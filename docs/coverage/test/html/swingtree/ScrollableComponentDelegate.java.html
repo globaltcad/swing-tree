@@ -97,19 +97,19 @@ public final class ScrollableComponentDelegate
         Lazy&lt;Boolean&gt; fitHeight;
         ScrollIncrementSupplier unitIncrementSupplier;
         ScrollIncrementSupplier blockIncrementSupplier;
-<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        if ( content instanceof Scrollable) {</span>
-<span class="nc" id="L101">            Scrollable scrollable = (Scrollable)content;</span>
-<span class="nc" id="L102">            fitWidth  = Lazy.from(scrollable::getScrollableTracksViewportWidth);</span>
-<span class="nc" id="L103">            fitHeight = Lazy.from(scrollable::getScrollableTracksViewportHeight);</span>
-<span class="nc" id="L104">            unitIncrementSupplier = (a,b,c) -&gt; {</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if ( content instanceof Scrollable) {</span>
+<span class="fc" id="L101">            Scrollable scrollable = (Scrollable)content;</span>
+<span class="fc" id="L102">            fitWidth  = Lazy.from(scrollable::getScrollableTracksViewportWidth);</span>
+<span class="fc" id="L103">            fitHeight = Lazy.from(scrollable::getScrollableTracksViewportHeight);</span>
+<span class="fc" id="L104">            unitIncrementSupplier = (a,b,c) -&gt; {</span>
 <span class="nc bnc" id="L105" title="All 2 branches missed.">                int orientation = b.isHorizontal() ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;</span>
 <span class="nc" id="L106">                return scrollable.getScrollableUnitIncrement(a.toRectangle(),orientation,c);</span>
             };
-<span class="nc" id="L108">            blockIncrementSupplier = (a,b,c) -&gt; {</span>
+<span class="fc" id="L108">            blockIncrementSupplier = (a,b,c) -&gt; {</span>
 <span class="nc bnc" id="L109" title="All 2 branches missed.">                int orientation = b.isHorizontal() ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;</span>
 <span class="nc" id="L110">                return scrollable.getScrollableBlockIncrement(a.toRectangle(),orientation,c);</span>
             };
-<span class="nc" id="L112">        } else {</span>
+<span class="fc" id="L112">        } else {</span>
 <span class="fc" id="L113">            int averageBlockIncrement  = 10;</span>
 <span class="fc" id="L114">            int averageUnitIncrement   = 10;</span>
             try {

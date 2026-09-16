@@ -1,0 +1,1316 @@
+{
+  "className":"swingtree.Grid_Layout_Invariance_Spec",
+  "title":"Grid Layout Invariance",
+  "narrative":"The `UniformGridLayout` is SwingTree's own version of the `GridLayout` of\n    the JDK. Both divide a container into cells of equal size and place one\n    component into each cell, filling the grid row by row.\n\n    They differ in how the grid is built. A `GridLayout` ignores its column\n    count whenever its row count is not zero, and spreads the components over\n    its rows instead. A `UniformGridLayout` starts a new row after the column\n    count you give it, and leaves out the rows and columns which no component\n    occupies. You switch it to the behaviour of a `GridLayout` with three\n    settings: the mode `UniformGridLayout.Mode.SPREAD_OVER_ROWS`, the setting\n    `UniformGridLayout.CollapseEmpty.NONE`, and the growth policy\n    `UniformGridLayout.OverflowGrowth.ADD_COLUMNS`. A hard requirement follows\n    from that: **a `UniformGridLayout` which spreads its components over its\n    rows, collapses nothing and grows by columns must behave exactly like a\n    `GridLayout`**. Anybody replacing the one with the other should not be able\n    to tell the difference.\n\n    This specification pins that equivalence down across row counts, column\n    counts, component counts, gap sizes, container sizes, component orientations,\n    container insets, hidden children, preferred and minimum sizes, and the\n    argument checks of the constructors and setters. Every feature builds the\n    same UI twice, once with each layout manager, and then compares the results.\n\n    A `UniformGridLayout` scales its gaps by the UI scale factor of SwingTree, and\n    a `GridLayout` does not, so this specification runs at a scale factor of 1.\n\n    The growth policy has to be named because a `GridLayout` answers the question\n    it asks in exactly one way. Once a grid holds more components than its declared\n    row count times its declared column count, `ADD_COLUMNS` is the policy which\n    keeps widening the grid the way a `GridLayout` does, while `ADD_ROWS` and\n    `ADD_ROWS_AND_COLUMNS` deliberately make room on the other axis instead. The\n    last feature of this specification pins that difference down, so that the one\n    policy which does match cannot start matching by accident.",
+  "subjects":["swingtree.layout.UniformGridLayout"],
+  "statistics":{
+    "runs":"54",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [12]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` places every component exactly where a `GridLayout` places it. [13]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The core of the equivalence: for the very same children in a container of\n            the very same size, every component has to end up at exactly the same\n            position and with exactly the same size under both layout managers.\n\n            The table covers a single row, a single column, grids where either the\n            row count or the column count is zero, grids with more components than\n            cells, grids with fewer components than cells, and container sizes which\n            do not divide evenly into cells. When a container cannot be divided\n            evenly, both layout managers centre the grid and leave the few pixels\n            that are left over as a margin around it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, horizontalGap, verticalGap))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are given the same size and told to lay out their children,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"every child really was given a place in the grid,","code":["ourBounds.every { it.width > 0 && it.height > 0 }"]},
+
+        {"kind":"and","text":"and it is exactly the same place under both layout managers.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","0","2","3","3","2","2","3","2","4","2","1","5"],"cols":["0","1","3","0","2","2","5","5","3","2","1","3","1","5"],"components":["5","5","7","7","6","9","8","3","4","1","2","6","1","25"],"horizontalGap":["0","0","5","5","0","5","5","5","0","4","7","7","0","1"],"verticalGap":["0","0","5","5","0","5","5","5","0","4","3","3","0","2"],"width":["200","50","200","200","120","120","250","250","90","100","61","103","17","104"],"height":["50","200","120","120","90","90","60","60","90","100","103","97","13","111"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A right-to-left container is laid out exactly like a right-to-left `GridLayout` container. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers mirror the columns of the grid when the container has\n            a right-to-left component orientation: the first component of every row is\n            placed into the rightmost cell. The width of 107 pixels does not divide\n            evenly into cells, so the left over pixels have to end up on the same side\n            under both layout managers as well.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same component orientation, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The two panels really do carry the orientation we asked for.","code":["ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(107, 80)","ours.doLayout()","awts.setSize(107, 80)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the mirrored positions agree exactly.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.LEFT_TO_RIGHT"],"rows":["2","0","2","3","2"],"cols":["3","4","5","0","3"],"components":["5","6","8","7","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A right-to-left container is laid out exactly like a right-to-left `GridLayout` container. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers mirror the columns of the grid when the container has\n            a right-to-left component orientation: the first component of every row is\n            placed into the rightmost cell. The width of 107 pixels does not divide\n            evenly into cells, so the left over pixels have to end up on the same side\n            under both layout managers as well.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same component orientation, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The two panels really do carry the orientation we asked for.","code":["ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(107, 80)","ours.doLayout()","awts.setSize(107, 80)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the mirrored positions agree exactly.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.LEFT_TO_RIGHT"],"rows":["2","0","2","3","2"],"cols":["3","4","5","0","3"],"components":["5","6","8","7","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A right-to-left container is laid out exactly like a right-to-left `GridLayout` container. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers mirror the columns of the grid when the container has\n            a right-to-left component orientation: the first component of every row is\n            placed into the rightmost cell. The width of 107 pixels does not divide\n            evenly into cells, so the left over pixels have to end up on the same side\n            under both layout managers as well.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same component orientation, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The two panels really do carry the orientation we asked for.","code":["ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(107, 80)","ours.doLayout()","awts.setSize(107, 80)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the mirrored positions agree exactly.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.LEFT_TO_RIGHT"],"rows":["2","0","2","3","2"],"cols":["3","4","5","0","3"],"components":["5","6","8","7","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A right-to-left container is laid out exactly like a right-to-left `GridLayout` container. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers mirror the columns of the grid when the container has\n            a right-to-left component orientation: the first component of every row is\n            placed into the rightmost cell. The width of 107 pixels does not divide\n            evenly into cells, so the left over pixels have to end up on the same side\n            under both layout managers as well.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same component orientation, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The two panels really do carry the orientation we asked for.","code":["ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(107, 80)","ours.doLayout()","awts.setSize(107, 80)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the mirrored positions agree exactly.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.LEFT_TO_RIGHT"],"rows":["2","0","2","3","2"],"cols":["3","4","5","0","3"],"components":["5","6","8","7","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A right-to-left container is laid out exactly like a right-to-left `GridLayout` container. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers mirror the columns of the grid when the container has\n            a right-to-left component orientation: the first component of every row is\n            placed into the rightmost cell. The width of 107 pixels does not divide\n            evenly into cells, so the left over pixels have to end up on the same side\n            under both layout managers as well.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same component orientation, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The two panels really do carry the orientation we asked for.","code":["ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(107, 80)","ours.doLayout()","awts.setSize(107, 80)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the mirrored positions agree exactly.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.LEFT_TO_RIGHT"],"rows":["2","0","2","3","2"],"cols":["3","4","5","0","3"],"components":["5","6","8","7","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the container are honoured exactly like a `GridLayout` honours them. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border on the container shrinks the space which is divided into cells and\n            shifts the grid right and down. Both layout managers read those insets from\n            the container itself, so the outcome has to be identical. The border used\n            here is different on every side, so that a mix up of two sides shows.\n\n            A right-to-left container places its first column against its right inset\n            instead of its left inset, so the table runs every grid in both orientations.\n            The container is 150 by 91 pixels large, which does not divide evenly into\n            cells for most of the grids in the table, so the pixels left over by rounding\n            the cell size down have to end up on the same side under both layout managers.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 3, 4)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels carrying the same asymmetric border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 3, 4))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets of both panels are the ones of the border, and both have the orientation from the table.","code":["ours.getInsets() == new Insets(4, 6, 8, 10)","awts.getInsets() == new Insets(4, 6, 8, 10)","ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(150, 91)","ours.doLayout()","awts.setSize(150, 91)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grid sits inside the insets in exactly the same way.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT"],"rows":["2","0","3","2","2","0","3","2"],"cols":["3","2","0","4","3","2","0","4"],"components":["6","5","4","7","6","5","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the container are honoured exactly like a `GridLayout` honours them. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border on the container shrinks the space which is divided into cells and\n            shifts the grid right and down. Both layout managers read those insets from\n            the container itself, so the outcome has to be identical. The border used\n            here is different on every side, so that a mix up of two sides shows.\n\n            A right-to-left container places its first column against its right inset\n            instead of its left inset, so the table runs every grid in both orientations.\n            The container is 150 by 91 pixels large, which does not divide evenly into\n            cells for most of the grids in the table, so the pixels left over by rounding\n            the cell size down have to end up on the same side under both layout managers.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 3, 4)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels carrying the same asymmetric border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 3, 4))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets of both panels are the ones of the border, and both have the orientation from the table.","code":["ours.getInsets() == new Insets(4, 6, 8, 10)","awts.getInsets() == new Insets(4, 6, 8, 10)","ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(150, 91)","ours.doLayout()","awts.setSize(150, 91)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grid sits inside the insets in exactly the same way.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT"],"rows":["2","0","3","2","2","0","3","2"],"cols":["3","2","0","4","3","2","0","4"],"components":["6","5","4","7","6","5","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the container are honoured exactly like a `GridLayout` honours them. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border on the container shrinks the space which is divided into cells and\n            shifts the grid right and down. Both layout managers read those insets from\n            the container itself, so the outcome has to be identical. The border used\n            here is different on every side, so that a mix up of two sides shows.\n\n            A right-to-left container places its first column against its right inset\n            instead of its left inset, so the table runs every grid in both orientations.\n            The container is 150 by 91 pixels large, which does not divide evenly into\n            cells for most of the grids in the table, so the pixels left over by rounding\n            the cell size down have to end up on the same side under both layout managers.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 3, 4)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels carrying the same asymmetric border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 3, 4))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets of both panels are the ones of the border, and both have the orientation from the table.","code":["ours.getInsets() == new Insets(4, 6, 8, 10)","awts.getInsets() == new Insets(4, 6, 8, 10)","ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(150, 91)","ours.doLayout()","awts.setSize(150, 91)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grid sits inside the insets in exactly the same way.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT"],"rows":["2","0","3","2","2","0","3","2"],"cols":["3","2","0","4","3","2","0","4"],"components":["6","5","4","7","6","5","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the container are honoured exactly like a `GridLayout` honours them. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border on the container shrinks the space which is divided into cells and\n            shifts the grid right and down. Both layout managers read those insets from\n            the container itself, so the outcome has to be identical. The border used\n            here is different on every side, so that a mix up of two sides shows.\n\n            A right-to-left container places its first column against its right inset\n            instead of its left inset, so the table runs every grid in both orientations.\n            The container is 150 by 91 pixels large, which does not divide evenly into\n            cells for most of the grids in the table, so the pixels left over by rounding\n            the cell size down have to end up on the same side under both layout managers.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 3, 4)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels carrying the same asymmetric border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 3, 4))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets of both panels are the ones of the border, and both have the orientation from the table.","code":["ours.getInsets() == new Insets(4, 6, 8, 10)","awts.getInsets() == new Insets(4, 6, 8, 10)","ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(150, 91)","ours.doLayout()","awts.setSize(150, 91)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grid sits inside the insets in exactly the same way.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT"],"rows":["2","0","3","2","2","0","3","2"],"cols":["3","2","0","4","3","2","0","4"],"components":["6","5","4","7","6","5","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the container are honoured exactly like a `GridLayout` honours them. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border on the container shrinks the space which is divided into cells and\n            shifts the grid right and down. Both layout managers read those insets from\n            the container itself, so the outcome has to be identical. The border used\n            here is different on every side, so that a mix up of two sides shows.\n\n            A right-to-left container places its first column against its right inset\n            instead of its left inset, so the table runs every grid in both orientations.\n            The container is 150 by 91 pixels large, which does not divide evenly into\n            cells for most of the grids in the table, so the pixels left over by rounding\n            the cell size down have to end up on the same side under both layout managers.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 3, 4)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels carrying the same asymmetric border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 3, 4))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets of both panels are the ones of the border, and both have the orientation from the table.","code":["ours.getInsets() == new Insets(4, 6, 8, 10)","awts.getInsets() == new Insets(4, 6, 8, 10)","ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(150, 91)","ours.doLayout()","awts.setSize(150, 91)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grid sits inside the insets in exactly the same way.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT"],"rows":["2","0","3","2","2","0","3","2"],"cols":["3","2","0","4","3","2","0","4"],"components":["6","5","4","7","6","5","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the container are honoured exactly like a `GridLayout` honours them. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border on the container shrinks the space which is divided into cells and\n            shifts the grid right and down. Both layout managers read those insets from\n            the container itself, so the outcome has to be identical. The border used\n            here is different on every side, so that a mix up of two sides shows.\n\n            A right-to-left container places its first column against its right inset\n            instead of its left inset, so the table runs every grid in both orientations.\n            The container is 150 by 91 pixels large, which does not divide evenly into\n            cells for most of the grids in the table, so the pixels left over by rounding\n            the cell size down have to end up on the same side under both layout managers.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 3, 4)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels carrying the same asymmetric border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 3, 4))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets of both panels are the ones of the border, and both have the orientation from the table.","code":["ours.getInsets() == new Insets(4, 6, 8, 10)","awts.getInsets() == new Insets(4, 6, 8, 10)","ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(150, 91)","ours.doLayout()","awts.setSize(150, 91)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grid sits inside the insets in exactly the same way.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT"],"rows":["2","0","3","2","2","0","3","2"],"cols":["3","2","0","4","3","2","0","4"],"components":["6","5","4","7","6","5","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the container are honoured exactly like a `GridLayout` honours them. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border on the container shrinks the space which is divided into cells and\n            shifts the grid right and down. Both layout managers read those insets from\n            the container itself, so the outcome has to be identical. The border used\n            here is different on every side, so that a mix up of two sides shows.\n\n            A right-to-left container places its first column against its right inset\n            instead of its left inset, so the table runs every grid in both orientations.\n            The container is 150 by 91 pixels large, which does not divide evenly into\n            cells for most of the grids in the table, so the pixels left over by rounding\n            the cell size down have to end up on the same side under both layout managers.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 3, 4)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels carrying the same asymmetric border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 3, 4))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets of both panels are the ones of the border, and both have the orientation from the table.","code":["ours.getInsets() == new Insets(4, 6, 8, 10)","awts.getInsets() == new Insets(4, 6, 8, 10)","ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(150, 91)","ours.doLayout()","awts.setSize(150, 91)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grid sits inside the insets in exactly the same way.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT"],"rows":["2","0","3","2","2","0","3","2"],"cols":["3","2","0","4","3","2","0","4"],"components":["6","5","4","7","6","5","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The insets of the container are honoured exactly like a `GridLayout` honours them. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border on the container shrinks the space which is divided into cells and\n            shifts the grid right and down. Both layout managers read those insets from\n            the container itself, so the outcome has to be identical. The border used\n            here is different on every side, so that a mix up of two sides shows.\n\n            A right-to-left container places its first column against its right inset\n            instead of its left inset, so the table runs every grid in both orientations.\n            The container is 150 by 91 pixels large, which does not divide evenly into\n            cells for most of the grids in the table, so the pixels left over by rounding\n            the cell size down have to end up on the same side under both layout managers.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 3, 4)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels carrying the same asymmetric border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 3, 4))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })","        .peek({ it.setComponentOrientation(orientation) })","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets of both panels are the ones of the border, and both have the orientation from the table.","code":["ours.getInsets() == new Insets(4, 6, 8, 10)","awts.getInsets() == new Insets(4, 6, 8, 10)","ours.getComponentOrientation() == orientation","awts.getComponentOrientation() == orientation"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(150, 91)","ours.doLayout()","awts.setSize(150, 91)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grid sits inside the insets in exactly the same way.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"orientation":["ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.LEFT_TO_RIGHT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT","ComponentOrientation.RIGHT_TO_LEFT"],"rows":["2","0","3","2","2","0","3","2"],"cols":["3","2","0","4","3","2","0","4"],"components":["6","5","4","7","6","5","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The preferred and minimum sizes of a `UniformGridLayout` are those of a `GridLayout`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers size every cell after the largest child: the preferred\n            width of a cell is the largest preferred width of any child, and its\n            preferred height is the largest preferred height of any child, which may\n            well belong to a different child. The same goes for the minimum size.\n            The size of the whole grid is then that cell size times the number of\n            columns and rows, plus the gaps between them, plus the insets of the\n            container.\n\n            The children in this table deliberately have a different widest and\n            tallest member, so that a layout manager which picks both values from\n            the same child would show.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same children and the same border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 3))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We ask both layout managers for the sizes they need,","code":["var ourPreferredSize = ours.getLayout().preferredLayoutSize(ours)","var awtPreferredSize = awts.getLayout().preferredLayoutSize(awts)","var ourMinimumSize   = ours.getLayout().minimumLayoutSize(ours)","var awtMinimumSize   = awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"then","text":"the preferred sizes are identical,","code":["ourPreferredSize == awtPreferredSize"]},
+
+        {"kind":"and","text":"and so are the minimum sizes.","code":["ourMinimumSize == awtMinimumSize"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","2","2","3","3"],"cols":["0","2","5","5","3","2"],"preferredSizes":["[[10, 20], [30, 5], [25, 25]]","[[10, 20], [30, 5], [25, 25]]","[[40, 10], [10, 40], [20, 20]]","(1..8).collect { [it * 3, 30 - it] }","[[12, 7], [7, 12], [9, 9], [1, 1]]","(1..9).collect { [20, it * 2] }"],"minimumSizes":["[[5, 10], [15, 2], [12, 12]]","[[5, 10], [15, 2], [12, 12]]","[[20, 5], [5, 20], [10, 10]]","(1..8).collect { [it, 10 - it] }","[[6, 3], [3, 6], [4, 4], [0, 0]]","(1..9).collect { [10, it] }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The preferred and minimum sizes of a `UniformGridLayout` are those of a `GridLayout`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers size every cell after the largest child: the preferred\n            width of a cell is the largest preferred width of any child, and its\n            preferred height is the largest preferred height of any child, which may\n            well belong to a different child. The same goes for the minimum size.\n            The size of the whole grid is then that cell size times the number of\n            columns and rows, plus the gaps between them, plus the insets of the\n            container.\n\n            The children in this table deliberately have a different widest and\n            tallest member, so that a layout manager which picks both values from\n            the same child would show.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same children and the same border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 3))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We ask both layout managers for the sizes they need,","code":["var ourPreferredSize = ours.getLayout().preferredLayoutSize(ours)","var awtPreferredSize = awts.getLayout().preferredLayoutSize(awts)","var ourMinimumSize   = ours.getLayout().minimumLayoutSize(ours)","var awtMinimumSize   = awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"then","text":"the preferred sizes are identical,","code":["ourPreferredSize == awtPreferredSize"]},
+
+        {"kind":"and","text":"and so are the minimum sizes.","code":["ourMinimumSize == awtMinimumSize"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","2","2","3","3"],"cols":["0","2","5","5","3","2"],"preferredSizes":["[[10, 20], [30, 5], [25, 25]]","[[10, 20], [30, 5], [25, 25]]","[[40, 10], [10, 40], [20, 20]]","(1..8).collect { [it * 3, 30 - it] }","[[12, 7], [7, 12], [9, 9], [1, 1]]","(1..9).collect { [20, it * 2] }"],"minimumSizes":["[[5, 10], [15, 2], [12, 12]]","[[5, 10], [15, 2], [12, 12]]","[[20, 5], [5, 20], [10, 10]]","(1..8).collect { [it, 10 - it] }","[[6, 3], [3, 6], [4, 4], [0, 0]]","(1..9).collect { [10, it] }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The preferred and minimum sizes of a `UniformGridLayout` are those of a `GridLayout`. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers size every cell after the largest child: the preferred\n            width of a cell is the largest preferred width of any child, and its\n            preferred height is the largest preferred height of any child, which may\n            well belong to a different child. The same goes for the minimum size.\n            The size of the whole grid is then that cell size times the number of\n            columns and rows, plus the gaps between them, plus the insets of the\n            container.\n\n            The children in this table deliberately have a different widest and\n            tallest member, so that a layout manager which picks both values from\n            the same child would show.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same children and the same border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 3))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We ask both layout managers for the sizes they need,","code":["var ourPreferredSize = ours.getLayout().preferredLayoutSize(ours)","var awtPreferredSize = awts.getLayout().preferredLayoutSize(awts)","var ourMinimumSize   = ours.getLayout().minimumLayoutSize(ours)","var awtMinimumSize   = awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"then","text":"the preferred sizes are identical,","code":["ourPreferredSize == awtPreferredSize"]},
+
+        {"kind":"and","text":"and so are the minimum sizes.","code":["ourMinimumSize == awtMinimumSize"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","2","2","3","3"],"cols":["0","2","5","5","3","2"],"preferredSizes":["[[10, 20], [30, 5], [25, 25]]","[[10, 20], [30, 5], [25, 25]]","[[40, 10], [10, 40], [20, 20]]","(1..8).collect { [it * 3, 30 - it] }","[[12, 7], [7, 12], [9, 9], [1, 1]]","(1..9).collect { [20, it * 2] }"],"minimumSizes":["[[5, 10], [15, 2], [12, 12]]","[[5, 10], [15, 2], [12, 12]]","[[20, 5], [5, 20], [10, 10]]","(1..8).collect { [it, 10 - it] }","[[6, 3], [3, 6], [4, 4], [0, 0]]","(1..9).collect { [10, it] }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The preferred and minimum sizes of a `UniformGridLayout` are those of a `GridLayout`. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers size every cell after the largest child: the preferred\n            width of a cell is the largest preferred width of any child, and its\n            preferred height is the largest preferred height of any child, which may\n            well belong to a different child. The same goes for the minimum size.\n            The size of the whole grid is then that cell size times the number of\n            columns and rows, plus the gaps between them, plus the insets of the\n            container.\n\n            The children in this table deliberately have a different widest and\n            tallest member, so that a layout manager which picks both values from\n            the same child would show.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same children and the same border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 3))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We ask both layout managers for the sizes they need,","code":["var ourPreferredSize = ours.getLayout().preferredLayoutSize(ours)","var awtPreferredSize = awts.getLayout().preferredLayoutSize(awts)","var ourMinimumSize   = ours.getLayout().minimumLayoutSize(ours)","var awtMinimumSize   = awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"then","text":"the preferred sizes are identical,","code":["ourPreferredSize == awtPreferredSize"]},
+
+        {"kind":"and","text":"and so are the minimum sizes.","code":["ourMinimumSize == awtMinimumSize"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","2","2","3","3"],"cols":["0","2","5","5","3","2"],"preferredSizes":["[[10, 20], [30, 5], [25, 25]]","[[10, 20], [30, 5], [25, 25]]","[[40, 10], [10, 40], [20, 20]]","(1..8).collect { [it * 3, 30 - it] }","[[12, 7], [7, 12], [9, 9], [1, 1]]","(1..9).collect { [20, it * 2] }"],"minimumSizes":["[[5, 10], [15, 2], [12, 12]]","[[5, 10], [15, 2], [12, 12]]","[[20, 5], [5, 20], [10, 10]]","(1..8).collect { [it, 10 - it] }","[[6, 3], [3, 6], [4, 4], [0, 0]]","(1..9).collect { [10, it] }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The preferred and minimum sizes of a `UniformGridLayout` are those of a `GridLayout`. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers size every cell after the largest child: the preferred\n            width of a cell is the largest preferred width of any child, and its\n            preferred height is the largest preferred height of any child, which may\n            well belong to a different child. The same goes for the minimum size.\n            The size of the whole grid is then that cell size times the number of\n            columns and rows, plus the gaps between them, plus the insets of the\n            container.\n\n            The children in this table deliberately have a different widest and\n            tallest member, so that a layout manager which picks both values from\n            the same child would show.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same children and the same border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 3))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We ask both layout managers for the sizes they need,","code":["var ourPreferredSize = ours.getLayout().preferredLayoutSize(ours)","var awtPreferredSize = awts.getLayout().preferredLayoutSize(awts)","var ourMinimumSize   = ours.getLayout().minimumLayoutSize(ours)","var awtMinimumSize   = awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"then","text":"the preferred sizes are identical,","code":["ourPreferredSize == awtPreferredSize"]},
+
+        {"kind":"and","text":"and so are the minimum sizes.","code":["ourMinimumSize == awtMinimumSize"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","2","2","3","3"],"cols":["0","2","5","5","3","2"],"preferredSizes":["[[10, 20], [30, 5], [25, 25]]","[[10, 20], [30, 5], [25, 25]]","[[40, 10], [10, 40], [20, 20]]","(1..8).collect { [it * 3, 30 - it] }","[[12, 7], [7, 12], [9, 9], [1, 1]]","(1..9).collect { [20, it * 2] }"],"minimumSizes":["[[5, 10], [15, 2], [12, 12]]","[[5, 10], [15, 2], [12, 12]]","[[20, 5], [5, 20], [10, 10]]","(1..8).collect { [it, 10 - it] }","[[6, 3], [3, 6], [4, 4], [0, 0]]","(1..9).collect { [10, it] }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The preferred and minimum sizes of a `UniformGridLayout` are those of a `GridLayout`. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers size every cell after the largest child: the preferred\n            width of a cell is the largest preferred width of any child, and its\n            preferred height is the largest preferred height of any child, which may\n            well belong to a different child. The same goes for the minimum size.\n            The size of the whole grid is then that cell size times the number of\n            columns and rows, plus the gaps between them, plus the insets of the\n            container.\n\n            The children in this table deliberately have a different widest and\n            tallest member, so that a layout manager which picks both values from\n            the same child would show.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with the same children and the same border, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 3))","        .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })","        .apply({ ui ->","            preferredSizes.eachWithIndex { size, i ->","                ui.add(","                    UI.box()","                    .withPrefSize(size[0], size[1])","                    .withMinSize(minimumSizes[i][0], minimumSizes[i][1])","                )","            }","        })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We ask both layout managers for the sizes they need,","code":["var ourPreferredSize = ours.getLayout().preferredLayoutSize(ours)","var awtPreferredSize = awts.getLayout().preferredLayoutSize(awts)","var ourMinimumSize   = ours.getLayout().minimumLayoutSize(ours)","var awtMinimumSize   = awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"then","text":"the preferred sizes are identical,","code":["ourPreferredSize == awtPreferredSize"]},
+
+        {"kind":"and","text":"and so are the minimum sizes.","code":["ourMinimumSize == awtMinimumSize"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","2","2","3","3"],"cols":["0","2","5","5","3","2"],"preferredSizes":["[[10, 20], [30, 5], [25, 25]]","[[10, 20], [30, 5], [25, 25]]","[[40, 10], [10, 40], [20, 20]]","(1..8).collect { [it * 3, 30 - it] }","[[12, 7], [7, 12], [9, 9], [1, 1]]","(1..9).collect { [20, it * 2] }"],"minimumSizes":["[[5, 10], [15, 2], [12, 12]]","[[5, 10], [15, 2], [12, 12]]","[[20, 5], [5, 20], [10, 10]]","(1..8).collect { [it, 10 - it] }","[[6, 3], [3, 6], [4, 4], [0, 0]]","(1..9).collect { [10, it] }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty `UniformGridLayout` reports the very same, even negative, size as an empty `GridLayout`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid without any children has no cells to size, but it still has gaps.\n            When the row count is set, the column count is worked out from the number\n            of components, which gives zero columns for zero components. The `GridLayout`\n            of the JDK then subtracts one gap for the \"minus one\" gaps between zero\n            columns, and reports a negative width. The `UniformGridLayout` reports exactly\n            the same, down to the negative number.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two empty panels with gaps of 5 horizontally and 3 vertically, one per layout manager.","code":["var ours = UI.panel().withLayout(ourLayout).get(JPanel)","var awts = UI.panel().withLayout(new GridLayout(rows, cols, 5, 3)).get(JPanel)"]},
+
+        {"kind":"expect","text":"Both panels really are empty.","code":["ours.getComponentCount() == 0","awts.getComponentCount() == 0"]},
+
+        {"kind":"and","text":"The preferred size of the JDK grid is the one in the table,","code":["awts.getLayout().preferredLayoutSize(awts) == expectedSize"]},
+
+        {"kind":"and","text":"and the uniform grid reports the same preferred and minimum size.","code":["ours.getLayout().preferredLayoutSize(ours) == expectedSize","ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","2","2","0"],"cols":["0","0","5","4"],"expectedSize":["new Dimension(-5, 0)","new Dimension(-5, 3)","new Dimension(-5, 3)","new Dimension(15, -3)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty `UniformGridLayout` reports the very same, even negative, size as an empty `GridLayout`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid without any children has no cells to size, but it still has gaps.\n            When the row count is set, the column count is worked out from the number\n            of components, which gives zero columns for zero components. The `GridLayout`\n            of the JDK then subtracts one gap for the \"minus one\" gaps between zero\n            columns, and reports a negative width. The `UniformGridLayout` reports exactly\n            the same, down to the negative number.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two empty panels with gaps of 5 horizontally and 3 vertically, one per layout manager.","code":["var ours = UI.panel().withLayout(ourLayout).get(JPanel)","var awts = UI.panel().withLayout(new GridLayout(rows, cols, 5, 3)).get(JPanel)"]},
+
+        {"kind":"expect","text":"Both panels really are empty.","code":["ours.getComponentCount() == 0","awts.getComponentCount() == 0"]},
+
+        {"kind":"and","text":"The preferred size of the JDK grid is the one in the table,","code":["awts.getLayout().preferredLayoutSize(awts) == expectedSize"]},
+
+        {"kind":"and","text":"and the uniform grid reports the same preferred and minimum size.","code":["ours.getLayout().preferredLayoutSize(ours) == expectedSize","ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","2","2","0"],"cols":["0","0","5","4"],"expectedSize":["new Dimension(-5, 0)","new Dimension(-5, 3)","new Dimension(-5, 3)","new Dimension(15, -3)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty `UniformGridLayout` reports the very same, even negative, size as an empty `GridLayout`. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid without any children has no cells to size, but it still has gaps.\n            When the row count is set, the column count is worked out from the number\n            of components, which gives zero columns for zero components. The `GridLayout`\n            of the JDK then subtracts one gap for the \"minus one\" gaps between zero\n            columns, and reports a negative width. The `UniformGridLayout` reports exactly\n            the same, down to the negative number.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two empty panels with gaps of 5 horizontally and 3 vertically, one per layout manager.","code":["var ours = UI.panel().withLayout(ourLayout).get(JPanel)","var awts = UI.panel().withLayout(new GridLayout(rows, cols, 5, 3)).get(JPanel)"]},
+
+        {"kind":"expect","text":"Both panels really are empty.","code":["ours.getComponentCount() == 0","awts.getComponentCount() == 0"]},
+
+        {"kind":"and","text":"The preferred size of the JDK grid is the one in the table,","code":["awts.getLayout().preferredLayoutSize(awts) == expectedSize"]},
+
+        {"kind":"and","text":"and the uniform grid reports the same preferred and minimum size.","code":["ours.getLayout().preferredLayoutSize(ours) == expectedSize","ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","2","2","0"],"cols":["0","0","5","4"],"expectedSize":["new Dimension(-5, 0)","new Dimension(-5, 3)","new Dimension(-5, 3)","new Dimension(15, -3)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty `UniformGridLayout` reports the very same, even negative, size as an empty `GridLayout`. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid without any children has no cells to size, but it still has gaps.\n            When the row count is set, the column count is worked out from the number\n            of components, which gives zero columns for zero components. The `GridLayout`\n            of the JDK then subtracts one gap for the \"minus one\" gaps between zero\n            columns, and reports a negative width. The `UniformGridLayout` reports exactly\n            the same, down to the negative number.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(rows, cols, 5, 3)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two empty panels with gaps of 5 horizontally and 3 vertically, one per layout manager.","code":["var ours = UI.panel().withLayout(ourLayout).get(JPanel)","var awts = UI.panel().withLayout(new GridLayout(rows, cols, 5, 3)).get(JPanel)"]},
+
+        {"kind":"expect","text":"Both panels really are empty.","code":["ours.getComponentCount() == 0","awts.getComponentCount() == 0"]},
+
+        {"kind":"and","text":"The preferred size of the JDK grid is the one in the table,","code":["awts.getLayout().preferredLayoutSize(awts) == expectedSize"]},
+
+        {"kind":"and","text":"and the uniform grid reports the same preferred and minimum size.","code":["ours.getLayout().preferredLayoutSize(ours) == expectedSize","ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","2","2","0"],"cols":["0","0","5","4"],"expectedSize":["new Dimension(-5, 0)","new Dimension(-5, 3)","new Dimension(-5, 3)","new Dimension(15, -3)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A container that is too small for its gaps is laid out exactly like one using a `GridLayout`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a container is smaller than the gaps between its cells, there is\n            no room left for the cells themselves, and both layout managers hand out\n            cells with a negative width or height. Nothing about that is useful, but\n            it still has to be the same, because a container passes through such sizes\n            while a window is being shrunk.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(2, 3, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels holding a 2 by 3 grid with gaps of 5, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(2, 3, 5, 5))","        .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are squeezed to the same tiny size and laid out,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<6).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<6).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the JDK grid really does hand out cells without any room,","code":["awtBounds.every { it.width <= 0 || it.height <= 0 }"]},
+
+        {"kind":"and","text":"and the uniform grid hands out exactly the same ones.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"width":["0","3","9","100"],"height":["0","2","40","4"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A container that is too small for its gaps is laid out exactly like one using a `GridLayout`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a container is smaller than the gaps between its cells, there is\n            no room left for the cells themselves, and both layout managers hand out\n            cells with a negative width or height. Nothing about that is useful, but\n            it still has to be the same, because a container passes through such sizes\n            while a window is being shrunk.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(2, 3, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels holding a 2 by 3 grid with gaps of 5, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(2, 3, 5, 5))","        .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are squeezed to the same tiny size and laid out,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<6).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<6).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the JDK grid really does hand out cells without any room,","code":["awtBounds.every { it.width <= 0 || it.height <= 0 }"]},
+
+        {"kind":"and","text":"and the uniform grid hands out exactly the same ones.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"width":["0","3","9","100"],"height":["0","2","40","4"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A container that is too small for its gaps is laid out exactly like one using a `GridLayout`. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a container is smaller than the gaps between its cells, there is\n            no room left for the cells themselves, and both layout managers hand out\n            cells with a negative width or height. Nothing about that is useful, but\n            it still has to be the same, because a container passes through such sizes\n            while a window is being shrunk.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(2, 3, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels holding a 2 by 3 grid with gaps of 5, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(2, 3, 5, 5))","        .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are squeezed to the same tiny size and laid out,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<6).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<6).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the JDK grid really does hand out cells without any room,","code":["awtBounds.every { it.width <= 0 || it.height <= 0 }"]},
+
+        {"kind":"and","text":"and the uniform grid hands out exactly the same ones.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"width":["0","3","9","100"],"height":["0","2","40","4"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A container that is too small for its gaps is laid out exactly like one using a `GridLayout`. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a container is smaller than the gaps between its cells, there is\n            no room left for the cells themselves, and both layout managers hand out\n            cells with a negative width or height. Nothing about that is useful, but\n            it still has to be the same, because a container passes through such sizes\n            while a window is being shrunk.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(2, 3, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels holding a 2 by 3 grid with gaps of 5, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(2, 3, 5, 5))","        .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are squeezed to the same tiny size and laid out,","code":["ours.setSize(width, height)","ours.doLayout()","awts.setSize(width, height)","awts.doLayout()","var ourBounds = (0..<6).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<6).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the JDK grid really does hand out cells without any room,","code":["awtBounds.every { it.width <= 0 || it.height <= 0 }"]},
+
+        {"kind":"and","text":"and the uniform grid hands out exactly the same ones.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"width":["0","3","9","100"],"height":["0","2","40","4"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A hidden child still occupies its cell, exactly like it does in a `GridLayout`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Unlike a flow layout, a grid layout does not skip components which are not\n            visible. A hidden child keeps its cell, so the children after it stay where\n            they are when it is hidden or shown again. The `UniformGridLayout` has to\n            keep that behaviour, because a grid in which components move around when\n            one of them is hidden would be a different layout altogether.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.","code":["var ourLayout = new UniformGridLayout(2, 3, 5, 5)","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)"]},
+
+        {"kind":"and","text":"Two panels with five children, the second of which is hidden, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .add(UI.box().withPrefSize(30, 20))","        .add(UI.box().withPrefSize(30, 20).isVisibleIf(false))","        .add(UI.box().withPrefSize(30, 20))","        .add(UI.box().withPrefSize(30, 20))","        .add(UI.box().withPrefSize(30, 20))","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(2, 3, 5, 5))","        .add(UI.box().withPrefSize(30, 20))","        .add(UI.box().withPrefSize(30, 20).isVisibleIf(false))","        .add(UI.box().withPrefSize(30, 20))","        .add(UI.box().withPrefSize(30, 20))","        .add(UI.box().withPrefSize(30, 20))","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(160, 70)","ours.doLayout()","awts.setSize(160, 70)","awts.doLayout()","var ourBounds = (0..<5).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<5).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the second child is really hidden, but still has a cell of its own,","code":["!ours.getComponent(1).isVisible()","ourBounds[1].width > 0","ourBounds[1] != ourBounds[2]"]},
+
+        {"kind":"and","text":"and every child sits exactly where it sits in the JDK grid.","code":["ourBounds == awtBounds"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing a `UniformGridLayout` through its setters has the same effect as changing a `GridLayout`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers can be reconfigured after they were installed, through\n            `setRows`, `setColumns`, `setHgap` and `setVgap`. The next layout pass then\n            uses the new values. Both layout managers start from their default here:\n            a single row with a cell for every component and no gaps.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, and a JDK grid layout, both otherwise in their default configuration.","code":["var ourLayout = new UniformGridLayout()","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)","var awtLayout = new GridLayout()"]},
+
+        {"kind":"and","text":"Two panels with seven children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(awtLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"Both defaults are a single row without gaps.","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [1, 0, 0, 0]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [1, 0, 0, 0]"]},
+
+        {"kind":"when","text":"We reconfigure both layout managers in the same way and lay out both panels,","code":["ourLayout.setColumns(cols)","ourLayout.setRows(rows)","ourLayout.setHgap(horizontalGap)","ourLayout.setVgap(verticalGap)","awtLayout.setColumns(cols)","awtLayout.setRows(rows)","awtLayout.setHgap(horizontalGap)","awtLayout.setVgap(verticalGap)","ours.setSize(180, 120)","ours.doLayout()","awts.setSize(180, 120)","awts.doLayout()","var ourBounds = (0..<7).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<7).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"both report the values we have set,","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [rows, cols, horizontalGap, verticalGap]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [rows, cols, horizontalGap, verticalGap]"]},
+
+        {"kind":"and","text":"and the children are laid out identically.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","3","2","3"],"cols":["0","3","0","5","3"],"horizontalGap":["0","4","2","6","0"],"verticalGap":["0","2","4","1","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing a `UniformGridLayout` through its setters has the same effect as changing a `GridLayout`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers can be reconfigured after they were installed, through\n            `setRows`, `setColumns`, `setHgap` and `setVgap`. The next layout pass then\n            uses the new values. Both layout managers start from their default here:\n            a single row with a cell for every component and no gaps.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, and a JDK grid layout, both otherwise in their default configuration.","code":["var ourLayout = new UniformGridLayout()","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)","var awtLayout = new GridLayout()"]},
+
+        {"kind":"and","text":"Two panels with seven children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(awtLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"Both defaults are a single row without gaps.","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [1, 0, 0, 0]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [1, 0, 0, 0]"]},
+
+        {"kind":"when","text":"We reconfigure both layout managers in the same way and lay out both panels,","code":["ourLayout.setColumns(cols)","ourLayout.setRows(rows)","ourLayout.setHgap(horizontalGap)","ourLayout.setVgap(verticalGap)","awtLayout.setColumns(cols)","awtLayout.setRows(rows)","awtLayout.setHgap(horizontalGap)","awtLayout.setVgap(verticalGap)","ours.setSize(180, 120)","ours.doLayout()","awts.setSize(180, 120)","awts.doLayout()","var ourBounds = (0..<7).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<7).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"both report the values we have set,","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [rows, cols, horizontalGap, verticalGap]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [rows, cols, horizontalGap, verticalGap]"]},
+
+        {"kind":"and","text":"and the children are laid out identically.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","3","2","3"],"cols":["0","3","0","5","3"],"horizontalGap":["0","4","2","6","0"],"verticalGap":["0","2","4","1","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing a `UniformGridLayout` through its setters has the same effect as changing a `GridLayout`. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers can be reconfigured after they were installed, through\n            `setRows`, `setColumns`, `setHgap` and `setVgap`. The next layout pass then\n            uses the new values. Both layout managers start from their default here:\n            a single row with a cell for every component and no gaps.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, and a JDK grid layout, both otherwise in their default configuration.","code":["var ourLayout = new UniformGridLayout()","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)","var awtLayout = new GridLayout()"]},
+
+        {"kind":"and","text":"Two panels with seven children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(awtLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"Both defaults are a single row without gaps.","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [1, 0, 0, 0]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [1, 0, 0, 0]"]},
+
+        {"kind":"when","text":"We reconfigure both layout managers in the same way and lay out both panels,","code":["ourLayout.setColumns(cols)","ourLayout.setRows(rows)","ourLayout.setHgap(horizontalGap)","ourLayout.setVgap(verticalGap)","awtLayout.setColumns(cols)","awtLayout.setRows(rows)","awtLayout.setHgap(horizontalGap)","awtLayout.setVgap(verticalGap)","ours.setSize(180, 120)","ours.doLayout()","awts.setSize(180, 120)","awts.doLayout()","var ourBounds = (0..<7).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<7).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"both report the values we have set,","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [rows, cols, horizontalGap, verticalGap]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [rows, cols, horizontalGap, verticalGap]"]},
+
+        {"kind":"and","text":"and the children are laid out identically.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","3","2","3"],"cols":["0","3","0","5","3"],"horizontalGap":["0","4","2","6","0"],"verticalGap":["0","2","4","1","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing a `UniformGridLayout` through its setters has the same effect as changing a `GridLayout`. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers can be reconfigured after they were installed, through\n            `setRows`, `setColumns`, `setHgap` and `setVgap`. The next layout pass then\n            uses the new values. Both layout managers start from their default here:\n            a single row with a cell for every component and no gaps.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, and a JDK grid layout, both otherwise in their default configuration.","code":["var ourLayout = new UniformGridLayout()","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)","var awtLayout = new GridLayout()"]},
+
+        {"kind":"and","text":"Two panels with seven children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(awtLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"Both defaults are a single row without gaps.","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [1, 0, 0, 0]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [1, 0, 0, 0]"]},
+
+        {"kind":"when","text":"We reconfigure both layout managers in the same way and lay out both panels,","code":["ourLayout.setColumns(cols)","ourLayout.setRows(rows)","ourLayout.setHgap(horizontalGap)","ourLayout.setVgap(verticalGap)","awtLayout.setColumns(cols)","awtLayout.setRows(rows)","awtLayout.setHgap(horizontalGap)","awtLayout.setVgap(verticalGap)","ours.setSize(180, 120)","ours.doLayout()","awts.setSize(180, 120)","awts.doLayout()","var ourBounds = (0..<7).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<7).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"both report the values we have set,","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [rows, cols, horizontalGap, verticalGap]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [rows, cols, horizontalGap, verticalGap]"]},
+
+        {"kind":"and","text":"and the children are laid out identically.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","3","2","3"],"cols":["0","3","0","5","3"],"horizontalGap":["0","4","2","6","0"],"verticalGap":["0","2","4","1","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing a `UniformGridLayout` through its setters has the same effect as changing a `GridLayout`. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both layout managers can be reconfigured after they were installed, through\n            `setRows`, `setColumns`, `setHgap` and `setVgap`. The next layout pass then\n            uses the new values. Both layout managers start from their default here:\n            a single row with a cell for every component and no gaps.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, and a JDK grid layout, both otherwise in their default configuration.","code":["var ourLayout = new UniformGridLayout()","ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)","ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)","ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)","var awtLayout = new GridLayout()"]},
+
+        {"kind":"and","text":"Two panels with seven children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(awtLayout)","        .apply({ ui -> (0..<7).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"Both defaults are a single row without gaps.","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [1, 0, 0, 0]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [1, 0, 0, 0]"]},
+
+        {"kind":"when","text":"We reconfigure both layout managers in the same way and lay out both panels,","code":["ourLayout.setColumns(cols)","ourLayout.setRows(rows)","ourLayout.setHgap(horizontalGap)","ourLayout.setVgap(verticalGap)","awtLayout.setColumns(cols)","awtLayout.setRows(rows)","awtLayout.setHgap(horizontalGap)","awtLayout.setVgap(verticalGap)","ours.setSize(180, 120)","ours.doLayout()","awts.setSize(180, 120)","awts.doLayout()","var ourBounds = (0..<7).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<7).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"both report the values we have set,","code":["[ourLayout.rows, ourLayout.columns, ourLayout.hgap, ourLayout.vgap] == [rows, cols, horizontalGap, verticalGap]","[awtLayout.rows, awtLayout.columns, awtLayout.hgap, awtLayout.vgap] == [rows, cols, horizontalGap, verticalGap]"]},
+
+        {"kind":"and","text":"and the children are laid out identically.","code":["ourBounds == awtBounds"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","0","3","2","3"],"cols":["0","3","0","5","3"],"horizontalGap":["0","4","2","6","0"],"verticalGap":["0","2","4","1","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UniformGridLayout` rejects a grid without rows and columns exactly like a `GridLayout` does.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A row count of zero means \"as many rows as the components need\", and so does\n            a column count of zero. At least one of the two has to be given, otherwise\n            there is no way to tell how the components should be arranged. Both layout\n            managers throw an `IllegalArgumentException` with the same message, whether\n            the two zeros are passed to the constructor or set later through a setter.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We create a uniform grid layout without rows and without columns,","code":["new UniformGridLayout(0, 0)"]},
+
+        {"kind":"then","text":"it is rejected,","code":["var ourConstructorFailure = thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"and we create a JDK grid layout without rows and without columns,","code":["new GridLayout(0, 0)"]},
+
+        {"kind":"then","text":"it is rejected as well, with the same message.","code":["var awtConstructorFailure = thrown(IllegalArgumentException)","ourConstructorFailure.message == awtConstructorFailure.message"]},
+
+        {"kind":"when","text":"We set the rows of a uniform grid without columns to zero,","code":["new UniformGridLayout(2, 0).setRows(0)"]},
+
+        {"kind":"then","text":"it is rejected,","code":["var ourRowsFailure = thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"and we do the same to a JDK grid layout,","code":["new GridLayout(2, 0).setRows(0)"]},
+
+        {"kind":"then","text":"it is rejected as well, with the same message.","code":["var awtRowsFailure = thrown(IllegalArgumentException)","ourRowsFailure.message == awtRowsFailure.message"]},
+
+        {"kind":"when","text":"We set the columns of a uniform grid without rows to zero,","code":["new UniformGridLayout(0, 2).setColumns(0)"]},
+
+        {"kind":"then","text":"it is rejected,","code":["var ourColumnsFailure = thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"and we do the same to a JDK grid layout,","code":["new GridLayout(0, 2).setColumns(0)"]},
+
+        {"kind":"then","text":"it is rejected as well, with the same message.","code":["var awtColumnsFailure = thrown(IllegalArgumentException)","ourColumnsFailure.message == awtColumnsFailure.message"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only `OverflowGrowth.ADD_COLUMNS` keeps an overflowing grid equivalent to a `GridLayout`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Once a grid holds more components than its declared row count times its declared\n            column count, it has to make room, and a `GridLayout` only ever makes room in one\n            direction: it keeps its rows and widens itself. `ADD_COLUMNS` is the growth policy\n            which says exactly that, so it is the third setting the equivalence needs.\n\n            The other two policies are asked to make room on the other axis, and they do, which\n            means they part company with a `GridLayout` at the very component that overflows the\n            declared grid. That is not a defect of the equivalence but the point of the policy:\n            a grid of 3 rows and 2 columns holding 20 components stays 3 rows high and grows to\n            7 columns under `ADD_COLUMNS`, becomes 10 rows of 2 columns under `ADD_ROWS`, and\n            5 rows of 4 columns under `ADD_ROWS_AND_COLUMNS`.\n\n            The table therefore runs all three policies over grids which hold far more components\n            than the declared counts multiply to, and checks both directions: that `ADD_COLUMNS`\n            matches a `GridLayout` down to the last pixel, and that the other two really do differ.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing, and grows in the way the table asks for.","code":["var ourLayout = new UniformGridLayout(","                        UniformGridLayout.Mode.SPREAD_OVER_ROWS,","                        UniformGridLayout.CollapseEmpty.NONE,","                        overflowGrowth,","                        rows, cols, 5, 5","                    )"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The uniform grid really does carry the growth setting from the table.","code":["ourLayout.getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panels really do hold more components than the declared numbers of rows and columns multiply to.","code":["components > rows * cols"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grown grid is the one the table expects.","code":["[ourBounds.collect({ it.@y }).unique().size(), ourBounds.collect({ it.@x }).unique().size()] == [rowsLaidOut, columnsLaidOut]"]},
+
+        {"kind":"and","text":"only the policy which makes room the way a `GridLayout` makes room places every child where the JDK grid places it.","code":["(ourBounds == awtBounds) == matchesGridLayout"]},
+
+        {"kind":"and","text":"and only that policy asks for the same preferred and minimum size.","code":["(ours.getLayout().preferredLayoutSize(ours) == awts.getLayout().preferredLayoutSize(awts)) == matchesGridLayout","(ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)) == matchesGridLayout"]},
+
+        {"kind":"where","text":"","code":{"overflowGrowth":["UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","2","2","3","3","3"],"cols":["5","5","5","2","2","2"],"components":["13","13","13","20","20","20"],"rowsLaidOut":["2","3","3","3","10","5"],"columnsLaidOut":["7","5","6","7","2","4"],"matchesGridLayout":["true","false","false","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only `OverflowGrowth.ADD_COLUMNS` keeps an overflowing grid equivalent to a `GridLayout`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Once a grid holds more components than its declared row count times its declared\n            column count, it has to make room, and a `GridLayout` only ever makes room in one\n            direction: it keeps its rows and widens itself. `ADD_COLUMNS` is the growth policy\n            which says exactly that, so it is the third setting the equivalence needs.\n\n            The other two policies are asked to make room on the other axis, and they do, which\n            means they part company with a `GridLayout` at the very component that overflows the\n            declared grid. That is not a defect of the equivalence but the point of the policy:\n            a grid of 3 rows and 2 columns holding 20 components stays 3 rows high and grows to\n            7 columns under `ADD_COLUMNS`, becomes 10 rows of 2 columns under `ADD_ROWS`, and\n            5 rows of 4 columns under `ADD_ROWS_AND_COLUMNS`.\n\n            The table therefore runs all three policies over grids which hold far more components\n            than the declared counts multiply to, and checks both directions: that `ADD_COLUMNS`\n            matches a `GridLayout` down to the last pixel, and that the other two really do differ.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing, and grows in the way the table asks for.","code":["var ourLayout = new UniformGridLayout(","                        UniformGridLayout.Mode.SPREAD_OVER_ROWS,","                        UniformGridLayout.CollapseEmpty.NONE,","                        overflowGrowth,","                        rows, cols, 5, 5","                    )"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The uniform grid really does carry the growth setting from the table.","code":["ourLayout.getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panels really do hold more components than the declared numbers of rows and columns multiply to.","code":["components > rows * cols"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grown grid is the one the table expects.","code":["[ourBounds.collect({ it.@y }).unique().size(), ourBounds.collect({ it.@x }).unique().size()] == [rowsLaidOut, columnsLaidOut]"]},
+
+        {"kind":"and","text":"only the policy which makes room the way a `GridLayout` makes room places every child where the JDK grid places it.","code":["(ourBounds == awtBounds) == matchesGridLayout"]},
+
+        {"kind":"and","text":"and only that policy asks for the same preferred and minimum size.","code":["(ours.getLayout().preferredLayoutSize(ours) == awts.getLayout().preferredLayoutSize(awts)) == matchesGridLayout","(ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)) == matchesGridLayout"]},
+
+        {"kind":"where","text":"","code":{"overflowGrowth":["UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","2","2","3","3","3"],"cols":["5","5","5","2","2","2"],"components":["13","13","13","20","20","20"],"rowsLaidOut":["2","3","3","3","10","5"],"columnsLaidOut":["7","5","6","7","2","4"],"matchesGridLayout":["true","false","false","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only `OverflowGrowth.ADD_COLUMNS` keeps an overflowing grid equivalent to a `GridLayout`. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Once a grid holds more components than its declared row count times its declared\n            column count, it has to make room, and a `GridLayout` only ever makes room in one\n            direction: it keeps its rows and widens itself. `ADD_COLUMNS` is the growth policy\n            which says exactly that, so it is the third setting the equivalence needs.\n\n            The other two policies are asked to make room on the other axis, and they do, which\n            means they part company with a `GridLayout` at the very component that overflows the\n            declared grid. That is not a defect of the equivalence but the point of the policy:\n            a grid of 3 rows and 2 columns holding 20 components stays 3 rows high and grows to\n            7 columns under `ADD_COLUMNS`, becomes 10 rows of 2 columns under `ADD_ROWS`, and\n            5 rows of 4 columns under `ADD_ROWS_AND_COLUMNS`.\n\n            The table therefore runs all three policies over grids which hold far more components\n            than the declared counts multiply to, and checks both directions: that `ADD_COLUMNS`\n            matches a `GridLayout` down to the last pixel, and that the other two really do differ.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing, and grows in the way the table asks for.","code":["var ourLayout = new UniformGridLayout(","                        UniformGridLayout.Mode.SPREAD_OVER_ROWS,","                        UniformGridLayout.CollapseEmpty.NONE,","                        overflowGrowth,","                        rows, cols, 5, 5","                    )"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The uniform grid really does carry the growth setting from the table.","code":["ourLayout.getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panels really do hold more components than the declared numbers of rows and columns multiply to.","code":["components > rows * cols"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grown grid is the one the table expects.","code":["[ourBounds.collect({ it.@y }).unique().size(), ourBounds.collect({ it.@x }).unique().size()] == [rowsLaidOut, columnsLaidOut]"]},
+
+        {"kind":"and","text":"only the policy which makes room the way a `GridLayout` makes room places every child where the JDK grid places it.","code":["(ourBounds == awtBounds) == matchesGridLayout"]},
+
+        {"kind":"and","text":"and only that policy asks for the same preferred and minimum size.","code":["(ours.getLayout().preferredLayoutSize(ours) == awts.getLayout().preferredLayoutSize(awts)) == matchesGridLayout","(ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)) == matchesGridLayout"]},
+
+        {"kind":"where","text":"","code":{"overflowGrowth":["UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","2","2","3","3","3"],"cols":["5","5","5","2","2","2"],"components":["13","13","13","20","20","20"],"rowsLaidOut":["2","3","3","3","10","5"],"columnsLaidOut":["7","5","6","7","2","4"],"matchesGridLayout":["true","false","false","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only `OverflowGrowth.ADD_COLUMNS` keeps an overflowing grid equivalent to a `GridLayout`. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Once a grid holds more components than its declared row count times its declared\n            column count, it has to make room, and a `GridLayout` only ever makes room in one\n            direction: it keeps its rows and widens itself. `ADD_COLUMNS` is the growth policy\n            which says exactly that, so it is the third setting the equivalence needs.\n\n            The other two policies are asked to make room on the other axis, and they do, which\n            means they part company with a `GridLayout` at the very component that overflows the\n            declared grid. That is not a defect of the equivalence but the point of the policy:\n            a grid of 3 rows and 2 columns holding 20 components stays 3 rows high and grows to\n            7 columns under `ADD_COLUMNS`, becomes 10 rows of 2 columns under `ADD_ROWS`, and\n            5 rows of 4 columns under `ADD_ROWS_AND_COLUMNS`.\n\n            The table therefore runs all three policies over grids which hold far more components\n            than the declared counts multiply to, and checks both directions: that `ADD_COLUMNS`\n            matches a `GridLayout` down to the last pixel, and that the other two really do differ.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing, and grows in the way the table asks for.","code":["var ourLayout = new UniformGridLayout(","                        UniformGridLayout.Mode.SPREAD_OVER_ROWS,","                        UniformGridLayout.CollapseEmpty.NONE,","                        overflowGrowth,","                        rows, cols, 5, 5","                    )"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The uniform grid really does carry the growth setting from the table.","code":["ourLayout.getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panels really do hold more components than the declared numbers of rows and columns multiply to.","code":["components > rows * cols"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grown grid is the one the table expects.","code":["[ourBounds.collect({ it.@y }).unique().size(), ourBounds.collect({ it.@x }).unique().size()] == [rowsLaidOut, columnsLaidOut]"]},
+
+        {"kind":"and","text":"only the policy which makes room the way a `GridLayout` makes room places every child where the JDK grid places it.","code":["(ourBounds == awtBounds) == matchesGridLayout"]},
+
+        {"kind":"and","text":"and only that policy asks for the same preferred and minimum size.","code":["(ours.getLayout().preferredLayoutSize(ours) == awts.getLayout().preferredLayoutSize(awts)) == matchesGridLayout","(ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)) == matchesGridLayout"]},
+
+        {"kind":"where","text":"","code":{"overflowGrowth":["UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","2","2","3","3","3"],"cols":["5","5","5","2","2","2"],"components":["13","13","13","20","20","20"],"rowsLaidOut":["2","3","3","3","10","5"],"columnsLaidOut":["7","5","6","7","2","4"],"matchesGridLayout":["true","false","false","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only `OverflowGrowth.ADD_COLUMNS` keeps an overflowing grid equivalent to a `GridLayout`. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Once a grid holds more components than its declared row count times its declared\n            column count, it has to make room, and a `GridLayout` only ever makes room in one\n            direction: it keeps its rows and widens itself. `ADD_COLUMNS` is the growth policy\n            which says exactly that, so it is the third setting the equivalence needs.\n\n            The other two policies are asked to make room on the other axis, and they do, which\n            means they part company with a `GridLayout` at the very component that overflows the\n            declared grid. That is not a defect of the equivalence but the point of the policy:\n            a grid of 3 rows and 2 columns holding 20 components stays 3 rows high and grows to\n            7 columns under `ADD_COLUMNS`, becomes 10 rows of 2 columns under `ADD_ROWS`, and\n            5 rows of 4 columns under `ADD_ROWS_AND_COLUMNS`.\n\n            The table therefore runs all three policies over grids which hold far more components\n            than the declared counts multiply to, and checks both directions: that `ADD_COLUMNS`\n            matches a `GridLayout` down to the last pixel, and that the other two really do differ.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing, and grows in the way the table asks for.","code":["var ourLayout = new UniformGridLayout(","                        UniformGridLayout.Mode.SPREAD_OVER_ROWS,","                        UniformGridLayout.CollapseEmpty.NONE,","                        overflowGrowth,","                        rows, cols, 5, 5","                    )"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The uniform grid really does carry the growth setting from the table.","code":["ourLayout.getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panels really do hold more components than the declared numbers of rows and columns multiply to.","code":["components > rows * cols"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grown grid is the one the table expects.","code":["[ourBounds.collect({ it.@y }).unique().size(), ourBounds.collect({ it.@x }).unique().size()] == [rowsLaidOut, columnsLaidOut]"]},
+
+        {"kind":"and","text":"only the policy which makes room the way a `GridLayout` makes room places every child where the JDK grid places it.","code":["(ourBounds == awtBounds) == matchesGridLayout"]},
+
+        {"kind":"and","text":"and only that policy asks for the same preferred and minimum size.","code":["(ours.getLayout().preferredLayoutSize(ours) == awts.getLayout().preferredLayoutSize(awts)) == matchesGridLayout","(ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)) == matchesGridLayout"]},
+
+        {"kind":"where","text":"","code":{"overflowGrowth":["UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","2","2","3","3","3"],"cols":["5","5","5","2","2","2"],"components":["13","13","13","20","20","20"],"rowsLaidOut":["2","3","3","3","10","5"],"columnsLaidOut":["7","5","6","7","2","4"],"matchesGridLayout":["true","false","false","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only `OverflowGrowth.ADD_COLUMNS` keeps an overflowing grid equivalent to a `GridLayout`. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Once a grid holds more components than its declared row count times its declared\n            column count, it has to make room, and a `GridLayout` only ever makes room in one\n            direction: it keeps its rows and widens itself. `ADD_COLUMNS` is the growth policy\n            which says exactly that, so it is the third setting the equivalence needs.\n\n            The other two policies are asked to make room on the other axis, and they do, which\n            means they part company with a `GridLayout` at the very component that overflows the\n            declared grid. That is not a defect of the equivalence but the point of the policy:\n            a grid of 3 rows and 2 columns holding 20 components stays 3 rows high and grows to\n            7 columns under `ADD_COLUMNS`, becomes 10 rows of 2 columns under `ADD_ROWS`, and\n            5 rows of 4 columns under `ADD_ROWS_AND_COLUMNS`.\n\n            The table therefore runs all three policies over grids which hold far more components\n            than the declared counts multiply to, and checks both directions: that `ADD_COLUMNS`\n            matches a `GridLayout` down to the last pixel, and that the other two really do differ.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A uniform grid layout which spreads its components over its rows, collapses nothing, and grows in the way the table asks for.","code":["var ourLayout = new UniformGridLayout(","                        UniformGridLayout.Mode.SPREAD_OVER_ROWS,","                        UniformGridLayout.CollapseEmpty.NONE,","                        overflowGrowth,","                        rows, cols, 5, 5","                    )"]},
+
+        {"kind":"and","text":"Two panels with the same number of children, one per layout manager.","code":["var ours =","        UI.panel()","        .withLayout(ourLayout)","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)","var awts =","        UI.panel()","        .withLayout(new GridLayout(rows, cols, 5, 5))","        .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The uniform grid really does carry the growth setting from the table.","code":["ourLayout.getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panels really do hold more components than the declared numbers of rows and columns multiply to.","code":["components > rows * cols"]},
+
+        {"kind":"when","text":"Both are laid out at the same size,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()","var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }","var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"then","text":"the grown grid is the one the table expects.","code":["[ourBounds.collect({ it.@y }).unique().size(), ourBounds.collect({ it.@x }).unique().size()] == [rowsLaidOut, columnsLaidOut]"]},
+
+        {"kind":"and","text":"only the policy which makes room the way a `GridLayout` makes room places every child where the JDK grid places it.","code":["(ourBounds == awtBounds) == matchesGridLayout"]},
+
+        {"kind":"and","text":"and only that policy asks for the same preferred and minimum size.","code":["(ours.getLayout().preferredLayoutSize(ours) == awts.getLayout().preferredLayoutSize(awts)) == matchesGridLayout","(ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)) == matchesGridLayout"]},
+
+        {"kind":"where","text":"","code":{"overflowGrowth":["UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_COLUMNS","UniformGridLayout.OverflowGrowth.ADD_ROWS","UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","2","2","3","3","3"],"cols":["5","5","5","2","2","2"],"components":["13","13","13","20","20","20"],"rowsLaidOut":["2","3","3","3","10","5"],"columnsLaidOut":["7","5","6","7","2","4"],"matchesGridLayout":["true","false","false","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

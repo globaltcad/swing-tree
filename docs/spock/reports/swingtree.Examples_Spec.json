@@ -4,7 +4,7 @@
   "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite,\n    run successfully and also produce\n    UIs with expected state and appearance.",
   "subjects":[],
   "statistics":{
-    "runs":"39",
+    "runs":"40",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -606,6 +606,21 @@
       },
       "blocks":[
         {"kind":"when","text":"","code":["new examples.chat.mvvm.ChatView(new examples.chat.mvvm.ChatViewModel())","new examples.chat.mvi.ChatView(Var.of(new examples.chat.mvi.ChatViewModel()))"]},
+
+        {"kind":"then","text":"","code":["noExceptionThrown()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The tile workshop, an interactive guide to grid layouts, can be created error free.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/grids/TileWorkshopView.java\" target=\"_blank\">tile workshop</a> is a small\n            application for testing <code>withGridLayout(..)</code> and <code>Layout.grid(..)</code>\n            by hand. Each of its tabs lays out numbered tiles in one or more grids, explains\n            what the grids show, and offers a slider which adds or removes tiles. Its last tab\n            binds a grid to a <code>Val&lt;Layout&gt;</code> whose mode, empty rows and columns,\n            numbers of rows and columns and gaps can all be chosen, optionally next to a\n            <code>java.awt.GridLayout</code> with the same numbers.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"","code":["new examples.grids.TileWorkshopView(Var.of(examples.grids.TileWorkshopViewModel.initial()))"]},
 
         {"kind":"then","text":"","code":["noExceptionThrown()"]}
       ],

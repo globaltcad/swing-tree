@@ -478,7 +478,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            SwingTree's reactive layout system is not limited to MigLayout and\n            `ResponsiveGridFlowLayout`. `Layout.grid(rows, cols)` installs a\n            `java.awt.GridLayout`, and `Layout.box(UI.Axis)` installs a\n            `javax.swing.BoxLayout`. Both are installed or replaced exactly like\n            any other `Layout` implementation — just call `Var.set(...)` with the\n            desired value.\n\n            `GridLayout` exposes setters for all of its properties (rows, columns, and\n            both gap sizes), so SwingTree can update an existing `GridLayout` instance\n            in-place when the layout type hasn't changed. The identity of the manager\n            object is preserved across such constraint-only updates.\n\n            `BoxLayout` does not expose a setter for its axis after construction, so\n            switching the axis requires a fresh manager instance. This is handled\n            automatically by `ForBoxLayout.installFor`.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree's reactive layout system is not limited to MigLayout and\n            `ResponsiveGridFlowLayout`. `Layout.grid(rows, cols)` installs a\n            `UniformGridLayout`, and `Layout.box(UI.Axis)` installs a\n            `javax.swing.BoxLayout`. Both are installed or replaced exactly like\n            any other `Layout` implementation — just call `Var.set(...)` with the\n            desired value.\n\n            `UniformGridLayout` exposes setters for all of its properties (rows, columns,\n            both gap sizes, its mode and which empty rows and columns it leaves out), so\n            SwingTree can update an existing `UniformGridLayout` instance\n            in-place when the layout type hasn't changed. The identity of the manager\n            object is preserved across such constraint-only updates.\n\n            `BoxLayout` does not expose a setter for its axis after construction, so\n            switching the axis requires a fresh manager instance. This is handled\n            automatically by `ForBoxLayout.installFor`.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We set the UI scale factor to 1 for consistent test behavior:","code":["SwingTree.get().setUiScaleFactor(1f)"]},
@@ -489,13 +489,13 @@
 
         {"kind":"expect","text":"The panel starts with a MigLayout:","code":["(panel.getLayout() instanceof MigLayout)"]},
 
-        {"kind":"when","text":"We switch to a 2-row, 3-column GridLayout:","code":["layout.set(Layout.grid(2, 3))"]},
+        {"kind":"when","text":"We switch to a 2-row, 3-column UniformGridLayout:","code":["layout.set(Layout.grid(2, 3))"]},
 
-        {"kind":"then","text":"A GridLayout is installed with exactly those dimensions:","code":["panel.getLayout() instanceof GridLayout","((GridLayout) panel.getLayout()).getRows() == 2","((GridLayout) panel.getLayout()).getColumns() == 3"]},
+        {"kind":"then","text":"A UniformGridLayout is installed with exactly those dimensions:","code":["panel.getLayout() instanceof UniformGridLayout","((UniformGridLayout) panel.getLayout()).getRows() == 2","((UniformGridLayout) panel.getLayout()).getColumns() == 3"]},
 
-        {"kind":"when","text":"We update the GridLayout to different dimensions — the type stays the same:","code":["def firstGridLayout = panel.getLayout()","layout.set(Layout.grid(3, 2))"]},
+        {"kind":"when","text":"We update the UniformGridLayout to different dimensions — the type stays the same:","code":["def firstGridLayout = panel.getLayout()","layout.set(Layout.grid(3, 2))"]},
 
-        {"kind":"then","text":"The row/column counts are updated in-place on the existing GridLayout instance:","code":["panel.getLayout().is(firstGridLayout)","((GridLayout) panel.getLayout()).getRows() == 3","((GridLayout) panel.getLayout()).getColumns() == 2"]},
+        {"kind":"then","text":"The row/column counts are updated in-place on the existing UniformGridLayout instance:","code":["panel.getLayout().is(firstGridLayout)","((UniformGridLayout) panel.getLayout()).getRows() == 3","((UniformGridLayout) panel.getLayout()).getColumns() == 2"]},
 
         {"kind":"when","text":"We switch to a horizontal BoxLayout:","code":["layout.set(Layout.box(UI.Axis.HORIZONTAL))"]},
 

@@ -4,7 +4,7 @@
   "narrative":"Sliders are a common way to allow the user to select a value\n    within a range. Swing-Tree provides a way to create sliders\n    in a declarative way, allowing you to configure the slider\n    and then show it to the user.\n\n    Sliders can be vertical or horizontal, and can have a\n    minimum and maximum value, as well as a current value.\n    You can bind any of these values to properties in your\n    application, so that the slider can update itself\n    automatically when your application state changes.",
   "subjects":["swingtree.UIForSlider","swingtree.UI"],
   "statistics":{
-    "runs":"14",
+    "runs":"21",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -385,6 +385,171 @@
         {"kind":"then","text":"The slider runs over the whole numbers SwingTree chose, as before.","code":["slider.minimum == minimum","slider.maximum == maximum"]},
 
         {"kind":"and","text":"The knob still sits halfway along the slider, and the property still holds 0.5.","code":["(slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum) == 0.5d","opacity.get() == 0.5d"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withMajorTickSpacing(N)` and `withMinorTickSpacing(N)` to set how far apart the tick marks of a slider are.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `JSlider` has two settings for its tick marks, `setMajorTickSpacing(int)` and\n            `setMinorTickSpacing(int)`, which tell it how far apart its long and its short tick\n            marks are. The builder of a slider has the same two settings, `withMajorTickSpacing(N)`\n            and `withMinorTickSpacing(N)`, where `N` is the number type of the slider. The sliders\n            in this scenario are built from a plain `JSlider`, so their number type is `Integer`.\n\n            Just like the settings of a `JSlider`, the two methods only say where the tick marks are.\n            They do not draw anything. A `JSlider` draws its tick marks once its `paintTicks` flag\n            is `true`, and you can switch that flag on through `peek(..)`, which hands you the\n            `JSlider` while the slider is built.\n\n            This means that the two methods never change how a slider looks on their own. A slider\n            which never switches on its `paintTicks` flag shows no tick marks, whatever its spacings are.\n            A slider which does switch it on shows its tick marks at the spacings you gave it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A slider from 1 to 100 with a major tick mark every 10 and a minor tick mark every 5.","code":["var plain =","        UI.of(new JSlider())","        .withMajorTickSpacing(10)","        .withMinorTickSpacing(5)","        .withMin(1)","        .get(JSlider)"]},
+
+        {"kind":"and","text":"The same slider, except that it switches on the painting of its tick marks through `peek(..)`.","code":["var painted =","        UI.of(new JSlider())","        .withMajorTickSpacing(10)","        .withMinorTickSpacing(5)","        .withMin(1)","        .peek( s -> s.setPaintTicks(true) )","        .get(JSlider)"]},
+
+        {"kind":"expect","text":"Both sliders run from 1 to 100, with their tick marks 10 and 5 apart.","code":["plain.minimum == 1","plain.maximum == 100","plain.majorTickSpacing == 10","plain.minorTickSpacing == 5","painted.minimum == 1","painted.maximum == 100","painted.majorTickSpacing == 10","painted.minorTickSpacing == 5"]},
+
+        {"kind":"and","text":"The first slider draws no tick marks and shows no labels, because nothing switched them on.","code":["!plain.paintTicks","!plain.paintLabels","plain.labelTable == null"]},
+
+        {"kind":"and","text":"The second slider draws its tick marks.","code":["painted.paintTicks"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The tick spacings of a slider for fractional numbers put every tick mark exactly at its number.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            On a slider for `Double` numbers, `withMajorTickSpacing(N)` and `withMinorTickSpacing(N)`\n            take `Double` numbers. In this scenario the slider runs from 0.0 to 1.0, with a major tick\n            mark every 0.25 and a minor tick mark every 0.1.\n\n            A `JSlider` only knows whole numbers, so SwingTree maps the numbers of the slider onto a\n            range of whole numbers behind the scenes, and a `JSlider` can only draw a tick mark at one\n            of those whole numbers. If that range ran from 0 to 256, a minor tick mark every 0.1 would\n            have to sit every 25.6 whole numbers, and 25.6 is not a whole number. Rounding it to 26 would\n            move every minor tick mark a little further away from its number than the one before it.\n            The ninth minor tick mark would sit at 9 * 26 = 234, which is 234 / 256 = 0.914 of the way\n            along the slider, where it should sit at 0.9.\n\n            So SwingTree chooses the range of whole numbers to fit both spacings. Both 0.25 and 0.1 are\n            whole multiples of 0.05, and 0.05 fits exactly 20 times into a slider from 0.0 to 1.0. When the\n            range of whole numbers is a whole multiple of 20 long, every tick mark sits on a whole number.\n\n            We do not want this scenario to depend on the range SwingTree chose, though. What your users\n            see is where a tick mark sits along the slider, as a fraction of its length, and which number\n            the property holds when they move the knob onto a tick mark.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 0.5, and a slider from 0.0 to 1.0 bound to it, with tick marks every 0.25 and every 0.1.","code":["var opacity = Var.of(0.5d)","var slider =","        UI.slider(UI.Axis.HORIZONTAL, 0.0d, 1.0d, opacity)","        .withMajorTickSpacing(0.25d)","        .withMinorTickSpacing(0.1d)","        .peek( s -> s.setPaintTicks(true) )","        .get(JSlider)"]},
+
+        {"kind":"when","text":"We measure how far apart the tick marks are, as a fraction of the length of the slider.","code":["var length = slider.maximum - slider.minimum","var majorFraction = slider.majorTickSpacing / (double) length","var minorFraction = slider.minorTickSpacing / (double) length"]},
+
+        {"kind":"then","text":"The major tick marks are exactly 1/4 of the slider apart, and the minor tick marks exactly 1/10.","code":["majorFraction == 0.25d","minorFraction == 0.1d"]},
+
+        {"kind":"when","text":"The user moves the knob onto the third minor tick mark.","code":["UI.runNow({ slider.value = slider.minimum + 3 * slider.minorTickSpacing })"]},
+
+        {"kind":"then","text":"The property holds exactly 0.3, and not a number close to it.","code":["opacity.get() == 0.3d"]},
+
+        {"kind":"when","text":"The user moves the knob onto the third major tick mark.","code":["UI.runNow({ slider.value = slider.minimum + 3 * slider.majorTickSpacing })"]},
+
+        {"kind":"then","text":"The property holds exactly 0.75.","code":["opacity.get() == 0.75d"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withMajorTickSpacing(Val<N>)` and `withMinorTickSpacing(Val<N>)` to change the tick spacings of a slider while it is shown.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The spacings of the tick marks of a slider can come from properties, which may live in\n            your view model. The slider then follows every change of them.\n\n            A spacing of 0 removes the tick marks of that kind, just like it does on a `JSlider`.\n            The slider in this scenario starts with a major tick mark every 25 and a minor tick mark\n            every 5, and the application changes both spacings, and then sets the minor spacing to 0.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two properties holding the spacings 25 and 5.","code":["var majorSpacing = Var.of(25)","var minorSpacing = Var.of(5)"]},
+
+        {"kind":"and","text":"A slider from 0 to 100 bound to them, which switches on the painting of its tick marks.","code":["var slider =","        UI.slider(UI.Axis.HORIZONTAL, 0, 100, Var.of(50))","        .withMajorTickSpacing(majorSpacing)","        .withMinorTickSpacing(minorSpacing)","        .peek( s -> s.setPaintTicks(true) )","        .get(JSlider)"]},
+
+        {"kind":"expect","text":"The tick marks are 25 and 5 apart.","code":["slider.majorTickSpacing == 25","slider.minorTickSpacing == 5"]},
+
+        {"kind":"when","text":"The application changes the spacings to 20 and 10.","code":["UI.runNow({","    majorSpacing.set(20)","    minorSpacing.set(10)","})"]},
+
+        {"kind":"then","text":"The tick marks are 20 and 10 apart.","code":["slider.majorTickSpacing == 20","slider.minorTickSpacing == 10"]},
+
+        {"kind":"when","text":"The application sets the minor spacing to 0.","code":["UI.runNow({ minorSpacing.set(0) })"]},
+
+        {"kind":"then","text":"The slider has no minor tick marks any more, and its major tick marks are still 20 apart.","code":["slider.minorTickSpacing == 0","slider.majorTickSpacing == 20"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When the range of a slider for fractional numbers changes, its tick marks stay at the numbers of their spacing.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A slider for `Double` numbers maps its numbers onto a range of whole numbers behind the scenes,\n            and SwingTree chooses that range so that every tick mark sits on one of its whole numbers. The\n            `JSlider` itself only knows how many whole numbers apart its tick marks are. How many that is\n            depends on the minimum and the maximum of the slider as well as on the spacing. So when the\n            maximum changes, SwingTree has to tell the `JSlider` a new number of whole numbers between\n            its tick marks.\n\n            In this scenario a slider from 0.0 to 1.0 has a major tick mark every 0.25, which is a quarter\n            of the length of the slider. When the maximum grows to 2.0, a tick mark every 0.25 is an eighth\n            of the length of the slider. If the `JSlider` kept drawing a tick mark every quarter of its\n            length, its tick marks would sit at 0.5, 1.0 and 1.5, and a user who moved the knob onto the\n            first tick mark would expect 0.25 and get 0.5.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Properties for the minimum, the maximum and the value of a slider.","code":["var min   = Var.of(0.0d)","var max   = Var.of(1.0d)","var value = Var.of(0.5d)"]},
+
+        {"kind":"and","text":"A slider bound to them, with a major tick mark every 0.25.","code":["var slider =","        UI.slider(UI.Axis.HORIZONTAL, min, max, value)","        .withMajorTickSpacing(0.25d)","        .peek( s -> s.setPaintTicks(true) )","        .get(JSlider)"]},
+
+        {"kind":"expect","text":"The major tick marks are a quarter of the length of the slider apart.","code":["slider.majorTickSpacing / (double) (slider.maximum - slider.minimum) == 0.25d"]},
+
+        {"kind":"when","text":"The application changes the maximum to 2.0.","code":["UI.runNow({ max.set(2.0d) })"]},
+
+        {"kind":"then","text":"The major tick marks are an eighth of the length of the slider apart, because 0.25 is an eighth of 2.0.","code":["slider.majorTickSpacing / (double) (slider.maximum - slider.minimum) == 0.125d"]},
+
+        {"kind":"when","text":"The user moves the knob onto the third major tick mark.","code":["UI.runNow({ slider.value = slider.minimum + 3 * slider.majorTickSpacing })"]},
+
+        {"kind":"then","text":"The property holds exactly 0.75.","code":["value.get() == 0.75d"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider given a `SliderTicks` value takes its tick marks from that value and ignores `withMajorTickSpacing(N)` and `withMinorTickSpacing(N)`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            There are two ways to tell a slider where its tick marks are. `withMajorTickSpacing(N)` and\n            `withMinorTickSpacing(N)` set the spacings the way a `JSlider` does, and leave drawing them to\n            you. `withTicks(SliderTicks)` describes the tick marks, the labels and the snapping of a slider\n            in one value, and the slider then draws whatever that value describes.\n\n            When a slider gets both, the `SliderTicks` value decides, whichever of the methods is called\n            last. In this scenario the `SliderTicks` value asks for a major tick mark every 25, with four\n            minor tick marks between two major tick marks, which is a minor tick mark every 5. The spacing\n            methods ask for a major tick mark every 10 and a minor tick mark every 2. The table at the end\n            of this scenario builds the slider twice, once with the spacing methods called first, and once\n            with `withTicks(SliderTicks)` called first.\n\n            The rule has to hold after the range of the slider changes, too. SwingTree lays out the tick\n            marks of a `SliderTicks` value again for every new range of a slider. If the spacing methods won\n            whenever they were called last, the slider would show a tick mark every 10 only until its range\n            changed, and then the tick marks of the `SliderTicks` value would suddenly come back.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding the maximum 100.","code":["var max = Var.of(100)"]},
+
+        {"kind":"and","text":"A slider from 0 to that maximum, which gets both kinds of tick marks.","code":["var slider = buildSlider(max)"]},
+
+        {"kind":"expect","text":"The slider has the tick marks of the `SliderTicks` value, 25 and 5 apart.","code":["slider.majorTickSpacing == 25","slider.minorTickSpacing == 5","slider.paintTicks"]},
+
+        {"kind":"when","text":"The application changes the maximum of the slider to 200.","code":["UI.runNow({ max.set(200) })"]},
+
+        {"kind":"then","text":"The slider still has the tick marks of the `SliderTicks` value.","code":["slider.maximum == 200","slider.majorTickSpacing == 25","slider.minorTickSpacing == 5"]},
+
+        {"kind":"where","text":"The slider is built with the spacing methods called first, or with `withTicks(SliderTicks)` called first.","code":{"buildSlider":["{ Var<Integer> maximum ->\n        UI.slider(UI.Axis.HORIZONTAL, Var.of(0), maximum, Var.of(50))\n        .withMajorTickSpacing(10)\n        .withMinorTickSpacing(2)\n        .withTicks(SliderTicks.of(Integer.class).withMajorSpacing(25).withMinorTicksBetween(4))\n        .get(JSlider)\n    }","{ Var<Integer> maximum ->\n        UI.slider(UI.Axis.HORIZONTAL, Var.of(0), maximum, Var.of(50))\n        .withTicks(SliderTicks.of(Integer.class).withMajorSpacing(25).withMinorTicksBetween(4))\n        .withMajorTickSpacing(10)\n        .withMinorTickSpacing(2)\n        .get(JSlider)\n    }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider given a `SliderTicks` value takes its tick marks from that value and ignores `withMajorTickSpacing(N)` and `withMinorTickSpacing(N)`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            There are two ways to tell a slider where its tick marks are. `withMajorTickSpacing(N)` and\n            `withMinorTickSpacing(N)` set the spacings the way a `JSlider` does, and leave drawing them to\n            you. `withTicks(SliderTicks)` describes the tick marks, the labels and the snapping of a slider\n            in one value, and the slider then draws whatever that value describes.\n\n            When a slider gets both, the `SliderTicks` value decides, whichever of the methods is called\n            last. In this scenario the `SliderTicks` value asks for a major tick mark every 25, with four\n            minor tick marks between two major tick marks, which is a minor tick mark every 5. The spacing\n            methods ask for a major tick mark every 10 and a minor tick mark every 2. The table at the end\n            of this scenario builds the slider twice, once with the spacing methods called first, and once\n            with `withTicks(SliderTicks)` called first.\n\n            The rule has to hold after the range of the slider changes, too. SwingTree lays out the tick\n            marks of a `SliderTicks` value again for every new range of a slider. If the spacing methods won\n            whenever they were called last, the slider would show a tick mark every 10 only until its range\n            changed, and then the tick marks of the `SliderTicks` value would suddenly come back.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding the maximum 100.","code":["var max = Var.of(100)"]},
+
+        {"kind":"and","text":"A slider from 0 to that maximum, which gets both kinds of tick marks.","code":["var slider = buildSlider(max)"]},
+
+        {"kind":"expect","text":"The slider has the tick marks of the `SliderTicks` value, 25 and 5 apart.","code":["slider.majorTickSpacing == 25","slider.minorTickSpacing == 5","slider.paintTicks"]},
+
+        {"kind":"when","text":"The application changes the maximum of the slider to 200.","code":["UI.runNow({ max.set(200) })"]},
+
+        {"kind":"then","text":"The slider still has the tick marks of the `SliderTicks` value.","code":["slider.maximum == 200","slider.majorTickSpacing == 25","slider.minorTickSpacing == 5"]},
+
+        {"kind":"where","text":"The slider is built with the spacing methods called first, or with `withTicks(SliderTicks)` called first.","code":{"buildSlider":["{ Var<Integer> maximum ->\n        UI.slider(UI.Axis.HORIZONTAL, Var.of(0), maximum, Var.of(50))\n        .withMajorTickSpacing(10)\n        .withMinorTickSpacing(2)\n        .withTicks(SliderTicks.of(Integer.class).withMajorSpacing(25).withMinorTicksBetween(4))\n        .get(JSlider)\n    }","{ Var<Integer> maximum ->\n        UI.slider(UI.Axis.HORIZONTAL, Var.of(0), maximum, Var.of(50))\n        .withTicks(SliderTicks.of(Integer.class).withMajorSpacing(25).withMinorTicksBetween(4))\n        .withMajorTickSpacing(10)\n        .withMinorTickSpacing(2)\n        .get(JSlider)\n    }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Tick spacings which a slider for fractional numbers cannot place exactly are not drawn, and SwingTree logs a warning explaining why.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `JSlider` only knows whole numbers, so a slider for `Double` numbers maps its numbers onto a\n            range of whole numbers behind the scenes, and a tick mark can only sit on one of those whole\n            numbers. To place a major tick mark every 1.0 and a minor tick mark every 0.25 exactly, SwingTree\n            divides the slider into equal parts which both spacings are whole multiples of, here parts of\n            0.25, and gives every part the same number of whole numbers.\n\n            Some spacings need very small parts. In this scenario the minor tick marks are meant to sit at\n            every third of a whole number, and the spacing is written as `1.0d / 3`. As a `double`, that is\n            0.3333333333333333, a number with 16 decimal places. The largest parts which both 1.0 and\n            0.3333333333333333 are whole multiples of are 0.0000000000000001 long, and a slider from 0.0 to\n            100.0 holds 10^18 of them.\n\n            No screen can show that many positions, so SwingTree never divides a slider into more than\n            100 000 parts for its tick marks. It draws no tick marks at all, and logs a warning which tells\n            you why. If you want exactly three minor tick marks per whole number, describe them with\n            `SliderTicks.withMajorSpacing(1.0d).withMinorTicksBetween(2)`, which counts the minor tick\n            marks instead of spacing them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A spy on the log.","code":["var log = LogSpy.attach()"]},
+
+        {"kind":"and","text":"A slider from 0.0 to 100.0 with a major tick mark every 1.0 and a minor tick mark every 1.0 / 3.","code":["var slider =","        UI.slider(UI.Axis.HORIZONTAL, 0.0d, 100.0d, Var.of(50.0d))","        .withMajorTickSpacing(1.0d)","        .withMinorTickSpacing(1.0d / 3)","        .peek( s -> s.setPaintTicks(true) )","        .get(JSlider)"]},
+
+        {"kind":"expect","text":"The slider has no tick marks.","code":["slider.majorTickSpacing == 0","slider.minorTickSpacing == 0"]},
+
+        {"kind":"and","text":"A warning explains why.","code":["log.warnings().any { it.contains(\"more than 100000 parts\") }"]},
+
+        {"kind":"and","text":"The knob still sits halfway along the slider.","code":["(slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum) == 0.5d"]},
+
+        {"kind":"cleanup","text":"","code":["log?.detach()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

@@ -81,20 +81,20 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
     @Override
     protected void _addComponentTo( P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints ) {
 <span class="fc bfc" id="L83" title="All 2 branches covered.">        if ( _configurator != null ) {</span>
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            if ( addedComponent instanceof JTable ) {</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">            if ( addedComponent instanceof JTable ) {</span>
                 /*
                     Note that we cannot delegate the table like we do in
                     the below case. This is because a table only installs itself
                     properly in a scroll pane (with header) if its DIRECT parent is the
                     scroll pane. (with indirection, the header will be missing)
                 */
-<span class="nc" id="L91">                JTable jTable = (JTable)addedComponent;</span>
-<span class="nc" id="L92">                ScrollableComponentDelegate conf = _createNewScrollableConf(thisComponent, jTable, _configurator);</span>
-<span class="nc" id="L93">                jTable.setPreferredScrollableViewportSize(conf.preferredSize().toDimension());</span>
-<span class="nc" id="L94">                jTable.setFillsViewportHeight(conf.fitHeight());</span>
-<span class="nc bnc" id="L95" title="All 2 branches missed.">                int newMode = conf.fitWidth() ? JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS : JTable.AUTO_RESIZE_OFF;</span>
-<span class="nc" id="L96">                jTable.setAutoResizeMode(newMode);</span>
-<span class="nc" id="L97">                super._addComponentTo(thisComponent, addedComponent, constraints);</span>
+<span class="fc" id="L91">                JTable jTable = (JTable)addedComponent;</span>
+<span class="fc" id="L92">                ScrollableComponentDelegate conf = _createNewScrollableConf(thisComponent, jTable, _configurator);</span>
+<span class="fc" id="L93">                jTable.setPreferredScrollableViewportSize(conf.preferredSize().toDimension());</span>
+<span class="fc" id="L94">                jTable.setFillsViewportHeight(conf.fitHeight());</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">                int newMode = conf.fitWidth() ? JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS : JTable.AUTO_RESIZE_OFF;</span>
+<span class="fc" id="L96">                jTable.setAutoResizeMode(newMode);</span>
+<span class="fc" id="L97">                super._addComponentTo(thisComponent, addedComponent, constraints);</span>
 <span class="pc bpc" id="L98" title="1 of 2 branches missed.">            } else if ( addedComponent instanceof Scrollable ) {</span>
 <span class="nc" id="L99">                log.warn(SwingTree.get().logMarker(),</span>
                     &quot;Trying to add a 'Scrollable' component to a declarative scroll pane UI which is already &quot; +

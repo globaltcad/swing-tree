@@ -280,6 +280,123 @@ public final class UIForSlider&lt;S extends JSlider, N extends Number&gt; extend
     }
 
     /**
+     *  Sets how far apart the major tick marks of the slider are, in the numbers of the slider.
+     *  The major tick marks count from the minimum of the slider, so a spacing of 25 on a slider
+     *  running from 0 to 100 puts a major tick mark at 0, 25, 50, 75 and 100.
+     *  A spacing of zero or less removes the major tick marks.
+     *  &lt;p&gt;
+     *  Like {@link JSlider#setMajorTickSpacing(int)}, this method only sets where the major tick
+     *  marks are. The slider draws them once {@link JSlider#setPaintTicks(boolean)} was called with
+     *  {@code true}, for example through {@code peek( s -&gt; s.setPaintTicks(true) )}.
+     *  Unlike {@link JSlider#setMajorTickSpacing(int)}, the spacing is a number of the slider's own type,
+     *  so a slider for a {@code Double} property can have a major tick mark every {@code 0.25}.
+     *  &lt;p&gt;
+     *  To describe tick marks, labels and snapping together, use {@link #withTicks(SliderTicks)} instead.
+     *  A slider which has been given a {@link SliderTicks} value takes its tick marks from that value
+     *  and ignores the spacing given to this method, no matter in which order the two methods are called.
+     *
+     * @param spacing The distance between two neighbouring major tick marks, in the numbers of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null}.
+     */
+    public final UIForSlider&lt;S, N&gt; withMajorTickSpacing( N spacing ) {
+<span class="fc" id="L303">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Number.class );</span>
+<span class="fc" id="L304">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L305">                    _sliderStateOf(thisComponent).setMajorTickSpacing(spacing);</span>
+<span class="fc" id="L306">                })</span>
+<span class="fc" id="L307">                ._this();</span>
+    }
+
+    /**
+     *  Binds the supplied {@link Val} property to the spacing of the major tick marks of the slider,
+     *  so that the major tick marks move whenever the item of the property changes.
+     *  The spacing is a number of the slider's own type, and the major tick marks count from the
+     *  minimum of the slider, so a spacing of 25 on a slider running from 0 to 100 puts a major
+     *  tick mark at 0, 25, 50, 75 and 100. A spacing of zero or less removes the major tick marks.
+     *  &lt;p&gt;
+     *  Like {@link JSlider#setMajorTickSpacing(int)}, the property only decides where the major tick
+     *  marks are. The slider draws them once {@link JSlider#setPaintTicks(boolean)} was called with {@code true}.
+     *  A slider which has been given a {@link SliderTicks} value through {@link #withTicks(SliderTicks)}
+     *  or {@link #withTicks(Val)} takes its tick marks from that value and ignores this property.
+     *
+     * @param spacing A property holding the distance between two neighbouring major tick marks, in the numbers of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null} or allows {@code null} items.
+     */
+    public final UIForSlider&lt;S, N&gt; withMajorTickSpacing( Val&lt;N&gt; spacing ) {
+<span class="fc" id="L327">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
+<span class="fc" id="L328">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot;, &quot;The major tick spacing of a slider must not be null!&quot; );</span>
+<span class="fc" id="L329">        return _withOnShow( spacing, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L330">                    _sliderStateOf(thisComponent).setMajorTickSpacing(v);</span>
+<span class="fc" id="L331">                })</span>
+<span class="fc" id="L332">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L333">                    _sliderStateOf(thisComponent).setMajorTickSpacing(spacing.orElseThrowUnchecked());</span>
+<span class="fc" id="L334">                })</span>
+<span class="fc" id="L335">                ._this();</span>
+    }
+
+    /**
+     *  Sets how far apart the minor tick marks of the slider are, in the numbers of the slider.
+     *  The minor tick marks count from the minimum of the slider, so a spacing of 5 on a slider
+     *  running from 0 to 100 puts a minor tick mark at 0, 5, 10 and so on up to 100.
+     *  A spacing of zero or less removes the minor tick marks.
+     *  &lt;p&gt;
+     *  Like {@link JSlider#setMinorTickSpacing(int)}, this method only sets where the minor tick
+     *  marks are. The slider draws them once {@link JSlider#setPaintTicks(boolean)} was called with
+     *  {@code true}, for example through {@code peek( s -&gt; s.setPaintTicks(true) )}.
+     *  Unlike {@link JSlider#setMinorTickSpacing(int)}, the spacing is a number of the slider's own type,
+     *  so a slider for a {@code Double} property can have a minor tick mark every {@code 0.05}.
+     *  &lt;p&gt;
+     *  The minor tick marks do not depend on the major tick marks. With a major spacing of 25 and
+     *  a minor spacing of 10, the minor tick marks sit at 0, 10, 20, 30 and 40, while the major tick
+     *  marks sit at 0, 25 and 50, so the minor tick marks do not divide the gaps between the major
+     *  ones evenly. {@link SliderTicks#withMinorTicksBetween(int)} counts the minor tick marks
+     *  between two major tick marks instead, which always divides the gaps evenly.
+     *  A slider which has been given a {@link SliderTicks} value through {@link #withTicks(SliderTicks)}
+     *  takes its tick marks from that value and ignores the spacing given to this method,
+     *  no matter in which order the two methods are called.
+     *
+     * @param spacing The distance between two neighbouring minor tick marks, in the numbers of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null}.
+     */
+    public final UIForSlider&lt;S, N&gt; withMinorTickSpacing( N spacing ) {
+<span class="fc" id="L364">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Number.class );</span>
+<span class="fc" id="L365">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L366">                    _sliderStateOf(thisComponent).setMinorTickSpacing(spacing);</span>
+<span class="fc" id="L367">                })</span>
+<span class="fc" id="L368">                ._this();</span>
+    }
+
+    /**
+     *  Binds the supplied {@link Val} property to the spacing of the minor tick marks of the slider,
+     *  so that the minor tick marks move whenever the item of the property changes.
+     *  The spacing is a number of the slider's own type, and the minor tick marks count from the
+     *  minimum of the slider, so a spacing of 5 on a slider running from 0 to 100 puts a minor
+     *  tick mark at 0, 5, 10 and so on up to 100. A spacing of zero or less removes the minor tick marks.
+     *  &lt;p&gt;
+     *  Like {@link JSlider#setMinorTickSpacing(int)}, the property only decides where the minor tick
+     *  marks are. The slider draws them once {@link JSlider#setPaintTicks(boolean)} was called with {@code true}.
+     *  A slider which has been given a {@link SliderTicks} value through {@link #withTicks(SliderTicks)}
+     *  or {@link #withTicks(Val)} takes its tick marks from that value and ignores this property.
+     *
+     * @param spacing A property holding the distance between two neighbouring minor tick marks, in the numbers of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null} or allows {@code null} items.
+     */
+    public final UIForSlider&lt;S, N&gt; withMinorTickSpacing( Val&lt;N&gt; spacing ) {
+<span class="fc" id="L388">        NullUtil.nullArgCheck( spacing, &quot;spacing&quot;, Val.class );</span>
+<span class="fc" id="L389">        NullUtil.nullPropertyCheck( spacing, &quot;spacing&quot;, &quot;The minor tick spacing of a slider must not be null!&quot; );</span>
+<span class="fc" id="L390">        return _withOnShow( spacing, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L391">                    _sliderStateOf(thisComponent).setMinorTickSpacing(v);</span>
+<span class="fc" id="L392">                })</span>
+<span class="fc" id="L393">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L394">                    _sliderStateOf(thisComponent).setMinorTickSpacing(spacing.orElseThrowUnchecked());</span>
+<span class="fc" id="L395">                })</span>
+<span class="fc" id="L396">                ._this();</span>
+    }
+
+    /**
      *  Configures the tick marks and labels along the slider through the supplied
      *  {@link SliderTicks} value, which describes where the major and minor tick marks are,
      *  whether they are drawn, whether the knob snaps to them and which labels are shown:
@@ -302,11 +419,11 @@ public final class UIForSlider&lt;S extends JSlider, N extends Number&gt; extend
      * @throws IllegalArgumentException if {@code ticks} is {@code null}.
      */
     public final UIForSlider&lt;S, N&gt; withTicks( SliderTicks&lt;N&gt; ticks ) {
-<span class="fc" id="L305">        NullUtil.nullArgCheck( ticks, &quot;ticks&quot;, SliderTicks.class );</span>
-<span class="fc" id="L306">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L307">                    _sliderStateOf(thisComponent).setTicks(ticks);</span>
-<span class="fc" id="L308">                })</span>
-<span class="fc" id="L309">                ._this();</span>
+<span class="fc" id="L422">        NullUtil.nullArgCheck( ticks, &quot;ticks&quot;, SliderTicks.class );</span>
+<span class="fc" id="L423">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L424">                    _sliderStateOf(thisComponent).setTicks(ticks);</span>
+<span class="fc" id="L425">                })</span>
+<span class="fc" id="L426">                ._this();</span>
     }
 
     /**
@@ -332,15 +449,15 @@ public final class UIForSlider&lt;S extends JSlider, N extends Number&gt; extend
      * @throws IllegalArgumentException if {@code ticks} is {@code null} or allows {@code null} items.
      */
     public final UIForSlider&lt;S, N&gt; withTicks( Val&lt;SliderTicks&lt;N&gt;&gt; ticks ) {
-<span class="fc" id="L335">        NullUtil.nullArgCheck( ticks, &quot;ticks&quot;, Val.class );</span>
-<span class="fc" id="L336">        NullUtil.nullPropertyCheck( ticks, &quot;ticks&quot;, &quot;Use 'SliderTicks.of(..)' instead of null to describe a slider without tick marks!&quot; );</span>
-<span class="fc" id="L337">        return _withOnShow( ticks, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L338">                    _sliderStateOf(thisComponent).setTicks(v);</span>
-<span class="fc" id="L339">                })</span>
-<span class="fc" id="L340">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L341">                    _sliderStateOf(thisComponent).setTicks(ticks.orElseThrowUnchecked());</span>
-<span class="fc" id="L342">                })</span>
-<span class="fc" id="L343">                ._this();</span>
+<span class="fc" id="L452">        NullUtil.nullArgCheck( ticks, &quot;ticks&quot;, Val.class );</span>
+<span class="fc" id="L453">        NullUtil.nullPropertyCheck( ticks, &quot;ticks&quot;, &quot;Use 'SliderTicks.of(..)' instead of null to describe a slider without tick marks!&quot; );</span>
+<span class="fc" id="L454">        return _withOnShow( ticks, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L455">                    _sliderStateOf(thisComponent).setTicks(v);</span>
+<span class="fc" id="L456">                })</span>
+<span class="fc" id="L457">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L458">                    _sliderStateOf(thisComponent).setTicks(ticks.orElseThrowUnchecked());</span>
+<span class="fc" id="L459">                })</span>
+<span class="fc" id="L460">                ._this();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

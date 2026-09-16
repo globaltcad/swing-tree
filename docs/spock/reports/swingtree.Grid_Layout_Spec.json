@@ -1,0 +1,1560 @@
+{
+  "className":"swingtree.Grid_Layout_Spec",
+  "title":"Grid Layouts",
+  "narrative":"A grid layout divides a component into cells of equal size and puts its\n    children into those cells, row by row, starting with the top row. In a\n    SwingTree UI declaration, you get one in three ways:\n\n      - `withGridLayout(..)` on the builder of the component,\n      - `Layout.grid(..)` in a style, through `it.layout(Layout.grid(..))`,\n      - `Layout.grid(..)` in a `Var<Layout>`, which you bind with `withLayout(..)`,\n        so that the grid can change while the application runs.\n\n    All three install a `UniformGridLayout`. You declare a number of rows and\n    columns, and by default, a new row starts after every declared number of\n    columns, and the rows and columns which no child occupies are left out, so\n    that the children share the whole component. A grid of 2 rows and 3 columns\n    therefore lays out 6 children in 2 rows of 3 columns, and 2 children side by\n    side in a single row.\n\n    Both `withGridLayout(..)` and `Layout.grid(..)` also accept a\n    `UniformGridLayout.Mode` and a `UniformGridLayout.CollapseEmpty` setting in\n    front of the numbers of rows and columns, which choose how the grid is built\n    and which empty rows and columns are left out. The \"Uniform Grid Layout\"\n    specification describes every setting in detail.\n\n    A third setting, `UniformGridLayout.OverflowGrowth`, chooses how the grid\n    grows when a component holds more children than the declared number of rows\n    times the declared number of columns. It can add rows, add columns, or add\n    both so that the grid keeps the ratio of rows to columns it was declared with.",
+  "subjects":["swingtree.UIForAnySwing","swingtree.api.Layout","swingtree.layout.UniformGridLayout"],
+  "statistics":{
+    "runs":"70",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Use `withGridLayout(rows, cols)` to arrange the children of a component in cells of equal size.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withGridLayout(rows, cols)` attaches a `UniformGridLayout` without gaps to\n            the component. The children fill its cells row by row, and every child is\n            resized to exactly the size of its cell.\n\n            The panel in this feature has a grid of 2 rows and 3 columns, and 4 buttons.\n            At 300 by 100 pixels, every cell is 100 pixels wide and 50 pixels high: the\n            buttons 1, 2 and 3 fill the top row, and the button 4 starts the bottom row.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 3 columns, holding 4 buttons.","code":["var panel =","        UI.panel().withGridLayout(2, 3)","        .add(UI.button(\"1\")).add(UI.button(\"2\")).add(UI.button(\"3\"))","        .add(UI.button(\"4\"))","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with the declared numbers of rows and columns, no gaps and the default settings.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getRows() == 2","panel.getLayout().getColumns() == 3","panel.getLayout().getHgap() == 0","panel.getLayout().getVgap() == 0","panel.getLayout().getMode() == Mode.WRAP_AFTER_COLUMNS","panel.getLayout().getCollapseEmpty() == CollapseEmpty.ROWS_AND_COLUMNS"]},
+
+        {"kind":"when","text":"The panel is laid out at 300 by 100 pixels,","code":["panel.setSize(300, 100)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every button has its cell of 100 by 50 pixels.","code":["(0..<4).collect { panel.getComponent(it).getBounds() } == [","    new Rectangle(  0,  0, 100, 50),","    new Rectangle(100,  0, 100, 50),","    new Rectangle(200,  0, 100, 50),","    new Rectangle(  0, 50, 100, 50)","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid from `withGridLayout(rows, cols)` leaves out the rows and columns its children do not fill. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            By default, a grid only has the rows and columns its children occupy, so the\n            children never leave empty space next to them or below them. The table adds a\n            growing number of children to a panel of 300 by 100 pixels with a grid of 2\n            rows and 3 columns, and shows the size every child gets.\n\n            A single child takes the whole panel, 2 children get half of its width each,\n            and 3 children a third. From 4 children on, the grid has 2 rows, and a seventh\n            child adds a third row, because the grid never has more than the 3 declared\n            columns.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 3 columns, holding the number of children from the table.","code":["var panel =","        UI.panel().withGridLayout(2, 3)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 300 by 100 pixels,","code":["panel.setSize(300, 100)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<children).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"children":["1","2","3","4","6","7"],"cellWidth":["300","150","100","100","100","100"],"cellHeight":["100","100","100","50","50","33"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid from `withGridLayout(rows, cols)` leaves out the rows and columns its children do not fill. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            By default, a grid only has the rows and columns its children occupy, so the\n            children never leave empty space next to them or below them. The table adds a\n            growing number of children to a panel of 300 by 100 pixels with a grid of 2\n            rows and 3 columns, and shows the size every child gets.\n\n            A single child takes the whole panel, 2 children get half of its width each,\n            and 3 children a third. From 4 children on, the grid has 2 rows, and a seventh\n            child adds a third row, because the grid never has more than the 3 declared\n            columns.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 3 columns, holding the number of children from the table.","code":["var panel =","        UI.panel().withGridLayout(2, 3)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 300 by 100 pixels,","code":["panel.setSize(300, 100)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<children).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"children":["1","2","3","4","6","7"],"cellWidth":["300","150","100","100","100","100"],"cellHeight":["100","100","100","50","50","33"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid from `withGridLayout(rows, cols)` leaves out the rows and columns its children do not fill. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            By default, a grid only has the rows and columns its children occupy, so the\n            children never leave empty space next to them or below them. The table adds a\n            growing number of children to a panel of 300 by 100 pixels with a grid of 2\n            rows and 3 columns, and shows the size every child gets.\n\n            A single child takes the whole panel, 2 children get half of its width each,\n            and 3 children a third. From 4 children on, the grid has 2 rows, and a seventh\n            child adds a third row, because the grid never has more than the 3 declared\n            columns.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 3 columns, holding the number of children from the table.","code":["var panel =","        UI.panel().withGridLayout(2, 3)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 300 by 100 pixels,","code":["panel.setSize(300, 100)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<children).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"children":["1","2","3","4","6","7"],"cellWidth":["300","150","100","100","100","100"],"cellHeight":["100","100","100","50","50","33"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid from `withGridLayout(rows, cols)` leaves out the rows and columns its children do not fill. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            By default, a grid only has the rows and columns its children occupy, so the\n            children never leave empty space next to them or below them. The table adds a\n            growing number of children to a panel of 300 by 100 pixels with a grid of 2\n            rows and 3 columns, and shows the size every child gets.\n\n            A single child takes the whole panel, 2 children get half of its width each,\n            and 3 children a third. From 4 children on, the grid has 2 rows, and a seventh\n            child adds a third row, because the grid never has more than the 3 declared\n            columns.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 3 columns, holding the number of children from the table.","code":["var panel =","        UI.panel().withGridLayout(2, 3)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 300 by 100 pixels,","code":["panel.setSize(300, 100)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<children).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"children":["1","2","3","4","6","7"],"cellWidth":["300","150","100","100","100","100"],"cellHeight":["100","100","100","50","50","33"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid from `withGridLayout(rows, cols)` leaves out the rows and columns its children do not fill. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            By default, a grid only has the rows and columns its children occupy, so the\n            children never leave empty space next to them or below them. The table adds a\n            growing number of children to a panel of 300 by 100 pixels with a grid of 2\n            rows and 3 columns, and shows the size every child gets.\n\n            A single child takes the whole panel, 2 children get half of its width each,\n            and 3 children a third. From 4 children on, the grid has 2 rows, and a seventh\n            child adds a third row, because the grid never has more than the 3 declared\n            columns.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 3 columns, holding the number of children from the table.","code":["var panel =","        UI.panel().withGridLayout(2, 3)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 300 by 100 pixels,","code":["panel.setSize(300, 100)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<children).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"children":["1","2","3","4","6","7"],"cellWidth":["300","150","100","100","100","100"],"cellHeight":["100","100","100","50","50","33"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid from `withGridLayout(rows, cols)` leaves out the rows and columns its children do not fill. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            By default, a grid only has the rows and columns its children occupy, so the\n            children never leave empty space next to them or below them. The table adds a\n            growing number of children to a panel of 300 by 100 pixels with a grid of 2\n            rows and 3 columns, and shows the size every child gets.\n\n            A single child takes the whole panel, 2 children get half of its width each,\n            and 3 children a third. From 4 children on, the grid has 2 rows, and a seventh\n            child adds a third row, because the grid never has more than the 3 declared\n            columns.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 3 columns, holding the number of children from the table.","code":["var panel =","        UI.panel().withGridLayout(2, 3)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 300 by 100 pixels,","code":["panel.setSize(300, 100)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<children).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"children":["1","2","3","4","6","7"],"cellWidth":["300","150","100","100","100","100"],"cellHeight":["100","100","100","50","50","33"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withGridLayout()` to place all children side by side in a single row.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without any arguments, `withGridLayout()` attaches a grid of a single row and as\n            many columns as there are children, which is the same as `withGridLayout(1, 0)`.\n            So every child gets an equal share of the width and the full height, like the\n            buttons of a button bar.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with the default grid layout, holding 4 buttons.","code":["var panel =","        UI.panel().withGridLayout()","        .add(UI.button(\"Back\")).add(UI.button(\"Next\")).add(UI.button(\"Skip\")).add(UI.button(\"Finish\"))","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout of 1 row and as many columns as needed.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getRows() == 1","panel.getLayout().getColumns() == 0"]},
+
+        {"kind":"when","text":"The panel is laid out at 200 by 30 pixels,","code":["panel.setSize(200, 30)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the 4 buttons share the row equally.","code":["(0..<4).collect { panel.getComponent(it).getBounds() } == [","    new Rectangle(  0, 0, 50, 30),","    new Rectangle( 50, 0, 50, 30),","    new Rectangle(100, 0, 50, 30),","    new Rectangle(150, 0, 50, 30)","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The gaps of `withGridLayout(rows, cols, horizontalGap, verticalGap)` are scaled by the UI scale factor. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You declare the gaps between the cells for a UI scale factor of 1, and the grid\n            scales them by the current UI scale factor every time it lays out the component,\n            rounded to the nearest whole pixel. That is what `withFlowLayout(..)` does with\n            its gaps too, so both keep their proportions on high resolution screens.\n\n            The panels in this table are built after the scale factor is set, like the UI\n            of an application which starts on a high resolution screen. A horizontal gap of\n            7 pixels becomes 9 pixels at a scale factor of 1.25 and 14 pixels at 2, and a\n            vertical gap of 3 pixels becomes 4 and 6 pixels. The layout manager keeps\n            reporting the gaps as you declared them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The UI scale factor from the table, as a high resolution screen would set it.","code":["SwingTree.get().setUiScaleFactor(scaleFactor)"]},
+
+        {"kind":"and","text":"A panel with a grid of 2 rows and 3 columns, a horizontal gap of 7 and a vertical gap of 3, holding 6 children.","code":["var panel =","        UI.panel().withGridLayout(2, 3, 7, 3)","        .apply({ ui -> (0..<6).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The layout manager reports the gaps as they were declared.","code":["panel.getLayout().getHgap() == 7","panel.getLayout().getVgap() == 3"]},
+
+        {"kind":"and","text":"The gaps we expect are the declared gaps scaled by the UI scale factor.","code":["horizontalGap == UI.scale(7)","verticalGap   == UI.scale(3)"]},
+
+        {"kind":"when","text":"The panel is laid out exactly large enough for cells of 40 by 20 pixels with the scaled gaps between them,","code":["panel.setSize(3 * 40 + 2 * horizontalGap, 2 * 20 + verticalGap)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child sits in its 40 by 20 pixel cell, with the scaled gaps between the cells.","code":["(0..<6).collect { panel.getComponent(it).getBounds() } ==","    (0..<6).collect { i -> new Rectangle((i % 3) * (40 + horizontalGap), i.intdiv(3) * (20 + verticalGap), 40, 20) }"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"where","text":"","code":{"scaleFactor":["1f","1.25f","1.5f","1.75f","2f"],"horizontalGap":["7","9","11","12","14"],"verticalGap":["3","4","5","5","6"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The gaps of `withGridLayout(rows, cols, horizontalGap, verticalGap)` are scaled by the UI scale factor. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You declare the gaps between the cells for a UI scale factor of 1, and the grid\n            scales them by the current UI scale factor every time it lays out the component,\n            rounded to the nearest whole pixel. That is what `withFlowLayout(..)` does with\n            its gaps too, so both keep their proportions on high resolution screens.\n\n            The panels in this table are built after the scale factor is set, like the UI\n            of an application which starts on a high resolution screen. A horizontal gap of\n            7 pixels becomes 9 pixels at a scale factor of 1.25 and 14 pixels at 2, and a\n            vertical gap of 3 pixels becomes 4 and 6 pixels. The layout manager keeps\n            reporting the gaps as you declared them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The UI scale factor from the table, as a high resolution screen would set it.","code":["SwingTree.get().setUiScaleFactor(scaleFactor)"]},
+
+        {"kind":"and","text":"A panel with a grid of 2 rows and 3 columns, a horizontal gap of 7 and a vertical gap of 3, holding 6 children.","code":["var panel =","        UI.panel().withGridLayout(2, 3, 7, 3)","        .apply({ ui -> (0..<6).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The layout manager reports the gaps as they were declared.","code":["panel.getLayout().getHgap() == 7","panel.getLayout().getVgap() == 3"]},
+
+        {"kind":"and","text":"The gaps we expect are the declared gaps scaled by the UI scale factor.","code":["horizontalGap == UI.scale(7)","verticalGap   == UI.scale(3)"]},
+
+        {"kind":"when","text":"The panel is laid out exactly large enough for cells of 40 by 20 pixels with the scaled gaps between them,","code":["panel.setSize(3 * 40 + 2 * horizontalGap, 2 * 20 + verticalGap)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child sits in its 40 by 20 pixel cell, with the scaled gaps between the cells.","code":["(0..<6).collect { panel.getComponent(it).getBounds() } ==","    (0..<6).collect { i -> new Rectangle((i % 3) * (40 + horizontalGap), i.intdiv(3) * (20 + verticalGap), 40, 20) }"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"where","text":"","code":{"scaleFactor":["1f","1.25f","1.5f","1.75f","2f"],"horizontalGap":["7","9","11","12","14"],"verticalGap":["3","4","5","5","6"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The gaps of `withGridLayout(rows, cols, horizontalGap, verticalGap)` are scaled by the UI scale factor. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You declare the gaps between the cells for a UI scale factor of 1, and the grid\n            scales them by the current UI scale factor every time it lays out the component,\n            rounded to the nearest whole pixel. That is what `withFlowLayout(..)` does with\n            its gaps too, so both keep their proportions on high resolution screens.\n\n            The panels in this table are built after the scale factor is set, like the UI\n            of an application which starts on a high resolution screen. A horizontal gap of\n            7 pixels becomes 9 pixels at a scale factor of 1.25 and 14 pixels at 2, and a\n            vertical gap of 3 pixels becomes 4 and 6 pixels. The layout manager keeps\n            reporting the gaps as you declared them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The UI scale factor from the table, as a high resolution screen would set it.","code":["SwingTree.get().setUiScaleFactor(scaleFactor)"]},
+
+        {"kind":"and","text":"A panel with a grid of 2 rows and 3 columns, a horizontal gap of 7 and a vertical gap of 3, holding 6 children.","code":["var panel =","        UI.panel().withGridLayout(2, 3, 7, 3)","        .apply({ ui -> (0..<6).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The layout manager reports the gaps as they were declared.","code":["panel.getLayout().getHgap() == 7","panel.getLayout().getVgap() == 3"]},
+
+        {"kind":"and","text":"The gaps we expect are the declared gaps scaled by the UI scale factor.","code":["horizontalGap == UI.scale(7)","verticalGap   == UI.scale(3)"]},
+
+        {"kind":"when","text":"The panel is laid out exactly large enough for cells of 40 by 20 pixels with the scaled gaps between them,","code":["panel.setSize(3 * 40 + 2 * horizontalGap, 2 * 20 + verticalGap)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child sits in its 40 by 20 pixel cell, with the scaled gaps between the cells.","code":["(0..<6).collect { panel.getComponent(it).getBounds() } ==","    (0..<6).collect { i -> new Rectangle((i % 3) * (40 + horizontalGap), i.intdiv(3) * (20 + verticalGap), 40, 20) }"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"where","text":"","code":{"scaleFactor":["1f","1.25f","1.5f","1.75f","2f"],"horizontalGap":["7","9","11","12","14"],"verticalGap":["3","4","5","5","6"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The gaps of `withGridLayout(rows, cols, horizontalGap, verticalGap)` are scaled by the UI scale factor. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You declare the gaps between the cells for a UI scale factor of 1, and the grid\n            scales them by the current UI scale factor every time it lays out the component,\n            rounded to the nearest whole pixel. That is what `withFlowLayout(..)` does with\n            its gaps too, so both keep their proportions on high resolution screens.\n\n            The panels in this table are built after the scale factor is set, like the UI\n            of an application which starts on a high resolution screen. A horizontal gap of\n            7 pixels becomes 9 pixels at a scale factor of 1.25 and 14 pixels at 2, and a\n            vertical gap of 3 pixels becomes 4 and 6 pixels. The layout manager keeps\n            reporting the gaps as you declared them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The UI scale factor from the table, as a high resolution screen would set it.","code":["SwingTree.get().setUiScaleFactor(scaleFactor)"]},
+
+        {"kind":"and","text":"A panel with a grid of 2 rows and 3 columns, a horizontal gap of 7 and a vertical gap of 3, holding 6 children.","code":["var panel =","        UI.panel().withGridLayout(2, 3, 7, 3)","        .apply({ ui -> (0..<6).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The layout manager reports the gaps as they were declared.","code":["panel.getLayout().getHgap() == 7","panel.getLayout().getVgap() == 3"]},
+
+        {"kind":"and","text":"The gaps we expect are the declared gaps scaled by the UI scale factor.","code":["horizontalGap == UI.scale(7)","verticalGap   == UI.scale(3)"]},
+
+        {"kind":"when","text":"The panel is laid out exactly large enough for cells of 40 by 20 pixels with the scaled gaps between them,","code":["panel.setSize(3 * 40 + 2 * horizontalGap, 2 * 20 + verticalGap)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child sits in its 40 by 20 pixel cell, with the scaled gaps between the cells.","code":["(0..<6).collect { panel.getComponent(it).getBounds() } ==","    (0..<6).collect { i -> new Rectangle((i % 3) * (40 + horizontalGap), i.intdiv(3) * (20 + verticalGap), 40, 20) }"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"where","text":"","code":{"scaleFactor":["1f","1.25f","1.5f","1.75f","2f"],"horizontalGap":["7","9","11","12","14"],"verticalGap":["3","4","5","5","6"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The gaps of `withGridLayout(rows, cols, horizontalGap, verticalGap)` are scaled by the UI scale factor. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You declare the gaps between the cells for a UI scale factor of 1, and the grid\n            scales them by the current UI scale factor every time it lays out the component,\n            rounded to the nearest whole pixel. That is what `withFlowLayout(..)` does with\n            its gaps too, so both keep their proportions on high resolution screens.\n\n            The panels in this table are built after the scale factor is set, like the UI\n            of an application which starts on a high resolution screen. A horizontal gap of\n            7 pixels becomes 9 pixels at a scale factor of 1.25 and 14 pixels at 2, and a\n            vertical gap of 3 pixels becomes 4 and 6 pixels. The layout manager keeps\n            reporting the gaps as you declared them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The UI scale factor from the table, as a high resolution screen would set it.","code":["SwingTree.get().setUiScaleFactor(scaleFactor)"]},
+
+        {"kind":"and","text":"A panel with a grid of 2 rows and 3 columns, a horizontal gap of 7 and a vertical gap of 3, holding 6 children.","code":["var panel =","        UI.panel().withGridLayout(2, 3, 7, 3)","        .apply({ ui -> (0..<6).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The layout manager reports the gaps as they were declared.","code":["panel.getLayout().getHgap() == 7","panel.getLayout().getVgap() == 3"]},
+
+        {"kind":"and","text":"The gaps we expect are the declared gaps scaled by the UI scale factor.","code":["horizontalGap == UI.scale(7)","verticalGap   == UI.scale(3)"]},
+
+        {"kind":"when","text":"The panel is laid out exactly large enough for cells of 40 by 20 pixels with the scaled gaps between them,","code":["panel.setSize(3 * 40 + 2 * horizontalGap, 2 * 20 + verticalGap)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child sits in its 40 by 20 pixel cell, with the scaled gaps between the cells.","code":["(0..<6).collect { panel.getComponent(it).getBounds() } ==","    (0..<6).collect { i -> new Rectangle((i % 3) * (40 + horizontalGap), i.intdiv(3) * (20 + verticalGap), 40, 20) }"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"where","text":"","code":{"scaleFactor":["1f","1.25f","1.5f","1.75f","2f"],"horizontalGap":["7","9","11","12","14"],"verticalGap":["3","4","5","5","6"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass a `Mode` and a `CollapseEmpty` setting to `withGridLayout(..)` to choose how the grid treats its rows and columns. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withGridLayout(mode, collapseEmpty, rows, cols, horizontalGap, verticalGap)`\n            attaches a `UniformGridLayout` with the settings you choose. The table lays out\n            the same 3 children in a panel of 220 by 45 pixels with a grid of 2 rows and 5\n            columns and gaps of 5 pixels, which is exactly large enough for 5 cells of 40\n            pixels in width and 2 cells of 20 pixels in height.\n\n            With `ROWS_AND_COLUMNS`, the default, the children share a single row of 3\n            columns. `COLUMNS` keeps the empty second row, `ROWS` keeps the empty fourth and\n            fifth column, and `NONE` keeps both, so the children take the first 3 cells of\n            all 10. In the mode `SPREAD_OVER_ROWS`, the 3 children are spread over the 2 rows\n            in 2 columns, like a `GridLayout` spreads them, which leaves nothing empty.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns, gaps of 5 pixels and the settings from the table, holding 3 children.","code":["var panel =","        UI.panel().withGridLayout(mode, collapseEmpty, 2, 5, 5, 5)","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with those settings.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty","[panel.getLayout().getRows(), panel.getLayout().getColumns(), panel.getLayout().getHgap(), panel.getLayout().getVgap()] == [2, 5, 5, 5]"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children have the bounds from the table.","code":["(0..<3).collect { panel.getComponent(it).getBounds() } == bounds"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.ROWS_AND_COLUMNS"],"bounds":["[new Rectangle(0, 0, 70, 45),  new Rectangle(75, 0, 70, 45),  new Rectangle(150, 0, 70, 45)]","[new Rectangle(0, 0, 70, 20),  new Rectangle(75, 0, 70, 20),  new Rectangle(150, 0, 70, 20)]","[new Rectangle(0, 0, 40, 45),  new Rectangle(45, 0, 40, 45),  new Rectangle( 90, 0, 40, 45)]","[new Rectangle(0, 0, 40, 20),  new Rectangle(45, 0, 40, 20),  new Rectangle( 90, 0, 40, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass a `Mode` and a `CollapseEmpty` setting to `withGridLayout(..)` to choose how the grid treats its rows and columns. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withGridLayout(mode, collapseEmpty, rows, cols, horizontalGap, verticalGap)`\n            attaches a `UniformGridLayout` with the settings you choose. The table lays out\n            the same 3 children in a panel of 220 by 45 pixels with a grid of 2 rows and 5\n            columns and gaps of 5 pixels, which is exactly large enough for 5 cells of 40\n            pixels in width and 2 cells of 20 pixels in height.\n\n            With `ROWS_AND_COLUMNS`, the default, the children share a single row of 3\n            columns. `COLUMNS` keeps the empty second row, `ROWS` keeps the empty fourth and\n            fifth column, and `NONE` keeps both, so the children take the first 3 cells of\n            all 10. In the mode `SPREAD_OVER_ROWS`, the 3 children are spread over the 2 rows\n            in 2 columns, like a `GridLayout` spreads them, which leaves nothing empty.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns, gaps of 5 pixels and the settings from the table, holding 3 children.","code":["var panel =","        UI.panel().withGridLayout(mode, collapseEmpty, 2, 5, 5, 5)","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with those settings.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty","[panel.getLayout().getRows(), panel.getLayout().getColumns(), panel.getLayout().getHgap(), panel.getLayout().getVgap()] == [2, 5, 5, 5]"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children have the bounds from the table.","code":["(0..<3).collect { panel.getComponent(it).getBounds() } == bounds"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.ROWS_AND_COLUMNS"],"bounds":["[new Rectangle(0, 0, 70, 45),  new Rectangle(75, 0, 70, 45),  new Rectangle(150, 0, 70, 45)]","[new Rectangle(0, 0, 70, 20),  new Rectangle(75, 0, 70, 20),  new Rectangle(150, 0, 70, 20)]","[new Rectangle(0, 0, 40, 45),  new Rectangle(45, 0, 40, 45),  new Rectangle( 90, 0, 40, 45)]","[new Rectangle(0, 0, 40, 20),  new Rectangle(45, 0, 40, 20),  new Rectangle( 90, 0, 40, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass a `Mode` and a `CollapseEmpty` setting to `withGridLayout(..)` to choose how the grid treats its rows and columns. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withGridLayout(mode, collapseEmpty, rows, cols, horizontalGap, verticalGap)`\n            attaches a `UniformGridLayout` with the settings you choose. The table lays out\n            the same 3 children in a panel of 220 by 45 pixels with a grid of 2 rows and 5\n            columns and gaps of 5 pixels, which is exactly large enough for 5 cells of 40\n            pixels in width and 2 cells of 20 pixels in height.\n\n            With `ROWS_AND_COLUMNS`, the default, the children share a single row of 3\n            columns. `COLUMNS` keeps the empty second row, `ROWS` keeps the empty fourth and\n            fifth column, and `NONE` keeps both, so the children take the first 3 cells of\n            all 10. In the mode `SPREAD_OVER_ROWS`, the 3 children are spread over the 2 rows\n            in 2 columns, like a `GridLayout` spreads them, which leaves nothing empty.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns, gaps of 5 pixels and the settings from the table, holding 3 children.","code":["var panel =","        UI.panel().withGridLayout(mode, collapseEmpty, 2, 5, 5, 5)","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with those settings.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty","[panel.getLayout().getRows(), panel.getLayout().getColumns(), panel.getLayout().getHgap(), panel.getLayout().getVgap()] == [2, 5, 5, 5]"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children have the bounds from the table.","code":["(0..<3).collect { panel.getComponent(it).getBounds() } == bounds"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.ROWS_AND_COLUMNS"],"bounds":["[new Rectangle(0, 0, 70, 45),  new Rectangle(75, 0, 70, 45),  new Rectangle(150, 0, 70, 45)]","[new Rectangle(0, 0, 70, 20),  new Rectangle(75, 0, 70, 20),  new Rectangle(150, 0, 70, 20)]","[new Rectangle(0, 0, 40, 45),  new Rectangle(45, 0, 40, 45),  new Rectangle( 90, 0, 40, 45)]","[new Rectangle(0, 0, 40, 20),  new Rectangle(45, 0, 40, 20),  new Rectangle( 90, 0, 40, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass a `Mode` and a `CollapseEmpty` setting to `withGridLayout(..)` to choose how the grid treats its rows and columns. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withGridLayout(mode, collapseEmpty, rows, cols, horizontalGap, verticalGap)`\n            attaches a `UniformGridLayout` with the settings you choose. The table lays out\n            the same 3 children in a panel of 220 by 45 pixels with a grid of 2 rows and 5\n            columns and gaps of 5 pixels, which is exactly large enough for 5 cells of 40\n            pixels in width and 2 cells of 20 pixels in height.\n\n            With `ROWS_AND_COLUMNS`, the default, the children share a single row of 3\n            columns. `COLUMNS` keeps the empty second row, `ROWS` keeps the empty fourth and\n            fifth column, and `NONE` keeps both, so the children take the first 3 cells of\n            all 10. In the mode `SPREAD_OVER_ROWS`, the 3 children are spread over the 2 rows\n            in 2 columns, like a `GridLayout` spreads them, which leaves nothing empty.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns, gaps of 5 pixels and the settings from the table, holding 3 children.","code":["var panel =","        UI.panel().withGridLayout(mode, collapseEmpty, 2, 5, 5, 5)","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with those settings.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty","[panel.getLayout().getRows(), panel.getLayout().getColumns(), panel.getLayout().getHgap(), panel.getLayout().getVgap()] == [2, 5, 5, 5]"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children have the bounds from the table.","code":["(0..<3).collect { panel.getComponent(it).getBounds() } == bounds"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.ROWS_AND_COLUMNS"],"bounds":["[new Rectangle(0, 0, 70, 45),  new Rectangle(75, 0, 70, 45),  new Rectangle(150, 0, 70, 45)]","[new Rectangle(0, 0, 70, 20),  new Rectangle(75, 0, 70, 20),  new Rectangle(150, 0, 70, 20)]","[new Rectangle(0, 0, 40, 45),  new Rectangle(45, 0, 40, 45),  new Rectangle( 90, 0, 40, 45)]","[new Rectangle(0, 0, 40, 20),  new Rectangle(45, 0, 40, 20),  new Rectangle( 90, 0, 40, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass a `Mode` and a `CollapseEmpty` setting to `withGridLayout(..)` to choose how the grid treats its rows and columns. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withGridLayout(mode, collapseEmpty, rows, cols, horizontalGap, verticalGap)`\n            attaches a `UniformGridLayout` with the settings you choose. The table lays out\n            the same 3 children in a panel of 220 by 45 pixels with a grid of 2 rows and 5\n            columns and gaps of 5 pixels, which is exactly large enough for 5 cells of 40\n            pixels in width and 2 cells of 20 pixels in height.\n\n            With `ROWS_AND_COLUMNS`, the default, the children share a single row of 3\n            columns. `COLUMNS` keeps the empty second row, `ROWS` keeps the empty fourth and\n            fifth column, and `NONE` keeps both, so the children take the first 3 cells of\n            all 10. In the mode `SPREAD_OVER_ROWS`, the 3 children are spread over the 2 rows\n            in 2 columns, like a `GridLayout` spreads them, which leaves nothing empty.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns, gaps of 5 pixels and the settings from the table, holding 3 children.","code":["var panel =","        UI.panel().withGridLayout(mode, collapseEmpty, 2, 5, 5, 5)","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with those settings.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty","[panel.getLayout().getRows(), panel.getLayout().getColumns(), panel.getLayout().getHgap(), panel.getLayout().getVgap()] == [2, 5, 5, 5]"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children have the bounds from the table.","code":["(0..<3).collect { panel.getComponent(it).getBounds() } == bounds"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.ROWS_AND_COLUMNS"],"bounds":["[new Rectangle(0, 0, 70, 45),  new Rectangle(75, 0, 70, 45),  new Rectangle(150, 0, 70, 45)]","[new Rectangle(0, 0, 70, 20),  new Rectangle(75, 0, 70, 20),  new Rectangle(150, 0, 70, 20)]","[new Rectangle(0, 0, 40, 45),  new Rectangle(45, 0, 40, 45),  new Rectangle( 90, 0, 40, 45)]","[new Rectangle(0, 0, 40, 20),  new Rectangle(45, 0, 40, 20),  new Rectangle( 90, 0, 40, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass a `Mode` and a `CollapseEmpty` setting to `withGridLayout(..)` to choose how the grid treats its rows and columns. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withGridLayout(mode, collapseEmpty, rows, cols, horizontalGap, verticalGap)`\n            attaches a `UniformGridLayout` with the settings you choose. The table lays out\n            the same 3 children in a panel of 220 by 45 pixels with a grid of 2 rows and 5\n            columns and gaps of 5 pixels, which is exactly large enough for 5 cells of 40\n            pixels in width and 2 cells of 20 pixels in height.\n\n            With `ROWS_AND_COLUMNS`, the default, the children share a single row of 3\n            columns. `COLUMNS` keeps the empty second row, `ROWS` keeps the empty fourth and\n            fifth column, and `NONE` keeps both, so the children take the first 3 cells of\n            all 10. In the mode `SPREAD_OVER_ROWS`, the 3 children are spread over the 2 rows\n            in 2 columns, like a `GridLayout` spreads them, which leaves nothing empty.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns, gaps of 5 pixels and the settings from the table, holding 3 children.","code":["var panel =","        UI.panel().withGridLayout(mode, collapseEmpty, 2, 5, 5, 5)","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with those settings.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty","[panel.getLayout().getRows(), panel.getLayout().getColumns(), panel.getLayout().getHgap(), panel.getLayout().getVgap()] == [2, 5, 5, 5]"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children have the bounds from the table.","code":["(0..<3).collect { panel.getComponent(it).getBounds() } == bounds"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.ROWS_AND_COLUMNS"],"bounds":["[new Rectangle(0, 0, 70, 45),  new Rectangle(75, 0, 70, 45),  new Rectangle(150, 0, 70, 45)]","[new Rectangle(0, 0, 70, 20),  new Rectangle(75, 0, 70, 20),  new Rectangle(150, 0, 70, 20)]","[new Rectangle(0, 0, 40, 45),  new Rectangle(45, 0, 40, 45),  new Rectangle( 90, 0, 40, 45)]","[new Rectangle(0, 0, 40, 20),  new Rectangle(45, 0, 40, 20),  new Rectangle( 90, 0, 40, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]","[new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(  0, 25, 107, 20)]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)` to lay out children exactly like a `GridLayout`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `GridLayout` of the JDK ignores its number of columns whenever its number of\n            rows is not zero, spreads the children over its rows, and keeps empty rows. When it\n            runs out of cells it makes room in one direction only: it keeps its rows and widens\n            itself. A grid which spreads its children over its rows, collapses nothing and grows\n            by columns does exactly the same, in all three respects. So if a part of your UI\n            relies on how a `GridLayout` arranges its children, these are the three settings\n            which keep that arrangement while using `withGridLayout(..)`.\n\n            The table compares both layout managers for grids with more children than cells,\n            fewer children than cells and rows or columns left open, in a panel of 230 by 70\n            pixels, which does not divide evenly into cells for most of them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid which spreads its children over its rows, collapses nothing and grows by columns.","code":["var ours =","        UI.panel().withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A panel with a `GridLayout` of the same numbers of rows and columns, holding as many children.","code":["var awts =","        UI.panel().withLayout(new GridLayout(rows, cols))","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both panels are laid out at 230 by 70 pixels,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()"]},
+
+        {"kind":"then","text":"every child of the uniform grid has exactly the bounds of the child with the same index in the `GridLayout`.","code":["(0..<children).collect { ours.getComponent(it).getBounds() } == (0..<children).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"where","text":"","code":{"rows":["2","2","2","3","0"],"cols":["5","5","5","0","3"],"children":["8","3","13","2","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)` to lay out children exactly like a `GridLayout`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `GridLayout` of the JDK ignores its number of columns whenever its number of\n            rows is not zero, spreads the children over its rows, and keeps empty rows. When it\n            runs out of cells it makes room in one direction only: it keeps its rows and widens\n            itself. A grid which spreads its children over its rows, collapses nothing and grows\n            by columns does exactly the same, in all three respects. So if a part of your UI\n            relies on how a `GridLayout` arranges its children, these are the three settings\n            which keep that arrangement while using `withGridLayout(..)`.\n\n            The table compares both layout managers for grids with more children than cells,\n            fewer children than cells and rows or columns left open, in a panel of 230 by 70\n            pixels, which does not divide evenly into cells for most of them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid which spreads its children over its rows, collapses nothing and grows by columns.","code":["var ours =","        UI.panel().withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A panel with a `GridLayout` of the same numbers of rows and columns, holding as many children.","code":["var awts =","        UI.panel().withLayout(new GridLayout(rows, cols))","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both panels are laid out at 230 by 70 pixels,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()"]},
+
+        {"kind":"then","text":"every child of the uniform grid has exactly the bounds of the child with the same index in the `GridLayout`.","code":["(0..<children).collect { ours.getComponent(it).getBounds() } == (0..<children).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"where","text":"","code":{"rows":["2","2","2","3","0"],"cols":["5","5","5","0","3"],"children":["8","3","13","2","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)` to lay out children exactly like a `GridLayout`. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `GridLayout` of the JDK ignores its number of columns whenever its number of\n            rows is not zero, spreads the children over its rows, and keeps empty rows. When it\n            runs out of cells it makes room in one direction only: it keeps its rows and widens\n            itself. A grid which spreads its children over its rows, collapses nothing and grows\n            by columns does exactly the same, in all three respects. So if a part of your UI\n            relies on how a `GridLayout` arranges its children, these are the three settings\n            which keep that arrangement while using `withGridLayout(..)`.\n\n            The table compares both layout managers for grids with more children than cells,\n            fewer children than cells and rows or columns left open, in a panel of 230 by 70\n            pixels, which does not divide evenly into cells for most of them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid which spreads its children over its rows, collapses nothing and grows by columns.","code":["var ours =","        UI.panel().withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A panel with a `GridLayout` of the same numbers of rows and columns, holding as many children.","code":["var awts =","        UI.panel().withLayout(new GridLayout(rows, cols))","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both panels are laid out at 230 by 70 pixels,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()"]},
+
+        {"kind":"then","text":"every child of the uniform grid has exactly the bounds of the child with the same index in the `GridLayout`.","code":["(0..<children).collect { ours.getComponent(it).getBounds() } == (0..<children).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"where","text":"","code":{"rows":["2","2","2","3","0"],"cols":["5","5","5","0","3"],"children":["8","3","13","2","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)` to lay out children exactly like a `GridLayout`. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `GridLayout` of the JDK ignores its number of columns whenever its number of\n            rows is not zero, spreads the children over its rows, and keeps empty rows. When it\n            runs out of cells it makes room in one direction only: it keeps its rows and widens\n            itself. A grid which spreads its children over its rows, collapses nothing and grows\n            by columns does exactly the same, in all three respects. So if a part of your UI\n            relies on how a `GridLayout` arranges its children, these are the three settings\n            which keep that arrangement while using `withGridLayout(..)`.\n\n            The table compares both layout managers for grids with more children than cells,\n            fewer children than cells and rows or columns left open, in a panel of 230 by 70\n            pixels, which does not divide evenly into cells for most of them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid which spreads its children over its rows, collapses nothing and grows by columns.","code":["var ours =","        UI.panel().withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A panel with a `GridLayout` of the same numbers of rows and columns, holding as many children.","code":["var awts =","        UI.panel().withLayout(new GridLayout(rows, cols))","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both panels are laid out at 230 by 70 pixels,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()"]},
+
+        {"kind":"then","text":"every child of the uniform grid has exactly the bounds of the child with the same index in the `GridLayout`.","code":["(0..<children).collect { ours.getComponent(it).getBounds() } == (0..<children).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"where","text":"","code":{"rows":["2","2","2","3","0"],"cols":["5","5","5","0","3"],"children":["8","3","13","2","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)` to lay out children exactly like a `GridLayout`. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `GridLayout` of the JDK ignores its number of columns whenever its number of\n            rows is not zero, spreads the children over its rows, and keeps empty rows. When it\n            runs out of cells it makes room in one direction only: it keeps its rows and widens\n            itself. A grid which spreads its children over its rows, collapses nothing and grows\n            by columns does exactly the same, in all three respects. So if a part of your UI\n            relies on how a `GridLayout` arranges its children, these are the three settings\n            which keep that arrangement while using `withGridLayout(..)`.\n\n            The table compares both layout managers for grids with more children than cells,\n            fewer children than cells and rows or columns left open, in a panel of 230 by 70\n            pixels, which does not divide evenly into cells for most of them.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid which spreads its children over its rows, collapses nothing and grows by columns.","code":["var ours =","        UI.panel().withGridLayout(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A panel with a `GridLayout` of the same numbers of rows and columns, holding as many children.","code":["var awts =","        UI.panel().withLayout(new GridLayout(rows, cols))","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"Both panels are laid out at 230 by 70 pixels,","code":["ours.setSize(230, 70)","ours.doLayout()","awts.setSize(230, 70)","awts.doLayout()"]},
+
+        {"kind":"then","text":"every child of the uniform grid has exactly the bounds of the child with the same index in the `GridLayout`.","code":["(0..<children).collect { ours.getComponent(it).getBounds() } == (0..<children).collect { awts.getComponent(it).getBounds() }"]},
+
+        {"kind":"where","text":"","code":{"rows":["2","2","2","3","0"],"cols":["5","5","5","0","3"],"children":["8","3","13","2","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`withGridLayout(..)` does not accept a missing setting.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid needs both of its settings to decide how it lays out its children, so\n            `withGridLayout(..)` rejects a `null` mode or a `null` setting for its empty rows\n            and columns right away, with an `IllegalArgumentException`, instead of failing\n            later when the component is laid out.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We pass no mode,","code":["UI.panel().withGridLayout(null, CollapseEmpty.NONE, 2, 5)"]},
+
+        {"kind":"then","text":"the builder rejects it.","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"We pass no setting for the empty rows and columns,","code":["UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, null, 2, 5, 5, 5)"]},
+
+        {"kind":"then","text":"the builder rejects that as well.","code":["thrown(IllegalArgumentException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `Layout.grid(..)` in a style to give a component a uniform grid. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In the style API, `it.layout(Layout.grid(..))` installs a `UniformGridLayout`.\n            `Layout.grid(..)` takes the same arguments as `withGridLayout(..)`: the numbers\n            of rows and columns, optionally the gaps, and optionally a `Mode` and a\n            `CollapseEmpty` setting in front of them. You can also change the settings of a\n            grid you already have, with `withMode(..)` and `withCollapseEmpty(..)`, which\n            return a new grid and leave the original one untouched.\n\n            Every panel in this table holds 3 children and is laid out at 220 by 45 pixels,\n            and the last two columns show the size every child gets.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style declares the grid from the table, holding 3 children.","code":["var panel =","        UI.panel()","        .withStyle( it -> it.layout(grid) )","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with the properties from the table.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getRows() == rows","panel.getLayout().getColumns() == cols","panel.getLayout().getHgap() == gap","panel.getLayout().getVgap() == gap","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<3).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"grid":["Layout.grid(2, 5)","Layout.grid(2, 5, 5, 5)","Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, 2, 5)","Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5)","Layout.grid(2, 5, 5, 5).withCollapseEmpty(CollapseEmpty.COLUMNS)","Layout.grid(2, 5).withMode(Mode.SPREAD_OVER_ROWS)"],"rows":["2","2","2","2","2","2"],"cols":["5","5","5","5","5","5"],"gap":["0","5","0","5","5","0"],"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS"],"cellWidth":["73","70","44","107","70","110"],"cellHeight":["45","45","22","20","20","22"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `Layout.grid(..)` in a style to give a component a uniform grid. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In the style API, `it.layout(Layout.grid(..))` installs a `UniformGridLayout`.\n            `Layout.grid(..)` takes the same arguments as `withGridLayout(..)`: the numbers\n            of rows and columns, optionally the gaps, and optionally a `Mode` and a\n            `CollapseEmpty` setting in front of them. You can also change the settings of a\n            grid you already have, with `withMode(..)` and `withCollapseEmpty(..)`, which\n            return a new grid and leave the original one untouched.\n\n            Every panel in this table holds 3 children and is laid out at 220 by 45 pixels,\n            and the last two columns show the size every child gets.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style declares the grid from the table, holding 3 children.","code":["var panel =","        UI.panel()","        .withStyle( it -> it.layout(grid) )","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with the properties from the table.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getRows() == rows","panel.getLayout().getColumns() == cols","panel.getLayout().getHgap() == gap","panel.getLayout().getVgap() == gap","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<3).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"grid":["Layout.grid(2, 5)","Layout.grid(2, 5, 5, 5)","Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, 2, 5)","Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5)","Layout.grid(2, 5, 5, 5).withCollapseEmpty(CollapseEmpty.COLUMNS)","Layout.grid(2, 5).withMode(Mode.SPREAD_OVER_ROWS)"],"rows":["2","2","2","2","2","2"],"cols":["5","5","5","5","5","5"],"gap":["0","5","0","5","5","0"],"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS"],"cellWidth":["73","70","44","107","70","110"],"cellHeight":["45","45","22","20","20","22"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `Layout.grid(..)` in a style to give a component a uniform grid. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In the style API, `it.layout(Layout.grid(..))` installs a `UniformGridLayout`.\n            `Layout.grid(..)` takes the same arguments as `withGridLayout(..)`: the numbers\n            of rows and columns, optionally the gaps, and optionally a `Mode` and a\n            `CollapseEmpty` setting in front of them. You can also change the settings of a\n            grid you already have, with `withMode(..)` and `withCollapseEmpty(..)`, which\n            return a new grid and leave the original one untouched.\n\n            Every panel in this table holds 3 children and is laid out at 220 by 45 pixels,\n            and the last two columns show the size every child gets.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style declares the grid from the table, holding 3 children.","code":["var panel =","        UI.panel()","        .withStyle( it -> it.layout(grid) )","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with the properties from the table.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getRows() == rows","panel.getLayout().getColumns() == cols","panel.getLayout().getHgap() == gap","panel.getLayout().getVgap() == gap","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<3).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"grid":["Layout.grid(2, 5)","Layout.grid(2, 5, 5, 5)","Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, 2, 5)","Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5)","Layout.grid(2, 5, 5, 5).withCollapseEmpty(CollapseEmpty.COLUMNS)","Layout.grid(2, 5).withMode(Mode.SPREAD_OVER_ROWS)"],"rows":["2","2","2","2","2","2"],"cols":["5","5","5","5","5","5"],"gap":["0","5","0","5","5","0"],"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS"],"cellWidth":["73","70","44","107","70","110"],"cellHeight":["45","45","22","20","20","22"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `Layout.grid(..)` in a style to give a component a uniform grid. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In the style API, `it.layout(Layout.grid(..))` installs a `UniformGridLayout`.\n            `Layout.grid(..)` takes the same arguments as `withGridLayout(..)`: the numbers\n            of rows and columns, optionally the gaps, and optionally a `Mode` and a\n            `CollapseEmpty` setting in front of them. You can also change the settings of a\n            grid you already have, with `withMode(..)` and `withCollapseEmpty(..)`, which\n            return a new grid and leave the original one untouched.\n\n            Every panel in this table holds 3 children and is laid out at 220 by 45 pixels,\n            and the last two columns show the size every child gets.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style declares the grid from the table, holding 3 children.","code":["var panel =","        UI.panel()","        .withStyle( it -> it.layout(grid) )","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with the properties from the table.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getRows() == rows","panel.getLayout().getColumns() == cols","panel.getLayout().getHgap() == gap","panel.getLayout().getVgap() == gap","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<3).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"grid":["Layout.grid(2, 5)","Layout.grid(2, 5, 5, 5)","Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, 2, 5)","Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5)","Layout.grid(2, 5, 5, 5).withCollapseEmpty(CollapseEmpty.COLUMNS)","Layout.grid(2, 5).withMode(Mode.SPREAD_OVER_ROWS)"],"rows":["2","2","2","2","2","2"],"cols":["5","5","5","5","5","5"],"gap":["0","5","0","5","5","0"],"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS"],"cellWidth":["73","70","44","107","70","110"],"cellHeight":["45","45","22","20","20","22"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `Layout.grid(..)` in a style to give a component a uniform grid. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In the style API, `it.layout(Layout.grid(..))` installs a `UniformGridLayout`.\n            `Layout.grid(..)` takes the same arguments as `withGridLayout(..)`: the numbers\n            of rows and columns, optionally the gaps, and optionally a `Mode` and a\n            `CollapseEmpty` setting in front of them. You can also change the settings of a\n            grid you already have, with `withMode(..)` and `withCollapseEmpty(..)`, which\n            return a new grid and leave the original one untouched.\n\n            Every panel in this table holds 3 children and is laid out at 220 by 45 pixels,\n            and the last two columns show the size every child gets.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style declares the grid from the table, holding 3 children.","code":["var panel =","        UI.panel()","        .withStyle( it -> it.layout(grid) )","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with the properties from the table.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getRows() == rows","panel.getLayout().getColumns() == cols","panel.getLayout().getHgap() == gap","panel.getLayout().getVgap() == gap","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<3).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"grid":["Layout.grid(2, 5)","Layout.grid(2, 5, 5, 5)","Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, 2, 5)","Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5)","Layout.grid(2, 5, 5, 5).withCollapseEmpty(CollapseEmpty.COLUMNS)","Layout.grid(2, 5).withMode(Mode.SPREAD_OVER_ROWS)"],"rows":["2","2","2","2","2","2"],"cols":["5","5","5","5","5","5"],"gap":["0","5","0","5","5","0"],"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS"],"cellWidth":["73","70","44","107","70","110"],"cellHeight":["45","45","22","20","20","22"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `Layout.grid(..)` in a style to give a component a uniform grid. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            In the style API, `it.layout(Layout.grid(..))` installs a `UniformGridLayout`.\n            `Layout.grid(..)` takes the same arguments as `withGridLayout(..)`: the numbers\n            of rows and columns, optionally the gaps, and optionally a `Mode` and a\n            `CollapseEmpty` setting in front of them. You can also change the settings of a\n            grid you already have, with `withMode(..)` and `withCollapseEmpty(..)`, which\n            return a new grid and leave the original one untouched.\n\n            Every panel in this table holds 3 children and is laid out at 220 by 45 pixels,\n            and the last two columns show the size every child gets.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style declares the grid from the table, holding 3 children.","code":["var panel =","        UI.panel()","        .withStyle( it -> it.layout(grid) )","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with the properties from the table.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getRows() == rows","panel.getLayout().getColumns() == cols","panel.getLayout().getHgap() == gap","panel.getLayout().getVgap() == gap","panel.getLayout().getMode() == mode","panel.getLayout().getCollapseEmpty() == collapseEmpty"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"every child has the size from the table.","code":["(0..<3).every { panel.getComponent(it).getWidth() == cellWidth && panel.getComponent(it).getHeight() == cellHeight }"]},
+
+        {"kind":"where","text":"","code":{"grid":["Layout.grid(2, 5)","Layout.grid(2, 5, 5, 5)","Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, 2, 5)","Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5)","Layout.grid(2, 5, 5, 5).withCollapseEmpty(CollapseEmpty.COLUMNS)","Layout.grid(2, 5).withMode(Mode.SPREAD_OVER_ROWS)"],"rows":["2","2","2","2","2","2"],"cols":["5","5","5","5","5","5"],"gap":["0","5","0","5","5","0"],"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS"],"collapseEmpty":["CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS","CollapseEmpty.NONE","CollapseEmpty.NONE","CollapseEmpty.COLUMNS","CollapseEmpty.ROWS_AND_COLUMNS"],"cellWidth":["73","70","44","107","70","110"],"cellHeight":["45","45","22","20","20","22"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Layout.grid(..)` style updates the grid of `withGridLayout(..)` in place, settings included.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withGridLayout(rows, cols)` and a style declaring `Layout.grid(..)` both install a\n            `UniformGridLayout`. When a style declares a grid for a component which already\n            has one, SwingTree reconfigures the layout manager the component already has\n            instead of creating a new one. So you can declare a grid in the builder and let\n            a style adjust it later, and anything which holds on to the layout manager keeps\n            seeing the one the component really uses.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A variable for the layout manager which the builder method installs.","code":["var installedByBuilder = null"]},
+
+        {"kind":"and","text":"A panel which gets a default grid of 2 rows and 5 columns from the builder, and a different grid with different settings from its style.","code":["var panel =","        UI.panel()","        .withGridLayout(2, 5)","        .peek({ installedByBuilder = it.getLayout() })","        .withStyle( it -> it","            .layout(Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 3, 3, 4, 2))","        )","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The builder method installed a uniform grid layout.","code":["installedByBuilder instanceof UniformGridLayout"]},
+
+        {"kind":"and","text":"It is still the layout manager of the panel, now with the numbers, gaps and settings of the style.","code":["panel.getLayout().is(installedByBuilder)","[panel.getLayout().getRows(), panel.getLayout().getColumns()] == [3, 3]","[panel.getLayout().getHgap(), panel.getLayout().getVgap()] == [4, 2]","panel.getLayout().getMode() == Mode.SPREAD_OVER_ROWS","panel.getLayout().getCollapseEmpty() == CollapseEmpty.NONE"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Var<Layout>` holding `Layout.grid(..)` changes the settings of a grid while the application runs.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you bind a component to a `Var<Layout>` with `withLayout(..)`, every new\n            `Layout.grid(..)` value you set reconfigures the `UniformGridLayout` of the\n            component in place, including its mode and which empty rows and columns it leaves\n            out. A button which switches a panel between two looks only has to set a new value.\n\n            The panel in this feature holds 3 children in a grid of 2 rows and 5 columns with\n            gaps of 5 pixels, laid out at 220 by 45 pixels. With the default settings, the\n            children share a single row of 3 columns, 70 by 45 pixels each. When nothing is\n            collapsed, they take the first 3 of 10 cells of 40 by 20 pixels, and when they are\n            spread over the rows, they get 2 rows of 2 columns, 107 by 20 pixels each.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a default grid of 2 rows and 5 columns with gaps of 5 pixels.","code":["var layout = Var.of(Layout.class, Layout.grid(2, 5, 5, 5))"]},
+
+        {"kind":"and","text":"A panel bound to the property, holding 3 children.","code":["var panel =","        UI.panel()","        .withLayout(layout)","        .add(UI.box()).add(UI.box()).add(UI.box())","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the layout manager the panel starts with.","code":["var gridLayout = panel.getLayout()"]},
+
+        {"kind":"when","text":"The panel is laid out at 220 by 45 pixels,","code":["panel.setSize(220, 45)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children share a single row of 3 columns.","code":["gridLayout instanceof UniformGridLayout","(0..<3).collect { panel.getComponent(it).getBounds() } == [new Rectangle(0, 0, 70, 45), new Rectangle(75, 0, 70, 45), new Rectangle(150, 0, 70, 45)]"]},
+
+        {"kind":"when","text":"We set the same grid, but without collapsing anything, and lay out the panel again,","code":["UI.runNow({ layout.set(Layout.grid(2, 5, 5, 5).withCollapseEmpty(CollapseEmpty.NONE)) })","panel.doLayout()"]},
+
+        {"kind":"then","text":"the very same layout manager keeps the empty cells, and the children take the first 3 of them.","code":["panel.getLayout().is(gridLayout)","panel.getLayout().getCollapseEmpty() == CollapseEmpty.NONE","(0..<3).collect { panel.getComponent(it).getBounds() } == [new Rectangle(0, 0, 40, 20), new Rectangle(45, 0, 40, 20), new Rectangle(90, 0, 40, 20)]"]},
+
+        {"kind":"when","text":"We set a grid which spreads its children over its rows, and lay out the panel again,","code":["UI.runNow({ layout.set(Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5)) })","panel.doLayout()"]},
+
+        {"kind":"then","text":"the very same layout manager spreads the 3 children over 2 rows of 2 columns.","code":["panel.getLayout().is(gridLayout)","panel.getLayout().getMode() == Mode.SPREAD_OVER_ROWS","(0..<3).collect { panel.getComponent(it).getBounds() } == [new Rectangle(0, 0, 107, 20), new Rectangle(112, 0, 107, 20), new Rectangle(0, 25, 107, 20)]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Var<Layout>` can switch a grid from a fixed number of rows to a fixed number of columns in place.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A row count of zero means \"as many rows as the children need\", and a column count\n            of zero means the same for columns, but a grid may not leave both of them open. A\n            `UniformGridLayout` rejects that with an `IllegalArgumentException`, whether the two\n            zeros are given to its constructor or set one after the other through `setRows`\n            and `setColumns`.\n\n            When a property switches a panel from `Layout.grid(2, 0)` to `Layout.grid(0, 3)`,\n            both grids are perfectly valid, but updating the installed layout manager in place\n            could pass through a moment in which the rows are already zero and the columns are\n            still zero. SwingTree therefore sets the count which stays greater than zero first,\n            so the grid never leaves both counts open, not even between two setter calls.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a grid of 2 rows and as many columns as needed.","code":["var layout = Var.of(Layout.class, Layout.grid(2, 0))"]},
+
+        {"kind":"and","text":"A panel bound to the property.","code":["var panel = UI.panel().withLayout(layout).get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the layout manager the panel starts with.","code":["var gridLayout = panel.getLayout()"]},
+
+        {"kind":"when","text":"We switch to a grid of 3 columns and as many rows as needed,","code":["UI.runNow({ layout.set(Layout.grid(0, 3)) })"]},
+
+        {"kind":"then","text":"the very same layout manager now has 0 rows and 3 columns.","code":["panel.getLayout().is(gridLayout)","panel.getLayout().getRows() == 0","panel.getLayout().getColumns() == 3"]},
+
+        {"kind":"when","text":"We switch back to 2 rows and as many columns as needed,","code":["UI.runNow({ layout.set(Layout.grid(2, 0)) })"]},
+
+        {"kind":"then","text":"that works just as well.","code":["panel.getLayout().is(gridLayout)","panel.getLayout().getRows() == 2","panel.getLayout().getColumns() == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Pass an `OverflowGrowth` setting to `withGridLayout(..)` to choose how a grid grows when it holds more children than cells. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid of 2 rows and 5 columns has 10 cells, so from the eleventh child on it has to\n            grow. `withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols)` chooses how:\n\n              - `ADD_ROWS`, the default, keeps the 5 declared columns and adds rows below them,\n              - `ADD_COLUMNS` keeps the 2 declared rows and adds columns to their right,\n              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one which\n                keeps the ratio of rows to columns closest to the declared 2 : 5.\n\n            The table lays out a growing number of children in a panel of 600 by 300 pixels and\n            reports the grid every setting builds, as rows by columns. Only `ADD_ROWS` keeps the\n            child at index `i` in row `i / 5`; the other two settings rearrange the children the\n            moment the grid outgrows its declared shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 5 columns and the growth setting from the table, holding more children than its 10 cells.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, overflowGrowth, 2, 5)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The panel has a uniform grid layout with that growth setting.","code":["panel.getLayout() instanceof UniformGridLayout","panel.getLayout().getOverflowGrowth() == overflowGrowth"]},
+
+        {"kind":"and","text":"The panel really does hold more children than the 10 cells of the declared grid.","code":["children > 2 * 5"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"and","text":"that grid really does have a cell for every child.","code":["rows * cols >= children"]},
+
+        {"kind":"where","text":"","code":{"children":["11","11","11","13","13","13","20","20","20","30","30","30"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["3","2","2","3","2","3","4","2","3","6","2","4"],"cols":["5","6","6","5","7","6","5","10","7","5","15","9"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`OverflowGrowth.ADD_ROWS_AND_COLUMNS` keeps the declared ratio exactly when a grid scales up evenly. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `ADD_ROWS_AND_COLUMNS` grows a grid towards the ratio of rows to columns it was declared\n            with. Whenever a component holds exactly `factor * factor` times as many children as the\n            declared grid has cells, that ratio can be met exactly, and the grid becomes exactly\n            `factor` times as high and `factor` times as wide, without a single cell left over.\n\n            So a grid declared with 1 row and 4 columns, holding 400 children, which is 100 times its\n            4 cells, is laid out in exactly 10 rows of 40 columns. Because the component keeps its\n            size while the grid grows, holding the ratio of rows to columns also holds the shape of\n            every cell: a cell of a grid of `r` rows and `c` columns is `width / c` by `height / r`\n            large, so all 400 cells have the same shape the 4 declared cells had.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The number of children which fills the declared grid scaled up by the factor from the table.","code":["var children = rows * cols * factor * factor"]},
+
+        {"kind":"and","text":"A panel which grows such a grid by rows and columns at once, holding that many children.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, OverflowGrowth.ADD_ROWS_AND_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 800 by 400 pixels,","code":["panel.setSize(800, 400)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the grid is exactly the declared one scaled up by the factor,","code":["gridShapeOf(panel) == [rows * factor, cols * factor]"]},
+
+        {"kind":"and","text":"it holds exactly as many cells as there are children, so none is left empty.","code":["rows * factor * cols * factor == children"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","1","1","2","2","3"],"cols":["4","4","4","5","5","7"],"factor":["2","5","10","2","4","2"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`OverflowGrowth.ADD_ROWS_AND_COLUMNS` keeps the declared ratio exactly when a grid scales up evenly. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `ADD_ROWS_AND_COLUMNS` grows a grid towards the ratio of rows to columns it was declared\n            with. Whenever a component holds exactly `factor * factor` times as many children as the\n            declared grid has cells, that ratio can be met exactly, and the grid becomes exactly\n            `factor` times as high and `factor` times as wide, without a single cell left over.\n\n            So a grid declared with 1 row and 4 columns, holding 400 children, which is 100 times its\n            4 cells, is laid out in exactly 10 rows of 40 columns. Because the component keeps its\n            size while the grid grows, holding the ratio of rows to columns also holds the shape of\n            every cell: a cell of a grid of `r` rows and `c` columns is `width / c` by `height / r`\n            large, so all 400 cells have the same shape the 4 declared cells had.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The number of children which fills the declared grid scaled up by the factor from the table.","code":["var children = rows * cols * factor * factor"]},
+
+        {"kind":"and","text":"A panel which grows such a grid by rows and columns at once, holding that many children.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, OverflowGrowth.ADD_ROWS_AND_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 800 by 400 pixels,","code":["panel.setSize(800, 400)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the grid is exactly the declared one scaled up by the factor,","code":["gridShapeOf(panel) == [rows * factor, cols * factor]"]},
+
+        {"kind":"and","text":"it holds exactly as many cells as there are children, so none is left empty.","code":["rows * factor * cols * factor == children"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","1","1","2","2","3"],"cols":["4","4","4","5","5","7"],"factor":["2","5","10","2","4","2"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`OverflowGrowth.ADD_ROWS_AND_COLUMNS` keeps the declared ratio exactly when a grid scales up evenly. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `ADD_ROWS_AND_COLUMNS` grows a grid towards the ratio of rows to columns it was declared\n            with. Whenever a component holds exactly `factor * factor` times as many children as the\n            declared grid has cells, that ratio can be met exactly, and the grid becomes exactly\n            `factor` times as high and `factor` times as wide, without a single cell left over.\n\n            So a grid declared with 1 row and 4 columns, holding 400 children, which is 100 times its\n            4 cells, is laid out in exactly 10 rows of 40 columns. Because the component keeps its\n            size while the grid grows, holding the ratio of rows to columns also holds the shape of\n            every cell: a cell of a grid of `r` rows and `c` columns is `width / c` by `height / r`\n            large, so all 400 cells have the same shape the 4 declared cells had.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The number of children which fills the declared grid scaled up by the factor from the table.","code":["var children = rows * cols * factor * factor"]},
+
+        {"kind":"and","text":"A panel which grows such a grid by rows and columns at once, holding that many children.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, OverflowGrowth.ADD_ROWS_AND_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 800 by 400 pixels,","code":["panel.setSize(800, 400)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the grid is exactly the declared one scaled up by the factor,","code":["gridShapeOf(panel) == [rows * factor, cols * factor]"]},
+
+        {"kind":"and","text":"it holds exactly as many cells as there are children, so none is left empty.","code":["rows * factor * cols * factor == children"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","1","1","2","2","3"],"cols":["4","4","4","5","5","7"],"factor":["2","5","10","2","4","2"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`OverflowGrowth.ADD_ROWS_AND_COLUMNS` keeps the declared ratio exactly when a grid scales up evenly. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `ADD_ROWS_AND_COLUMNS` grows a grid towards the ratio of rows to columns it was declared\n            with. Whenever a component holds exactly `factor * factor` times as many children as the\n            declared grid has cells, that ratio can be met exactly, and the grid becomes exactly\n            `factor` times as high and `factor` times as wide, without a single cell left over.\n\n            So a grid declared with 1 row and 4 columns, holding 400 children, which is 100 times its\n            4 cells, is laid out in exactly 10 rows of 40 columns. Because the component keeps its\n            size while the grid grows, holding the ratio of rows to columns also holds the shape of\n            every cell: a cell of a grid of `r` rows and `c` columns is `width / c` by `height / r`\n            large, so all 400 cells have the same shape the 4 declared cells had.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The number of children which fills the declared grid scaled up by the factor from the table.","code":["var children = rows * cols * factor * factor"]},
+
+        {"kind":"and","text":"A panel which grows such a grid by rows and columns at once, holding that many children.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, OverflowGrowth.ADD_ROWS_AND_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 800 by 400 pixels,","code":["panel.setSize(800, 400)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the grid is exactly the declared one scaled up by the factor,","code":["gridShapeOf(panel) == [rows * factor, cols * factor]"]},
+
+        {"kind":"and","text":"it holds exactly as many cells as there are children, so none is left empty.","code":["rows * factor * cols * factor == children"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","1","1","2","2","3"],"cols":["4","4","4","5","5","7"],"factor":["2","5","10","2","4","2"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`OverflowGrowth.ADD_ROWS_AND_COLUMNS` keeps the declared ratio exactly when a grid scales up evenly. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `ADD_ROWS_AND_COLUMNS` grows a grid towards the ratio of rows to columns it was declared\n            with. Whenever a component holds exactly `factor * factor` times as many children as the\n            declared grid has cells, that ratio can be met exactly, and the grid becomes exactly\n            `factor` times as high and `factor` times as wide, without a single cell left over.\n\n            So a grid declared with 1 row and 4 columns, holding 400 children, which is 100 times its\n            4 cells, is laid out in exactly 10 rows of 40 columns. Because the component keeps its\n            size while the grid grows, holding the ratio of rows to columns also holds the shape of\n            every cell: a cell of a grid of `r` rows and `c` columns is `width / c` by `height / r`\n            large, so all 400 cells have the same shape the 4 declared cells had.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The number of children which fills the declared grid scaled up by the factor from the table.","code":["var children = rows * cols * factor * factor"]},
+
+        {"kind":"and","text":"A panel which grows such a grid by rows and columns at once, holding that many children.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, OverflowGrowth.ADD_ROWS_AND_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 800 by 400 pixels,","code":["panel.setSize(800, 400)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the grid is exactly the declared one scaled up by the factor,","code":["gridShapeOf(panel) == [rows * factor, cols * factor]"]},
+
+        {"kind":"and","text":"it holds exactly as many cells as there are children, so none is left empty.","code":["rows * factor * cols * factor == children"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","1","1","2","2","3"],"cols":["4","4","4","5","5","7"],"factor":["2","5","10","2","4","2"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`OverflowGrowth.ADD_ROWS_AND_COLUMNS` keeps the declared ratio exactly when a grid scales up evenly. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `ADD_ROWS_AND_COLUMNS` grows a grid towards the ratio of rows to columns it was declared\n            with. Whenever a component holds exactly `factor * factor` times as many children as the\n            declared grid has cells, that ratio can be met exactly, and the grid becomes exactly\n            `factor` times as high and `factor` times as wide, without a single cell left over.\n\n            So a grid declared with 1 row and 4 columns, holding 400 children, which is 100 times its\n            4 cells, is laid out in exactly 10 rows of 40 columns. Because the component keeps its\n            size while the grid grows, holding the ratio of rows to columns also holds the shape of\n            every cell: a cell of a grid of `r` rows and `c` columns is `width / c` by `height / r`\n            large, so all 400 cells have the same shape the 4 declared cells had.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The number of children which fills the declared grid scaled up by the factor from the table.","code":["var children = rows * cols * factor * factor"]},
+
+        {"kind":"and","text":"A panel which grows such a grid by rows and columns at once, holding that many children.","code":["var panel =","        UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, OverflowGrowth.ADD_ROWS_AND_COLUMNS, rows, cols)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 800 by 400 pixels,","code":["panel.setSize(800, 400)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the grid is exactly the declared one scaled up by the factor,","code":["gridShapeOf(panel) == [rows * factor, cols * factor]"]},
+
+        {"kind":"and","text":"it holds exactly as many cells as there are children, so none is left empty.","code":["rows * factor * cols * factor == children"]},
+
+        {"kind":"where","text":"","code":{"rows":["1","1","1","2","2","3"],"cols":["4","4","4","5","5","7"],"factor":["2","5","10","2","4","2"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `OverflowGrowth` setting changes nothing about a grid which cannot overflow. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid can only hold more children than cells when it has a cell count to exceed, and\n            it only has one when both its declared numbers are greater than zero. A number of zero\n            means \"as many as the children need\", so that axis grows as far as the children need in\n            either mode and there is never an overflow to handle. The growth setting then has\n            nothing to decide, whichever of the three you pick.\n\n            This is the one case in which the setting is idle. Both modes cap a grid as soon as you\n            declare both numbers, so both modes hand the growth setting something to decide, which\n            the feature after this one shows.\n\n            Every panel in this table holds 13 children and is laid out three times, once per\n            `OverflowGrowth` setting, and every one of the three lays the children out in the very\n            same grid.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The three growth settings, and a panel per setting with the grid from the table, each holding 13 children.","code":["var panels = OverflowGrowth.values().collect { growth ->","        UI.panel().withGridLayout(mode, CollapseEmpty.ROWS_AND_COLUMNS, growth, rows, cols)","        .apply({ ui -> (0..<13).each { ui.add(UI.box()) } })","        .get(JPanel)","    }"]},
+
+        {"kind":"expect","text":"There is one panel per growth setting.","code":["panels.size() == 3"]},
+
+        {"kind":"when","text":"All of them are laid out at 600 by 300 pixels,","code":["panels.each { it.setSize(600, 300); it.doLayout() }"]},
+
+        {"kind":"then","text":"every one of them arranges its children in the grid from the table.","code":["panels.collect { gridShapeOf(it) } == [[expectedRows, expectedCols]] * 3"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"rows":["0","2","0","2"],"cols":["4","0","4","0"],"expectedRows":["4","2","4","2"],"expectedCols":["4","7","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `OverflowGrowth` setting changes nothing about a grid which cannot overflow. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid can only hold more children than cells when it has a cell count to exceed, and\n            it only has one when both its declared numbers are greater than zero. A number of zero\n            means \"as many as the children need\", so that axis grows as far as the children need in\n            either mode and there is never an overflow to handle. The growth setting then has\n            nothing to decide, whichever of the three you pick.\n\n            This is the one case in which the setting is idle. Both modes cap a grid as soon as you\n            declare both numbers, so both modes hand the growth setting something to decide, which\n            the feature after this one shows.\n\n            Every panel in this table holds 13 children and is laid out three times, once per\n            `OverflowGrowth` setting, and every one of the three lays the children out in the very\n            same grid.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The three growth settings, and a panel per setting with the grid from the table, each holding 13 children.","code":["var panels = OverflowGrowth.values().collect { growth ->","        UI.panel().withGridLayout(mode, CollapseEmpty.ROWS_AND_COLUMNS, growth, rows, cols)","        .apply({ ui -> (0..<13).each { ui.add(UI.box()) } })","        .get(JPanel)","    }"]},
+
+        {"kind":"expect","text":"There is one panel per growth setting.","code":["panels.size() == 3"]},
+
+        {"kind":"when","text":"All of them are laid out at 600 by 300 pixels,","code":["panels.each { it.setSize(600, 300); it.doLayout() }"]},
+
+        {"kind":"then","text":"every one of them arranges its children in the grid from the table.","code":["panels.collect { gridShapeOf(it) } == [[expectedRows, expectedCols]] * 3"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"rows":["0","2","0","2"],"cols":["4","0","4","0"],"expectedRows":["4","2","4","2"],"expectedCols":["4","7","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `OverflowGrowth` setting changes nothing about a grid which cannot overflow. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid can only hold more children than cells when it has a cell count to exceed, and\n            it only has one when both its declared numbers are greater than zero. A number of zero\n            means \"as many as the children need\", so that axis grows as far as the children need in\n            either mode and there is never an overflow to handle. The growth setting then has\n            nothing to decide, whichever of the three you pick.\n\n            This is the one case in which the setting is idle. Both modes cap a grid as soon as you\n            declare both numbers, so both modes hand the growth setting something to decide, which\n            the feature after this one shows.\n\n            Every panel in this table holds 13 children and is laid out three times, once per\n            `OverflowGrowth` setting, and every one of the three lays the children out in the very\n            same grid.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The three growth settings, and a panel per setting with the grid from the table, each holding 13 children.","code":["var panels = OverflowGrowth.values().collect { growth ->","        UI.panel().withGridLayout(mode, CollapseEmpty.ROWS_AND_COLUMNS, growth, rows, cols)","        .apply({ ui -> (0..<13).each { ui.add(UI.box()) } })","        .get(JPanel)","    }"]},
+
+        {"kind":"expect","text":"There is one panel per growth setting.","code":["panels.size() == 3"]},
+
+        {"kind":"when","text":"All of them are laid out at 600 by 300 pixels,","code":["panels.each { it.setSize(600, 300); it.doLayout() }"]},
+
+        {"kind":"then","text":"every one of them arranges its children in the grid from the table.","code":["panels.collect { gridShapeOf(it) } == [[expectedRows, expectedCols]] * 3"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"rows":["0","2","0","2"],"cols":["4","0","4","0"],"expectedRows":["4","2","4","2"],"expectedCols":["4","7","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `OverflowGrowth` setting changes nothing about a grid which cannot overflow. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A grid can only hold more children than cells when it has a cell count to exceed, and\n            it only has one when both its declared numbers are greater than zero. A number of zero\n            means \"as many as the children need\", so that axis grows as far as the children need in\n            either mode and there is never an overflow to handle. The growth setting then has\n            nothing to decide, whichever of the three you pick.\n\n            This is the one case in which the setting is idle. Both modes cap a grid as soon as you\n            declare both numbers, so both modes hand the growth setting something to decide, which\n            the feature after this one shows.\n\n            Every panel in this table holds 13 children and is laid out three times, once per\n            `OverflowGrowth` setting, and every one of the three lays the children out in the very\n            same grid.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The three growth settings, and a panel per setting with the grid from the table, each holding 13 children.","code":["var panels = OverflowGrowth.values().collect { growth ->","        UI.panel().withGridLayout(mode, CollapseEmpty.ROWS_AND_COLUMNS, growth, rows, cols)","        .apply({ ui -> (0..<13).each { ui.add(UI.box()) } })","        .get(JPanel)","    }"]},
+
+        {"kind":"expect","text":"There is one panel per growth setting.","code":["panels.size() == 3"]},
+
+        {"kind":"when","text":"All of them are laid out at 600 by 300 pixels,","code":["panels.each { it.setSize(600, 300); it.doLayout() }"]},
+
+        {"kind":"then","text":"every one of them arranges its children in the grid from the table.","code":["panels.collect { gridShapeOf(it) } == [[expectedRows, expectedCols]] * 3"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"rows":["0","2","0","2"],"cols":["4","0","4","0"],"expectedRows":["4","2","4","2"],"expectedCols":["4","7","4","7"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid grows the way its `OverflowGrowth` setting says in both modes. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mode decides the shape of the grid while it still has a cell for every child:\n            `WRAP_AFTER_COLUMNS` keeps the declared columns and fills the rows one after another,\n            while `SPREAD_OVER_ROWS` keeps the declared rows and takes only as many columns as the\n            children need. Once there are more children than the declared numbers multiply to, that\n            question is settled and a second one takes over: on which axis does the grid make room?\n            That is what `OverflowGrowth` answers, and it answers it in both modes.\n\n            Every panel in this table declares 2 rows and 4 columns, which is 8 cells, and is laid\n            out at 600 by 300 pixels. With 8 children both modes agree on 2 rows of 4 columns. With\n            the ninth child the grid has to grow, and each setting grows it the way it promises,\n            whichever mode built the grid underneath.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a grid of 2 rows and 4 columns and the mode and growth setting from the table.","code":["var panel =","        UI.panel().withGridLayout(mode, CollapseEmpty.NONE, overflowGrowth, 2, 4)","        .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the grid from the table.","code":["gridShapeOf(panel) == [rows, cols]"]},
+
+        {"kind":"where","text":"","code":{"mode":["Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.WRAP_AFTER_COLUMNS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS","Mode.SPREAD_OVER_ROWS"],"children":["8","9","9","9","11","8","9","9","9","11"],"overflowGrowth":["OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_ROWS","OverflowGrowth.ADD_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS","OverflowGrowth.ADD_ROWS_AND_COLUMNS"],"rows":["2","3","2","2","3","2","3","2","2","3"],"cols":["4","4","5","5","5","4","4","5","5","5"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`withGridLayout(..)` does not accept a missing growth setting.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like the mode and the setting for the empty rows and columns, a grid needs to know\n            how it grows before it lays out a single child, so `withGridLayout(..)` rejects a `null`\n            growth setting right away with an `IllegalArgumentException`.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We pass no growth setting,","code":["UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, null, 2, 5)"]},
+
+        {"kind":"then","text":"the builder rejects it.","code":["thrown(IllegalArgumentException)"]},
+
+        {"kind":"when","text":"We pass no growth setting to the overload which also takes the gaps,","code":["UI.panel().withGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, null, 2, 5, 5, 5)"]},
+
+        {"kind":"then","text":"the builder rejects that as well.","code":["thrown(IllegalArgumentException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `Layout.grid(..).withOverflowGrowth(..)` to change how a grid grows while the application runs.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Layout.grid(..)` takes an `OverflowGrowth` setting alongside the mode and the empty rows\n            and columns, and `withOverflowGrowth(..)` returns a new grid with that setting and every\n            other property copied unchanged, leaving the original grid untouched.\n\n            When such a grid is set on a `Var<Layout>` which a component is bound to, the\n            `UniformGridLayout` the component already has is reconfigured in place, so a panel can\n            switch between growing by rows and growing by rows and columns without ever exchanging\n            its layout manager.\n\n            The panel in this feature holds 13 children in a grid of 2 rows and 5 columns, which has\n            only 10 cells.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a grid of 2 rows and 5 columns, which grows by rows.","code":["var layout = Var.of(Layout.class, Layout.grid(2, 5))"]},
+
+        {"kind":"and","text":"A panel bound to the property, holding 13 children.","code":["var panel =","        UI.panel()","        .withLayout(layout)","        .apply({ ui -> (0..<13).each { ui.add(UI.box()) } })","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the layout manager the panel starts with.","code":["var gridLayout = panel.getLayout()"]},
+
+        {"kind":"expect","text":"A grid grows by rows unless you say otherwise, and `withOverflowGrowth(..)` leaves the grid it is called on untouched.","code":["Layout.grid(2, 5).withOverflowGrowth(OverflowGrowth.ADD_COLUMNS) != Layout.grid(2, 5)","Layout.grid(2, 5).withOverflowGrowth(OverflowGrowth.ADD_ROWS) == Layout.grid(2, 5)"]},
+
+        {"kind":"when","text":"The panel is laid out at 600 by 300 pixels,","code":["panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the 13 children fill 3 rows of the 5 declared columns.","code":["gridLayout instanceof UniformGridLayout","gridLayout.getOverflowGrowth() == OverflowGrowth.ADD_ROWS","gridShapeOf(panel) == [3, 5]"]},
+
+        {"kind":"when","text":"We set the same grid, but growing by rows and columns at once, and lay out the panel again,","code":["UI.runNow({ layout.set(Layout.grid(2, 5).withOverflowGrowth(OverflowGrowth.ADD_ROWS_AND_COLUMNS)) })","panel.doLayout()"]},
+
+        {"kind":"then","text":"the very same layout manager now arranges the children in 3 rows of 6 columns.","code":["panel.getLayout().is(gridLayout)","panel.getLayout().getOverflowGrowth() == OverflowGrowth.ADD_ROWS_AND_COLUMNS","gridShapeOf(panel) == [3, 6]"]},
+
+        {"kind":"when","text":"We set a grid which grows by columns instead, and lay out the panel again,","code":["UI.runNow({ layout.set(Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.ROWS_AND_COLUMNS, OverflowGrowth.ADD_COLUMNS, 2, 5)) })","panel.doLayout()"]},
+
+        {"kind":"then","text":"the very same layout manager keeps the 2 declared rows and widens the grid to 7 columns.","code":["panel.getLayout().is(gridLayout)","panel.getLayout().getOverflowGrowth() == OverflowGrowth.ADD_COLUMNS","gridShapeOf(panel) == [2, 7]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `UniformGridLayout` constructor which takes every setting builds the grid all three settings describe.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Outside of a SwingTree UI declaration, the constructor\n            `UniformGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols, hgap, vgap)` spells\n            out every setting of a grid in one call, so you never have to build a layout manager and\n            then reach for its setters. The other constructors leave the three settings at their\n            defaults: `WRAP_AFTER_COLUMNS`, `ROWS_AND_COLUMNS` and `ADD_ROWS`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A grid layout with every setting spelled out.","code":["var layout = new UniformGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, OverflowGrowth.ADD_ROWS_AND_COLUMNS, 2, 5, 5, 5)"]},
+
+        {"kind":"expect","text":"It reports every one of them.","code":["layout.getMode() == Mode.WRAP_AFTER_COLUMNS","layout.getCollapseEmpty() == CollapseEmpty.NONE","layout.getOverflowGrowth() == OverflowGrowth.ADD_ROWS_AND_COLUMNS","[layout.getRows(), layout.getColumns(), layout.getHgap(), layout.getVgap()] == [2, 5, 5, 5]"]},
+
+        {"kind":"and","text":"A grid layout built without them uses the default settings.","code":["new UniformGridLayout(2, 5).getMode() == Mode.WRAP_AFTER_COLUMNS","new UniformGridLayout(2, 5).getCollapseEmpty() == CollapseEmpty.ROWS_AND_COLUMNS","new UniformGridLayout(2, 5).getOverflowGrowth() == OverflowGrowth.ADD_ROWS"]},
+
+        {"kind":"when","text":"We install it on a panel with 13 children and lay the panel out at 600 by 300 pixels,","code":["var panel =","        UI.panel().withLayout(layout)","        .apply({ ui -> (0..<13).each { ui.add(UI.box()) } })","        .get(JPanel)","panel.setSize(600, 300)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the children are arranged in the 3 rows of 6 columns the growth setting asks for.","code":["gridShapeOf(panel) == [3, 6]"]},
+
+        {"kind":"when","text":"We ask the layout manager to describe itself,","code":["var description = layout.toString()"]},
+
+        {"kind":"then","text":"it names all three settings.","code":["description.contains(\"mode=WRAP_AFTER_COLUMNS\")","description.contains(\"collapseEmpty=NONE\")","description.contains(\"overflowGrowth=ADD_ROWS_AND_COLUMNS\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid layout rejects a missing growth setting instead of quietly keeping the old one.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `setOverflowGrowth(null)` throws a `NullPointerException`, and the constructor which takes\n            every setting does the same, so a grid never ends up without an answer to how it grows.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We take the growth setting away from a grid,","code":["new UniformGridLayout(2, 5).setOverflowGrowth(null)"]},
+
+        {"kind":"then","text":"it is rejected,","code":["thrown(NullPointerException)"]},
+
+        {"kind":"when","text":"and we build a grid without one,","code":["new UniformGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, null, 2, 5, 0, 0)"]},
+
+        {"kind":"then","text":"that is rejected as well.","code":["thrown(NullPointerException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

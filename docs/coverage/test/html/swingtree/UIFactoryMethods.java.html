@@ -685,7 +685,7 @@ import java.util.function.Supplier;
 <span class="fc" id="L685">        NullUtil.nullArgCheck(colConstraints, &quot;colConstraints&quot;, String.class);</span>
 <span class="fc" id="L686">        NullUtil.nullArgCheck(rowConstraints, &quot;rowConstraints&quot;, String.class);</span>
 <span class="pc bpc" id="L687" title="1 of 2 branches missed.">        if (attr.isEmpty()) attr = &quot;ins 0&quot;;</span>
-<span class="pc bpc" id="L688" title="1 of 2 branches missed.">        else if (!attr.contains(&quot;ins&quot;)) attr += &quot;, ins 0&quot;;</span>
+<span class="fc bfc" id="L688" title="All 2 branches covered.">        else if (!attr.contains(&quot;ins&quot;)) attr += &quot;, ins 0&quot;;</span>
 <span class="fc" id="L689">        return box().withLayout(attr, colConstraints, rowConstraints);</span>
     }
 
@@ -2455,8 +2455,8 @@ import java.util.function.Supplier;
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;P extends JScrollPane&gt; UIForScrollPane&lt;P&gt; of( P component ) {
-<span class="nc" id="L2458">        NullUtil.nullArgCheck(component, &quot;component&quot;, JScrollPane.class);</span>
-<span class="nc" id="L2459">        return new UIForScrollPane&lt;&gt;(new BuilderState&lt;&gt;(component));</span>
+<span class="fc" id="L2458">        NullUtil.nullArgCheck(component, &quot;component&quot;, JScrollPane.class);</span>
+<span class="fc" id="L2459">        return new UIForScrollPane&lt;&gt;(new BuilderState&lt;&gt;(component));</span>
     }
 
     /**
@@ -2813,8 +2813,8 @@ import java.util.function.Supplier;
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
     public static &lt;P extends JTextPane&gt; UIForTextPane&lt;P&gt; of( P component ) {
-<span class="nc" id="L2816">        NullUtil.nullArgCheck(component, &quot;component&quot;, JTextPane.class);</span>
-<span class="nc" id="L2817">        return new UIForTextPane&lt;&gt;(new BuilderState&lt;&gt;(component));</span>
+<span class="fc" id="L2816">        NullUtil.nullArgCheck(component, &quot;component&quot;, JTextPane.class);</span>
+<span class="fc" id="L2817">        return new UIForTextPane&lt;&gt;(new BuilderState&lt;&gt;(component));</span>
     }
 
     /**
@@ -6180,8 +6180,8 @@ import java.util.function.Supplier;
      * @return A builder instance for a new {@link JTable}.
      */
     public static &lt;T extends JTable&gt; UIForTable&lt;T&gt; of( T table ) {
-<span class="nc" id="L6183">        NullUtil.nullArgCheck(table, &quot;table&quot;, JTable.class);</span>
-<span class="nc" id="L6184">        return new UIForTable&lt;&gt;(new BuilderState&lt;&gt;(table));</span>
+<span class="fc" id="L6183">        NullUtil.nullArgCheck(table, &quot;table&quot;, JTable.class);</span>
+<span class="fc" id="L6184">        return new UIForTable&lt;&gt;(new BuilderState&lt;&gt;(table));</span>
     }
 
     /**
