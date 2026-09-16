@@ -1,11 +1,13 @@
 package examples.laf;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
 import javax.swing.JSplitPane;
+import javax.swing.LookAndFeel;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
@@ -27,6 +29,10 @@ public final class SwingTreeSplitPaneUI
 
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeSplitPaneUI(SwingTreeLookAndFeel.installedTheme()); }
 
+    /** Whether the split pane laid out continuously before this delegate made it, given back when
+     *  it is uninstalled; {@code null} where nothing was changed. */
+    private @Nullable Boolean _displacedContinuousLayout = null;
+
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
@@ -36,12 +42,21 @@ public final class SwingTreeSplitPaneUI
         if ( _theme.symbols().drawsItsOwnChrome() ) {
             if ( pane.getBorder() instanceof UIResource )
                 pane.setBorder(null);
-            pane.setDividerSize(UI.scale(_theme.symbols().splitDividerThickness()));
+            LookAndFeel.installProperty(pane, "dividerSize", UI.scale(_theme.symbols().splitDividerThickness()));
             // BasicSplitPaneUI starts with continuousLayout off, which draws a marker line while
             // the divider is dragged and moves the split only when the mouse is released.
+            _displacedContinuousLayout = pane.isContinuousLayout();
             pane.setContinuousLayout(true);
         }
         _theme.installStyleOn(c);
+    }
+
+    @Override
+    public void uninstallUI( JComponent c ) {
+        super.uninstallUI(c);
+        if ( _displacedContinuousLayout != null )
+            ((JSplitPane) c).setContinuousLayout(_displacedContinuousLayout);
+        _displacedContinuousLayout = null;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package examples.laf;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
@@ -60,9 +61,25 @@ public final class SwingTreeTableHeaderUI
         // A per-column header renderer is left alone. A column with none of its own already falls
         // back to the header default, and one installed per column would outlive this look and
         // feel: other look and feels replace the header default but never clear per-column ones.
-        if ( _theme.symbols().drawsItsOwnChrome() && isReplaceableLafDefault(header.getDefaultRenderer()) )
+        if ( _theme.symbols().drawsItsOwnChrome() && isReplaceableLafDefault(header.getDefaultRenderer()) ) {
+            _displacedRenderer = header.getDefaultRenderer();
             header.setDefaultRenderer(new HeaderRenderer(_theme, _headingMargins));
+        }
         _theme.installStyleOn(c);
+    }
+
+    /** The default renderer the header had before this delegate replaced it, given back when it is
+     *  uninstalled. {@code JTableHeader} makes its default renderer once, in its constructor, so a
+     *  look and feel that finds this one installed has nothing to put in its place. */
+    private @Nullable TableCellRenderer _displacedRenderer = null;
+
+    @Override
+    public void uninstallUI( JComponent c ) {
+        super.uninstallUI(c);
+        JTableHeader header = (JTableHeader) c;
+        if ( _displacedRenderer != null && header.getDefaultRenderer() instanceof HeaderRenderer )
+            header.setDefaultRenderer(_displacedRenderer);
+        _displacedRenderer = null;
     }
 
     /** @return {@code true} for a renderer the next look and feel is allowed to overwrite, which

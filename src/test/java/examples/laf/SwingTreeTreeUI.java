@@ -6,6 +6,7 @@ import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTreeUI;
@@ -44,8 +45,10 @@ public final class SwingTreeTreeUI
     public void installUI( JComponent c ) {
         super.installUI(c);
         JTree tree = (JTree) c;
+        // Installed rather than set, so that a symbol set drawing no chrome gives the handles back
+        // and one the application set stands.
+        LookAndFeel.installProperty(tree, "showsRootHandles", _theme.symbols().drawsItsOwnChrome());
         if ( _theme.symbols().drawsItsOwnChrome() ) {
-            tree.setShowsRootHandles(true);
             setExpandedIcon(GlyphIcons.treeExpanded(_theme));
             setCollapsedIcon(GlyphIcons.treeCollapsed(_theme));
         }

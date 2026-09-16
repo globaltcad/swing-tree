@@ -524,7 +524,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("SplitPane.shadow",        ui(p.border()));
         table.put("SplitPane.darkShadow",    ui(p.accent()));
         table.put("SplitPane.highlight",     ui(p.surfaceHover()));
-        table.put("SplitPane.dividerSize",   s.splitDividerThickness());
+        if ( s.drawsItsOwnChrome() )
+            table.put("SplitPane.dividerSize", s.splitDividerThickness());
         table.put("SplitPaneDivider.border", BorderFactory.createEmptyBorder());
 
         table.put("MenuBar.background", ui(p.surface()));

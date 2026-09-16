@@ -36,11 +36,17 @@ public final class SwingTreeTableUI
         return new SwingTreeTableUI(SwingTreeLookAndFeel.installedTheme(), UIManager.getColor("Table.alternateRowColor"));
     }
 
+    /** The grid lines and cell spacing the table had before this delegate removed them, given back
+     *  when it is uninstalled; {@code null} where the symbol set draws no chrome and nothing was
+     *  removed. Swing installs neither from its defaults, so no later look and feel would. */
+    private @Nullable Grid _displacedGrid = null;
+
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         JTable table = (JTable) c;
         if ( _theme.symbols().drawsItsOwnChrome() ) {
+            _displacedGrid = new Grid(table);
             table.setShowGrid(false);
             table.setIntercellSpacing(new Dimension(0, 0));
             table.setRowHeight(UI.scale(_theme.symbols().tableRowHeight()));
@@ -50,6 +56,33 @@ public final class SwingTreeTableUI
             table.setRowHeight(rowHeightFor(table));
         }
         _theme.installStyleOn(c);
+    }
+
+    @Override
+    public void uninstallUI( JComponent c ) {
+        super.uninstallUI(c);
+        if ( _displacedGrid != null )
+            _displacedGrid.restoreOn((JTable) c);
+        _displacedGrid = null;
+    }
+
+    private static final class Grid
+    {
+        private final boolean   _horizontalLines;
+        private final boolean   _verticalLines;
+        private final Dimension _intercellSpacing;
+
+        Grid( JTable table ) {
+            _horizontalLines  = table.getShowHorizontalLines();
+            _verticalLines    = table.getShowVerticalLines();
+            _intercellSpacing = table.getIntercellSpacing();
+        }
+
+        void restoreOn( JTable table ) {
+            table.setShowHorizontalLines(_horizontalLines);
+            table.setShowVerticalLines(_verticalLines);
+            table.setIntercellSpacing(_intercellSpacing);
+        }
     }
 
     @Override
