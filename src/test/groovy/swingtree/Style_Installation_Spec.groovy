@@ -1106,4 +1106,131 @@ class Style_Installation_Spec extends Specification
             !button.isBorderPainted()
     }
 
+    def 'When the style of a scroll pane is removed, SwingTree keeps a viewport background color which was set while the style was active.'()
+    {
+        reportInfo """
+            When a style gives a scroll pane a background color, SwingTree gives that color to the
+            viewport inside the scroll pane as well. When the style is removed again, SwingTree puts
+            the old background color of the viewport back, but only if the viewport still has the
+            color of the style. If something else replaced the background of the viewport in the
+            meantime, then that replacement has to stay.
+
+            Let's first look at why SwingTree touches the viewport at all.
+            The content of a `JScrollPane` is not a child of the scroll pane itself. It is a child of a
+            `JViewport`, and that viewport is a child of the scroll pane. The viewport covers the area
+            inside the border of the scroll pane which is not taken by scroll bars or headers, it is
+            painted on top of the scroll pane, and it is opaque. So it fills that whole area with its
+            own background color, which under Swing's default Metal look and feel is a light grey,
+            `(238, 238, 238)`. A red background which a style gives to the scroll pane would be hidden
+            under that grey. This is why SwingTree calls `viewport.setBackground(..)` with the red of
+            the style too, and remembers the grey, so that it can put the grey back once the style is
+            removed.
+
+            Now suppose that, while the style is still active, something else calls
+            `viewport.setBackground(..)` with a blue. That can be your application code. It can also
+            be a look and feel which is switched to at runtime and installs its own default background
+            color on the viewport. If SwingTree put the remembered grey back when the style is removed,
+            it would throw that blue away. After a switch of the look and feel it would even bring back
+            a color of the look and feel which was installed before, so the viewport would show the
+            grey of the old look and feel inside a scroll pane painted by the new one.
+            So SwingTree puts the grey back only while the viewport still has the red it was given.
+
+            A look and feel wraps the colors it installs in a `ColorUIResource`, which is how Swing
+            tells the colors of a look and feel apart from the colors an application sets. The
+            scenario uses a `ColorUIResource` for the blue, so that it is exactly the kind of color a
+            look and feel would install.
+
+            The styler lambda reads the local variable `styled` every time SwingTree runs it. While
+            `styled` is `false`, the lambda returns the style delegate `it` unchanged, which is the same
+            as having no style at all. SwingTree applies a style to a component while the component is
+            painted, which is why the scenario paints the scroll pane after every change of `styled`.
+            And because Swing skips painting a component whose width or height is 0, the scroll pane
+            gets a size of 200 by 100 pixels.
+        """
+        given: 'A scroll pane whose styler sets a red background only while the variable `styled` is true:'
+            var styled = false
+            var scrollPane =
+                    UI.scrollPane()
+                    .withSize(200, 100)
+                    .withStyle( it -> styled ? it.backgroundColor(Color.RED) : it )
+                    .get(JScrollPane)
+            var viewport = scrollPane.getViewport()
+        and: 'We remember the background color of the viewport from before the style, the default of the look and feel:'
+            var original = viewport.getBackground()
+
+        when: 'We turn the style on and paint the scroll pane, so that SwingTree applies the style:'
+            styled = true
+            Utility.paintWithoutWindow(scrollPane, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'SwingTree has given the red of the style to the viewport:'
+            viewport.getBackground() == Color.RED
+
+        when: 'While the style is still active, the viewport gets a blue background the way a look and feel would install it:'
+            var replacement = new javax.swing.plaf.ColorUIResource(Color.BLUE)
+            viewport.setBackground(replacement)
+        and: 'We turn the style off and paint the scroll pane again, so that SwingTree removes the style:'
+            styled = false
+            Utility.paintWithoutWindow(scrollPane, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The viewport still has the blue background, SwingTree did not put the remembered color back over it:'
+            viewport.getBackground() == replacement
+            viewport.getBackground() != original
+    }
+
+    def 'When the style of a scroll pane is removed, SwingTree gives the viewport back the background color it had before the style.'()
+    {
+        reportInfo """
+            When a style gives a scroll pane a background color, SwingTree gives that color to the
+            viewport inside the scroll pane as well. When the style is removed again, the viewport has
+            to get back the background color it had before the style was applied.
+
+            To see why SwingTree touches the viewport at all, you need to know how a `JScrollPane` is
+            painted. The content of a scroll pane is not a child of the scroll pane itself. It is a
+            child of a `JViewport`, and that viewport is a child of the scroll pane. The viewport covers
+            the area inside the border of the scroll pane which is not taken by scroll bars or headers,
+            it is painted on top of the scroll pane, and it is opaque. So it fills that whole area with
+            its own background color, which under Swing's default Metal look and feel is a light grey,
+            `(238, 238, 238)`. A red background which a style gives to the scroll pane would be hidden
+            under that grey. This is why SwingTree calls `viewport.setBackground(..)` with the red of
+            the style too.
+
+            When the style is removed, SwingTree gives the scroll pane its old background color back.
+            If SwingTree did not do the same for the viewport, the viewport would stay red, and you would
+            see a red area inside a grey scroll pane which no longer has any style at all.
+            So SwingTree remembers the grey of the viewport when it applies the style, and calls
+            `viewport.setBackground(..)` with that grey again when the style is removed.
+
+            The scenario checks that the viewport really is red while the style is active. Without that
+            check the scenario would also pass if SwingTree never gave the red to the viewport, because
+            then the viewport would simply keep its grey the whole time.
+
+            The styler lambda reads the local variable `styled` every time SwingTree runs it. While
+            `styled` is `false`, the lambda returns the style delegate `it` unchanged, which is the same
+            as having no style at all. SwingTree applies a style to a component while the component is
+            painted, which is why the scenario paints the scroll pane after every change of `styled`.
+            And because Swing skips painting a component whose width or height is 0, the scroll pane
+            gets a size of 200 by 100 pixels.
+        """
+        given: 'A scroll pane whose styler sets a red background only while the variable `styled` is true:'
+            var styled = false
+            var scrollPane =
+                    UI.scrollPane()
+                    .withSize(200, 100)
+                    .withStyle( it -> styled ? it.backgroundColor(Color.RED) : it )
+                    .get(JScrollPane)
+            var viewport = scrollPane.getViewport()
+        and: 'We remember the background color of the viewport from before the style, the default of the look and feel:'
+            var original = viewport.getBackground()
+
+        when: 'We turn the style on and paint the scroll pane, so that SwingTree applies the style:'
+            styled = true
+            Utility.paintWithoutWindow(scrollPane, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'SwingTree has given the red of the style to the viewport:'
+            viewport.getBackground() == Color.RED
+
+        when: 'We turn the style off and paint the scroll pane again, so that SwingTree removes the style:'
+            styled = false
+            Utility.paintWithoutWindow(scrollPane, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The viewport has the background color from before the style again:'
+            viewport.getBackground() == original
+    }
+
 }
