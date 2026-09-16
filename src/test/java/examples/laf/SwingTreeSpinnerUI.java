@@ -51,8 +51,14 @@ public final class SwingTreeSpinnerUI
     @Override
     protected void replaceEditor( JComponent oldEditor, JComponent newEditor ) {
         super.replaceEditor(oldEditor, newEditor);
-        if ( newEditor instanceof JSpinner.DefaultEditor )
+        // The focus repaint follows the field that can take focus, or a spinner given a new model
+        // after it was built would stop showing focus.
+        if ( oldEditor instanceof JSpinner.DefaultEditor )
+            LafUtilities.uninstallFocusRepaint(spinner, ((JSpinner.DefaultEditor) oldEditor).getTextField());
+        if ( newEditor instanceof JSpinner.DefaultEditor ) {
+            LafUtilities.repaintOnFocusChange(spinner, ((JSpinner.DefaultEditor) newEditor).getTextField());
             restyleInPlace(((JSpinner.DefaultEditor) newEditor).getTextField());
+        }
     }
 
     private void restyleInPlace( JComponent inner ) {
