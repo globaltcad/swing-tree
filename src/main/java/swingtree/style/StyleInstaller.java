@@ -641,6 +641,9 @@ final class StyleInstaller<C extends JComponent>
      *  Without this, a scroll pane whose styling was removed again would keep
      *  a translucent viewport, and with it the loss of opaqueness
      *  which {@link #_updateViewportOpaquenessOf(JComponent, StyleConf)} derives from it.
+     *  The original color only comes back while the viewport still has the color the style
+     *  engine handed down; any other color was set by something else in the meantime,
+     *  like the application or a look and feel installed while the style was active, and stays.
      *
      * @param owner The component whose viewport should be restored, only scroll panes have one.
      */
