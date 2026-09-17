@@ -4,6 +4,7 @@ import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
+import javax.swing.LookAndFeel;
 import javax.swing.AbstractButton;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicCheckBoxUI;
@@ -18,20 +19,19 @@ public final class SwingTreeCheckBoxUI
         extends    BasicCheckBoxUI
         implements SwingTreeStyledComponentUI<AbstractButton>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeCheckBoxUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeCheckBoxUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeCheckBoxUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        // Swing's own fill has to go only when a style rule paints one in its place, or it would
-        // show through the rounded corners and the grain of that rule. A blank preset paints none.
-        if ( SwingTreeLookAndFeel.styles(c.getClass()) ) {
-            AbstractButton b = (AbstractButton) c;
-            b.setContentAreaFilled(false);
-            b.setRolloverEnabled(true);
-            b.setFocusPainted(false);
-        }
-        SwingTreeLookAndFeel.installStyleOn(c);
+        // A style rule shows the pointer, so the model has to track it. Installed rather than set,
+        // so that the next look and feel can take it back and one the application set stands.
+        LookAndFeel.installProperty(c, "rolloverEnabled", _theme.styles(c.getClass()));
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -48,7 +48,7 @@ public final class SwingTreeCheckBoxUI
      *  button, so the label is written in the ink the style rule chose instead. */
     @Override
     protected void paintText( Graphics g, AbstractButton b, Rectangle textRect, String text ) {
-        if ( b.getModel().isEnabled() || !SwingTreeLookAndFeel.styles(b.getClass()) )
+        if ( b.getModel().isEnabled() || !_theme.styles(b.getClass()) )
             super.paintText(g, b, textRect, text);
         else
             LafUtilities.paintDisabledText(g, b, textRect, text);
@@ -59,6 +59,6 @@ public final class SwingTreeCheckBoxUI
 
     @Override
     public ComponentStyleDelegate<AbstractButton> style( ComponentStyleDelegate<AbstractButton> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

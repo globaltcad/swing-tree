@@ -23,12 +23,16 @@ public final class SwingTreeTextFieldUI
         extends    BasicTextFieldUI
         implements SwingTreeStyledComponentUI<JTextField>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTextFieldUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeTextFieldUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTextFieldUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
         // Swing repaints neither on a focus change nor across a whole new selection, and the
         // style is re-gathered while the component paints, so both need a repaint of their own.
         LafUtilities.repaintOnFocusChange(c, c);
@@ -52,6 +56,6 @@ public final class SwingTreeTextFieldUI
 
     @Override
     public ComponentStyleDelegate<JTextField> style( ComponentStyleDelegate<JTextField> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

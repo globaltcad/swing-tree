@@ -25,16 +25,21 @@ public final class SwingTreeSliderUI
         extends    BasicSliderUI
         implements SwingTreeStyledComponentUI<JSlider>
 {
+    private final SwingTreeLookAndFeel.Theme _theme;
+
     /** {@link BasicSliderUI} asks for a slider up front; {@link #installUI(JComponent)} supplies
      *  it instead, which is what the basic look and feel does too. */
-    public SwingTreeSliderUI() { super(null); }
+    SwingTreeSliderUI( SwingTreeLookAndFeel.Theme theme ) {
+        super(null);
+        _theme = theme;
+    }
 
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeSliderUI(); }
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeSliderUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -81,9 +86,9 @@ public final class SwingTreeSliderUI
 
     @Override
     protected Dimension getThumbSize() {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.getThumbSize();
-        int side = UI.scale(SwingTreeLookAndFeel.symbols().sliderThumbDiameter());
+        int side = UI.scale(_theme.symbols().sliderThumbDiameter());
         return new Dimension(side, side);
     }
 
@@ -91,21 +96,21 @@ public final class SwingTreeSliderUI
      *  unless the symbol set draws no handle, and Swing's rectangle is the only sign there is. */
     @Override
     public void paintFocus( Graphics g ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             super.paintFocus(g);
     }
 
     @Override
     public void paintTrack( Graphics g ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) { super.paintTrack(g); return; }
+        if ( !_theme.symbols().drawsItsOwnChrome() ) { super.paintTrack(g); return; }
         boolean    horizontal = slider.getOrientation() == SwingConstants.HORIZONTAL;
         int        centre     = horizontal
                                     ? thumbRect.x + thumbRect.width / 2
                                     : thumbRect.y + thumbRect.height / 2;
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            SwingTreeLookAndFeel.symbols().paintSliderTrack(
-                    g2, SwingTreeLookAndFeel.palette(), trackRect, centre,
+            _theme.symbols().paintSliderTrack(
+                    g2, _theme.palette(), trackRect, centre,
                     horizontal, drawInverted(), slider.isEnabled()
             );
         } finally {
@@ -115,11 +120,11 @@ public final class SwingTreeSliderUI
 
     @Override
     public void paintThumb( Graphics g ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) { super.paintThumb(g); return; }
+        if ( !_theme.symbols().drawsItsOwnChrome() ) { super.paintThumb(g); return; }
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            SwingTreeLookAndFeel.symbols().paintSliderThumb(
-                    g2, SwingTreeLookAndFeel.palette(), thumbRect,
+            _theme.symbols().paintSliderThumb(
+                    g2, _theme.palette(), thumbRect,
                     slider.isEnabled(), slider.isFocusOwner(), _handleUnderPointer
             );
         } finally {
@@ -167,13 +172,13 @@ public final class SwingTreeSliderUI
 
     @Override
     public ComponentStyleDelegate<JSlider> style( ComponentStyleDelegate<JSlider> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
     /** @return the smallest extent across the slider that still fits the handle, plus a margin. */
-    private static int thickness() {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+    private int thickness() {
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return 0;
-        return UI.scale(SwingTreeLookAndFeel.symbols().sliderThumbDiameter() + 4);
+        return UI.scale(_theme.symbols().sliderThumbDiameter() + 4);
     }
 }

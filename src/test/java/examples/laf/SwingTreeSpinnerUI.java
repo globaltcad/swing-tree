@@ -22,18 +22,48 @@ public final class SwingTreeSpinnerUI
         extends    BasicSpinnerUI
         implements SwingTreeStyledComponentUI<JSpinner>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeSpinnerUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeSpinnerUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeSpinnerUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
         // Focus lands on the text field inside the spinner, never on the spinner itself, and the
         // spinner's own border is what has to change when it does.
         JSpinner  spinner = (JSpinner) c;
         Component editor  = spinner.getEditor();
-        if ( editor instanceof JSpinner.DefaultEditor )
+        if ( editor instanceof JSpinner.DefaultEditor ) {
             LafUtilities.repaintOnFocusChange(spinner, ((JSpinner.DefaultEditor) editor).getTextField());
+            restyleInPlace(((JSpinner.DefaultEditor) editor).getTextField());
+        }
+    }
+
+    /**
+     *  A spinner's text field is styled when its own delegate is installed, which is before the
+     *  spinner puts it inside itself, so a rule asking whether it sits inside a spinner gets the
+     *  wrong answer until the field first paints. A layout that measures the spinner before that
+     *  paint then gives it the height of a free standing text field, and keeps it.
+     */
+    @Override
+    protected void replaceEditor( JComponent oldEditor, JComponent newEditor ) {
+        super.replaceEditor(oldEditor, newEditor);
+        // The focus repaint follows the field that can take focus, or a spinner given a new model
+        // after it was built would stop showing focus.
+        if ( oldEditor instanceof JSpinner.DefaultEditor )
+            LafUtilities.uninstallFocusRepaint(spinner, ((JSpinner.DefaultEditor) oldEditor).getTextField());
+        if ( newEditor instanceof JSpinner.DefaultEditor ) {
+            LafUtilities.repaintOnFocusChange(spinner, ((JSpinner.DefaultEditor) newEditor).getTextField());
+            restyleInPlace(((JSpinner.DefaultEditor) newEditor).getTextField());
+        }
+    }
+
+    private void restyleInPlace( JComponent inner ) {
+        if ( LafUtilities.componentUIOf(inner) instanceof SwingTreeStyledComponentUI )
+            _theme.installStyleOn(inner);
     }
 
     @Override
@@ -58,25 +88,25 @@ public final class SwingTreeSpinnerUI
 
     @Override
     protected Component createNextButton() {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.createNextButton();
-        Component button = new StepperButton(true);
+        Component button = new StepperButton(_theme, true);
         installNextButtonListeners(button);
         return button;
     }
 
     @Override
     protected Component createPreviousButton() {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.createPreviousButton();
-        Component button = new StepperButton(false);
+        Component button = new StepperButton(_theme, false);
         installPreviousButtonListeners(button);
         return button;
     }
 
     @Override
     public ComponentStyleDelegate<JSpinner> style( ComponentStyleDelegate<JSpinner> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
     /** One of the two stepper buttons. */
@@ -84,10 +114,13 @@ public final class SwingTreeSpinnerUI
     {
         private final boolean _up;
 
-        StepperButton( boolean up ) { _up = up; }
+        StepperButton( SwingTreeLookAndFeel.Theme theme, boolean up ) {
+            super(theme);
+            _up = up;
+        }
 
         @Override public Dimension getPreferredSize() {
-            Symbols symbols = SwingTreeLookAndFeel.symbols();
+            Symbols symbols = theme().symbols();
             return new Dimension(UI.scale(symbols.spinnerButtonWidth()),
                                  UI.scale(symbols.spinnerButtonHeight()));
         }

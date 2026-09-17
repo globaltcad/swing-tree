@@ -15,12 +15,16 @@ public final class SwingTreeEditorPaneUI
         extends    BasicEditorPaneUI
         implements SwingTreeStyledComponentUI<JEditorPane>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeEditorPaneUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeEditorPaneUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeEditorPaneUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
         // Swing repaints neither on a focus change nor across a whole new selection, and the
         // style is re-gathered while the component paints, so both need a repaint of their own.
         LafUtilities.repaintOnFocusChange(c, c);
@@ -45,6 +49,6 @@ public final class SwingTreeEditorPaneUI
 
     @Override
     public ComponentStyleDelegate<JEditorPane> style( ComponentStyleDelegate<JEditorPane> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

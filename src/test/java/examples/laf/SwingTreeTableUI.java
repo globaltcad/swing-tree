@@ -1,11 +1,13 @@
 package examples.laf;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
 import javax.swing.JTable;
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTableUI;
@@ -23,22 +25,66 @@ public final class SwingTreeTableUI
         extends    BasicTableUI
         implements SwingTreeStyledComponentUI<JTable>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+    private final @Nullable Color            _stripe;
+
+    SwingTreeTableUI( SwingTreeLookAndFeel.Theme theme, @Nullable Color stripe ) {
+        _theme  = theme;
+        _stripe = stripe;
+    }
+
+    public static ComponentUI createUI( JComponent c ) {
+        return new SwingTreeTableUI(SwingTreeLookAndFeel.installedTheme(), UIManager.getColor("Table.alternateRowColor"));
+    }
+
+    /** The grid lines and cell spacing the table had before this delegate removed them, given back
+     *  when it is uninstalled; {@code null} where the symbol set draws no chrome and nothing was
+     *  removed. Swing installs neither from its defaults, so no later look and feel would. */
+    private @Nullable Grid _displacedGrid = null;
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         JTable table = (JTable) c;
-        if ( SwingTreeLookAndFeel.drawsOwnChrome() ) {
+        if ( _theme.symbols().drawsItsOwnChrome() ) {
+            _displacedGrid = new Grid(table);
             table.setShowGrid(false);
             table.setIntercellSpacing(new Dimension(0, 0));
-            table.setRowHeight(UI.scale(SwingTreeLookAndFeel.symbols().tableRowHeight()));
-        } else {
-            // The table's constructor sets a fixed 16 pixels, which is shorter than the font
-            // this look and feel installs once the UI scale factor is above one.
-            table.setRowHeight(rowHeightFor(table));
         }
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
+        // Installed rather than set, so that a row height the application chose stands. Without a
+        // symbol set's own height, the table's constructor leaves a fixed 16 pixels, which is
+        // shorter than the font this look and feel installs once the UI scale factor is above one.
+        LookAndFeel.installProperty(table, "rowHeight", _theme.symbols().drawsItsOwnChrome()
+                                                        ? UI.scale(_theme.symbols().tableRowHeight())
+                                                        : rowHeightFor(table));
+    }
+
+    @Override
+    public void uninstallUI( JComponent c ) {
+        super.uninstallUI(c);
+        if ( _displacedGrid != null )
+            _displacedGrid.restoreOn((JTable) c);
+        _displacedGrid = null;
+    }
+
+    private static final class Grid
+    {
+        private final boolean   _horizontalLines;
+        private final boolean   _verticalLines;
+        private final Dimension _intercellSpacing;
+
+        Grid( JTable table ) {
+            _horizontalLines  = table.getShowHorizontalLines();
+            _verticalLines    = table.getShowVerticalLines();
+            _intercellSpacing = table.getIntercellSpacing();
+        }
+
+        void restoreOn( JTable table ) {
+            table.setShowHorizontalLines(_horizontalLines);
+            table.setShowVerticalLines(_verticalLines);
+            table.setIntercellSpacing(_intercellSpacing);
+        }
     }
 
     @Override
@@ -65,10 +111,10 @@ public final class SwingTreeTableUI
      *  stripes. Filling them under the renderers puts them back whatever renders the cells, for
      *  the reason {@link #paintSelectionBands} fills its bands there.
      */
-    private static void paintStripes( Graphics2D g, JTable table ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+    private void paintStripes( Graphics2D g, JTable table ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return;
-        Color stripe = UIManager.getColor("Table.alternateRowColor");
+        Color stripe = _stripe;
         if ( stripe == null || stripe.equals(table.getBackground()) )
             return;
         Rectangle clip = g.getClipBounds();
@@ -82,13 +128,13 @@ public final class SwingTreeTableUI
 
     /** Fills a band behind each selected row, for the reason {@link SwingTreeListUI} paints its
      *  own: one renderer instance cannot carry a colour that differs from row to row. */
-    private static void paintSelectionBands( Graphics2D g, JTable table ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+    private void paintSelectionBands( Graphics2D g, JTable table ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return; // Swing's own renderer is carrying the selection colour
         int[] selected = table.getSelectedRows();
         if ( selected.length == 0 )
             return;
-        g.setColor(SwingTreeLookAndFeel.palette().accentSoft());
+        g.setColor(_theme.palette().accentSoft());
         for ( int row : selected ) {
             Rectangle band = table.getCellRect(row, 0, true);
             g.fillRect(0, band.y, table.getWidth(), band.height);
@@ -103,6 +149,6 @@ public final class SwingTreeTableUI
 
     @Override
     public ComponentStyleDelegate<JTable> style( ComponentStyleDelegate<JTable> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

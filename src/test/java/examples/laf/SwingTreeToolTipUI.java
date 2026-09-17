@@ -14,12 +14,16 @@ public final class SwingTreeToolTipUI
         extends    BasicToolTipUI
         implements SwingTreeStyledComponentUI<JToolTip>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeToolTipUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeToolTipUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeToolTipUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -35,6 +39,6 @@ public final class SwingTreeToolTipUI
 
     @Override
     public ComponentStyleDelegate<JToolTip> style( ComponentStyleDelegate<JToolTip> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

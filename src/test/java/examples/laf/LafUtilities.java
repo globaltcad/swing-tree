@@ -7,6 +7,7 @@ import sprouts.ValDelegate;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.style.ComponentBackend;
+import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 
 import javax.swing.AbstractButton;
 import javax.swing.CellRendererPane;
@@ -18,6 +19,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.JViewport;
 import javax.swing.UIManager;
 import javax.swing.event.CaretListener;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
@@ -93,7 +95,6 @@ final class LafUtilities
      *  The same colour with its saturation and brightness moved by fixed amounts, both on the
      *  0-to-1 scale {@link Color#RGBtoHSB} reports and both clamped at the ends.
      *  <p>
-     *  This is how {@link NimbusRelief} keeps its light the same light in every palette.
      *  {@link #shadeTowardsWhite} washes the hue out as it goes, so a stack of mixed shades drifts
      *  towards grey. Moving the brightness leaves the hue alone, so a red base yields light reds
      *  and a blue base light blues, and one set of offsets describes the same relief on either.
@@ -274,6 +275,30 @@ final class LafUtilities
     }
 
     /**
+     *  Paints a component's style and then its inherited painting on top of it, without the clip to
+     *  the component's body the style engine would put around that painting. Only for a component
+     *  whose inherited painting draws nothing a rounded body would have to cut off - a label, an
+     *  icon - since the point of leaving the clip out is that the text keeps the desktop's subpixel
+     *  antialiasing, which Java2D drops under any clip that is not a list of rectangles.
+     *
+     * @param g the context the component is being painted on
+     * @param c the component
+     * @param inheritedPainting the {@code Basic*UI} painting to run over the style
+     */
+    static void paintStyledUnderInheritedPainting( Graphics g, JComponent c, Painter inheritedPainting ) {
+        paintStyled(g, c, Painter.none());
+        Graphics2D g2 = (Graphics2D) g.create();
+        try {
+            applyDesktopTextHints(g2);
+            g2.setColor(c.getForeground());
+            g2.setFont(c.getFont());
+            inheritedPainting.paint(g2);
+        } finally {
+            g2.dispose();
+        }
+    }
+
+    /**
      *  Draws the label of a button, a check box or a radio button whose model is disabled.
      *  <p>
      *  {@code BasicButtonUI.paintText} embosses that label out of the button's own background, by
@@ -446,6 +471,22 @@ final class LafUtilities
     static boolean isControlInternal( JComponent inner ) {
         return SwingUtilities.getAncestorOfClass(JSpinner.class, inner) != null
             || SwingUtilities.getAncestorOfClass(JComboBox.class, inner) != null;
+    }
+
+    /**
+     *  The {@link ComponentUI} delegate installed on a component, or {@code null} if it has none.
+     *  <p>
+     *  {@code JComponent.getUI()} is a Java 9 addition and these examples are compiled at source
+     *  level 8, so the lookup goes through the library's own Java 8 compatible helper, which casts
+     *  to the component types that declare {@code getUI()} and is what SwingTree itself uses when
+     *  it needs a component's delegate.
+     *
+     * @param c the component whose delegate is asked for
+     * @return the installed delegate, or {@code null} for a component that declares none
+     */
+    @SuppressWarnings({"DoNotCall", "deprecation"})
+    static ComponentUI componentUIOf( JComponent c ) {
+        return LibraryInternalCrossPackageStyleUtil._findComponentUIOf(c);
     }
 
     /** Whether a combo box should be drawn as focused. An editable one hands the focus to its

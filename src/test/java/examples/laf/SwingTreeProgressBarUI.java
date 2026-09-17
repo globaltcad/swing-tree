@@ -25,20 +25,24 @@ public final class SwingTreeProgressBarUI
         extends    BasicProgressBarUI
         implements SwingTreeStyledComponentUI<JProgressBar>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeProgressBarUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeProgressBarUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeProgressBarUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
     public Dimension getPreferredSize( JComponent c ) {
         Dimension d = super.getPreferredSize(c);
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return d;
-        int floor = UI.scale(SwingTreeLookAndFeel.symbols().progressBarThickness());
+        int floor = UI.scale(_theme.symbols().progressBarThickness());
         if ( ((JProgressBar) c).getOrientation() == SwingConstants.HORIZONTAL )
             d.height = Math.max(d.height, floor);
         else
@@ -59,13 +63,13 @@ public final class SwingTreeProgressBarUI
 
     @Override
     protected void paintDeterminate( Graphics g, JComponent c ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) { super.paintDeterminate(g, c); return; }
+        if ( !_theme.symbols().drawsItsOwnChrome() ) { super.paintDeterminate(g, c); return; }
         JProgressBar bar   = (JProgressBar) c;
         double       ratio = fillRatio(bar);
         Graphics2D   g2    = (Graphics2D) g.create();
         try {
-            SwingTreeLookAndFeel.symbols().paintProgressFill(
-                    g2, SwingTreeLookAndFeel.palette(), bar.getWidth(), bar.getHeight(), ratio,
+            _theme.symbols().paintProgressFill(
+                    g2, _theme.palette(), bar.getWidth(), bar.getHeight(), ratio,
                     bar.getOrientation() == SwingConstants.HORIZONTAL, bar.isEnabled()
             );
         } finally {
@@ -77,7 +81,7 @@ public final class SwingTreeProgressBarUI
 
     @Override
     public ComponentStyleDelegate<JProgressBar> style( ComponentStyleDelegate<JProgressBar> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
     private static double fillRatio( JProgressBar bar ) {
@@ -86,7 +90,7 @@ public final class SwingTreeProgressBarUI
     }
 
     /** Centres the bar's string, switching to the on-filled colour once the fill has reached it. */
-    private static void paintStringAtCentre( Graphics2D g, JProgressBar bar, double ratio ) {
+    private void paintStringAtCentre( Graphics2D g, JProgressBar bar, double ratio ) {
         String text = bar.getString();
         if ( text == null || text.isEmpty() )
             return;
@@ -94,7 +98,7 @@ public final class SwingTreeProgressBarUI
         try {
             g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g2.setFont(bar.getFont());
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p = _theme.palette();
             Color colour = ratio > 0.45 ? p.onFilled() : p.text();
             g2.setColor(colour);
             FontMetrics metrics = g2.getFontMetrics();

@@ -26,13 +26,19 @@ import java.awt.Insets;
  */
 abstract class ActuatorButton extends JButton
 {
-    ActuatorButton() {
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    ActuatorButton( SwingTreeLookAndFeel.Theme theme ) {
+        _theme = theme;
         super.setBorder(null);
         setContentAreaFilled(false);
         setFocusable(false);
         setOpaque(false);
         setRolloverEnabled(true);
     }
+
+    /** @return the theme this actuator was made for, which also decides how large it is */
+    SwingTreeLookAndFeel.Theme theme() { return _theme; }
 
     /** Ignores {@code border} and stays borderless, for the reason given on the class. */
     @Override
@@ -51,7 +57,7 @@ abstract class ActuatorButton extends JButton
     protected final void paintComponent( Graphics g ) {
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            paintActuator(g2, SwingTreeLookAndFeel.symbols(), SwingTreeLookAndFeel.palette());
+            paintActuator(g2, _theme.symbols(), _theme.palette());
         } finally {
             g2.dispose();
         }
@@ -62,8 +68,8 @@ abstract class ActuatorButton extends JButton
      *
      * @param g a scratch context covering the whole button, which the implementation may configure
      *          freely and does not have to dispose of
-     * @param symbols the symbol set in force
-     * @param palette the palette in force
+     * @param symbols the symbol set of the theme this actuator was made for
+     * @param palette the palette of that theme
      */
     abstract void paintActuator( Graphics2D g, Symbols symbols, SwingTreeLookAndFeel.Palette palette );
 }

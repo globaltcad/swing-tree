@@ -6,6 +6,7 @@ import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTreeUI;
@@ -22,19 +23,37 @@ public final class SwingTreeTreeUI
         extends    BasicTreeUI
         implements SwingTreeStyledComponentUI<JTree>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTreeUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+    private final int                        _leftChildIndent;
+    private final int                        _rightChildIndent;
+
+    SwingTreeTreeUI( SwingTreeLookAndFeel.Theme theme, int leftChildIndent, int rightChildIndent ) {
+        _theme            = theme;
+        _leftChildIndent  = leftChildIndent;
+        _rightChildIndent = rightChildIndent;
+    }
+
+    public static ComponentUI createUI( JComponent c ) {
+        return new SwingTreeTreeUI(
+                    SwingTreeLookAndFeel.installedTheme(),
+                    UIManager.getInt("Tree.leftChildIndent"),
+                    UIManager.getInt("Tree.rightChildIndent")
+                );
+    }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         JTree tree = (JTree) c;
-        if ( SwingTreeLookAndFeel.drawsOwnChrome() ) {
-            tree.setShowsRootHandles(true);
-            setExpandedIcon(GlyphIcons.treeExpanded());
-            setCollapsedIcon(GlyphIcons.treeCollapsed());
+        // Installed rather than set, so that a symbol set drawing no chrome gives the handles back
+        // and one the application set stands.
+        LookAndFeel.installProperty(tree, "showsRootHandles", _theme.symbols().drawsItsOwnChrome());
+        if ( _theme.symbols().drawsItsOwnChrome() ) {
+            setExpandedIcon(GlyphIcons.treeExpanded(_theme));
+            setCollapsedIcon(GlyphIcons.treeCollapsed(_theme));
         }
         LafUtilities.rescaleOnUiScaleChange(tree, () -> applyScaledMetrics(tree));
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -50,16 +69,17 @@ public final class SwingTreeTreeUI
      *  clips off the bottom of every label it has.
      */
     private void applyScaledMetrics( JTree tree ) {
-        if ( SwingTreeLookAndFeel.drawsOwnChrome() )
-            tree.setRowHeight(UI.scale(SwingTreeLookAndFeel.symbols().treeRowHeight()));
+        // Installed rather than set, so that a row height the application chose stands.
+        if ( _theme.symbols().drawsItsOwnChrome() )
+            LookAndFeel.installProperty(tree, "rowHeight", UI.scale(_theme.symbols().treeRowHeight()));
         else {
             // A row shorter than the font in it is unreadable rather than merely plain.
             java.awt.Font font = tree.getFont();
             int size = font == null ? UI.scale(13) : Math.round(font.getSize2D());
-            tree.setRowHeight(Math.round(size * 1.75f));
+            LookAndFeel.installProperty(tree, "rowHeight", Math.round(size * 1.75f));
         }
-        setLeftChildIndent(UI.scale(UIManager.getInt("Tree.leftChildIndent")));
-        setRightChildIndent(UI.scale(UIManager.getInt("Tree.rightChildIndent")));
+        setLeftChildIndent(UI.scale(_leftChildIndent));
+        setRightChildIndent(UI.scale(_rightChildIndent));
     }
 
     @Override
@@ -78,13 +98,13 @@ public final class SwingTreeTreeUI
      *  rows are selected and is painted once, so the band is filled here and the renderers, which
      *  are not opaque, are painted over it.
      */
-    private static void paintSelectionBands( Graphics2D g, JTree tree ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+    private void paintSelectionBands( Graphics2D g, JTree tree ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return; // Swing's own renderer is carrying the selection colour
         int[] selected = tree.getSelectionRows();
         if ( selected == null )
             return;
-        g.setColor(SwingTreeLookAndFeel.palette().accentSoft());
+        g.setColor(_theme.palette().accentSoft());
         for ( int row : selected ) {
             Rectangle band = tree.getRowBounds(row);
             if ( band != null )
@@ -101,19 +121,19 @@ public final class SwingTreeTreeUI
     /** No vertical guide line between siblings, unless the symbol set draws no chrome. */
     @Override
     protected void paintVerticalLine( Graphics g, JComponent c, int x, int top, int bottom ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             super.paintVerticalLine(g, c, x, top, bottom);
     }
 
     /** No horizontal guide line into a child, unless the symbol set draws no chrome. */
     @Override
     protected void paintHorizontalLine( Graphics g, JComponent c, int y, int left, int right ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             super.paintHorizontalLine(g, c, y, left, right);
     }
 
     @Override
     public ComponentStyleDelegate<JTree> style( ComponentStyleDelegate<JTree> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

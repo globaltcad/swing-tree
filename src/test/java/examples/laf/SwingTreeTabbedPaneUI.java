@@ -9,6 +9,7 @@ import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import java.awt.Color;
@@ -21,7 +22,6 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 
 /**
  *  The {@link JTabbedPane} UI delegate. The symbol set draws the tab surfaces and the accent on
@@ -33,12 +33,30 @@ public final class SwingTreeTabbedPaneUI
         extends    BasicTabbedPaneUI
         implements SwingTreeStyledComponentUI<JTabbedPane>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTabbedPaneUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+    private final @Nullable Insets           _tabMargins;
+    private final @Nullable Insets           _tabAreaMargins;
+
+    SwingTreeTabbedPaneUI(
+        SwingTreeLookAndFeel.Theme theme, @Nullable Insets tabMargins, @Nullable Insets tabAreaMargins
+    ) {
+        _theme          = theme;
+        _tabMargins     = tabMargins;
+        _tabAreaMargins = tabAreaMargins;
+    }
+
+    public static ComponentUI createUI( JComponent c ) {
+        return new SwingTreeTabbedPaneUI(
+                    SwingTreeLookAndFeel.installedTheme(),
+                    UIManager.getInsets(TAB_MARGINS),
+                    UIManager.getInsets(TAB_AREA_MARGINS)
+                );
+    }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -54,11 +72,22 @@ public final class SwingTreeTabbedPaneUI
 
     // ── Insets and spacing ───────────────────────────────────────────────
 
+    /** The key Nimbus files the room around a tab's label under, which a look and feel that lays
+     *  its tabs out the Nimbus way puts into its defaults. */
+    private static final String TAB_MARGINS = "TabbedPane:TabbedPaneTab.contentMargins";
+
+    /** The same for the room around the whole row of tabs, whose bottom Nimbus fills with the edge
+     *  along the page. */
+    private static final String TAB_AREA_MARGINS = "TabbedPane:TabbedPaneTabArea.contentMargins";
+
     @Override
     protected Insets getTabInsets( int tabPlacement, int tabIndex ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.getTabInsets(tabPlacement, tabIndex);
-        Symbols symbols = SwingTreeLookAndFeel.symbols();
+        Insets margins = _tabMargins;
+        if ( margins != null )
+            return new Insets(UI.scale(margins.top), UI.scale(margins.left), UI.scale(margins.bottom), UI.scale(margins.right));
+        Symbols symbols = _theme.symbols();
         int     v       = UI.scale(symbols.tabPaddingVertical());
         int     h       = UI.scale(symbols.tabPaddingHorizontal());
         return new Insets(v, h, v, h);
@@ -66,10 +95,10 @@ public final class SwingTreeTabbedPaneUI
 
     @Override
     protected Insets getContentBorderInsets( int tabPlacement ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.getContentBorderInsets(tabPlacement);
         // The symbol set's edge, on whichever side of the page the tabs sit.
-        int n = Math.max(1, UI.scale(SwingTreeLookAndFeel.symbols().tabEdgeThickness()));
+        int n = Math.max(1, UI.scale(_theme.symbols().tabEdgeThickness()));
         switch ( tabPlacement ) {
             case SwingConstants.LEFT:   return new Insets(0, n, 0, 0);
             case SwingConstants.RIGHT:  return new Insets(0, 0, 0, n);
@@ -81,16 +110,31 @@ public final class SwingTreeTabbedPaneUI
 
     @Override
     protected Insets getTabAreaInsets( int tabPlacement ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.getTabAreaInsets(tabPlacement);
-        int gap = UI.scale(SwingTreeLookAndFeel.symbols().tabAreaGap());
+        Insets margins = _tabAreaMargins;
+        if ( margins != null ) {
+            // The edge along the page is drawn inside these margins, reaching one row up under the
+            // tabs, so the area itself stops that far short of them.
+            int edge = _theme.symbols().tabEdgeThickness();
+            return new Insets(UI.scale(margins.top), UI.scale(margins.left), UI.scale(margins.bottom - edge), UI.scale(margins.right));
+        }
+        int gap = UI.scale(_theme.symbols().tabAreaGap());
         return new Insets(gap, gap, 0, gap);
+    }
+
+    /** Swing adds three pixels to every tab beyond its label and its insets. A tab laid out to
+     *  Nimbus's margins is exactly its label and its margins wide. */
+    @Override
+    protected int calculateTabWidth( int tabPlacement, int tabIndex, FontMetrics metrics ) {
+        int basic = super.calculateTabWidth(tabPlacement, tabIndex, metrics);
+        return _theme.symbols().drawsItsOwnChrome() && _tabMargins != null ? basic - 3 : basic;
     }
 
     @Override
     protected int calculateTabAreaHeight( int tabPlacement, int horizRunCount, int maxTabHeight ) {
         int basic = super.calculateTabAreaHeight(tabPlacement, horizRunCount, maxTabHeight);
-        return SwingTreeLookAndFeel.drawsOwnChrome() ? basic + UI.scale(2) : basic;
+        return _theme.symbols().drawsItsOwnChrome() && _tabAreaMargins == null ? basic + UI.scale(2) : basic;
     }
 
     // ── Sizing ───────────────────────────────────────────────────────────
@@ -153,7 +197,7 @@ public final class SwingTreeTabbedPaneUI
     protected void setRolloverTab( int index ) {
         int left = getRolloverTab();
         super.setRolloverTab(index);
-        if ( left == index || tabPane == null || !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( left == index || tabPane == null || !_theme.symbols().drawsItsOwnChrome() )
             return;
         repaintTab(left);
         repaintTab(index);
@@ -176,15 +220,15 @@ public final class SwingTreeTabbedPaneUI
     protected void paintTabBackground(
         Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected
     ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() ) {
             super.paintTabBackground(g, tabPlacement, tabIndex, x, y, w, h, isSelected);
             return;
         }
         boolean    rollover = getRolloverTab() == tabIndex && tabPane.isEnabledAt(tabIndex);
         Graphics2D g2       = (Graphics2D) g.create();
         try {
-            SwingTreeLookAndFeel.symbols().paintTabSurface(
-                    g2, SwingTreeLookAndFeel.palette(), x, y, w, h, isSelected, rollover
+            _theme.symbols().paintTabSurface(
+                    g2, _theme.palette(), x, y, w, h, isSelected, rollover
             );
         } finally {
             g2.dispose();
@@ -195,7 +239,7 @@ public final class SwingTreeTabbedPaneUI
     protected void paintTabBorder(
         Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected
     ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() ) {
             super.paintTabBorder(g, tabPlacement, tabIndex, x, y, w, h, isSelected);
             return;
         }
@@ -203,8 +247,8 @@ public final class SwingTreeTabbedPaneUI
             return;
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            SwingTreeLookAndFeel.symbols().paintTabAccent(
-                    g2, SwingTreeLookAndFeel.palette(), x, y, w, h,
+            _theme.symbols().paintTabAccent(
+                    g2, _theme.palette(), x, y, w, h,
                     tabPlacement, tabPane.isEnabledAt(tabIndex)
             );
         } finally {
@@ -217,19 +261,16 @@ public final class SwingTreeTabbedPaneUI
         Graphics g, int tabPlacement, Font font, FontMetrics metrics,
         int tabIndex, String title, Rectangle textRect, boolean isSelected
     ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() ) {
             super.paintText(g, tabPlacement, font, metrics, tabIndex, title, textRect, isSelected);
             return;
         }
-        SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-        Color colour;
-        if ( !tabPane.isEnabledAt(tabIndex) ) colour = p.textDisabled();
-        else if ( isSelected )                colour = p.text();
-        else                                  colour = p.textMuted();
+        Color colour = _theme.symbols().tabText(
+                            _theme.palette(), isSelected, tabPane.isEnabledAt(tabIndex)
+                        );
 
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g2.setFont(font);
             g2.setColor(colour);
             g2.drawString(title, textRect.x, textRect.y + metrics.getAscent());
@@ -244,19 +285,19 @@ public final class SwingTreeTabbedPaneUI
         Graphics g, int tabPlacement, Rectangle[] rects,
         int tabIndex, Rectangle iconRect, Rectangle textRect, boolean isSelected
     ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             super.paintFocusIndicator(g, tabPlacement, rects, tabIndex, iconRect, textRect, isSelected);
     }
 
     @Override
     protected void paintContentBorder( Graphics g, int tabPlacement, int selectedIndex ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() ) {
             super.paintContentBorder(g, tabPlacement, selectedIndex);
             return;
         }
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            int n = Math.max(1, UI.scale(SwingTreeLookAndFeel.symbols().tabEdgeThickness()));
+            int n = Math.max(1, UI.scale(_theme.symbols().tabEdgeThickness()));
             int w = tabPane.getWidth(), h = tabPane.getHeight();
             int tabAreaH = calculateTabAreaHeight(tabPlacement, runCount, maxTabHeight);
             int tabAreaW = calculateTabAreaWidth(tabPlacement, runCount, maxTabWidth);
@@ -268,8 +309,8 @@ public final class SwingTreeTabbedPaneUI
                 case SwingConstants.TOP:
                 default:                    edge = new Rectangle(0, tabAreaH, w, n);         break;
             }
-            SwingTreeLookAndFeel.symbols().paintTabEdge(
-                    g2, SwingTreeLookAndFeel.palette(), edge, selectedTabBounds(selectedIndex), tabPlacement
+            _theme.symbols().paintTabEdge(
+                    g2, _theme.palette(), edge, selectedTabBounds(selectedIndex), tabPlacement
             );
         } finally {
             g2.dispose();
@@ -286,6 +327,6 @@ public final class SwingTreeTabbedPaneUI
 
     @Override
     public ComponentStyleDelegate<JTabbedPane> style( ComponentStyleDelegate<JTabbedPane> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

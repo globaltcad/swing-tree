@@ -18,12 +18,16 @@ public final class SwingTreeViewportUI
         extends    BasicViewportUI
         implements SwingTreeStyledComponentUI<JViewport>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeViewportUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeViewportUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeViewportUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -39,6 +43,6 @@ public final class SwingTreeViewportUI
 
     @Override
     public ComponentStyleDelegate<JViewport> style( ComponentStyleDelegate<JViewport> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

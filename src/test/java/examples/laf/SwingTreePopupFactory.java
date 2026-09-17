@@ -1,6 +1,7 @@
 package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.PopupWindowMode;
+import examples.laf.SwingTreeLookAndFeel.Theme;
 import swingtree.UI;
 import swingtree.style.ComponentBackend;
 
@@ -27,8 +28,8 @@ import java.util.Objects;
  *  whole ring, which turns a rounded shadowed sheet into a square one on a light slab. A style rule
  *  cannot correct it, because the window is one level above the component a rule is handed.
  *  <p>
- *  So this factory dresses the window instead, in whichever way
- *  {@link SwingTreeLookAndFeel#popupWindowMode()} says the platform supports. The style rules are
+ *  So this factory dresses the window instead, in whichever way the
+ *  {@linkplain Theme#popupWindowMode() theme} it was made for says the platform supports. The style rules are
  *  untouched under every mode: the sheet keeps the margin, the radius and the shadow it has
  *  in-frame, and only the window behind it changes.
  *  <ul>
@@ -54,9 +55,11 @@ final class SwingTreePopupFactory extends PopupFactory
     private static final Color FULLY_TRANSPARENT = new Color(0, 0, 0, 0);
 
     private final PopupFactory _replaced;
+    private final Theme        _theme;
 
-    SwingTreePopupFactory( PopupFactory replaced ) {
+    SwingTreePopupFactory( PopupFactory replaced, Theme theme ) {
         _replaced = Objects.requireNonNull(replaced);
+        _theme    = Objects.requireNonNull(theme);
     }
 
     /** @return the factory this one was installed in front of, which uninstalling restores */
@@ -88,8 +91,8 @@ final class SwingTreePopupFactory extends PopupFactory
      *  The shape cannot be set here, because it has to match the sheet and the sheet has no size
      *  until the {@code pack()} inside {@link Popup#show()} has run.
      */
-    private static PopupWindowMode _dress( Window host ) {
-        PopupWindowMode mode = SwingTreeLookAndFeel.popupWindowMode();
+    private PopupWindowMode _dress( Window host ) {
+        PopupWindowMode mode = _theme.popupWindowMode();
         if ( mode == PopupWindowMode.TRANSLUCENT ) {
             try {
                 Color current = host.getBackground();
@@ -100,7 +103,7 @@ final class SwingTreePopupFactory extends PopupFactory
                 mode = PopupWindowMode.SHAPED;
             }
         }
-        Color ground = SwingTreeLookAndFeel.palette().background();
+        Color ground = _theme.palette().background();
         if ( !ground.equals(host.getBackground()) )
             host.setBackground(ground);
         if ( mode == PopupWindowMode.SHAPED )

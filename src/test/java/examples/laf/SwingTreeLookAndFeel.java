@@ -11,21 +11,25 @@ import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JMenu;
 import javax.swing.JLayeredPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolTip;
 import javax.swing.JViewport;
+import javax.swing.LookAndFeel;
 import javax.swing.PopupFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.Border;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -43,14 +47,16 @@ import java.util.concurrent.ConcurrentHashMap;
  *  A configurable Swing <i>Look and Feel</i> which paints every component through the
  *  {@linkplain ComponentBackend SwingTree style engine} rather than through
  *  hand written {@link java.awt.Graphics} code. Its appearance is data instead of code: a
- *  {@link Palette} of named colours, a {@link StylePreset} of {@link Styler} rules keyed by
+ *  {@link Palette} of named colours, a {@link StylePreset} of {@link ThemedStyler} rules keyed by
  *  component type, and a {@link SymbolPreset} drawing the small geometry no rule can express.
  *  <pre>{@code
  *    SwingTreeLookAndFeel.initializeUsing( it -> it
  *        .stylePreset(SwingTreeLookAndFeel.StylePreset.LINEN)
  *        .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.LINEN)
- *        .overrideStyle(JButton.class, s -> s.borderRadius(2))       // replaces the preset rule
- *        .addStyle(JTextField.class, s -> s.backgroundColor("blue")) // applied on top of it
+ *        .overrideStyle(JButton.class, (theme, s) -> s.borderRadius(2))  // replaces the preset rule
+ *        .addStyle(JTextField.class, (theme, s) ->                       // applied on top of it
+ *            s.backgroundColor(theme.palette().accentSoft())
+ *        )
  *    );
  *  }</pre>
  *  {@link #initializeUsing(Configurator)} refreshes every window that is already open, so it is
@@ -59,9 +65,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *  <p>
  *  A rule is registered against a component type and applies to that type and every subtype of it,
  *  the most specific match winning, which is how {@code JCheckBox} is styled differently from the
- *  {@code AbstractButton} rule it would otherwise take. A {@link Conf#overrideStyle(Class, Styler)}
+ *  {@code AbstractButton} rule it would otherwise take. A {@link Conf#overrideStyle(Class, ThemedStyler)}
  *  rule replaces the preset's rule for everything it matches, every matching
- *  {@link Conf#addStyle(Class, Styler)} rule is applied over the result in registration order, and
+ *  {@link Conf#addStyle(Class, ThemedStyler)} rule is applied over the result in registration order, and
  *  between two rules for one type the later one wins.
  *  <p>
  *  This cascade is the second of SwingTree's three style layers: it runs after an application's
@@ -75,13 +81,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 {
-    /**
-     *  The configuration the UI delegates read from. Swing builds them reflectively through
-     *  {@link UIDefaults}, so there is no constructor to hand it to them; the installed look and
-     *  feel publishes it here instead. Swing allows one installed look and feel per process.
-     */
-    private static volatile SwingTreeLookAndFeel _active = null;
-
     /** Where the UI delegate classes live, for the {@link UIDefaults} class-name entries. */
     private static final String PKG = "examples.laf.";
 
@@ -106,7 +105,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             "PopupMenu.font"
     ));
 
-    private final Conf _conf;
+    private final Theme _theme;
 
     /** Sprouts holds listeners weakly, so dropping this field would stop font tracking without
      *  saying so. */
@@ -128,12 +127,53 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             throw new IllegalStateException("Failed to install the SwingTree look and feel.", e);
         }
         for ( Window window : Window.getWindows() )
-            SwingUtilities.updateComponentTreeUI(window);
+            updateComponentTreeUI(window);
+    }
+
+    /**
+     *  Gives every component of a tree a fresh UI delegate from the installed look and feel, like
+     *  {@link SwingUtilities#updateComponentTreeUI(Component)} does, but children before their
+     *  parent.
+     *  <p>
+     *  The order is what a freshly built tree was installed in, and Swing's own parent-first walk
+     *  breaks it in two ways. A parent's new delegate makes new children of its own - a spinner's
+     *  arrow buttons, a combo box's editor - and the walk then reaches those and installs a second
+     *  delegate on them, which re-installs defaults the parent had just replaced: a spinner's arrow
+     *  button ends up wearing {@code Button.border}. And a component that owns a child it did not
+     *  make - a spinner its editor, a scroll pane its viewport - is installed while that child still
+     *  has the delegate of the previous look and feel, so anything the parent asks of the child
+     *  is answered by the old theme.
+     *
+     * @param root the window, or any other component, whose tree to update
+     */
+    public static void updateComponentTreeUI( Component root ) {
+        _updateChildrenThenSelf(root);
+        root.invalidate();
+        root.validate();
+        root.repaint();
+    }
+
+    private static void _updateChildrenThenSelf( Component c ) {
+        Component[] children = null;
+        if ( c instanceof JMenu )
+            children = ((JMenu) c).getMenuComponents();
+        else if ( c instanceof Container )
+            children = ((Container) c).getComponents();
+        if ( children != null )
+            for ( Component child : children )
+                _updateChildrenThenSelf(child);
+        if ( c instanceof JComponent ) {
+            JComponent component = (JComponent) c;
+            component.updateUI();
+            JPopupMenu popup = component.getComponentPopupMenu();
+            if ( popup != null )
+                updateComponentTreeUI(popup);
+        }
     }
 
     /** Creates the look and feel with its default configuration. */
     public SwingTreeLookAndFeel() {
-        _conf = Conf.DEFAULT;
+        _theme = new Theme(Conf.DEFAULT);
     }
 
     /**
@@ -144,15 +184,17 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      */
     public SwingTreeLookAndFeel( Configurator<Conf> configurator ) {
         Objects.requireNonNull(configurator);
+        Conf configured;
         try {
-            _conf = Objects.requireNonNull(configurator.configure(Conf.DEFAULT));
+            configured = Objects.requireNonNull(configurator.configure(Conf.DEFAULT));
         } catch ( Exception e ) {
             throw new IllegalArgumentException("Failed to configure the SwingTree look and feel.", e);
         }
+        _theme = new Theme(configured);
     }
 
-    @Override public String  getName()                { return _conf.name(); }
-    @Override public String  getID()                  { return _conf.name(); }
+    @Override public String  getName()                { return _theme.stylePreset().displayName(); }
+    @Override public String  getID()                  { return _theme.stylePreset().displayName(); }
     @Override public String  getDescription()         { return "A configurable look-and-feel rendered by the SwingTree style engine."; }
     @Override public boolean isNativeLookAndFeel()    { return false; }
     @Override public boolean isSupportedLookAndFeel() { return true; }
@@ -165,7 +207,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      */
     @Override
     public void initialize() {
-        _active = this;
         super.initialize();
         _installPopupFactory();
         _fontView = SwingTree.get().getScaledDefaultFontView();
@@ -178,18 +219,17 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     public void uninitialize() {
         _uninstallPopupFactory();
         _fontView = null;
-        if ( _active == this )
-            _active = null;
         super.uninitialize();
     }
 
-    /** Puts the popup factory in front of whichever one is installed, unless it is already there.
-     *  Switching presets re-installs the look and feel, and a factory stacked on itself would
-     *  dress every popup once per switch. */
-    private static void _installPopupFactory() {
+    /** Puts a popup factory dressing popups in this look and feel's theme in front of whichever one
+     *  is installed. One an earlier theme left there is replaced rather than stacked on, which
+     *  would dress every popup once per switch. */
+    private void _installPopupFactory() {
         PopupFactory current = PopupFactory.getSharedInstance();
-        if ( !(current instanceof SwingTreePopupFactory) )
-            PopupFactory.setSharedInstance(new SwingTreePopupFactory(current));
+        if ( current instanceof SwingTreePopupFactory )
+            current = ((SwingTreePopupFactory) current).replaced();
+        PopupFactory.setSharedInstance(new SwingTreePopupFactory(current, _theme));
     }
 
     private static void _uninstallPopupFactory() {
@@ -198,37 +238,34 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             PopupFactory.setSharedInstance(((SwingTreePopupFactory) current).replaced());
     }
 
-    @Override
-    public UIDefaults getDefaults() {
-        _active = this;
-        return super.getDefaults();
-    }
+    // ── The installed theme ──────────────────────────────────────────────
 
-    // ── The delegates' view of the installed configuration ────────────────
-
-    /** @return the configuration of the installed look and feel, or the default one. */
-    static Conf conf() {
-        SwingTreeLookAndFeel active = _active;
-        return active == null ? Conf.DEFAULT : active._conf;
+    /**
+     *  The theme a UI delegate is made for. Swing builds a delegate reflectively, through the
+     *  static {@code createUI} method a {@link UIDefaults} entry names, so there is no constructor
+     *  of Swing's to hand the theme through. Each {@code createUI} asks here once and passes the
+     *  answer to the delegate it makes, and switching theme installs a fresh delegate everywhere.
+     *
+     * @return the theme of the installed look and feel, or one built from the default
+     *         configuration if a SwingTree delegate is made while another look and feel is installed
+     */
+    static Theme installedTheme() {
+        LookAndFeel installed = UIManager.getLookAndFeel();
+        return installed instanceof SwingTreeLookAndFeel
+                ? ((SwingTreeLookAndFeel) installed)._theme
+                : new Theme(Conf.DEFAULT);
     }
 
     /**
      *  The colours the installed look and feel paints with, or the default palette if none is
-     *  installed. An application that styles something of its own reads them from here, so that a
-     *  re-tinted palette reaches its work too.
+     *  installed. An application that styles something of its own outside this look and feel's
+     *  rules reads them from here, so that a re-tinted palette reaches its work too.
      */
-    public static Palette palette() { return conf().palette(); }
-
-    /**
-     *  How {@link SwingTreePopupFactory} dresses the window of a popup that does not fit inside the
-     *  application window, with {@link PopupWindowMode#AUTO} already resolved against the platform.
-     *
-     * @return the mode a popup needing a window of its own is given; never
-     *         {@link PopupWindowMode#AUTO} and never {@link PopupWindowMode#IN_FRAME}
-     */
-    public static PopupWindowMode popupWindowMode() {
-        PopupWindowMode configured = conf().popupWindowMode();
-        return configured == PopupWindowMode.AUTO ? _detectedPopupWindowMode() : configured;
+    public static Palette palette() {
+        LookAndFeel installed = UIManager.getLookAndFeel();
+        return installed instanceof SwingTreeLookAndFeel
+                ? ((SwingTreeLookAndFeel) installed)._theme.palette()
+                : Conf.DEFAULT.palette();
     }
 
     /**
@@ -244,11 +281,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         Object recorded = popup.getClientProperty(SwingTreePopupFactory.MODE_KEY);
         return recorded instanceof PopupWindowMode ? (PopupWindowMode) recorded : PopupWindowMode.IN_FRAME;
     }
-
-    /** Remembered because the screen device would otherwise be asked once per popup, and a
-     *  display's translucency support does not change while the application runs. Two threads
-     *  arriving at once compute the same answer. */
-    private static volatile PopupWindowMode _detectedPopupWindowMode = null;
 
     /**
      *  Which dressing the platform can actually carry.
@@ -266,81 +298,16 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      *  {@link Conf#popupWindowMode(PopupWindowMode)}.
      */
     private static PopupWindowMode _detectedPopupWindowMode() {
-        PopupWindowMode detected = _detectedPopupWindowMode;
-        if ( detected != null )
-            return detected;
         if ( GraphicsEnvironment.isHeadless() )
             return PopupWindowMode.OPAQUE;
         GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
         boolean alwaysComposites = os.contains("mac") || os.contains("darwin") || os.contains("windows");
         if ( alwaysComposites && screen.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSLUCENT) )
-            detected = PopupWindowMode.TRANSLUCENT;
-        else if ( screen.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT) )
-            detected = PopupWindowMode.SHAPED;
-        else
-            detected = PopupWindowMode.OPAQUE;
-        _detectedPopupWindowMode = detected;
-        return detected;
-    }
-
-    /** @return the symbol set of the installed look and feel. */
-    static Symbols symbols() { return conf().symbols(); }
-
-    /**
-     *  Whether the installed symbol set draws chrome of its own. When it does not, every delegate
-     *  falls through to the painting and the sizing of the {@code Basic*UI} it extends, which
-     *  leaves plain Swing with the style engine wired in and nothing else.
-     */
-    static boolean drawsOwnChrome() { return conf().symbols().drawsItsOwnChrome(); }
-
-    static boolean styles( Class<?> componentType ) { return conf().styles(componentType); }
-
-    /**
-     *  Installs the style engine on a component, first handing the component back to Swing's own
-     *  defaults if nothing styles its type any more.
-     *  <p>
-     *  A style rule's colours are not only painted, they are installed: the engine calls
-     *  {@code setForeground(..)} and {@code setBackground(..)} on the component. Those outlive the
-     *  preset that asked for them, because Swing treats a colour it did not install itself as the
-     *  application's and will not overwrite it. Switching from a theme to {@link StylePreset#BLANK}
-     *  would therefore leave every button wearing the label colour the old theme picked to sit on a
-     *  fill nothing paints any more - white on white. So the component is given the plain
-     *  look-and-feel defaults for its own class instead.
-     *  <p>
-     *  A component that <em>is</em> styled gives up the border Swing installed from
-     *  {@code Button.border}, {@code TextField.border} and the rest. Those are bevels drawn from the
-     *  {@code control*} colours, and the style engine keeps whatever border it finds as the one to
-     *  fall back on wherever a rule leaves its own invisible, so under a theme without outlines they
-     *  would surface as a two-tone frame around every control. Only a border Swing itself put there
-     *  is dropped, so one the application set survives.
-     *
-     * @param c the component the delegate is being installed on
-     */
-    static void installStyleOn( JComponent c ) {
-        if ( !styles(c.getClass()) )
-            _restoreDefaultColours(c);
-        else if ( c.getBorder() instanceof UIResource )
-            c.setBorder(null);
-        ComponentBackend.powering(c).gatherApplyAndInstallStyle(true);
-    }
-
-    /** Re-reads the two colour defaults of a component's own UI class, e.g. "Button.background". */
-    private static void _restoreDefaultColours( JComponent c ) {
-        String id     = c.getUIClassID();
-        String prefix = id.endsWith("UI") ? id.substring(0, id.length() - 2) : id;
-        Color  bg     = UIManager.getColor(prefix + ".background");
-        Color  fg     = UIManager.getColor(prefix + ".foreground");
-        if ( bg != null ) c.setBackground(bg);
-        if ( fg != null ) c.setForeground(fg);
-    }
-
-    /** Runs the configured style rules of the component being styled. Every UI delegate's
-     *  {@code style(..)} method is a call to this and nothing else. */
-    @SuppressWarnings({"unchecked", "rawtypes", "deprecation"}) // component() is the documented hook for LAF state reads
-    static <C extends JComponent> ComponentStyleDelegate<C> applyStyle( ComponentStyleDelegate<C> delegate ) throws Exception {
-        Styler styler = conf().stylerFor(delegate.component().getClass());
-        return (ComponentStyleDelegate<C>) styler.style((ComponentStyleDelegate) delegate);
+            return PopupWindowMode.TRANSLUCENT;
+        if ( screen.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT) )
+            return PopupWindowMode.SHAPED;
+        return PopupWindowMode.OPAQUE;
     }
 
     // ── UIDefaults ───────────────────────────────────────────────────────
@@ -391,7 +358,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     @Override
     protected void initSystemColorDefaults( UIDefaults table ) {
         super.initSystemColorDefaults(table);
-        Palette p = _conf.palette();
+        Palette p = _theme.palette();
         table.put("control",            ui(p.surface()));
         table.put("controlText",        ui(p.text()));
         table.put("controlHighlight",   ui(p.surfaceHover()));
@@ -417,8 +384,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     protected void initComponentDefaults( UIDefaults table ) {
         super.initComponentDefaults(table);
 
-        Palette p = _conf.palette();
-        Symbols s = _conf.symbols();
+        Palette p = _theme.palette();
+        Symbols s = _theme.symbols();
 
         // SwingTree owns the default font sized for the active display. SwingTree.get() also
         // starts the library if nothing has yet, so the order of setLookAndFeel(..) and UI.show(..)
@@ -557,7 +524,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("SplitPane.shadow",        ui(p.border()));
         table.put("SplitPane.darkShadow",    ui(p.accent()));
         table.put("SplitPane.highlight",     ui(p.surfaceHover()));
-        table.put("SplitPane.dividerSize",   s.splitDividerThickness());
+        if ( s.drawsItsOwnChrome() )
+            table.put("SplitPane.dividerSize", s.splitDividerThickness());
         table.put("SplitPaneDivider.border", BorderFactory.createEmptyBorder());
 
         table.put("MenuBar.background", ui(p.surface()));
@@ -582,21 +550,21 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         // The check and the radio mark are installed whatever the symbol set says, because
         // BasicLookAndFeel's own versions of those two are empty stubs. The rest have working
         // basic defaults, so a symbol set that draws no chrome keeps them.
-        table.put("CheckBox.icon",                 GlyphIcons.checkBox());
-        table.put("RadioButton.icon",              GlyphIcons.radio());
-        table.put("CheckBoxMenuItem.checkIcon",    GlyphIcons.checkBox());
-        table.put("RadioButtonMenuItem.checkIcon", GlyphIcons.radio());
+        table.put("CheckBox.icon",                 GlyphIcons.checkBox(_theme));
+        table.put("RadioButton.icon",              GlyphIcons.radio(_theme));
+        table.put("CheckBoxMenuItem.checkIcon",    GlyphIcons.menuCheck(_theme));
+        table.put("RadioButtonMenuItem.checkIcon", GlyphIcons.menuRadio(_theme));
         if ( s.drawsItsOwnChrome() ) {
-            table.put("Tree.expandedIcon",  GlyphIcons.treeExpanded());
-            table.put("Tree.collapsedIcon", GlyphIcons.treeCollapsed());
-            table.put("Menu.arrowIcon",     GlyphIcons.submenuArrow());
+            table.put("Tree.expandedIcon",  GlyphIcons.treeExpanded(_theme));
+            table.put("Tree.collapsedIcon", GlyphIcons.treeCollapsed(_theme));
+            table.put("Menu.arrowIcon",     GlyphIcons.submenuArrow(_theme));
         }
         // A set with no icon for a node leaves these empty, and a tree then indents its labels by
         // the disclosure handle alone rather than by the width of an icon that draws nothing.
         if ( s.treeNodeGlyphSize() > 0 ) {
-            table.put("Tree.leafIcon",   GlyphIcons.treeLeaf());
-            table.put("Tree.closedIcon", GlyphIcons.treeClosed());
-            table.put("Tree.openIcon",   GlyphIcons.treeOpen());
+            table.put("Tree.leafIcon",   GlyphIcons.treeLeaf(_theme));
+            table.put("Tree.closedIcon", GlyphIcons.treeClosed(_theme));
+            table.put("Tree.openIcon",   GlyphIcons.treeOpen(_theme));
         }
 
         table.put("TabbedPane.background",            ui(p.background()));
@@ -610,6 +578,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("TabbedPane.shadow",                ui(p.border()));
         table.put("TabbedPane.focus",                 ui(p.accent()));
         table.put("TabbedPane.font",                  baseFont);
+
+        _theme.stylePreset().installDefaults(table, _theme);
     }
 
     private static ColorUIResource ui( Color c ) { return new ColorUIResource(c); }
@@ -638,7 +608,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         for ( String key : FONT_KEYS )
             UIManager.put(key, font);
         for ( Window w : Window.getWindows() )
-            SwingUtilities.updateComponentTreeUI(w);
+            updateComponentTreeUI(w);
     }
 
 
@@ -651,7 +621,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      *  <pre>{@code
      *    it -> it.stylePreset(StylePreset.LINEN)
      *            .palette(p -> p.accent(new Color(0x2E, 0x5A, 0x88)))
-     *            .addStyle(JButton.class, s -> s.borderRadius(2))
+     *            .addStyle(JButton.class, (theme, s) -> s.borderRadius(2))
      *  }</pre>
      */
     public static final class Conf
@@ -670,15 +640,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         private final Tuple<StyleRule> _additions;
         private final PopupWindowMode  _popupWindowMode;
 
-        /** Remembers the fold of preset, overrides and additions per component class, so that a
-         *  style gathered on every paint costs one map lookup. */
-        private final Map<Class<?>, Styler<?>> _resolved = new ConcurrentHashMap<>();
-
-        /** The resolved symbol set behind the {@link CachedSymbols} the delegates paint through.
-         *  Both belong to this configuration, so a theme's rasterized glyphs are dropped with the
-         *  theme rather than outliving it. */
-        private final Symbols _symbols;
-
         private Conf(
             StylePreset      stylePreset,
             SymbolPreset     symbolPreset,
@@ -695,8 +656,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             _overrides     = overrides;
             _additions     = additions;
             _popupWindowMode = popupWindowMode;
-            SymbolPreset symbols = symbolPreset != null ? symbolPreset : stylePreset.preferredSymbols();
-            _symbols       = new CachedSymbols(symbols.symbols(), palette());
         }
 
         /**
@@ -762,14 +721,14 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         /**
          *  Replaces the preset's rule for {@code type} and every subtype of it. Use it when the
          *  preset's idea of how a component looks is wrong for the application, and
-         *  {@link #addStyle(Class, Styler)} when it is merely incomplete.
+         *  {@link #addStyle(Class, ThemedStyler)} when it is merely incomplete.
          *
          * @param type   the component type the rule applies to, subtypes included
          * @param styler the replacement style rule
          * @param <C> the component type
          * @return a new configuration carrying the rule
          */
-        public <C extends JComponent> Conf overrideStyle( Class<C> type, Styler<C> styler ) {
+        public <C extends JComponent> Conf overrideStyle( Class<C> type, ThemedStyler<C> styler ) {
             return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
                             _overrides.add(new StyleRule(type, styler)), _additions, _popupWindowMode);
         }
@@ -784,7 +743,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          * @param <C> the component type
          * @return a new configuration carrying the rule
          */
-        public <C extends JComponent> Conf addStyle( Class<C> type, Styler<C> styler ) {
+        public <C extends JComponent> Conf addStyle( Class<C> type, ThemedStyler<C> styler ) {
             return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
                             _overrides, _additions.add(new StyleRule(type, styler)), _popupWindowMode);
         }
@@ -810,24 +769,70 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
                             _overrides, _additions, mode);
         }
 
-        // ── read back by the look and feel and its delegates ──────────────
-
-        PopupWindowMode popupWindowMode() { return _popupWindowMode; }
-
+        /** @return the palette this configuration resolves to, the one {@link #palette(Configurator)} starts from */
         Palette palette() {
             if ( _palette != null )
                 return _palette;
             PalettePreset preset = _palettePreset != null ? _palettePreset : _stylePreset.preferredPalette();
             return preset.palette();
         }
+    }
 
+    /**
+     *  Everything a {@link Conf} resolves to, worked out once when a look and feel is built from it:
+     *  the palette, the symbol set chosen for that palette, the style rules, and how a popup's own
+     *  window is dressed. A theme never changes. The UI delegates, the icons and the popup factory of
+     *  a look and feel are each handed its theme, rather than looking one up while they paint, so
+     *  switching theme means replacing the look and feel, and whatever was worked out from the old
+     *  theme - a folded style rule, a rasterized glyph - is dropped together with it.
+     */
+    public static final class Theme
+    {
+        private final StylePreset      _stylePreset;
+        private final Palette          _palette;
+        private final NimbusScheme     _nimbusScheme;
+        private final Symbols          _symbols;
+        private final PopupWindowMode  _popupWindowMode;
+        private final Tuple<StyleRule> _overrides;
+        private final Tuple<StyleRule> _additions;
+
+        /** Remembers the fold of preset, overrides and additions per component class, so that a
+         *  style gathered on every paint costs one map lookup. */
+        private final Map<Class<?>, Styler<?>> _resolved = new ConcurrentHashMap<>();
+
+        Theme( Conf conf ) {
+            SymbolPreset symbols = conf._symbolPreset != null ? conf._symbolPreset : conf._stylePreset.preferredSymbols();
+            _stylePreset     = conf._stylePreset;
+            _palette         = conf.palette();
+            _nimbusScheme    = NimbusScheme.readFor(_palette);
+            _symbols         = new CachedSymbols(symbols.symbolsFor(_palette, _nimbusScheme), _palette);
+            _popupWindowMode = conf._popupWindowMode == PopupWindowMode.AUTO
+                                   ? _detectedPopupWindowMode()
+                                   : conf._popupWindowMode;
+            _overrides       = conf._overrides;
+            _additions       = conf._additions;
+        }
+
+        /** @return the colours this theme paints with */
+        public Palette palette() { return _palette; }
+
+        /** @return the symbol set chosen for this theme's palette, rasterizing through a cache that
+         *          belongs to this theme */
         Symbols symbols() { return _symbols; }
 
-        String name() { return _stylePreset.displayName(); }
+        /** @return the colours Nimbus derives from this theme's palette and from the Nimbus keys an
+         *          application had put into {@link UIManager} when the theme was built */
+        NimbusScheme nimbusScheme() { return _nimbusScheme; }
+
+        StylePreset stylePreset() { return _stylePreset; }
+
+        /** @return the mode a popup needing a window of its own is given; never
+         *          {@link PopupWindowMode#AUTO} and never {@link PopupWindowMode#IN_FRAME} */
+        PopupWindowMode popupWindowMode() { return _popupWindowMode; }
 
         /**
          *  Folds the preset rule, the overriding rule and every addition applying to
-         *  {@code componentType} into one {@link Styler}.
+         *  {@code componentType} into one {@link Styler}, each of them handed this theme.
          *
          * @param componentType the runtime class of the component being styled
          * @return the style rule governing that class, never {@code null}
@@ -837,16 +842,20 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             Styler<?> memoised = _resolved.get(componentType);
             if ( memoised != null )
                 return memoised;
-            Styler resolved = _mostSpecific(_overrides, componentType);
-            if ( resolved == null )
-                resolved = _mostSpecific(_stylePreset.rules(), componentType);
-            if ( resolved == null )
-                resolved = Styler.none();
-            for ( StyleRule rule : _additions )
-                if ( rule.appliesTo(componentType) )
-                    resolved = resolved.andThen(rule.styler());
+            ThemedStyler rule = _mostSpecific(_overrides, componentType);
+            if ( rule == null )
+                rule = _mostSpecific(_stylePreset.rules(), componentType);
+            Styler resolved = rule == null ? Styler.none() : _handedThisTheme(rule);
+            for ( StyleRule addition : _additions )
+                if ( addition.appliesTo(componentType) )
+                    resolved = resolved.andThen(_handedThisTheme(addition.styler()));
             _resolved.put(componentType, resolved);
             return resolved;
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        private Styler _handedThisTheme( ThemedStyler rule ) {
+            return delegate -> rule.style(this, delegate);
         }
 
         /**
@@ -861,7 +870,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         boolean styles( Class<?> componentType ) { return stylerFor(componentType) != Styler.none(); }
 
         /** @return the rule of the most derived matching type, the last registered one winning ties. */
-        private static Styler<?> _mostSpecific( Tuple<StyleRule> rules, Class<?> componentType ) {
+        private static ThemedStyler<?> _mostSpecific( Tuple<StyleRule> rules, Class<?> componentType ) {
             StyleRule best = null;
             for ( StyleRule rule : rules ) {
                 if ( !rule.appliesTo(componentType) )
@@ -871,6 +880,101 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             }
             return best == null ? null : best.styler();
         }
+
+        /**
+         *  Installs the style engine on a component, first handing the component back to Swing's own
+         *  defaults if nothing styles its type any more.
+         *  <p>
+         *  A style rule's colours are not only painted, they are installed: the engine calls
+         *  {@code setForeground(..)} and {@code setBackground(..)} on the component. Those outlive the
+         *  preset that asked for them, because Swing treats a colour it did not install itself as the
+         *  application's and will not overwrite it. Switching from a theme to {@link StylePreset#BLANK}
+         *  would therefore leave every button wearing the label colour the old theme picked to sit on a
+         *  fill nothing paints any more - white on white. So the component is given the plain
+         *  look-and-feel defaults for its own class instead.
+         *  <p>
+         *  A component that <em>is</em> styled gives up the border Swing installed from
+         *  {@code Button.border}, {@code TextField.border} and the rest. Those are bevels drawn from the
+         *  {@code control*} colours, and the style engine keeps whatever border it finds as the one to
+         *  fall back on wherever a rule leaves its own invisible, so under a theme without outlines they
+         *  would surface as a two-tone frame around every control. Only a border Swing itself put there
+         *  is dropped, so one the application set survives.
+         *  <p>
+         *  That border has to be handed back once nothing styles the component any more. The
+         *  {@code Basic*UI} of the next look and feel cannot do it: it installs its defaults before
+         *  the style engine lets go of the component, so it finds the engine's border, which it
+         *  must not replace, and the engine then gives back the empty border it displaced. So the
+         *  default border is installed again exactly when the engine lets go of a border here, and
+         *  not when a container merely restyles a part of itself it has already set up.
+         *
+         * @param c the component the delegate is being installed on
+         */
+        void installStyleOn( JComponent c ) { installStyleOn(c, _defaultsPrefixOf(c)); }
+
+        /**
+         *  The same, for a delegate that reads its defaults under another prefix than the one its
+         *  component's UI class ID implies: {@code SwingTreeButtonUI} serves toggle buttons too, and
+         *  installs them from the {@code Button.*} keys.
+         *
+         * @param c the component the delegate is being installed on
+         * @param defaultsPrefix the prefix the delegate's defaults are filed under, "Button" for {@code Button.border}
+         */
+        void installStyleOn( JComponent c, String defaultsPrefix ) {
+            boolean styled = styles(c.getClass());
+            if ( !styled )
+                _restoreDefaultColours(c, defaultsPrefix);
+            else if ( c.getBorder() instanceof UIResource )
+                c.setBorder(null);
+            Border held = c.getBorder();
+            ComponentBackend.powering(c).gatherApplyAndInstallStyle(true);
+            boolean engineLetGo = c.getBorder() != held;
+            if ( !styled && engineLetGo )
+                LookAndFeel.installBorder(c, defaultsPrefix + ".border");
+        }
+
+        /** Re-reads the two colour defaults of a component's own UI class, e.g. "Button.background". */
+        private static void _restoreDefaultColours( JComponent c, String prefix ) {
+            Color bg = UIManager.getColor(prefix + ".background");
+            Color fg = UIManager.getColor(prefix + ".foreground");
+            if ( bg != null ) c.setBackground(bg);
+            if ( fg != null ) c.setForeground(fg);
+        }
+
+        /** @return the prefix of a component's {@link UIDefaults} keys, "Button" for a {@code JButton} */
+        private static String _defaultsPrefixOf( JComponent c ) {
+            String id = c.getUIClassID();
+            return id.endsWith("UI") ? id.substring(0, id.length() - 2) : id;
+        }
+
+        /** Runs the configured style rules of the component being styled. Every UI delegate's
+         *  {@code style(..)} method is a call to this and nothing else. */
+        @SuppressWarnings({"unchecked", "rawtypes", "deprecation"}) // component() is the documented hook for LAF state reads
+        <C extends JComponent> ComponentStyleDelegate<C> applyStyle( ComponentStyleDelegate<C> delegate ) throws Exception {
+            Styler styler = stylerFor(delegate.component().getClass());
+            return (ComponentStyleDelegate<C>) styler.style((ComponentStyleDelegate) delegate);
+        }
+    }
+
+    /**
+     *  A style rule of this look and feel: a {@link Styler} which is also handed the {@link Theme} it
+     *  is styling for, so that it takes its colours from its arguments rather than from whichever
+     *  look and feel happens to be installed while it runs.
+     *  <pre>{@code
+     *    it -> it.addStyle(JButton.class, (theme, s) -> s.borderColor(theme.palette().accent()))
+     *  }</pre>
+     *
+     * @param <C> the type of component the rule styles
+     */
+    @FunctionalInterface
+    public interface ThemedStyler<C extends JComponent>
+    {
+        /**
+         * @param theme    the theme of the look and feel the component is being styled by
+         * @param delegate the style of the component so far
+         * @return the style with this rule applied
+         * @throws Exception if the rule fails, which the style engine logs rather than rethrows
+         */
+        ComponentStyleDelegate<C> style( Theme theme, ComponentStyleDelegate<C> delegate ) throws Exception;
     }
 
     /**
@@ -886,7 +990,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     {
         /** Fully transparent: what a control paints instead of a surface when whatever it sits on
          *  has to show through untouched. */
-        public static final Color TRANSPARENT = new Color(0, 0, 0, 0);
+        public static final Color TRANSPARENT = swingtree.UI.Color.TRANSPARENT;
 
         private enum Slot {
             BACKGROUND, SURFACE, SURFACE_HOVER, SURFACE_PRESSED, SURFACE_DISABLED, SURFACE_FIELD,
@@ -1032,21 +1136,21 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          * @return a palette with all twenty-two slots filled from those five
          */
         public static Palette nimbus( Color base, Color chrome, Color positive, Color negative, Color notice ) {
-            Color ground = LafUtilities.shiftHsb(chrome, -0.070, +0.129);
+            Color ground = NimbusScheme.derive(chrome, 0f, -0.07016757f, 0.12941176f, 0);
             return neutral()
                     .background     (ground)
                     .surface        (ground)
-                    .surfaceHover   (LafUtilities.shiftHsb(chrome, -0.073, +0.204))
-                    .surfacePressed (LafUtilities.shiftHsb(chrome, -0.002, -0.024))
+                    .surfaceHover   (NimbusScheme.derive(chrome, 0f, -0.07333623f, 0.20392156f, 0))
+                    .surfacePressed (NimbusScheme.derive(chrome, -0.0027777553f, -0.0018306673f, -0.02352941f, 0))
                     .surfaceDisabled(LafUtilities.shiftHsb(chrome, -0.090, +0.204))
-                    .surfaceField   (LafUtilities.shiftHsb(chrome, -0.111, +0.255))
-                    .border         (LafUtilities.shiftHsb(chrome, -0.017, -0.114))
-                    .borderSoft     (LafUtilities.shiftHsb(chrome, -0.034, +0.071))
-                    .text           (LafUtilities.shiftHsb(chrome, -0.111, -0.745))
+                    .surfaceField   (NimbusScheme.derive(chrome, 0f, -0.110526316f, 0.25490195f, 0))
+                    .border         (NimbusScheme.derive(chrome, 0f, -0.017358616f, -0.11372548f, 0))
+                    .borderSoft     (NimbusScheme.derive(chrome, -0.008547008f, -0.03830409f, -0.039215684f, 0))
+                    .text           (NimbusScheme.derive(chrome, 0f, -0.110526316f, -0.74509805f, 0))
                     .textMuted      (LafUtilities.shiftHsb(chrome, +0.029, -0.408))
-                    .textDisabled   (LafUtilities.shiftHsb(chrome, -0.090, -0.177))
+                    .textDisabled   (NimbusScheme.derive(chrome, 0f, -0.089836657f, -0.176470578f, 0))
                     .accent         (base)
-                    .accentSoft     (LafUtilities.shiftHsb(base,   -0.049, -0.008))
+                    .accentSoft     (NimbusScheme.derive(base, -0.010750473f, -0.04875779f, -0.007843137f, 0))
                     .textureLight   (notice)
                     .textureDark    (LafUtilities.shiftHsb(notice, +0.180, -0.245))
                     .primary        (positive)
@@ -1055,7 +1159,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
                     .danger         (negative)
                     .dangerHover    (LafUtilities.shiftHsb(negative, -0.060, +0.078))
                     .dangerPressed  (LafUtilities.shiftHsb(negative, +0.040, -0.086))
-                    .onFilled       (LafUtilities.shiftHsb(chrome, -0.111, +0.255));
+                    .onFilled       (NimbusScheme.derive(chrome, 0f, -0.110526316f, 0.25490195f, 0));
         }
 
         /** @param alpha how opaque the returned accent should be, 0 to 255
@@ -1067,7 +1171,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     }
 
     /**
-     *  The tables of {@link Styler} rules a {@link SwingTreeLookAndFeel} can be built from. Each
+     *  The tables of {@link ThemedStyler} rules a {@link SwingTreeLookAndFeel} can be built from. Each
      *  preset also names the {@link SymbolPreset} and {@link PalettePreset} it was designed
      *  against, which a {@link Conf} uses when the application chooses neither.
      */
@@ -1079,7 +1183,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  its own content-area fill, a scroll pane its own border and a table Swing's row height.
          *  With {@link SymbolPreset#BLANK}, which it asks for by default, this look and feel paints
          *  nothing at all, which is where an application starts that means to build its whole
-         *  appearance out of {@link Conf#addStyle(Class, Styler)} rules.
+         *  appearance out of {@link Conf#addStyle(Class, ThemedStyler)} rules.
          */
         BLANK {
             @Override Tuple<StyleRule>     rules()            { return Tuple.of(StyleRule.class); }
@@ -1186,6 +1290,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.NIMBUS; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.NIMBUS; }
             @Override String               displayName()      { return "Nimbus"; }
+            @Override void installDefaults( UIDefaults table, Theme theme ) { Styles.Nimbus.installDefaults(table, theme); }
         },
         /**
          *  Polymorphism: a theme with no fixed appearance, only rules for arriving at one. It
@@ -1225,6 +1330,17 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         /** @return the name the look and feel reports to {@link UIManager}. */
         abstract String displayName();
 
+        /**
+         *  Puts whatever the rules expect to find in {@link UIManager} into the look and feel's
+         *  defaults, after every default the look and feel installs for all presets. Most presets
+         *  expect nothing. One that reproduces an existing look and feel installs the keys that
+         *  look and feel is read through, so that an application written against it finds them.
+         *
+         * @param table the defaults being built
+         * @param theme the theme of the look and feel being installed
+         */
+        void installDefaults( UIDefaults table, Theme theme ) {}
+
         @Override public String toString() { return displayName(); }
     }
 
@@ -1239,66 +1355,79 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         /** No symbols: every delegate falls through to the painting and the sizing of the
          *  {@code Basic*UI} it extends, so the marks, arrows, thumbs and grips are Swing's own. */
         BLANK {
-            @Override Symbols symbols() { return Symbols.Blank.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Blank.INSTANCE; }
             @Override String  displayName() { return "Blank"; }
         },
         /** Thin strokes, round caps, round dots and almost no fills: drawn the way a pen draws. */
         LINEN {
-            @Override Symbols symbols() { return Symbols.Linen.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Linen.INSTANCE; }
             @Override String  displayName() { return "Linen"; }
         },
         /** Extruded: every glyph is the surface colour, lit from the top left and shadowed at the
          *  bottom right, so it reads as pressed out of the panel rather than drawn onto it. */
         SOFT {
-            @Override Symbols symbols() { return Symbols.Soft.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Soft.INSTANCE; }
             @Override String  displayName() { return "Soft"; }
         },
         /** Glass: saturated fills under a hard gloss that breaks across the middle, with a crisp
          *  outline and a highlight along the top edge. */
         GLOSSY {
-            @Override Symbols symbols() { return Symbols.Glossy.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Glossy.INSTANCE; }
             @Override String  displayName() { return "Glossy"; }
         },
         /** Bold and geometric: filled shapes rather than outlined ones, solid triangles for arrows,
          *  and thick strokes that stay legible at a glance. */
         MATERIAL {
-            @Override Symbols symbols() { return Symbols.Material.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Material.INSTANCE; }
             @Override String  displayName() { return "Material"; }
         },
         /** Rectangles and solid triangles: no radius, no rim, no halo and no shade, so a control
          *  that is on is the same shape as one that is off, filled. */
         FLAT {
-            @Override Symbols symbols() { return Symbols.Flat.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Flat.INSTANCE; }
             @Override String  displayName() { return "Flat"; }
         },
         /** Cut into the surface or screwed onto it: every mark is drawn twice, dark on the line
          *  and light one pixel below it, where the far wall of the groove catches the light. */
         CARVED {
-            @Override Symbols symbols() { return Symbols.Carved.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Carved.INSTANCE; }
             @Override String  displayName() { return "Carved"; }
         },
         /** Cut from the same glass as everything else: a shape that is off is a wash you can see
          *  the ground through, one that is on is the accent behind a brighter rim. */
         GLASS {
-            @Override Symbols symbols() { return Symbols.Glass.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Glass.INSTANCE; }
             @Override String  displayName() { return "Glass"; }
         },
         /** Moulded from the same plastic as the surfaces around them: a small rounded square, a
          *  small circle, a round knob and a pill, each lit by the one overhead light the Nimbus
          *  style preset uses, inside the outline a button of the same state wears. */
         NIMBUS {
-            @Override Symbols symbols() { return Symbols.Nimbus.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return new Symbols.Nimbus(nimbusScheme); }
             @Override String  displayName() { return "Nimbus"; }
         },
-        /** Not a set of its own but a choice between three of the others, made afresh from the
-         *  installed palette on every call. */
+        /** Not a set of its own but a choice between three of the others, made from what the
+         *  palette leaves a theme to tell a surface from its ground with, which is how
+         *  {@link StylePreset#POLYMORPHIC} decides everything else: {@link #SOFT} when only light
+         *  can, {@link #GLASS} on a dark ground, and {@link #MATERIAL} otherwise. */
         ADAPTIVE {
-            @Override Symbols symbols() { return Symbols.Adaptive.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) {
+                switch ( Mood.of(palette) ) {
+                    case RELIEF:   return Symbols.Soft.INSTANCE;
+                    case LUMINOUS: return Symbols.Glass.INSTANCE;
+                    case SHEET:
+                    default:       return Symbols.Material.INSTANCE;
+                }
+            }
             @Override String  displayName() { return "Adaptive"; }
         };
 
-        /** @return the symbol painter this preset stands for. */
-        abstract Symbols symbols();
+        /**
+         * @param palette      the palette the symbols will be drawn with
+         * @param nimbusScheme the Nimbus colours worked out from that palette
+         * @return the symbol painter this preset stands for under that palette
+         */
+        abstract Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme );
 
         /** @return the name to show a user choosing between presets. */
         abstract String displayName();

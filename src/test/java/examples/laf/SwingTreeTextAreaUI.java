@@ -15,12 +15,16 @@ public final class SwingTreeTextAreaUI
         extends    BasicTextAreaUI
         implements SwingTreeStyledComponentUI<JTextArea>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTextAreaUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeTextAreaUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTextAreaUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
         // Swing repaints neither on a focus change nor across a whole new selection, and the
         // style is re-gathered while the component paints, so both need a repaint of their own.
         LafUtilities.repaintOnFocusChange(c, c);
@@ -45,6 +49,6 @@ public final class SwingTreeTextAreaUI
 
     @Override
     public ComponentStyleDelegate<JTextArea> style( ComponentStyleDelegate<JTextArea> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

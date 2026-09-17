@@ -18,18 +18,22 @@ public final class SwingTreeSeparatorUI
         extends    BasicSeparatorUI
         implements SwingTreeStyledComponentUI<JSeparator>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeSeparatorUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeSeparatorUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeSeparatorUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
     public void paint( Graphics g, JComponent c ) {
         LafUtilities.paintStyled(g, c, g2 -> {
-            if ( SwingTreeLookAndFeel.drawsOwnChrome() )
+            if ( _theme.symbols().drawsItsOwnChrome() )
                 drawHairline(g2, (JSeparator) c);
             else
                 super.paint(g2, c);
@@ -44,7 +48,7 @@ public final class SwingTreeSeparatorUI
 
     @Override
     public Dimension getPreferredSize( JComponent c ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.getPreferredSize(c);
         int thickness = thickness();
         return ((JSeparator) c).getOrientation() == SwingConstants.VERTICAL
@@ -54,19 +58,19 @@ public final class SwingTreeSeparatorUI
 
     @Override
     public ComponentStyleDelegate<JSeparator> style( ComponentStyleDelegate<JSeparator> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
-    private static int thickness() {
-        return Math.max(1, UI.scale(SwingTreeLookAndFeel.symbols().separatorThickness()));
+    private int thickness() {
+        return Math.max(1, UI.scale(_theme.symbols().separatorThickness()));
     }
 
     /** Down or across the middle of whatever box a layout gave it, rather than along its near edge:
      *  a tool bar hands a separator a box several pixels wide, and a line drawn at the edge of that
      *  box sits against the control beside it instead of between the two. */
-    private static void drawHairline( Graphics2D g, JSeparator separator ) {
+    private void drawHairline( Graphics2D g, JSeparator separator ) {
         int thickness = thickness();
-        g.setColor(SwingTreeLookAndFeel.palette().borderSoft());
+        g.setColor(_theme.palette().borderSoft());
         if ( separator.getOrientation() == SwingConstants.VERTICAL )
             g.fillRect(( separator.getWidth() - thickness ) / 2, 0, thickness, separator.getHeight());
         else
