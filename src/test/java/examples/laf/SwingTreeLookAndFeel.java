@@ -990,7 +990,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     {
         /** Fully transparent: what a control paints instead of a surface when whatever it sits on
          *  has to show through untouched. */
-        public static final Color TRANSPARENT = new Color(0, 0, 0, 0);
+        public static final Color TRANSPARENT = swingtree.UI.Color.TRANSPARENT;
 
         private enum Slot {
             BACKGROUND, SURFACE, SURFACE_HOVER, SURFACE_PRESSED, SURFACE_DISABLED, SURFACE_FIELD,
