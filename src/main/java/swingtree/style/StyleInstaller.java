@@ -76,7 +76,8 @@ final class StyleInstaller<C extends JComponent>
     private @Nullable Boolean _initialIsOpaque           = null;
     private @Nullable Boolean _initialContentAreaFilled  = null;
     private @Nullable Font    _initialFont               = null;
-    private @Nullable Color   _initialForeground         = null; // set when a solid font color is routed through the foreground channel (see _applyFontStyleTo)
+    private @Nullable Color   _initialForeground         = null; // the foreground from before the style set one, UI.Color.UNDEFINED when the component had none of its own (see _installForeground)
+    private @Nullable Color   _installedForeground       = null; // the foreground the style set last, UI.Color.UNDEFINED for none, so that only that one is taken back (see _restoreForeground)
     private @Nullable Color   _initialViewportBackground = null; // set when the styled background is handed down to a scroll pane viewport (see _restoreViewportBackgroundOf)
     private @Nullable Color   _handedDownViewportBackground = null; // the color the style engine gave the viewport, so it only takes that one back (see _restoreViewportBackgroundOf)
     private @Nullable Boolean _initialViewportOpaque     = null; // set when the opaqueness is taken from a scroll pane viewport (see _updateViewportOpaquenessOf)
@@ -299,7 +300,7 @@ final class StyleInstaller<C extends JComponent>
                     owner.setFont(_initialFont);
                     _initialFont = null;
                 }
-                _restoreForegroundIfFontColorWasInstalled(owner, newStyle);
+                _restoreForeground(owner);
                 _restoreStyleOwnedSizesOf(owner);
                 _restoreViewportBackgroundOf(owner);
                 _updateViewportOpaquenessOf(owner, newStyle);
@@ -518,6 +519,7 @@ final class StyleInstaller<C extends JComponent>
         }
 
         _applyGenericBaseStyleTo(owner, newStyle);
+        _applyForegroundStyleTo(owner, newStyle);
         _applyIconStyleTo(owner, newStyle);
         _applyLayoutStyleTo(owner, newStyle);
         _applyDimensionalityStyleTo(owner, newStyle);
@@ -682,20 +684,6 @@ final class StyleInstaller<C extends JComponent>
     private void _applyGenericBaseStyleTo( final C owner, final StyleConf styleConf )
     {
         final BaseConf base = styleConf.base();
-
-        // A solid *font* color is the more specific property and wins over the base foreground
-        // color — it is applied through the same channel by _applyFontStyleTo (which runs after
-        // this), so applying the base color here would only cause a set/override ping-pong.
-        boolean fontColorTakesPrecedence = styleConf.font().solidColor() != null;
-
-        if ( !fontColorTakesPrecedence && base.foregroundColor().isPresent() && !Objects.equals( owner.getForeground(), base.foregroundColor().get() ) ) {
-            Color newColor = base.foregroundColor().get();
-            if ( StyleUtil.isUndefinedColor(newColor) )
-                newColor = null;
-
-            if ( !Objects.equals( owner.getForeground(), newColor ) )
-                owner.setForeground( newColor );
-        }
 
         base.cursor().ifPresent( cursor -> {
             if ( !Objects.equals( owner.getCursor(), cursor ) )
@@ -935,7 +923,6 @@ final class StyleInstaller<C extends JComponent>
                 owner.setFont(_initialFont);
                 _initialFont = null;
             }
-            _restoreForegroundIfFontColorWasInstalled(owner, styleConf);
             return;
         } else if ( _initialFont == null ) {
             _initialFont = owner.getFont();
@@ -954,45 +941,48 @@ final class StyleInstaller<C extends JComponent>
                         owner.setFont( newFont );
                 });
 
-        /*
-            A SOLID font color deliberately does not travel inside the font (it would flip
-            'Font.hasLayoutAttributes()' and put every measure/draw of this component on the
-            expensive TextLayout path, and it would override the LaF's state colors) — it is
-            applied through Swing's native channel for text color instead: the foreground
-            property, which is exactly what a LaF consults when painting enabled text.
-            It wins over the base style's 'foregroundColor' (the more specific property
-            takes precedence, see _applyGenericBaseStyleTo), and the pre-style foreground
-            is remembered and restored just like '_initialFont' above.
-        */
-        Color solidFontColor = fontConf.solidColor();
-        if ( solidFontColor != null ) {
-            if ( _initialForeground == null )
-                _initialForeground = owner.getForeground();
-            if ( !Objects.equals(owner.getForeground(), solidFontColor) )
-                owner.setForeground(solidFontColor);
-        }
-        else
-            _restoreForegroundIfFontColorWasInstalled(owner, styleConf);
-
         _installLayoutInfoFromFontConf(fontConf, owner);
     }
 
-    /** Ends the solid font color's ownership of the foreground property. If the current style
-     *  still defines a base 'foregroundColor', that base color — already applied earlier in this
-     *  very installation cycle by _applyGenericBaseStyleTo — takes over the channel, so restoring
-     *  the remembered pre-style value here would wrongly override it; the memory is just dropped
-     *  (matching the base color's own set-only semantics). Only when nothing else claims the
-     *  channel is the pre-style foreground actually restored. */
-    private void _restoreForegroundIfFontColorWasInstalled( C owner, StyleConf styleConf ) {
-        if ( _initialForeground != null ) {
-            if ( styleConf.base().foregroundColor().isPresent() )
-                _initialForeground = null; // the base style owns the foreground now
-            else {
-                if ( !Objects.equals(owner.getForeground(), _initialForeground) )
-                    owner.setForeground(_initialForeground);
-                _initialForeground = null;
-            }
-        }
+    /**
+     *  A style sets the foreground of a component in two ways: with the base 'foregroundColor',
+     *  and with a solid font color, which is the more specific of the two and wins.
+     *  A solid font color deliberately does not travel inside the font: it would flip
+     *  'Font.hasLayoutAttributes()' and put every measure/draw of this component on the
+     *  expensive TextLayout path, and it would override the LaF's state colors.
+     *  When the style sets neither, the foreground from before the style comes back.
+     */
+    private void _applyForegroundStyleTo( final C owner, final StyleConf styleConf ) {
+        final Color fontColor = styleConf.font().solidColor();
+        if ( fontColor != null )
+            _installForeground(owner, fontColor);
+        else if ( styleConf.base().foregroundColor().isPresent() )
+            _installForeground(owner, styleConf.base().foregroundColor().get());
+        else
+            _restoreForeground(owner);
+    }
+
+    private void _installForeground( final C owner, final Color color ) {
+        if ( _installedForeground == null || !_hasOwnForeground(owner, _installedForeground) )
+            _initialForeground = owner.isForegroundSet() ? owner.getForeground() : UI.Color.UNDEFINED;
+        if ( !_hasOwnForeground(owner, color) )
+            owner.setForeground( StyleUtil.isUndefinedColor(color) ? null : color );
+        _installedForeground = color;
+    }
+
+    private void _restoreForeground( final C owner ) {
+        if ( _initialForeground == null || _installedForeground == null )
+            return;
+        if ( _hasOwnForeground(owner, _installedForeground) && !_hasOwnForeground(owner, _initialForeground) )
+            owner.setForeground( StyleUtil.isUndefinedColor(_initialForeground) ? null : _initialForeground );
+        _initialForeground   = null;
+        _installedForeground = null;
+    }
+
+    private static boolean _hasOwnForeground( final JComponent owner, final Color color ) {
+        if ( StyleUtil.isUndefinedColor(color) )
+            return !owner.isForegroundSet();
+        return owner.isForegroundSet() && color.equals(owner.getForeground());
     }
 
     @SuppressWarnings("DoNotCall")
