@@ -68,7 +68,7 @@ public final class SwingTreeComboBoxUI
     @Override
     protected void configureEditor() {
         super.configureEditor();
-        if ( editor instanceof JComponent && ((JComponent) editor).getUI() instanceof SwingTreeStyledComponentUI )
+        if ( editor instanceof JComponent && LafUtilities.componentUIOf((JComponent) editor) instanceof SwingTreeStyledComponentUI )
             _theme.installStyleOn((JComponent) editor);
     }
 

@@ -62,7 +62,7 @@ public final class SwingTreeSpinnerUI
     }
 
     private void restyleInPlace( JComponent inner ) {
-        if ( inner.getUI() instanceof SwingTreeStyledComponentUI )
+        if ( LafUtilities.componentUIOf(inner) instanceof SwingTreeStyledComponentUI )
             _theme.installStyleOn(inner);
     }
 

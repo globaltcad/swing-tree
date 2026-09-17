@@ -7,6 +7,7 @@ import sprouts.ValDelegate;
 import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.style.ComponentBackend;
+import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 
 import javax.swing.AbstractButton;
 import javax.swing.CellRendererPane;
@@ -18,6 +19,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.JViewport;
 import javax.swing.UIManager;
 import javax.swing.event.CaretListener;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
@@ -469,6 +471,22 @@ final class LafUtilities
     static boolean isControlInternal( JComponent inner ) {
         return SwingUtilities.getAncestorOfClass(JSpinner.class, inner) != null
             || SwingUtilities.getAncestorOfClass(JComboBox.class, inner) != null;
+    }
+
+    /**
+     *  The {@link ComponentUI} delegate installed on a component, or {@code null} if it has none.
+     *  <p>
+     *  {@code JComponent.getUI()} is a Java 9 addition and these examples are compiled at source
+     *  level 8, so the lookup goes through the library's own Java 8 compatible helper, which casts
+     *  to the component types that declare {@code getUI()} and is what SwingTree itself uses when
+     *  it needs a component's delegate.
+     *
+     * @param c the component whose delegate is asked for
+     * @return the installed delegate, or {@code null} for a component that declares none
+     */
+    @SuppressWarnings({"DoNotCall", "deprecation"})
+    static ComponentUI componentUIOf( JComponent c ) {
+        return LibraryInternalCrossPackageStyleUtil._findComponentUIOf(c);
     }
 
     /** Whether a combo box should be drawn as focused. An editable one hands the focus to its
