@@ -944,8 +944,8 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
 <span class="fc" id="L944">                    Font highDPIFont = _calculateDPIAwarePlatformFont(config.logMarker());</span>
 <span class="fc" id="L945">                    boolean updated = _initialize( highDPIFont );</span>
 <span class="pc bpc" id="L946" title="1 of 2 branches missed.">                    if ( this.scaleFactor.isNot(defaultScale) ) {</span>
-<span class="nc" id="L947">                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);</span>
-<span class="nc" id="L948">                        log.debug(config.logMarker(), &quot;Setting default font ('{}') to in UIManager to {}&quot;, _DEFAULT_FONT, highDPIFont);</span>
+<span class="fc" id="L947">                        UIManager.getDefaults().put(_DEFAULT_FONT, highDPIFont);</span>
+<span class="fc" id="L948">                        log.debug(config.logMarker(), &quot;Setting default font ('{}') to in UIManager to {}&quot;, _DEFAULT_FONT, highDPIFont);</span>
                     }
 <span class="pc bpc" id="L950" title="1 of 2 branches missed.">                    if ( updated )</span>
 <span class="fc" id="L951">                        _setScalePropertyListeners();</span>

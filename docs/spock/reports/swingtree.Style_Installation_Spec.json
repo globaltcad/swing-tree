@@ -4,7 +4,7 @@
   "narrative":"**This specification covers the behaviour of the style installation process!**\n    Which means that the contents of this may not be relevant to you.\n    Keep reading however if you are interested in some of the obscure details\n    of the SwingTree library internals.\n\n    SwingTree offers advanced styling options as part of **the style API**,\n    which is most commonly used through the `withStyle(Styler)` method\n    on any declarative builder node.\n\n    The installation of styles is a complex process that involves\n    the partial override of the component's UI delegate, the application of\n    the style's properties to the component and the installation of\n    a custom border, all depending on the style configuration.\n\n    This is a very finicky process that requires a lot of\n    testing to ensure that the styles are applied correctly.\n    Here you will find most of the tests that ensure that after the\n    installation of a style, the component has the expected plugin installed.",
   "subjects":["swingtree.UI","swingtree.api.Styler"],
   "statistics":{
-    "runs":"314",
+    "runs":"334",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -8171,6 +8171,524 @@
         {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentBackend.powering(panel).getStyle() != StyleConf.none()"]},
 
         {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A button whose border was not painted gets that flag back when the style engine removes its border.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            To draw a styled border around a button, the style engine installs a border of its own,\n            and a button only paints its border while `AbstractButton.isBorderPainted()` is `true`.\n            So the engine switches that flag on for a button that had it off - a menu item, or a\n            button made plain through `makePlain()`.\n\n            It has to switch the flag off again once it takes its border away. Otherwise the button\n            keeps painting whatever border it is given afterwards: a look and feel that is switched to\n            at runtime, for example, would draw its own border around every menu item.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button without a painted border, which is styled with a border only sometimes:","code":["var styled = false","var button =","        UI.button(\"Plain\")","        .isBorderPaintedIf(false)","        .withSize(120, 40)","        .withStyle( it -> styled ? it.border(2, Color.RED) : it )","        .get(JButton)"]},
+
+        {"kind":"expect","text":"The border is not painted to begin with:","code":["!button.isBorderPainted()"]},
+
+        {"kind":"when","text":"We activate the border style and paint:","code":["styled = true","Utility.paintWithoutWindow(button, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The border is painted, because the style engine has to draw it:","code":["button.isBorderPainted()"]},
+
+        {"kind":"when","text":"We remove the style again and paint:","code":["styled = false","Utility.paintWithoutWindow(button, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The button is back to not painting its border:","code":["!button.isBorderPainted()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When the style of a scroll pane is removed, SwingTree keeps a viewport background color which was set while the style was active.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a style gives a scroll pane a background color, SwingTree gives that color to the\n            viewport inside the scroll pane as well. When the style is removed again, SwingTree puts\n            the old background color of the viewport back, but only if the viewport still has the\n            color of the style. If something else replaced the background of the viewport in the\n            meantime, then that replacement has to stay.\n\n            Let's first look at why SwingTree touches the viewport at all.\n            The content of a `JScrollPane` is not a child of the scroll pane itself. It is a child of a\n            `JViewport`, and that viewport is a child of the scroll pane. The viewport covers the area\n            inside the border of the scroll pane which is not taken by scroll bars or headers, it is\n            painted on top of the scroll pane, and it is opaque. So it fills that whole area with its\n            own background color, which under Swing's default Metal look and feel is a light grey,\n            `(238, 238, 238)`. A red background which a style gives to the scroll pane would be hidden\n            under that grey. This is why SwingTree calls `viewport.setBackground(..)` with the red of\n            the style too, and remembers the grey, so that it can put the grey back once the style is\n            removed.\n\n            Now suppose that, while the style is still active, something else calls\n            `viewport.setBackground(..)` with a blue. That can be your application code. It can also\n            be a look and feel which is switched to at runtime and installs its own default background\n            color on the viewport. If SwingTree put the remembered grey back when the style is removed,\n            it would throw that blue away. After a switch of the look and feel it would even bring back\n            a color of the look and feel which was installed before, so the viewport would show the\n            grey of the old look and feel inside a scroll pane painted by the new one.\n            So SwingTree puts the grey back only while the viewport still has the red it was given.\n\n            A look and feel wraps the colors it installs in a `ColorUIResource`, which is how Swing\n            tells the colors of a look and feel apart from the colors an application sets. The\n            scenario uses a `ColorUIResource` for the blue, so that it is exactly the kind of color a\n            look and feel would install.\n\n            The styler lambda reads the local variable `styled` every time SwingTree runs it. While\n            `styled` is `false`, the lambda returns the style delegate `it` unchanged, which is the same\n            as having no style at all. SwingTree applies a style to a component while the component is\n            painted, which is why the scenario paints the scroll pane after every change of `styled`.\n            And because Swing skips painting a component whose width or height is 0, the scroll pane\n            gets a size of 200 by 100 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane whose styler sets a red background only while the variable `styled` is true:","code":["var styled = false","var scrollPane =","        UI.scrollPane()","        .withSize(200, 100)","        .withStyle( it -> styled ? it.backgroundColor(Color.RED) : it )","        .get(JScrollPane)","var viewport = scrollPane.getViewport()"]},
+
+        {"kind":"and","text":"We remember the background color of the viewport from before the style, the default of the look and feel:","code":["var original = viewport.getBackground()"]},
+
+        {"kind":"when","text":"We turn the style on and paint the scroll pane, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(scrollPane, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"SwingTree has given the red of the style to the viewport:","code":["viewport.getBackground() == Color.RED"]},
+
+        {"kind":"when","text":"While the style is still active, the viewport gets a blue background the way a look and feel would install it:","code":["var replacement = new javax.swing.plaf.ColorUIResource(Color.BLUE)","viewport.setBackground(replacement)"]},
+
+        {"kind":"and","text":"We turn the style off and paint the scroll pane again, so that SwingTree removes the style:","code":["styled = false","Utility.paintWithoutWindow(scrollPane, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The viewport still has the blue background, SwingTree did not put the remembered color back over it:","code":["viewport.getBackground() == replacement","viewport.getBackground() != original"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When the style of a scroll pane is removed, SwingTree gives the viewport back the background color it had before the style.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a style gives a scroll pane a background color, SwingTree gives that color to the\n            viewport inside the scroll pane as well. When the style is removed again, the viewport has\n            to get back the background color it had before the style was applied.\n\n            To see why SwingTree touches the viewport at all, you need to know how a `JScrollPane` is\n            painted. The content of a scroll pane is not a child of the scroll pane itself. It is a\n            child of a `JViewport`, and that viewport is a child of the scroll pane. The viewport covers\n            the area inside the border of the scroll pane which is not taken by scroll bars or headers,\n            it is painted on top of the scroll pane, and it is opaque. So it fills that whole area with\n            its own background color, which under Swing's default Metal look and feel is a light grey,\n            `(238, 238, 238)`. A red background which a style gives to the scroll pane would be hidden\n            under that grey. This is why SwingTree calls `viewport.setBackground(..)` with the red of\n            the style too.\n\n            When the style is removed, SwingTree gives the scroll pane its old background color back.\n            If SwingTree did not do the same for the viewport, the viewport would stay red, and you would\n            see a red area inside a grey scroll pane which no longer has any style at all.\n            So SwingTree remembers the grey of the viewport when it applies the style, and calls\n            `viewport.setBackground(..)` with that grey again when the style is removed.\n\n            The scenario checks that the viewport really is red while the style is active. Without that\n            check the scenario would also pass if SwingTree never gave the red to the viewport, because\n            then the viewport would simply keep its grey the whole time.\n\n            The styler lambda reads the local variable `styled` every time SwingTree runs it. While\n            `styled` is `false`, the lambda returns the style delegate `it` unchanged, which is the same\n            as having no style at all. SwingTree applies a style to a component while the component is\n            painted, which is why the scenario paints the scroll pane after every change of `styled`.\n            And because Swing skips painting a component whose width or height is 0, the scroll pane\n            gets a size of 200 by 100 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane whose styler sets a red background only while the variable `styled` is true:","code":["var styled = false","var scrollPane =","        UI.scrollPane()","        .withSize(200, 100)","        .withStyle( it -> styled ? it.backgroundColor(Color.RED) : it )","        .get(JScrollPane)","var viewport = scrollPane.getViewport()"]},
+
+        {"kind":"and","text":"We remember the background color of the viewport from before the style, the default of the look and feel:","code":["var original = viewport.getBackground()"]},
+
+        {"kind":"when","text":"We turn the style on and paint the scroll pane, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(scrollPane, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"SwingTree has given the red of the style to the viewport:","code":["viewport.getBackground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the style off and paint the scroll pane again, so that SwingTree removes the style:","code":["styled = false","Utility.paintWithoutWindow(scrollPane, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The viewport has the background color from before the style again:","code":["viewport.getBackground() == original"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree gives the component back the foreground color it had before the style. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the color of the text of a component, and it can stop setting it again:\n            a hover effect ends, a condition in your styler changes, or a style sheet rule no longer\n            applies. When that happens, the component has to get back the foreground color it had\n            before the style set one.\n\n            Swing paints the text of a component in its foreground color, the color which\n            `getForeground()` returns. A style can set that color in two ways: with\n            `foregroundColor(..)`, or as the color of the font with `componentFont(f -> f.color(..))`.\n            SwingTree applies both of them by calling `setForeground(..)` on the component. So when the\n            style no longer sets a color, SwingTree has to call `setForeground(..)` once more, with the\n            color the component had before the style.\n\n            If SwingTree did not do that, the text would keep the red of a style which is no longer\n            there. You would see a red label which no styler and no line of your code asks to be red,\n            and the red would only go away if your code set a foreground color itself.\n\n            A style does not have to disappear completely to stop setting the foreground color. It may\n            keep other properties the whole time. This is why the scenario runs with each of these\n            styles staying active: no style at all, a background color, a border and a larger font\n            ('no style' in this run). And it runs for both ways of setting the color\n            ('foregroundColor' in this run).\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(otherStyle(it)) : otherStyle(it) )","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"remainingStyle":["'no style'","'a background color'","'a border'","'a larger font'","'no style'","'a background color'","'a border'","'a larger font'"],"otherStyle":["{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }","{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }"],"howTheColorIsSet":["'foregroundColor'","'foregroundColor'","'foregroundColor'","'foregroundColor'","'a font color'","'a font color'","'a font color'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree gives the component back the foreground color it had before the style. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the color of the text of a component, and it can stop setting it again:\n            a hover effect ends, a condition in your styler changes, or a style sheet rule no longer\n            applies. When that happens, the component has to get back the foreground color it had\n            before the style set one.\n\n            Swing paints the text of a component in its foreground color, the color which\n            `getForeground()` returns. A style can set that color in two ways: with\n            `foregroundColor(..)`, or as the color of the font with `componentFont(f -> f.color(..))`.\n            SwingTree applies both of them by calling `setForeground(..)` on the component. So when the\n            style no longer sets a color, SwingTree has to call `setForeground(..)` once more, with the\n            color the component had before the style.\n\n            If SwingTree did not do that, the text would keep the red of a style which is no longer\n            there. You would see a red label which no styler and no line of your code asks to be red,\n            and the red would only go away if your code set a foreground color itself.\n\n            A style does not have to disappear completely to stop setting the foreground color. It may\n            keep other properties the whole time. This is why the scenario runs with each of these\n            styles staying active: no style at all, a background color, a border and a larger font\n            ('a background color' in this run). And it runs for both ways of setting the color\n            ('foregroundColor' in this run).\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(otherStyle(it)) : otherStyle(it) )","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"remainingStyle":["'no style'","'a background color'","'a border'","'a larger font'","'no style'","'a background color'","'a border'","'a larger font'"],"otherStyle":["{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }","{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }"],"howTheColorIsSet":["'foregroundColor'","'foregroundColor'","'foregroundColor'","'foregroundColor'","'a font color'","'a font color'","'a font color'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree gives the component back the foreground color it had before the style. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the color of the text of a component, and it can stop setting it again:\n            a hover effect ends, a condition in your styler changes, or a style sheet rule no longer\n            applies. When that happens, the component has to get back the foreground color it had\n            before the style set one.\n\n            Swing paints the text of a component in its foreground color, the color which\n            `getForeground()` returns. A style can set that color in two ways: with\n            `foregroundColor(..)`, or as the color of the font with `componentFont(f -> f.color(..))`.\n            SwingTree applies both of them by calling `setForeground(..)` on the component. So when the\n            style no longer sets a color, SwingTree has to call `setForeground(..)` once more, with the\n            color the component had before the style.\n\n            If SwingTree did not do that, the text would keep the red of a style which is no longer\n            there. You would see a red label which no styler and no line of your code asks to be red,\n            and the red would only go away if your code set a foreground color itself.\n\n            A style does not have to disappear completely to stop setting the foreground color. It may\n            keep other properties the whole time. This is why the scenario runs with each of these\n            styles staying active: no style at all, a background color, a border and a larger font\n            ('a border' in this run). And it runs for both ways of setting the color\n            ('foregroundColor' in this run).\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(otherStyle(it)) : otherStyle(it) )","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"remainingStyle":["'no style'","'a background color'","'a border'","'a larger font'","'no style'","'a background color'","'a border'","'a larger font'"],"otherStyle":["{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }","{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }"],"howTheColorIsSet":["'foregroundColor'","'foregroundColor'","'foregroundColor'","'foregroundColor'","'a font color'","'a font color'","'a font color'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree gives the component back the foreground color it had before the style. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the color of the text of a component, and it can stop setting it again:\n            a hover effect ends, a condition in your styler changes, or a style sheet rule no longer\n            applies. When that happens, the component has to get back the foreground color it had\n            before the style set one.\n\n            Swing paints the text of a component in its foreground color, the color which\n            `getForeground()` returns. A style can set that color in two ways: with\n            `foregroundColor(..)`, or as the color of the font with `componentFont(f -> f.color(..))`.\n            SwingTree applies both of them by calling `setForeground(..)` on the component. So when the\n            style no longer sets a color, SwingTree has to call `setForeground(..)` once more, with the\n            color the component had before the style.\n\n            If SwingTree did not do that, the text would keep the red of a style which is no longer\n            there. You would see a red label which no styler and no line of your code asks to be red,\n            and the red would only go away if your code set a foreground color itself.\n\n            A style does not have to disappear completely to stop setting the foreground color. It may\n            keep other properties the whole time. This is why the scenario runs with each of these\n            styles staying active: no style at all, a background color, a border and a larger font\n            ('a larger font' in this run). And it runs for both ways of setting the color\n            ('foregroundColor' in this run).\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(otherStyle(it)) : otherStyle(it) )","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"remainingStyle":["'no style'","'a background color'","'a border'","'a larger font'","'no style'","'a background color'","'a border'","'a larger font'"],"otherStyle":["{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }","{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }"],"howTheColorIsSet":["'foregroundColor'","'foregroundColor'","'foregroundColor'","'foregroundColor'","'a font color'","'a font color'","'a font color'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree gives the component back the foreground color it had before the style. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the color of the text of a component, and it can stop setting it again:\n            a hover effect ends, a condition in your styler changes, or a style sheet rule no longer\n            applies. When that happens, the component has to get back the foreground color it had\n            before the style set one.\n\n            Swing paints the text of a component in its foreground color, the color which\n            `getForeground()` returns. A style can set that color in two ways: with\n            `foregroundColor(..)`, or as the color of the font with `componentFont(f -> f.color(..))`.\n            SwingTree applies both of them by calling `setForeground(..)` on the component. So when the\n            style no longer sets a color, SwingTree has to call `setForeground(..)` once more, with the\n            color the component had before the style.\n\n            If SwingTree did not do that, the text would keep the red of a style which is no longer\n            there. You would see a red label which no styler and no line of your code asks to be red,\n            and the red would only go away if your code set a foreground color itself.\n\n            A style does not have to disappear completely to stop setting the foreground color. It may\n            keep other properties the whole time. This is why the scenario runs with each of these\n            styles staying active: no style at all, a background color, a border and a larger font\n            ('no style' in this run). And it runs for both ways of setting the color\n            ('a font color' in this run).\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(otherStyle(it)) : otherStyle(it) )","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"remainingStyle":["'no style'","'a background color'","'a border'","'a larger font'","'no style'","'a background color'","'a border'","'a larger font'"],"otherStyle":["{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }","{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }"],"howTheColorIsSet":["'foregroundColor'","'foregroundColor'","'foregroundColor'","'foregroundColor'","'a font color'","'a font color'","'a font color'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree gives the component back the foreground color it had before the style. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the color of the text of a component, and it can stop setting it again:\n            a hover effect ends, a condition in your styler changes, or a style sheet rule no longer\n            applies. When that happens, the component has to get back the foreground color it had\n            before the style set one.\n\n            Swing paints the text of a component in its foreground color, the color which\n            `getForeground()` returns. A style can set that color in two ways: with\n            `foregroundColor(..)`, or as the color of the font with `componentFont(f -> f.color(..))`.\n            SwingTree applies both of them by calling `setForeground(..)` on the component. So when the\n            style no longer sets a color, SwingTree has to call `setForeground(..)` once more, with the\n            color the component had before the style.\n\n            If SwingTree did not do that, the text would keep the red of a style which is no longer\n            there. You would see a red label which no styler and no line of your code asks to be red,\n            and the red would only go away if your code set a foreground color itself.\n\n            A style does not have to disappear completely to stop setting the foreground color. It may\n            keep other properties the whole time. This is why the scenario runs with each of these\n            styles staying active: no style at all, a background color, a border and a larger font\n            ('a background color' in this run). And it runs for both ways of setting the color\n            ('a font color' in this run).\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(otherStyle(it)) : otherStyle(it) )","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"remainingStyle":["'no style'","'a background color'","'a border'","'a larger font'","'no style'","'a background color'","'a border'","'a larger font'"],"otherStyle":["{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }","{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }"],"howTheColorIsSet":["'foregroundColor'","'foregroundColor'","'foregroundColor'","'foregroundColor'","'a font color'","'a font color'","'a font color'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree gives the component back the foreground color it had before the style. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the color of the text of a component, and it can stop setting it again:\n            a hover effect ends, a condition in your styler changes, or a style sheet rule no longer\n            applies. When that happens, the component has to get back the foreground color it had\n            before the style set one.\n\n            Swing paints the text of a component in its foreground color, the color which\n            `getForeground()` returns. A style can set that color in two ways: with\n            `foregroundColor(..)`, or as the color of the font with `componentFont(f -> f.color(..))`.\n            SwingTree applies both of them by calling `setForeground(..)` on the component. So when the\n            style no longer sets a color, SwingTree has to call `setForeground(..)` once more, with the\n            color the component had before the style.\n\n            If SwingTree did not do that, the text would keep the red of a style which is no longer\n            there. You would see a red label which no styler and no line of your code asks to be red,\n            and the red would only go away if your code set a foreground color itself.\n\n            A style does not have to disappear completely to stop setting the foreground color. It may\n            keep other properties the whole time. This is why the scenario runs with each of these\n            styles staying active: no style at all, a background color, a border and a larger font\n            ('a border' in this run). And it runs for both ways of setting the color\n            ('a font color' in this run).\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(otherStyle(it)) : otherStyle(it) )","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"remainingStyle":["'no style'","'a background color'","'a border'","'a larger font'","'no style'","'a background color'","'a border'","'a larger font'"],"otherStyle":["{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }","{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }"],"howTheColorIsSet":["'foregroundColor'","'foregroundColor'","'foregroundColor'","'foregroundColor'","'a font color'","'a font color'","'a font color'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree gives the component back the foreground color it had before the style. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the color of the text of a component, and it can stop setting it again:\n            a hover effect ends, a condition in your styler changes, or a style sheet rule no longer\n            applies. When that happens, the component has to get back the foreground color it had\n            before the style set one.\n\n            Swing paints the text of a component in its foreground color, the color which\n            `getForeground()` returns. A style can set that color in two ways: with\n            `foregroundColor(..)`, or as the color of the font with `componentFont(f -> f.color(..))`.\n            SwingTree applies both of them by calling `setForeground(..)` on the component. So when the\n            style no longer sets a color, SwingTree has to call `setForeground(..)` once more, with the\n            color the component had before the style.\n\n            If SwingTree did not do that, the text would keep the red of a style which is no longer\n            there. You would see a red label which no styler and no line of your code asks to be red,\n            and the red would only go away if your code set a foreground color itself.\n\n            A style does not have to disappear completely to stop setting the foreground color. It may\n            keep other properties the whole time. This is why the scenario runs with each of these\n            styles staying active: no style at all, a background color, a border and a larger font\n            ('a larger font' in this run). And it runs for both ways of setting the color\n            ('a font color' in this run).\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(otherStyle(it)) : otherStyle(it) )","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"remainingStyle":["'no style'","'a background color'","'a border'","'a larger font'","'no style'","'a background color'","'a border'","'a larger font'"],"otherStyle":["{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }","{ it }","{ it.backgroundColor(Color.YELLOW) }","{ it.border(2, Color.BLUE) }","{ it.componentFont(f -> f.size(20)) }"],"howTheColorIsSet":["'foregroundColor'","'foregroundColor'","'foregroundColor'","'foregroundColor'","'a font color'","'a font color'","'a font color'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component without a foreground color of its own, the component follows the foreground color of its parent again. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A component does not need a foreground color of its own. When nothing set one on it, or\n            `setForeground(null)` was called, then `getForeground()` returns the foreground color of its\n            parent, and the component follows the parent whenever the parent changes its color.\n            When a style sets a foreground color on such a component and then stops setting it, the\n            component has to go back to having no foreground color of its own, so that it follows its\n            parent again.\n\n            A style can set the foreground color in two ways: with `foregroundColor(..)`, or as the color\n            of the font with `componentFont(f -> f.color(..))`. SwingTree applies both of them by calling\n            `setForeground(..)` on the component, and before it does that, it remembers the color the\n            component had, so that it can put that color back later. The difficulty lies in remembering\n            the color. In this scenario `getForeground()` returns green, but it does not tell whether the\n            green belongs to the label or to the panel around it. `isForegroundSet()` does: it returns\n            `false` when the label has no foreground color of its own.\n\n            If SwingTree remembered the green from `getForeground()` and put it back with\n            `setForeground(..)`, the label would look right at first. But the green would now be a\n            foreground color of the label itself, and when the panel later changed its foreground color\n            to blue, the label would stay green. Your code might never have set a foreground color on\n            this label, and yet the label would have stopped following its panel.\n\n            The scenario runs for both ways of setting the color ('foregroundColor' in this run).\n            The panel has a green foreground color. The label inside it has none, because\n            `withForeground(UI.Color.UNDEFINED)` calls `setForeground(null)` on it. The styler lambda reads\n            the local variable `styled` every time SwingTree runs it, and adds the red only while `styled`\n            is `true`. SwingTree applies a style to a component while the component is painted, which is\n            why the scenario paints the label after every change of `styled`. And because Swing skips\n            painting a component whose width or height is 0, the label gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A green panel holding a label without a foreground color, whose styler adds a red text color only while `styled` is true:","code":["var styled = false","var panel =","        UI.panel()","        .withForeground(Color.GREEN)","        .add(","            UI.label(\"Text\")","            .withForeground(UI.Color.UNDEFINED)","            .withSize(120, 40)","            .withStyle( it -> styled ? redStyle(it) : it )","        )","        .get(JPanel)","var label = panel.getComponent(0) as JLabel"]},
+
+        {"kind":"expect","text":"The label has no foreground color of its own and shows the green of the panel:","code":["!label.isForegroundSet()","label.getForeground() == Color.GREEN"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.isForegroundSet()","label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has no foreground color of its own again and shows the green of the panel:","code":["!label.isForegroundSet()","label.getForeground() == Color.GREEN"]},
+
+        {"kind":"when","text":"The panel changes its foreground color to blue:","code":["panel.setForeground(Color.BLUE)"]},
+
+        {"kind":"then","text":"The label follows the panel and shows the blue:","code":["label.getForeground() == Color.BLUE"]},
+
+        {"kind":"where","text":"","code":{"howTheColorIsSet":["'foregroundColor'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component without a foreground color of its own, the component follows the foreground color of its parent again. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A component does not need a foreground color of its own. When nothing set one on it, or\n            `setForeground(null)` was called, then `getForeground()` returns the foreground color of its\n            parent, and the component follows the parent whenever the parent changes its color.\n            When a style sets a foreground color on such a component and then stops setting it, the\n            component has to go back to having no foreground color of its own, so that it follows its\n            parent again.\n\n            A style can set the foreground color in two ways: with `foregroundColor(..)`, or as the color\n            of the font with `componentFont(f -> f.color(..))`. SwingTree applies both of them by calling\n            `setForeground(..)` on the component, and before it does that, it remembers the color the\n            component had, so that it can put that color back later. The difficulty lies in remembering\n            the color. In this scenario `getForeground()` returns green, but it does not tell whether the\n            green belongs to the label or to the panel around it. `isForegroundSet()` does: it returns\n            `false` when the label has no foreground color of its own.\n\n            If SwingTree remembered the green from `getForeground()` and put it back with\n            `setForeground(..)`, the label would look right at first. But the green would now be a\n            foreground color of the label itself, and when the panel later changed its foreground color\n            to blue, the label would stay green. Your code might never have set a foreground color on\n            this label, and yet the label would have stopped following its panel.\n\n            The scenario runs for both ways of setting the color ('a font color' in this run).\n            The panel has a green foreground color. The label inside it has none, because\n            `withForeground(UI.Color.UNDEFINED)` calls `setForeground(null)` on it. The styler lambda reads\n            the local variable `styled` every time SwingTree runs it, and adds the red only while `styled`\n            is `true`. SwingTree applies a style to a component while the component is painted, which is\n            why the scenario paints the label after every change of `styled`. And because Swing skips\n            painting a component whose width or height is 0, the label gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A green panel holding a label without a foreground color, whose styler adds a red text color only while `styled` is true:","code":["var styled = false","var panel =","        UI.panel()","        .withForeground(Color.GREEN)","        .add(","            UI.label(\"Text\")","            .withForeground(UI.Color.UNDEFINED)","            .withSize(120, 40)","            .withStyle( it -> styled ? redStyle(it) : it )","        )","        .get(JPanel)","var label = panel.getComponent(0) as JLabel"]},
+
+        {"kind":"expect","text":"The label has no foreground color of its own and shows the green of the panel:","code":["!label.isForegroundSet()","label.getForeground() == Color.GREEN"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.isForegroundSet()","label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has no foreground color of its own again and shows the green of the panel:","code":["!label.isForegroundSet()","label.getForeground() == Color.GREEN"]},
+
+        {"kind":"when","text":"The panel changes its foreground color to blue:","code":["panel.setForeground(Color.BLUE)"]},
+
+        {"kind":"then","text":"The label follows the panel and shows the blue:","code":["label.getForeground() == Color.BLUE"]},
+
+        {"kind":"where","text":"","code":{"howTheColorIsSet":["'foregroundColor'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree keeps a foreground color which your code set while the style was active. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            While a style sets the foreground color of a component, your code may call\n            `setForeground(..)` on the component too, for example through a property of your view model\n            which you bound with `withForeground(Val<Color>)`. When the style then stops setting a\n            foreground color, the color which your code set has to stay. SwingTree only takes back a\n            color which it set itself.\n\n            A style can set the foreground color in two ways: with `foregroundColor(..)`, or as the color\n            of the font with `componentFont(f -> f.color(..))`. SwingTree applies both of them by calling\n            `setForeground(..)` on the component. Before it does that, it remembers the color the\n            component had, so that it can put that color back once the style stops setting one.\n\n            Now suppose that your code sets blue while the style sets red. If SwingTree put the\n            remembered color back when the style stops setting one, it would throw your blue away, and\n            the label would show the dark grey from before the style, a color your code has already\n            replaced. So SwingTree first checks whether the label still has the red which it set, and\n            only then puts the remembered color back.\n\n            The scenario runs for both ways of setting the color ('foregroundColor' in this run).\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(it) : it )","        .get(JLabel)"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"While the style is still active, our code sets a blue foreground color on the label:","code":["label.setForeground(Color.BLUE)"]},
+
+        {"kind":"and","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label keeps the blue which our code set:","code":["label.getForeground() == Color.BLUE"]},
+
+        {"kind":"where","text":"","code":{"howTheColorIsSet":["'foregroundColor'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color of a component, SwingTree keeps a foreground color which your code set while the style was active. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            While a style sets the foreground color of a component, your code may call\n            `setForeground(..)` on the component too, for example through a property of your view model\n            which you bound with `withForeground(Val<Color>)`. When the style then stops setting a\n            foreground color, the color which your code set has to stay. SwingTree only takes back a\n            color which it set itself.\n\n            A style can set the foreground color in two ways: with `foregroundColor(..)`, or as the color\n            of the font with `componentFont(f -> f.color(..))`. SwingTree applies both of them by calling\n            `setForeground(..)` on the component. Before it does that, it remembers the color the\n            component had, so that it can put that color back once the style stops setting one.\n\n            Now suppose that your code sets blue while the style sets red. If SwingTree put the\n            remembered color back when the style stops setting one, it would throw your blue away, and\n            the label would show the dark grey from before the style, a color your code has already\n            replaced. So SwingTree first checks whether the label still has the red which it set, and\n            only then puts the remembered color back.\n\n            The scenario runs for both ways of setting the color ('a font color' in this run).\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variable `styled` every time SwingTree runs it, and\n            adds the red only while `styled` is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of\n            `styled`. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler adds a red text color only while the variable `styled` is true:","code":["var styled = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styled ? redStyle(it) : it )","        .get(JLabel)"]},
+
+        {"kind":"when","text":"We turn the red on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"While the style is still active, our code sets a blue foreground color on the label:","code":["label.setForeground(Color.BLUE)"]},
+
+        {"kind":"and","text":"We turn the red off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label keeps the blue which our code set:","code":["label.getForeground() == Color.BLUE"]},
+
+        {"kind":"where","text":"","code":{"howTheColorIsSet":["'foregroundColor'","'a font color'"],"redStyle":["{ it.foregroundColor(Color.RED) }","{ it.componentFont(f -> f.color(Color.RED)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style changes its foreground color after your code set one, SwingTree gives back the color of your code once the style stops setting a foreground color. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            While a style sets the foreground color of a component, your code may set a foreground color\n            too, and the style may change its color afterwards, for example from a hover color to a\n            pressed color. When the style finally stops setting a foreground color, the component has to\n            show the color which your code set last, and not the color the component had before the style.\n\n            A style can set the foreground color in two ways: with `foregroundColor(..)`, or as the color\n            of the font with `componentFont(f -> f.color(..))`. SwingTree applies both of them by calling\n            `setForeground(..)` on the component. Before it does that, it remembers the color the\n            component had, so that it can put that color back once the style stops setting one.\n\n            Let's walk through the steps of this scenario. The label starts dark grey. The style sets red,\n            and SwingTree remembers the dark grey. Then our code sets blue. Then the style changes its\n            color to green. At this moment the label has the blue and not the red which SwingTree set, so\n            SwingTree treats the blue as a color from outside of the style: it remembers the blue in place\n            of the dark grey, and then it sets the green. When the style stops setting a color, the label\n            still has the green which SwingTree set, so SwingTree puts the blue back.\n\n            If SwingTree kept remembering the dark grey, the label would end up dark grey, a color which\n            our code replaced two steps earlier. And if SwingTree never put a color back, the label would\n            stay green, the color of a style which is no longer there.\n\n            The scenario runs for both ways of setting the color ('foregroundColor' in this run).\n            The styler lambda reads the local variable `styleColor` every time SwingTree runs it. While\n            `styleColor` is `null`, the lambda sets no foreground color at all. SwingTree applies a style to\n            a component while the component is painted, which is why the scenario paints the label after\n            every change of `styleColor`. And because Swing skips painting a component whose width or\n            height is 0, the label gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler sets the text color stored in the variable `styleColor`, unless it is null:","code":["Color styleColor = null","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styleColor == null ? it : colorStyle(it, styleColor) )","        .get(JLabel)"]},
+
+        {"kind":"when","text":"The style sets red and we paint the label, so that SwingTree applies the style:","code":["styleColor = Color.RED","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"Our code sets a blue foreground color on the label:","code":["label.setForeground(Color.BLUE)"]},
+
+        {"kind":"and","text":"The style changes its color to green and we paint the label again:","code":["styleColor = Color.GREEN","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the green foreground color of the style:","code":["label.getForeground() == Color.GREEN"]},
+
+        {"kind":"when","text":"The style stops setting a color and we paint the label again:","code":["styleColor = null","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the blue which our code set, not the dark grey from before the style:","code":["label.getForeground() == Color.BLUE"]},
+
+        {"kind":"where","text":"","code":{"howTheColorIsSet":["'foregroundColor'","'a font color'"],"colorStyle":["{ it, color -> it.foregroundColor(color) }","{ it, color -> it.componentFont(f -> f.color(color)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style changes its foreground color after your code set one, SwingTree gives back the color of your code once the style stops setting a foreground color. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            While a style sets the foreground color of a component, your code may set a foreground color\n            too, and the style may change its color afterwards, for example from a hover color to a\n            pressed color. When the style finally stops setting a foreground color, the component has to\n            show the color which your code set last, and not the color the component had before the style.\n\n            A style can set the foreground color in two ways: with `foregroundColor(..)`, or as the color\n            of the font with `componentFont(f -> f.color(..))`. SwingTree applies both of them by calling\n            `setForeground(..)` on the component. Before it does that, it remembers the color the\n            component had, so that it can put that color back once the style stops setting one.\n\n            Let's walk through the steps of this scenario. The label starts dark grey. The style sets red,\n            and SwingTree remembers the dark grey. Then our code sets blue. Then the style changes its\n            color to green. At this moment the label has the blue and not the red which SwingTree set, so\n            SwingTree treats the blue as a color from outside of the style: it remembers the blue in place\n            of the dark grey, and then it sets the green. When the style stops setting a color, the label\n            still has the green which SwingTree set, so SwingTree puts the blue back.\n\n            If SwingTree kept remembering the dark grey, the label would end up dark grey, a color which\n            our code replaced two steps earlier. And if SwingTree never put a color back, the label would\n            stay green, the color of a style which is no longer there.\n\n            The scenario runs for both ways of setting the color ('a font color' in this run).\n            The styler lambda reads the local variable `styleColor` every time SwingTree runs it. While\n            `styleColor` is `null`, the lambda sets no foreground color at all. SwingTree applies a style to\n            a component while the component is painted, which is why the scenario paints the label after\n            every change of `styleColor`. And because Swing skips painting a component whose width or\n            height is 0, the label gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler sets the text color stored in the variable `styleColor`, unless it is null:","code":["Color styleColor = null","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> styleColor == null ? it : colorStyle(it, styleColor) )","        .get(JLabel)"]},
+
+        {"kind":"when","text":"The style sets red and we paint the label, so that SwingTree applies the style:","code":["styleColor = Color.RED","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red foreground color of the style:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"Our code sets a blue foreground color on the label:","code":["label.setForeground(Color.BLUE)"]},
+
+        {"kind":"and","text":"The style changes its color to green and we paint the label again:","code":["styleColor = Color.GREEN","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the green foreground color of the style:","code":["label.getForeground() == Color.GREEN"]},
+
+        {"kind":"when","text":"The style stops setting a color and we paint the label again:","code":["styleColor = null","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the blue which our code set, not the dark grey from before the style:","code":["label.getForeground() == Color.BLUE"]},
+
+        {"kind":"where","text":"","code":{"howTheColorIsSet":["'foregroundColor'","'a font color'"],"colorStyle":["{ it, color -> it.foregroundColor(color) }","{ it, color -> it.componentFont(f -> f.color(color)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting a font color and a foreground color one after the other, the component shows the color which is left and then the foreground color from before the style. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the foreground color of a component in two ways at once: with\n            `foregroundColor(..)`, and as the color of the font with `componentFont(f -> f.color(..))`.\n            Both end up in the same place, because SwingTree applies both of them by calling\n            `setForeground(..)` on the component. When a style sets both, the font color wins, because it\n            is the more specific of the two. When the style stops setting them one after the other, the\n            component has to show the color which is left, and once both are gone, it has to get back the\n            foreground color it had before the style.\n\n            The order in which the two colors go away must not matter, which is why the scenario runs\n            once with the font color going away first and once with the foreground color going away first\n            ('the font color' goes away first in this run).\n\n            When the font color goes away first, the label changes from the red font color to the blue\n            foreground color: SwingTree calls `setForeground(..)` with the blue. SwingTree still has to\n            remember the dark grey from before the style at this step, because the blue is a color of the\n            style too. If SwingTree forgot the dark grey when it replaced its own red with its own blue,\n            the label would stay blue once the style stops setting both colors.\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variables `withForegroundColor` and `withFontColor`\n            every time SwingTree runs it, and sets the blue foreground color and the red font color only\n            while the matching variable is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of these\n            variables. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler sets a blue foreground color and a red font color, each only while its variable is true:","code":["var withForegroundColor = false","var withFontColor = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> {","            var style = withForegroundColor ? it.foregroundColor(Color.BLUE) : it","            return withFontColor ? style.componentFont(f -> f.color(Color.RED)) : style","        })","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn both colors on and paint the label, so that SwingTree applies the style:","code":["withForegroundColor = true","withFontColor = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red of the font color, which wins over the foreground color:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn one of the two colors off and paint the label again:","code":["withFontColor = fontColorStays","withForegroundColor = foregroundColorStays","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the color which is left:","code":["label.getForeground() == colorInBetween"]},
+
+        {"kind":"when","text":"We turn the other color off as well and paint the label again:","code":["withFontColor = false","withForegroundColor = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"firstGone":["'the font color'","'the foreground color'"],"fontColorStays":["false","true"],"foregroundColorStays":["true","false"],"colorInBetween":["Color.BLUE","Color.RED"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting a font color and a foreground color one after the other, the component shows the color which is left and then the foreground color from before the style. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style can set the foreground color of a component in two ways at once: with\n            `foregroundColor(..)`, and as the color of the font with `componentFont(f -> f.color(..))`.\n            Both end up in the same place, because SwingTree applies both of them by calling\n            `setForeground(..)` on the component. When a style sets both, the font color wins, because it\n            is the more specific of the two. When the style stops setting them one after the other, the\n            component has to show the color which is left, and once both are gone, it has to get back the\n            foreground color it had before the style.\n\n            The order in which the two colors go away must not matter, which is why the scenario runs\n            once with the font color going away first and once with the foreground color going away first\n            ('the foreground color' goes away first in this run).\n\n            When the font color goes away first, the label changes from the red font color to the blue\n            foreground color: SwingTree calls `setForeground(..)` with the blue. SwingTree still has to\n            remember the dark grey from before the style at this step, because the blue is a color of the\n            style too. If SwingTree forgot the dark grey when it replaced its own red with its own blue,\n            the label would stay blue once the style stops setting both colors.\n\n            The label starts with a dark grey foreground color, which `withForeground(Color.DARK_GRAY)`\n            sets. The styler lambda reads the local variables `withForegroundColor` and `withFontColor`\n            every time SwingTree runs it, and sets the blue foreground color and the red font color only\n            while the matching variable is `true`. SwingTree applies a style to a component while the\n            component is painted, which is why the scenario paints the label after every change of these\n            variables. And because Swing skips painting a component whose width or height is 0, the label\n            gets a size of 120 by 40 pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A dark grey label whose styler sets a blue foreground color and a red font color, each only while its variable is true:","code":["var withForegroundColor = false","var withFontColor = false","var label =","        UI.label(\"Text\")","        .withForeground(Color.DARK_GRAY)","        .withSize(120, 40)","        .withStyle( it -> {","            var style = withForegroundColor ? it.foregroundColor(Color.BLUE) : it","            return withFontColor ? style.componentFont(f -> f.color(Color.RED)) : style","        })","        .get(JLabel)"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn both colors on and paint the label, so that SwingTree applies the style:","code":["withForegroundColor = true","withFontColor = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the red of the font color, which wins over the foreground color:","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"We turn one of the two colors off and paint the label again:","code":["withFontColor = fontColorStays","withForegroundColor = foregroundColorStays","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has the color which is left:","code":["label.getForeground() == colorInBetween"]},
+
+        {"kind":"when","text":"We turn the other color off as well and paint the label again:","code":["withFontColor = false","withForegroundColor = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"where","text":"","code":{"firstGone":["'the font color'","'the foreground color'"],"fontColorStays":["false","true"],"foregroundColorStays":["true","false"],"colorInBetween":["Color.BLUE","Color.RED"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a style stops setting the foreground color `UI.Color.UNDEFINED`, SwingTree gives the component back the foreground color it had before the style.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API does not accept `null` as a color, so a style uses the constant\n            `UI.Color.UNDEFINED` in its place. When a style sets `foregroundColor(UI.Color.UNDEFINED)`,\n            SwingTree calls `setForeground(null)` on the component, so the component has no foreground\n            color of its own while the style is active. When the style stops setting it, the component\n            has to get back the foreground color it had before the style.\n\n            SwingTree only puts the color from before the style back if the component still has the\n            color which the style gave it, because a color which your code set in the meantime has to\n            stay. For `UI.Color.UNDEFINED` that check cannot compare colors with `getForeground()`.\n            A component without a foreground color of its own returns the foreground color of its parent\n            from `getForeground()`, which is green in this scenario, and green is not the `null` which\n            SwingTree set. The check has to call `isForegroundSet()` instead, which returns `false` for a\n            component without a foreground color of its own. If SwingTree compared the colors, it would\n            take the green for a color which your code set, and the label would never get its dark grey\n            back.\n\n            The panel has a green foreground color, and the label inside it starts with a dark grey\n            foreground color, which `withForeground(Color.DARK_GRAY)` sets. The styler lambda reads the\n            local variable `styled` every time SwingTree runs it, and sets `UI.Color.UNDEFINED` only while\n            `styled` is `true`. SwingTree applies a style to a component while the component is painted,\n            which is why the scenario paints the label after every change of `styled`. And because Swing\n            skips painting a component whose width or height is 0, the label gets a size of 120 by 40\n            pixels.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A green panel holding a dark grey label, whose styler sets `UI.Color.UNDEFINED` only while `styled` is true:","code":["var styled = false","var panel =","        UI.panel()","        .withForeground(Color.GREEN)","        .add(","            UI.label(\"Text\")","            .withForeground(Color.DARK_GRAY)","            .withSize(120, 40)","            .withStyle( it -> styled ? it.foregroundColor(UI.Color.UNDEFINED) : it )","        )","        .get(JPanel)","var label = panel.getComponent(0) as JLabel"]},
+
+        {"kind":"expect","text":"The label starts with its dark grey foreground color:","code":["label.getForeground() == Color.DARK_GRAY"]},
+
+        {"kind":"when","text":"We turn the style on and paint the label, so that SwingTree applies the style:","code":["styled = true","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has no foreground color of its own and shows the green of the panel:","code":["!label.isForegroundSet()","label.getForeground() == Color.GREEN"]},
+
+        {"kind":"when","text":"We turn the style off and paint the label again:","code":["styled = false","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The label has its dark grey foreground color from before the style again:","code":["label.isForegroundSet()","label.getForeground() == Color.DARK_GRAY"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

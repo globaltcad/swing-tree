@@ -76,7 +76,7 @@ import java.util.function.Function;
 
     @SuppressWarnings(&quot;ReferenceEquality&quot;)
     protected final boolean _isUndefinedColor( Color color ) {
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        return color == UI.Color.UNDEFINED;</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        return color == UI.Color.UNDEFINED;</span>
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Observable event ) {
@@ -2921,7 +2921,7 @@ import java.util.function.Function;
      */
     public final I withForeground( Color color ) {
 <span class="fc" id="L2923">        NullUtil.nullArgCheck(color, &quot;color&quot;, Color.class);</span>
-<span class="pc bpc" id="L2924" title="1 of 2 branches missed.">        return _with( c -&gt; c.setForeground( _isUndefinedColor(color) ? null : color ) )._this();</span>
+<span class="fc bfc" id="L2924" title="All 2 branches covered.">        return _with( c -&gt; c.setForeground( _isUndefinedColor(color) ? null : color ) )._this();</span>
     }
 
     /**

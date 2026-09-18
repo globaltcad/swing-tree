@@ -169,7 +169,7 @@ instead of guessing.
 <dependency>
   <groupId>io.github.globaltcad</groupId>
   <artifactId>swing-tree</artifactId>
-  <version>0.29.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -178,11 +178,11 @@ instead of guessing.
 ## 📥 Getting started with Gradle ##
 Groovy DSL:
 ```groovy
-implementation 'io.github.globaltcad:swing-tree:0.29.0'
+implementation 'io.github.globaltcad:swing-tree:1.0.0'
 ```
 Kotlin DSL:
 ```kotlin
-implementation("io.github.globaltcad:swing-tree:0.29.0")
+implementation("io.github.globaltcad:swing-tree:1.0.0")
 ```
 ---
 
@@ -201,13 +201,26 @@ allprojects {
 ...either by specifying the version tag:
 ```groovy
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:0.29.0'
+	implementation 'com.github.globaltcad:swing-tree:1.0.0'
 }
 ```
 ...or by using a custom commit hash instead:
 ```groovy
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:2892b87'//Any commit hash...
+	implementation 'com.github.globaltcad:swing-tree:59f329d'//Any commit hash...
 }
 ```
 ---
+
+## 🚲 Roadmap ##
+
+SwingTree is essentially feature complete, so its future is
+centered around stability, performance and reliability.
+This means we are committed to keeping the API stable.
+
+Further development will also seek to upgrade the minimum
+source code compatible version to at least 25, which
+is planed for SwingTree version 2.0.0.
+
+If we ever introduce breaking changes, they will be motivated
+by how the language and JVM ecosystem evolves.
