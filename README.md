@@ -211,3 +211,16 @@ dependencies {
 }
 ```
 ---
+
+## 🚲 Roadmap ##
+
+SwingTree is essentially feature complete, so its future is
+centered around stability, performance and reliability.
+This means we are committed to keeping the API stable.
+
+Further development will also seek to upgrade the minimum
+source code compatible version to at least 25, which
+is planed for SwingTree version 2.0.0.
+
+If we ever introduce breaking changes, they will be motivated
+by how the language and JVM ecosystem evolves.
