@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SliderState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">SliderState.java</span></div><h1>SliderState.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.From;
+import sprouts.Val;
+import sprouts.Var;
+import swingtree.api.model.SliderTicks;
+import swingtree.style.ComponentBackend;
+import swingtree.threading.EventProcessor;
+
+import javax.swing.BoundedRangeModel;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.plaf.UIResource;
+import java.awt.Color;
+import java.awt.Font;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.function.Function;
+
+final class SliderState
+{
+<span class="fc" id="L34">    private static final Logger log = LoggerFactory.getLogger(SliderState.class);</span>
+
+    static SliderState of( JSlider slider, Class&lt;? extends Number&gt; numberType, EventProcessor eventProcessor ) {
+<span class="fc" id="L37">        return ComponentBackend.powering(slider)</span>
+<span class="fc" id="L38">                .getOrSet(SliderState.class, () -&gt; new SliderState(slider, numberType, eventProcessor));</span>
+    }
+
+    private final JSlider                 _slider;
+    private final Class&lt;? extends Number&gt; _numberType;
+    private final EventProcessor          _eventProcessor;
+<span class="fc" id="L44">    private final List&lt;ChangeListener&gt;    _changeActions = new ArrayList&lt;&gt;();</span>
+
+    private Number                       _min;
+    private Number                       _max;
+    private Number                       _value;
+    private @Nullable SliderTicks&lt;?&gt;     _ticks;
+    private @Nullable Number             _fractionalMajorTickSpacing;
+    private @Nullable Number             _fractionalMinorTickSpacing;
+    private SliderGrid                   _grid;
+    private @Nullable Var&lt;Number&gt;        _valueTarget;
+    private @Nullable Val&lt;Number&gt;        _minSource;
+    private @Nullable Val&lt;Number&gt;        _maxSource;
+    private int                          _lastSeenStep;
+    private int                          _writesStillOnTheirWay;
+    private boolean                      _isChangingTheSliderItself;
+
+<span class="fc" id="L60">    private SliderState( JSlider slider, Class&lt;? extends Number&gt; numberType, EventProcessor eventProcessor ) {</span>
+<span class="fc" id="L61">        _slider         = slider;</span>
+<span class="fc" id="L62">        _numberType     = numberType;</span>
+<span class="fc" id="L63">        _eventProcessor = eventProcessor;</span>
+<span class="fc" id="L64">        BoundedRangeModel model = slider.getModel();</span>
+<span class="fc" id="L65">        _min   = SliderGrid.convert(numberType, model.getMinimum());</span>
+<span class="fc" id="L66">        _max   = SliderGrid.convert(numberType, model.getMaximum());</span>
+<span class="fc" id="L67">        _value = SliderGrid.convert(numberType, model.getValue());</span>
+<span class="fc" id="L68">        _grid  = SliderGrid.of(numberType, _min, _max, null);</span>
+<span class="fc" id="L69">        _lastSeenStep = model.getValue();</span>
+<span class="fc" id="L70">        slider.addChangeListener(new SliderChangeListener());</span>
+<span class="fc" id="L71">    }</span>
+
+    void setMin( Number min ) {
+<span class="fc" id="L74">        _min = SliderGrid.convert(_numberType, min);</span>
+<span class="fc" id="L75">        _layOutForNewRange();</span>
+<span class="fc" id="L76">    }</span>
+
+    void setMax( Number max ) {
+<span class="fc" id="L79">        _max = SliderGrid.convert(_numberType, max);</span>
+<span class="fc" id="L80">        _layOutForNewRange();</span>
+<span class="fc" id="L81">    }</span>
+
+    void setValue( Number value ) {
+<span class="fc bfc" id="L84" title="All 4 branches covered.">        if ( _slider.getValueIsAdjusting() || _writesStillOnTheirWay &gt; 0 )</span>
+<span class="fc" id="L85">            return;</span>
+<span class="fc" id="L86">        _value = SliderGrid.convert(_numberType, value);</span>
+<span class="fc" id="L87">        _placeKnob();</span>
+<span class="fc" id="L88">    }</span>
+
+    void setTicks( SliderTicks&lt;?&gt; ticks ) {
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">        if ( ticks.equals(_ticks) )</span>
+<span class="nc" id="L92">            return;</span>
+<span class="fc" id="L93">        _ticks = ticks;</span>
+<span class="fc" id="L94">        _grid = SliderGrid.of(_numberType, _min, _max, ticks);</span>
+<span class="fc" id="L95">        _placeKnob();</span>
+<span class="fc" id="L96">        _installTicks(_grid, ticks);</span>
+<span class="fc" id="L97">    }</span>
+
+    void setMajorTickSpacing( Number spacing ) {
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        if ( _ticks != null )</span>
+<span class="fc" id="L101">            return;</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if ( SliderGrid.isWholeNumberType(_numberType) ) {</span>
+<span class="fc" id="L103">            _slider.setMajorTickSpacing(spacing.intValue());</span>
+        } else {
+<span class="fc" id="L105">            _fractionalMajorTickSpacing = SliderGrid.convert(_numberType, spacing);</span>
+<span class="fc" id="L106">            _layOutForNewFractionalTickSpacing();</span>
+        }
+<span class="fc" id="L108">    }</span>
+
+    void setMinorTickSpacing( Number spacing ) {
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        if ( _ticks != null )</span>
+<span class="fc" id="L112">            return;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if ( SliderGrid.isWholeNumberType(_numberType) ) {</span>
+<span class="fc" id="L114">            _slider.setMinorTickSpacing(spacing.intValue());</span>
+        } else {
+<span class="fc" id="L116">            _fractionalMinorTickSpacing = SliderGrid.convert(_numberType, spacing);</span>
+<span class="fc" id="L117">            _layOutForNewFractionalTickSpacing();</span>
+        }
+<span class="fc" id="L119">    }</span>
+
+    void onChange( ChangeListener action ) {
+<span class="fc" id="L122">        _changeActions.add(action);</span>
+<span class="fc" id="L123">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    void keepMinWithin( Val&lt;? extends Number&gt; minSource ) {
+<span class="fc" id="L127">        _minSource = (Val&lt;Number&gt;) minSource;</span>
+<span class="fc" id="L128">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    void keepMaxWithin( Val&lt;? extends Number&gt; maxSource ) {
+<span class="fc" id="L132">        _maxSource = (Val&lt;Number&gt;) maxSource;</span>
+<span class="fc" id="L133">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    void writeUserChangesTo( Var&lt;? extends Number&gt; target ) {
+<span class="fc" id="L137">        _valueTarget = (Var&lt;Number&gt;) target;</span>
+<span class="fc" id="L138">    }</span>
+
+    private void _layOutForNewRange() {
+<span class="fc" id="L141">        SliderGrid grid = _gridForRangeAndTicks();</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">        boolean gridChanged = !grid.equals(_grid);</span>
+<span class="fc" id="L143">        _grid = grid;</span>
+<span class="fc" id="L144">        _placeKnob();</span>
+<span class="fc" id="L145">        SliderTicks&lt;?&gt; ticks = _ticks;</span>
+<span class="pc bpc" id="L146" title="1 of 4 branches missed.">        if ( ticks != null &amp;&amp; gridChanged )</span>
+<span class="fc" id="L147">            _installTicks(grid, ticks);</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        else if ( gridChanged )</span>
+<span class="fc" id="L149">            _installFractionalTickSpacings(grid);</span>
+<span class="fc" id="L150">    }</span>
+
+    private void _layOutForNewFractionalTickSpacing() {
+<span class="fc" id="L153">        _grid = _gridForRangeAndTicks();</span>
+<span class="fc" id="L154">        _placeKnob();</span>
+<span class="fc" id="L155">        _installFractionalTickSpacings(_grid);</span>
+<span class="fc" id="L156">    }</span>
+
+    private SliderGrid _gridForRangeAndTicks() {
+<span class="pc bpc" id="L159" title="1 of 4 branches missed.">        boolean hasFractionalTickSpacings = _fractionalMajorTickSpacing != null || _fractionalMinorTickSpacing != null;</span>
+<span class="fc bfc" id="L160" title="All 4 branches covered.">        if ( _ticks == null &amp;&amp; hasFractionalTickSpacings )</span>
+<span class="fc" id="L161">            return SliderGrid.ofFractionalTickSpacings(_numberType, _min, _max, _fractionalMajorTickSpacing, _fractionalMinorTickSpacing);</span>
+<span class="fc" id="L162">        return SliderGrid.of(_numberType, _min, _max, _ticks);</span>
+    }
+
+    private void _installFractionalTickSpacings( SliderGrid grid ) {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if ( _fractionalMajorTickSpacing != null )</span>
+<span class="fc" id="L167">            _slider.setMajorTickSpacing(grid.majorSpacingInSteps());</span>
+<span class="fc bfc" id="L168" title="All 2 branches covered.">        if ( _fractionalMinorTickSpacing != null )</span>
+<span class="fc" id="L169">            _slider.setMinorTickSpacing(grid.minorSpacingInSteps());</span>
+<span class="fc" id="L170">    }</span>
+
+    private void _placeKnob() {
+<span class="fc" id="L173">        SliderGrid grid = _grid;</span>
+<span class="fc" id="L174">        int step = grid.stepOf(_value);</span>
+<span class="fc" id="L175">        BoundedRangeModel model = _slider.getModel();</span>
+<span class="fc bfc" id="L176" title="All 6 branches covered.">        if ( model.getMinimum() != grid.intMin() || model.getMaximum() != grid.intMax() || model.getValue() != step )</span>
+<span class="fc" id="L177">            _changeTheSliderItself(() -&gt; model.setRangeProperties(step, model.getExtent(), grid.intMin(), grid.intMax(), model.getValueIsAdjusting()));</span>
+<span class="fc" id="L178">        _lastSeenStep = model.getValue();</span>
+<span class="fc" id="L179">    }</span>
+
+    private void _installTicks( SliderGrid grid, SliderTicks&lt;?&gt; ticks ) {
+<span class="fc" id="L182">        Hashtable&lt;Integer, JComponent&gt; labels = _labelsFor(grid, ticks);</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if ( labels.isEmpty() ) {</span>
+<span class="fc" id="L184">            _slider.setPaintLabels(false);</span>
+<span class="fc" id="L185">            _slider.setLabelTable(labels);</span>
+        } else {
+<span class="fc" id="L187">            _slider.setLabelTable(labels);</span>
+<span class="fc" id="L188">            _slider.setPaintLabels(true);</span>
+        }
+<span class="fc" id="L190">        _slider.setMajorTickSpacing(grid.majorSpacingInSteps());</span>
+<span class="fc" id="L191">        _slider.setMinorTickSpacing(grid.minorSpacingInSteps());</span>
+<span class="fc bfc" id="L192" title="All 4 branches covered.">        _slider.setPaintTicks(ticks.hasVisibleTickMarks() &amp;&amp; grid.majorSpacingInSteps() &gt; 0);</span>
+<span class="fc" id="L193">    }</span>
+
+    @SuppressWarnings(&quot;JdkObsolete&quot;)
+    private &lt;N extends Number&gt; Hashtable&lt;Integer, JComponent&gt; _labelsFor( SliderGrid grid, SliderTicks&lt;N&gt; ticks ) {
+<span class="fc" id="L197">        Hashtable&lt;Integer, JComponent&gt; labels = new Hashtable&lt;&gt;();</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        if ( ticks.hasLabelsAtMajorTicks() ) {</span>
+<span class="fc" id="L199">            int count = grid.majorTickCount();</span>
+<span class="fc" id="L200">            Function&lt;N, String&gt; text = ticks.majorTickLabelText().orElse(null);</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">            int decimals = text == null ? _decimalsToWriteExactly(grid, count) : 0;</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">            for ( int index = 0; index &lt; count; index++ ) {</span>
+<span class="fc" id="L203">                BigDecimal number = grid.numberAtMajorTick(index);</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">                String labelText = text == null</span>
+<span class="fc" id="L205">                                    ? _numberText(number, decimals, ticks.labelLocale())</span>
+<span class="fc" id="L206">                                    : _textOf(text, SliderGrid.convert(ticks.numberType(), number));</span>
+<span class="fc" id="L207">                labels.put(grid.stepOfMajorTick(index), new TickLabel(_slider, labelText));</span>
+            }
+        }
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        for ( N position : ticks.labelPositions() ) {</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">            if ( !grid.isInRange(position) )</span>
+<span class="fc" id="L212">                continue;</span>
+<span class="fc" id="L213">            int step = grid.stepOf(position);</span>
+<span class="fc" id="L214">            ticks.labelTextAt(position).ifPresent( text -&gt; labels.put(step, new TickLabel(_slider, text)) );</span>
+<span class="fc" id="L215">            ticks.labelIconAt(position).ifPresent( icon -&gt; labels.put(step, new TickLabel(_slider, icon.find().orElse(null))) );</span>
+<span class="fc" id="L216">        }</span>
+<span class="fc" id="L217">        return labels;</span>
+    }
+
+    private static int _decimalsToWriteExactly( SliderGrid grid, int count ) {
+<span class="fc" id="L221">        int decimals = 0;</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        for ( int index = 0; index &lt; count; index++ )</span>
+<span class="fc" id="L223">            decimals = Math.max(decimals, grid.numberAtMajorTick(index).stripTrailingZeros().scale());</span>
+<span class="fc" id="L224">        return decimals;</span>
+    }
+
+    private static String _numberText( BigDecimal number, int decimals, Locale locale ) {
+<span class="fc" id="L228">        BigDecimal rounded = number.setScale(decimals, RoundingMode.HALF_UP);</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        if ( Locale.ROOT.equals(locale) )</span>
+<span class="fc" id="L230">            return rounded.toPlainString();</span>
+<span class="fc" id="L231">        NumberFormat format = NumberFormat.getNumberInstance(locale);</span>
+<span class="fc" id="L232">        format.setMinimumFractionDigits(decimals);</span>
+<span class="fc" id="L233">        format.setMaximumFractionDigits(decimals);</span>
+<span class="fc" id="L234">        return format.format(rounded);</span>
+    }
+
+    private static &lt;N extends Number&gt; String _textOf( Function&lt;N, String&gt; text, N number ) {
+        try {
+<span class="fc" id="L239">            String result = text.apply(number);</span>
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">            return result == null ? &quot;&quot; : result;</span>
+<span class="nc" id="L241">        } catch ( Exception e ) {</span>
+<span class="nc" id="L242">            log.error(SwingTree.get().logMarker(), &quot;Failed to compute the text of the slider label at {}.&quot;, number, e);</span>
+<span class="nc" id="L243">            return &quot;&quot;;</span>
+        }
+    }
+
+    private void _onSliderChange( ChangeEvent event ) {
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        if ( _isChangingTheSliderItself )</span>
+<span class="fc" id="L249">            return;</span>
+<span class="fc" id="L250">        BoundedRangeModel model = _slider.getModel();</span>
+<span class="fc bfc" id="L251" title="All 4 branches covered.">        if ( model.getMinimum() != _grid.intMin() || model.getMaximum() != _grid.intMax() )</span>
+<span class="fc" id="L252">            _followRangeSetOnTheSlider(model);</span>
+<span class="fc" id="L253">        _onUserChange();</span>
+<span class="fc bfc" id="L254" title="All 2 branches covered.">        for ( ChangeListener action : _changeActions )</span>
+<span class="fc" id="L255">            action.stateChanged(event);</span>
+<span class="fc" id="L256">    }</span>
+
+    private void _followRangeSetOnTheSlider( BoundedRangeModel model ) {
+<span class="fc bfc" id="L259" title="All 2 branches covered.">        if ( SliderGrid.isWholeNumberType(_numberType) ) {</span>
+<span class="fc" id="L260">            _min = SliderGrid.convert(_numberType, model.getMinimum());</span>
+<span class="fc" id="L261">            _max = SliderGrid.convert(_numberType, model.getMaximum());</span>
+<span class="fc" id="L262">            _layOutForNewRange();</span>
+        }
+        else
+<span class="fc" id="L265">            _placeKnob();</span>
+<span class="fc" id="L266">    }</span>
+
+    private void _onUserChange() {
+<span class="fc" id="L269">        int step = _slider.getValue();</span>
+<span class="fc" id="L270">        int chosenStep = _chooseStepFor(step);</span>
+<span class="fc" id="L271">        _lastSeenStep = step;</span>
+<span class="fc bfc" id="L272" title="All 4 branches covered.">        if ( chosenStep != step &amp;&amp; !_slider.getValueIsAdjusting() ) {</span>
+<span class="fc" id="L273">            _changeTheSliderItself(() -&gt; _slider.setValue(chosenStep));</span>
+<span class="fc" id="L274">            _lastSeenStep = chosenStep;</span>
+        }
+<span class="fc bfc" id="L276" title="All 2 branches covered.">        Number number = _isStepOfTheValue(chosenStep) ? _value : _grid.numberAt(chosenStep);</span>
+<span class="fc" id="L277">        _value = number;</span>
+<span class="fc" id="L278">        Var&lt;Number&gt; target = _valueTarget;</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">        if ( target == null )</span>
+<span class="fc" id="L280">            return;</span>
+<span class="fc" id="L281">        Val&lt;Number&gt; minSource = _minSource;</span>
+<span class="fc" id="L282">        Val&lt;Number&gt; maxSource = _maxSource;</span>
+<span class="fc" id="L283">        _writesStillOnTheirWay++;</span>
+<span class="fc" id="L284">        _eventProcessor.registerAppEvent(() -&gt; {</span>
+<span class="fc" id="L285">            target.set(From.VIEW, _keepWithin(number, minSource, maxSource));</span>
+<span class="fc" id="L286">            Number settled = target.get();</span>
+<span class="fc" id="L287">            _eventProcessor.registerUIEvent(() -&gt; _acknowledgeWrite(settled));</span>
+<span class="fc" id="L288">        });</span>
+<span class="fc" id="L289">    }</span>
+
+    private void _acknowledgeWrite( Number settled ) {
+<span class="fc" id="L292">        _writesStillOnTheirWay--;</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">        if ( _writesStillOnTheirWay == 0 )</span>
+<span class="fc" id="L294">            setValue(settled);</span>
+<span class="fc" id="L295">    }</span>
+
+    private int _chooseStepFor( int step ) {
+<span class="fc" id="L298">        SliderTicks&lt;?&gt; ticks = _ticks;</span>
+<span class="fc bfc" id="L299" title="All 6 branches covered.">        if ( ticks == null || !ticks.isSnappingToTicks() || _isStepOfTheValue(step) )</span>
+<span class="fc" id="L300">            return step;</span>
+<span class="fc bfc" id="L301" title="All 4 branches covered.">        if ( _slider.getValueIsAdjusting() || step == _lastSeenStep )</span>
+<span class="fc" id="L302">            return _grid.nearestTick(step);</span>
+<span class="fc" id="L303">        return _grid.nextTickTowards(step, _lastSeenStep);</span>
+    }
+
+    private boolean _isStepOfTheValue( int step ) {
+<span class="fc bfc" id="L307" title="All 4 branches covered.">        return _grid.isInRange(_value) &amp;&amp; _grid.stepOf(_value) == step;</span>
+    }
+
+    private static Number _keepWithin( Number number, @Nullable Val&lt;Number&gt; minSource, @Nullable Val&lt;Number&gt; maxSource ) {
+<span class="fc bfc" id="L311" title="All 2 branches covered.">        if ( minSource != null ) {</span>
+<span class="fc" id="L312">            Number min = minSource.orElseNull();</span>
+<span class="pc bpc" id="L313" title="2 of 4 branches missed.">            if ( min != null &amp;&amp; number.doubleValue() &lt; min.doubleValue() )</span>
+<span class="nc" id="L314">                return min;</span>
+        }
+<span class="fc bfc" id="L316" title="All 2 branches covered.">        if ( maxSource != null ) {</span>
+<span class="fc" id="L317">            Number max = maxSource.orElseNull();</span>
+<span class="pc bpc" id="L318" title="1 of 4 branches missed.">            if ( max != null &amp;&amp; number.doubleValue() &gt; max.doubleValue() )</span>
+<span class="fc" id="L319">                return max;</span>
+        }
+<span class="fc" id="L321">        return number;</span>
+    }
+
+    private void _changeTheSliderItself( Runnable change ) {
+<span class="fc" id="L325">        boolean wasChangingTheSliderItself = _isChangingTheSliderItself;</span>
+<span class="fc" id="L326">        _isChangingTheSliderItself = true;</span>
+        try {
+<span class="fc" id="L328">            change.run();</span>
+        } finally {
+<span class="fc" id="L330">            _isChangingTheSliderItself = wasChangingTheSliderItself;</span>
+        }
+<span class="fc" id="L332">    }</span>
+
+<span class="fc" id="L334">    private final class SliderChangeListener implements ChangeListener {</span>
+        @Override
+        public void stateChanged( ChangeEvent event ) {
+<span class="fc" id="L337">            _onSliderChange(event);</span>
+<span class="fc" id="L338">        }</span>
+    }
+
+    private static final class TickLabel extends JLabel implements UIResource
+    {
+        private final @Nullable JSlider _owner;
+
+        TickLabel( JSlider owner, String text ) {
+<span class="fc" id="L346">            super(text, JLabel.CENTER);</span>
+<span class="fc" id="L347">            _owner = owner;</span>
+<span class="fc" id="L348">            setName(&quot;Slider.label&quot;);</span>
+<span class="fc" id="L349">        }</span>
+
+        TickLabel( JSlider owner, @Nullable Icon icon ) {
+<span class="fc" id="L352">            super(icon, JLabel.CENTER);</span>
+<span class="fc" id="L353">            _owner = owner;</span>
+<span class="fc" id="L354">            setName(&quot;Slider.label&quot;);</span>
+<span class="fc" id="L355">        }</span>
+
+        @Override
+        public Font getFont() {
+<span class="fc" id="L359">            Font font = super.getFont();</span>
+<span class="fc" id="L360">            JSlider owner = _owner;</span>
+<span class="pc bpc" id="L361" title="2 of 6 branches missed.">            if ( owner == null || (font != null &amp;&amp; !(font instanceof UIResource)) )</span>
+<span class="fc" id="L362">                return font;</span>
+<span class="fc" id="L363">            return owner.getFont();</span>
+        }
+
+        @Override
+        public Color getForeground() {
+<span class="fc" id="L368">            Color foreground = super.getForeground();</span>
+<span class="fc" id="L369">            JSlider owner = _owner;</span>
+<span class="pc bpc" id="L370" title="2 of 6 branches missed.">            if ( owner == null || (foreground != null &amp;&amp; !(foreground instanceof UIResource)) )</span>
+<span class="fc" id="L371">                return foreground;</span>
+<span class="fc" id="L372">            Color ownerForeground = owner.getForeground();</span>
+<span class="pc bpc" id="L373" title="1 of 4 branches missed.">            if ( ownerForeground != null &amp;&amp; !(ownerForeground instanceof UIResource) )</span>
+<span class="fc" id="L374">                return ownerForeground;</span>
+<span class="fc" id="L375">            return foreground;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

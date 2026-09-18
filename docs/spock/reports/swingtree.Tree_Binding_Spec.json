@@ -1,0 +1,359 @@
+{
+  "className":"swingtree.Tree_Binding_Spec",
+  "title":"Growing a Tree from a Property",
+  "narrative":"A `JTree` in SwingTree is not built by assembling mutable nodes. It is bound to a\n    **single property holding one deeply immutable, nested value**, together with a small\n    configuration saying which parts of that value the tree should zoom into.\n\n    The value is usually a sum type. In Java 21 the file system these scenarios use would\n    read like this:\n\n    ```java\n    public sealed interface FsNode extends HasId<String> { String name(); }\n    public record Dir( String id, String name, Tuple<FsNode> entries ) implements FsNode {}\n    public record Doc( String id, String name, String body )           implements FsNode {}\n    ```\n\n    And the tree over it like this:\n\n    ```java\n    UI.tree(fileSystem, conf -> conf\n        .nodesOf(Dir.class, dir -> dir.children(Dir::entries).text(Dir::name))\n        .nodesOf(Doc.class, doc -> doc.text(Doc::name))\n    );\n    ```\n\n    One `nodesOf(..)` block per node type, reading like one `case` of the `switch` you\n    would otherwise have written by hand. This document is about that configuration: what\n    makes a node a branch or a leaf, where its label and icon come from, what identifies it,\n    and how a tree of unrelated types is described.\n\n    Three companion documents carry on from here: `Tree_Update_Spec` is about what happens\n    when the bound value changes, `Tree_Selection_And_Editing_Spec` is about selecting and\n    editing in a bound tree, and `Tree_Forest_Spec` is about `UI.trees(..)`, which binds a\n    `Var<Tuple<N>>` for data whose natural shape is several top level nodes rather than one\n    root.",
+  "subjects":["swingtree.UIForTree","swingtree.TreeConf","swingtree.TreeNodeConf"],
+  "statistics":{
+    "runs":"19",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A tree is one property plus one rule per node type.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole of the basic API. `UI.tree(..)` takes the property holding the\n            root of your structure and a configurator declaring, per node type, where that\n            type keeps its children and how it is labelled.\n\n            Note what you do *not* write: no `TreeModel`, no `DefaultMutableTreeNode`, no\n            loop copying your data into a second, mutable tree. The value you already have\n            *is* the tree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A little file system, held in a single property.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"assets\", Tuple.of(FsNode, new Doc(\"a1\", \"logo.svg\"))),","                            new Doc(\"b\", \"README.md\")","                        )))"]},
+
+        {"kind":"when","text":"We describe it as a tree, one rule block per node type.","code":["var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"then","text":"The tree shows the root and its two entries, because a bound tree opens its root.","code":["visibleRows(tree) == [","    \"root\",","    \"    assets\",","    \"    README.md\",","]"]},
+
+        {"kind":"and","text":"The root is a branch holding those two entries.","code":["!UI.runAndGet({ tree.getModel().isLeaf(tree.getModel().getRoot()) })","UI.runAndGet({ tree.getModel().getChildCount(tree.getModel().getRoot()) }) == 2"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A node type is a leaf exactly when no rule gives it children.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            There is no `leaf(..)` declaration to remember, and no \"allows children\" flag to\n            set. Declaring a `children(..)` rule for a type is what makes that type a branch,\n            and every type without one is a leaf.\n\n            For a sum type this is exactly the right default: the cases that carry a\n            collection of child nodes are the branches, and the cases that do not are the\n            leaves. The shape of your data already said so.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree whose configuration gives directories children, but documents none.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"empty\", \"empty-folder\", Tuple.of(FsNode)),","                            new Doc(\"d\", \"notes.txt\")","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"and","text":"We reach for the two children of the root.","code":["var model      = tree.getModel()","var emptyDir   = UI.runAndGet({ model.getChild(model.getRoot(), 0) })","var document   = UI.runAndGet({ model.getChild(model.getRoot(), 1) })"]},
+
+        {"kind":"expect","text":"The document is a leaf, because no rule ever hands it children.","code":["UI.runAndGet({ model.isLeaf(document) })"]},
+
+        {"kind":"and","text":"The directory is a branch even though it currently holds nothing at all.","code":["!UI.runAndGet({ model.isLeaf(emptyDir) })","UI.runAndGet({ model.getChildCount(emptyDir) }) == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An empty branch stays a branch, unless you ask for the plain Swing behaviour.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A plain `JTree` calls any node with zero children a leaf, which draws an empty\n            folder as though it were a document. SwingTree defaults the other way round,\n            because a folder that happens to be empty is still a folder, and because the\n            user has to be able to open it to see things arrive in it later.\n\n            `leafWhenEmpty(true)` restores the plain Swing rule for the whole tree, for the\n            rare model where an empty branch really is nothing.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A file system whose only entry is an empty directory.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Dir(\"e\", \"empty-folder\", Tuple.of(FsNode)))))"]},
+
+        {"kind":"and","text":"Two trees over it, differing only in how they treat childless branches.","code":["var defaultTree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","        })","        .get(JTree)","var plainSwingTree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .leafWhenEmpty(true)","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"SwingTree keeps the empty directory a branch...","code":["!UI.runAndGet({ defaultTree.getModel().isLeaf(defaultTree.getPathForRow(1).getLastPathComponent()) })"]},
+
+        {"kind":"and","text":"...while the opted-in tree calls it a leaf.","code":["UI.runAndGet({ plainSwingTree.getModel().isLeaf(plainSwingTree.getPathForRow(1).getLastPathComponent()) })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A node with no children yet can still be declared a branch, which is how lazy loading works.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A tree whose branches are fetched on demand has a third kind of node: one that\n            *will* have children, but does not have them yet. It has to draw a handle,\n            because expanding it is the gesture that triggers the load.\n\n            `isLeaf(false)` says exactly that. It is the one place the derived default needs\n            overriding, and it is what makes a `Pending` case of a sum type behave the way\n            the user expects.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A file system in which one directory has not been read from disk yet.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Dir(\"lazy\", \"not-loaded-yet\", Tuple.of(FsNode)))))"]},
+
+        {"kind":"and","text":"A tree which declares the empty directory a branch regardless.","code":["var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }).isLeaf(false) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"It is a branch, so the tree draws a handle the user can click.","code":["!UI.runAndGet({ tree.getModel().isLeaf(tree.getPathForRow(1).getLastPathComponent()) })"]},
+
+        {"kind":"and","text":"Even though there is nothing below it to show.","code":["UI.runAndGet({ tree.getModel().getChildCount(tree.getPathForRow(1).getLastPathComponent()) }) == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The label of a node comes from its `text(..)` rule.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Without a `text(..)` rule a tree falls back to `toString()`, which is almost\n            never what a value object should show a user. Declaring the label as part of the\n            node's own rule keeps it next to everything else that is true about that type.\n\n            Note that the two node types here are labelled from *different* fields, which is\n            the whole point of declaring the rule per type rather than once for the tree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree labelling directories by their name and documents by name and size.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"Projects\", Tuple.of(FsNode,","                            new Doc(\"a\", \"notes.txt\", \"0123456789\")","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() + \" (\" + d.body().length() + \" bytes)\" }) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Each node is labelled by its own rule.","code":["visibleRows(tree) == [","    \"Projects\",","    \"    notes.txt (10 bytes)\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Without a text rule the tree falls back to the `toString()` of the node.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The fallback exists so that a half-finished tree still shows you something you\n            can recognise while you are building it. It is not meant to be shipped: a record\n            prints all of its fields, which is rarely a good label.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree which declares where the children are, but not how to label anything.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }) })","            .nodesOf(Doc, { it.isLeaf(true) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"The nodes are labelled by their own `toString()`.","code":["visibleRows(tree) == [","    \"Dir(root)\",","    \"    Doc(notes.txt)\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Icons and tool tips are declared right next to the label.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An icon is declared as an `IconDeclaration`, the same lightweight value SwingTree\n            uses everywhere else, so it is resolved through the shared icon cache and an SVG\n            source stays crisp at any UI scale.\n\n            Declaring it per node type is what lets a folder and a document look different\n            without a single `if` in a renderer.\n\n            A tool tip needs one thing beyond the renderer to actually appear: a `JTree`\n            shows the tips of its renderer only if it is registered with Swing's\n            `ToolTipManager`, which it is not by default. A bound tree registers itself, so\n            a declared `toolTip(..)` is a tip the user really sees.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two icon declarations, one per node type.","code":["IconDeclaration folderIcon = { \"img/two_16th_notes.svg\" }","IconDeclaration pageIcon   = { \"img/trees.png\" }"]},
+
+        {"kind":"and","text":"A tree declaring an icon and a tool tip for each type.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() })","                              .text({ Dir d -> d.name() })","                              .icon({ Dir d -> folderIcon })","                              .toolTip({ Dir d -> \"A folder holding \" + d.entries().size() + \" entries\" }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() })","                              .icon({ Doc d -> pageIcon })","                              .toolTip({ Doc d -> \"A document\" }) })","        })","        .get(JTree)"]},
+
+        {"kind":"and","text":"We render the root node the way the tree paints it.","code":["var model  = tree.getModel()","var view   = UI.runAndGet({ tree.getCellRenderer().getTreeCellRendererComponent(","                tree, model.getRoot(), false, true, false, 0, false","             ) })"]},
+
+        {"kind":"expect","text":"The declared icon reached the cell...","code":["view.getIcon() != null"]},
+
+        {"kind":"and","text":"...and so did the tool tip, which reads off the node it belongs to.","code":["view.getToolTipText() == \"A folder holding 1 entries\""]},
+
+        {"kind":"and","text":"The tree registered itself with the tool tip manager, without which nothing would show.","code":["tree.getMouseListeners().any({ it instanceof ToolTipManager })"]},
+
+        {"kind":"and","text":"So the tree answers a pointer resting over the root row with that very text.","code":["UI.runAndGet({","    tree.setSize(200, 100)","    tree.doLayout()","    var bounds = tree.getRowBounds(0)","    tree.getToolTipText(new MouseEvent(tree, MouseEvent.MOUSE_MOVED, 0, 0,","                            (int)(bounds.x + 2), (int)(bounds.y + 2), 0, false))","}) == \"A folder holding 1 entries\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The most specific rule wins, so a general rule can be refined for one type.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rules are looked up by the type of the node, and the most specific declared rule\n            wins. So a general rule can carry the types that have nothing special to say,\n            while the ones that do get a block of their own.\n\n            Here a rule on the `FsNode` interface labels everything by its name, and a rule on\n            `Dir` gives directories their children. Note that the `Dir` block restates the\n            label: the winning rule is used whole, it does not inherit from the general one.\n            The scenario after next is about exactly that.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree with a rule for the shared interface and a more specific one for directories.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf({ it.text({ FsNode n -> n.name().toUpperCase() }) })","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Directories use their own rule, documents fall back to the general one.","code":["visibleRows(tree) == [","    \"root\",","    \"    NOTES.TXT\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A tree of unrelated types needs only its common supertype named.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not every tree is a sum type. A company holds departments, a department holds\n            employees, and those are three records with nothing in common but `Object`.\n\n            The rules carry the shape just as well; what the tree needs is the common\n            supertype spelled out, which is what the `UI.tree(Class, .., ..)` overload is\n            for. Note also that the child collection is free to have a different element\n            type from the node type itself, which is what makes a heterogeneous tree work at\n            all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three unrelated value types, one per level of the tree.","code":["var company = Var.of(Object, new Company(\"Globaltcad\", Tuple.of(Department,","                        new Department(\"d1\", \"Research\", Tuple.of(Employee,","                            new Employee(\"e1\", \"Ada\"), new Employee(\"e2\", \"Grace\"))),","                        new Department(\"d2\", \"Support\", Tuple.of(Employee,","                            new Employee(\"e3\", \"Alan\")))","                    )))"]},
+
+        {"kind":"when","text":"We declare one rule block per level, naming Object as the common node type.","code":["var tree =","        UI.tree(Object, String, company, { conf -> conf","            .idOf({ Object node -> node instanceof Department ? ((Department) node).id()","                                 : node instanceof Employee   ? ((Employee) node).id()","                                 : \"company\" })","            .nodesOf(Company,    { it.children({ Company c -> c.departments() }).text({ Company c -> c.name() }) })","            .nodesOf(Department, { it.children({ Department d -> d.staff() }).text({ Department d -> d.name() }) })","            .nodesOf(Employee,   { it.text({ Employee e -> e.name() }) })","        })","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"then","text":"The three levels appear, each labelled by its own rule.","code":["visibleRows(tree) == [","    \"Globaltcad\",","    \"    Research\",","    \"        Ada\",","    \"        Grace\",","    \"    Support\",","    \"        Alan\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A node type with no rule at all is treated as a leaf.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Java 8, which SwingTree compiles against, cannot check a sealed hierarchy for\n            exhaustiveness, so a forgotten `nodesOf(..)` block cannot be a compile error.\n\n            It is not silent either: such a node becomes a leaf labelled by its `toString()`,\n            and SwingTree logs a warning naming the type it has no rule for, because a\n            missing case is almost always an oversight rather than an intent.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree which forgets to declare anything about documents.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"The undeclared type still shows up, as a leaf labelled by its `toString()`.","code":["visibleRows(tree) == [","    \"root\",","    \"    Doc(notes.txt)\",","]","UI.runAndGet({ tree.getModel().isLeaf(tree.getPathForRow(1).getLastPathComponent()) })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Node identity comes from `HasId`, or from an `idOf(..)` rule for types you do not own.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A tree of value objects needs an answer to \"which node is this?\" that survives\n            the node's content changing, because that is what keeps expanded paths and the\n            selection alive across an edit. Nodes implementing `sprouts.HasId` answer it for\n            free.\n\n            For a type you cannot change, `idOf(..)` supplies the answer instead. Note how\n            little is required of it: ids only have to be unique **among siblings**, because\n            the path leading to a node disambiguates the rest. The two documents below\n            deliberately share an id, and the folders above them keep them apart.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A structure in which the same id is deliberately reused in two different folders.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"first\", Tuple.of(FsNode,  new Doc(\"notes\", \"notes.txt\"))),","                            new Dir(\"b\", \"second\", Tuple.of(FsNode, new Doc(\"notes\", \"notes.txt\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Both folders start out open.","code":["expandedRows(tree) == [\"root\", \"first\", \"second\"]"]},
+
+        {"kind":"when","text":"The user closes the second folder, leaving only the first one open.","code":["UI.runNow({ tree.collapseRow(3) })"]},
+
+        {"kind":"then","text":"The two same-named documents were told apart by the folders above them.","code":["expandedRows(tree) == [\"root\", \"first\"]","visibleRows(tree) == [","    \"root\",","    \"    first\",","    \"        notes.txt\",","    \"    second\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A root nobody needs to see can be hidden, and then it counts for nothing.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Sometimes the data really does have a root which is simply not a thing to look at:\n            a folder whose *contents* are the point, the document node of an outline.\n            `withRootVisible(false)` drops that row and turns on the handles of the level\n            below, so what is now the first visible level can still be opened.\n\n            A row nobody can see is not a level either, so the depth\n            `withInitialExpansionDepth(n)` counts begins below it. That makes `n` mean the same\n            thing whether or not the root is drawn: the number of levels a user would count\n            looking at the screen.\n\n            Where the data has no root at all — several open projects, several top level\n            blocks — do not invent one in order to hide it. `UI.trees(..)` binds a\n            `Var<Tuple<N>>` of top level nodes directly, and then no invented id ends up inside\n            the selection paths your application persists. See *Growing a Forest from a\n            Property*.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A file system with a root nobody needs to see.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"<workspace>\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\"))),","                            new Dir(\"b\", \"docs\", Tuple.of(FsNode))","                        )))"]},
+
+        {"kind":"when","text":"We hide the root, and open a single level.","code":["var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withRootVisible(false)","        .withInitialExpansionDepth(1)","        .get(JTree)"]},
+
+        {"kind":"then","text":"Its children became the top level rows, and that one visible level is open.","code":["visibleRows(tree) == [","    \"src\",","    \"    App.java\",","    \"docs\",","]"]},
+
+        {"kind":"and","text":"And the tree draws handles next to them, so they can still be opened.","code":["tree.getShowsRootHandles()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The initial expansion depth decides how much of the tree is open to begin with.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A freshly bound tree opens its root and nothing else, which is the plain Swing\n            behaviour. `withInitialExpansionDepth(n)` opens `n` levels below the root\n            instead, which is how an outline or a small settings tree presents itself\n            usefully on first sight.\n\n            It only shapes the initial view; expansion the user performs afterwards is\n            untouched by it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A file system three levels deep.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Dir(\"a1\", \"main\", Tuple.of(FsNode, new Doc(\"a11\", \"App.java\"))))),","                            new Dir(\"b\", \"docs\", Tuple.of(FsNode))","                        )))","var conf = { conf -> conf","                .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","                .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","            }"]},
+
+        {"kind":"when","text":"We build one tree with no expansion depth and one which opens two levels.","code":["var closedTree = UI.tree(FsNode, fileSystem, conf).get(JTree)","var openTree   = UI.tree(FsNode, fileSystem, conf).withInitialExpansionDepth(2).get(JTree)"]},
+
+        {"kind":"then","text":"The first shows only the root and its immediate entries.","code":["visibleRows(closedTree) == [","    \"root\",","    \"    src\",","    \"    docs\",","]"]},
+
+        {"kind":"and","text":"The second has opened one level further down.","code":["visibleRows(openTree) == [","    \"root\",","    \"    src\",","    \"        main\",","    \"    docs\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A custom cell renderer still sees your own node values, never the tree internals.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A bound tree keeps internal handles inside its `TreePath`s, because value\n            identity cannot key an expanded path (see `Tree_Update_Spec` for why). Those\n            handles are an internal matter, and no renderer ever has to know about them:\n            SwingTree unwraps them before your renderer or your `withCells(..)` declaration\n            is asked anything.\n\n            So `when(Doc.class)` matches a document, and `cell.entry()` hands you a `Doc`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree whose cells are declared through the shared cell builder API.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }) })","        })","        .withCells({ it","            .when(Dir).asText({ cell -> \"[\" + cell.entry().map({ Dir d -> d.name() }).orElse(\"?\") + \"]\" })","            .when(Doc).asText({ cell -> \"- \" + cell.entry().map({ Doc d -> d.name() }).orElse(\"?\") })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Each cell was rendered by the declaration matching its own node type.","code":["visibleRows(tree) == [","    \"[root]\",","    \"    - notes.txt\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A cell view for one node type leaves every other type its own label.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withCells(..)` and the `text(..)` / `icon(..)` rules are not an either-or. A tree\n            usually needs a richer view for exactly one of its node types, and it would be a\n            poor trade to have to restate the label of every other type just to get it.\n\n            So a node type no `when(..)` clause covers keeps whatever its own rule says. Only\n            the types you actually name here are taken over.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree whose types are labelled by their rules, and one type given a cell view.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"assets\", Tuple.of(FsNode, new Doc(\"a1\", \"logo.svg\"))),","                            new Doc(\"b\", \"README.md\")","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withCells({ it","            .when(Doc).asText({ cell -> \"\\u00b7 \" + cell.entry().map({ Doc d -> d.name() }).orElse(\"?\") })","        })","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Documents use the cell view, and directories keep the label of their own rule.","code":["visibleRows(tree) == [","    \"root\",","    \"    assets\",","    \"        \\u00b7 logo.svg\",","    \"    \\u00b7 README.md\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A more specific rule replaces a general one, it does not extend it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rules are looked up per node type and the most specific match is the answer, whole.\n            It is worth being precise about what that means: the winning block is used *on its\n            own*, so a block declared for one type does not inherit the label of a catch-all\n            block above it.\n\n            The reason is that a `nodesOf(..)` block reads like one `case` of a `switch`, and a\n            `case` does not silently continue into another. If a type needs both the general\n            label and its own children, it says both.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A catch-all rule labelling everything, and a directory rule declaring only children.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var forgetful =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf({ it.text({ FsNode n -> n.name() }) })","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"The directory has no label of its own left, so it falls back to `toString()`.","code":["visibleRows(forgetful) == [","    \"Dir(root)\",","    \"    notes.txt\",","]"]},
+
+        {"kind":"when","text":"The directory rule states the label it wants as well.","code":["var complete =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf({ it.text({ FsNode n -> n.name() }) })","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"then","text":"Both are labelled, each by the rule that won for its own type.","code":["visibleRows(complete) == [","    \"root\",","    \"    notes.txt\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Two siblings sharing an id are reported rather than silently merged.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An id has to be unique among siblings, and only among siblings, because the parent\n            is part of the address. Two children of one node sharing an id are genuinely\n            indistinguishable to a tree which addresses a node by its path of ids: they\n            collapse onto one position, so one of them is drawn twice and the other never.\n\n            Nothing can be done about that from inside the library, but a warning naming the\n            offending id beats leaving somebody to work out why a row appeared twice.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A folder holding two documents which were given the same id.","code":["var log = LogSpy.attach()","var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"dup\", \"first.txt\"), new Doc(\"dup\", \"second.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"when","text":"The tree is asked what it shows.","code":["var rows = visibleRows(tree)"]},
+
+        {"kind":"then","text":"SwingTree said what went wrong, naming the id the two share.","code":["log.warnings().any { it.contains(\"share the id 'dup'\") }"]},
+
+        {"kind":"and","text":"And the two really are one position, which is the whole reason for the warning.","code":["rows.size() == 3"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A read only property yields a tree you can browse but not edit.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two conditions have to hold before a tree lets the user edit anything: the\n            property has to be writable, and a node type has to declare a text wither saying\n            how the edited text gets back into the node. Either one missing means a tree the\n            user can browse and select in, but not change.\n\n            Which overload you reach for is part of that decision, and it is decided by the\n            *declared* type of what you pass, not its runtime type. A view model exposing its\n            `Var` as a `Val` therefore hands out a genuinely read only tree, rather than one\n            that happens to be editable because of what the reference points at.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The same structure and the same renaming rules for both trees.","code":["FsNode structure = new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\")))","var conf = { conf -> conf","                .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })","                .nodesOf(Doc, { it.text({ Doc d -> d.name() }, { Doc d, String t -> d.withName(t) }) })","            }"]},
+
+        {"kind":"when","text":"We bind one tree to a mutable property and one to a read only one.","code":["var editableTree = UI.tree(FsNode, Var.of(FsNode, structure), conf).get(JTree)","var readOnlyTree = UI.tree(FsNode, Val.of(structure), conf).get(JTree)"]},
+
+        {"kind":"then","text":"Both render exactly the same thing.","code":["visibleRows(editableTree) == [\"root\", \"    notes.txt\"]","visibleRows(readOnlyTree) == [\"root\", \"    notes.txt\"]"]},
+
+        {"kind":"and","text":"But only the one bound to a mutable property lets the user start editing.","code":["editableTree.isEditable()","!readOnlyTree.isEditable()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A tree whose rules declare no wither is not editable either.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The second of the two conditions: a mutable property is not on its own enough.\n            Without a text wither there is nothing to turn edited text back into a node, so\n            SwingTree does not offer the user an editor it could not honour.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable property, but rules which only read.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))"]},
+
+        {"kind":"when","text":"We bind it with read only text rules.","code":["var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"then","text":"The tree is not editable, because no rule said how an edit would get home.","code":["!tree.isEditable()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

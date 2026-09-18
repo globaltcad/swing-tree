@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RenderAs.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">RenderAs.java</span></div><h1>RenderAs.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.slf4j.LoggerFactory;
+import swingtree.api.Configurator;
+
+import javax.swing.JComponent;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+/**
+ * This class models the API of the {@link CellBuilder} which allows you to
+ * specify how a cell should be rendered.
+ * Most likely you will want to call {@link #asText(Function)}
+ * on this as most cells are rendered as simple texts.
+ * An example would be a combo box containing enum values, which
+ * you don't want to render as the enum name (all capital letters), but rather as a
+ * more human-readable string.
+ *
+ * @param &lt;C&gt; The type of the component which is used to render the cell.
+ * @param &lt;E&gt; The type of the value of the cell.
+ * @param &lt;T&gt; The type of the value of the cell.
+ */
+public final class RenderAs&lt;C extends JComponent, E, T extends E&gt;
+{
+<span class="fc" id="L29">    private static final org.slf4j.Logger log = LoggerFactory.getLogger(RenderAs.class);</span>
+
+    private final CellBuilder&lt;C, E&gt; _builder;
+    private final Class&lt;T&gt;                      _valueType;
+    private final Predicate&lt;CellConf&lt;C, T&gt;&gt; _valueValidator;
+
+
+<span class="fc" id="L36">    RenderAs(CellBuilder&lt;C, E&gt; builder, Class&lt;T&gt; valueType, Predicate&lt;CellConf&lt;C, T&gt;&gt; valueValidator) {</span>
+<span class="fc" id="L37">        _builder        = builder;</span>
+<span class="fc" id="L38">        _valueType      = valueType;</span>
+<span class="fc" id="L39">        _valueValidator = valueValidator;</span>
+<span class="fc" id="L40">    }</span>
+
+    /**
+     * Specify a lambda which receives a {@link CellConf} instance
+     * for you to customize its renderer.
+     * This is the most generic way to customize the rendering of a cell,
+     * as you can choose between vastly different ways of rendering:
+     * &lt;pre&gt;{@code
+     * 		.when( MyEnum.class )
+     * 		.as( cell -&gt; {
+     * 			// do component based rendering:
+     * 			cell.setRenderer( new JLabel( &quot;Hello World&quot; ) );
+     * 			// or do graphics rendering directly:
+     * 			cell.setRenderer( g -&gt; {
+     * 				// draw something
+     * 				g.drawString( &quot;Hello World&quot;, 0, 0 );
+     * 			});
+     * 		})
+     *    }&lt;/pre&gt;
+     *
+     * @param valueInterpreter A lambda which customizes the provided cell.
+     * @return The builder API allowing method chaining.
+     */
+    public CellBuilder&lt;C, E&gt; as(Configurator&lt;CellConf&lt;C, T&gt;&gt; valueInterpreter ) {
+<span class="fc" id="L64">        NullUtil.nullArgCheck(valueInterpreter, &quot;valueInterpreter&quot;, Configurator.class);</span>
+<span class="fc" id="L65">        _builder._store(_valueType, _valueValidator, valueInterpreter);</span>
+<span class="fc" id="L66">        return _builder;</span>
+    }
+
+    /**
+     * Specify a lambda which receives a {@link CellConf} instance
+     * and return a {@link Component} which is then used to render the cell.
+     * &lt;pre&gt;{@code
+     * 		.when( MyEnum.class )
+     * 		.asComponent( cell -&gt; new JLabel( &quot;Hello World&quot; ) )
+     *    }&lt;/pre&gt;
+     *
+     * @param renderer A function which returns a {@link Component} which is then used to render the cell.
+     * @return The builder API allowing method chaining.
+     */
+    public CellBuilder&lt;C, E&gt; asComponent(Function&lt;CellConf&lt;C ,T&gt;, Component&gt; renderer ) {
+<span class="nc" id="L81">        return this.as( cell -&gt; cell.view(renderer.apply(cell)) );</span>
+    }
+
+    /**
+     * Specify a lambda which receives a {@link CellConf} instance
+     * and return a {@link String} which is then used to render the cell.
+     * &lt;pre&gt;{@code
+     * 		.when( MyEnum.class )
+     * 		.asText( cell -&gt; &quot;Hello World&quot; )
+     *    }&lt;/pre&gt;
+     *
+     * @param renderer A function which returns a {@link String} which is then used to render the cell.
+     * @return The builder API allowing method chaining.
+     */
+    public CellBuilder&lt;C, E&gt; asText(Function&lt;CellConf&lt;C ,T&gt;, String&gt; renderer ) {
+<span class="fc" id="L96">        return this.as(CellBuilder._createDefaultTextRenderer(renderer));</span>
+    }
+
+    /**
+     * Specify a lambda which receives a {@link CellConf} instance as well as a {@link Graphics} instance
+     * and then renders the cell.
+     * &lt;pre&gt;{@code
+     *  	.when( MyEnum.class )
+     *  	.render( (cell, g) -&gt; {
+     *  		// draw something
+     *  		g.drawString( &quot;Hello World&quot;, 0, 0 );
+     *    })
+     * }&lt;/pre&gt;
+     *
+     * @param renderer A function which receives a {@link CellConf} instance as well as a {@link Graphics} instance and then renders the cell.
+     * @return The builder API allowing method chaining.
+     */
+    public CellBuilder&lt;C, E&gt; render(BiConsumer&lt;CellConf&lt;C ,T&gt;, Graphics2D&gt; renderer ) {
+<span class="nc" id="L114">        return this.as( cell -&gt; cell.view(new JComponent( ){</span>
+            @Override public void paintComponent(Graphics g) {
+                try {
+<span class="nc" id="L117">                    renderer.accept(cell, (Graphics2D) g);</span>
+<span class="nc" id="L118">                } catch (Exception e) {</span>
+<span class="nc" id="L119">                    log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while rendering a cell!&quot;, e);</span>
+                    /*
+                        We log as warning because exceptions during rendering are not considered
+                        as harmful as elsewhere!
+                    */
+<span class="nc" id="L124">                }</span>
+<span class="nc" id="L125">            }</span>
+        }) );
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
