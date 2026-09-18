@@ -207,7 +207,7 @@ dependencies {
 ...or by using a custom commit hash instead:
 ```groovy
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:2892b87'//Any commit hash...
+	implementation 'com.github.globaltcad:swing-tree:59f329d'//Any commit hash...
 }
 ```
 ---
