@@ -14,6 +14,7 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 
 /**
@@ -66,17 +67,19 @@ public final class SwingTreeProgressBarUI
         if ( !_theme.symbols().drawsItsOwnChrome() ) { super.paintDeterminate(g, c); return; }
         JProgressBar bar   = (JProgressBar) c;
         double       ratio = fillRatio(bar);
+        Rectangle    box   = LafUtilities.marginBoxOf(bar);
         Graphics2D   g2    = (Graphics2D) g.create();
         try {
+            g2.translate(box.x, box.y);
             _theme.symbols().paintProgressFill(
-                    g2, _theme.palette(), bar.getWidth(), bar.getHeight(), ratio,
+                    g2, _theme.palette(), box.width, box.height, ratio,
                     bar.getOrientation() == SwingConstants.HORIZONTAL, bar.isEnabled()
             );
         } finally {
             g2.dispose();
         }
         if ( bar.isStringPainted() )
-            paintStringAtCentre((Graphics2D) g, bar, ratio);
+            paintStringAtCentre((Graphics2D) g, bar, ratio, box);
     }
 
     @Override
@@ -89,8 +92,9 @@ public final class SwingTreeProgressBarUI
         return Math.max(0, Math.min(1, (bar.getValue() - bar.getMinimum()) / (double) range));
     }
 
-    /** Centres the bar's string, switching to the on-filled colour once the fill has reached it. */
-    private void paintStringAtCentre( Graphics2D g, JProgressBar bar, double ratio ) {
+    /** Centres the bar's string in the bar rather than in the component, switching to the on-filled
+     *  colour once the fill has reached it. */
+    private void paintStringAtCentre( Graphics2D g, JProgressBar bar, double ratio, Rectangle box ) {
         String text = bar.getString();
         if ( text == null || text.isEmpty() )
             return;
@@ -102,8 +106,8 @@ public final class SwingTreeProgressBarUI
             Color colour = ratio > 0.45 ? p.onFilled() : p.text();
             g2.setColor(colour);
             FontMetrics metrics = g2.getFontMetrics();
-            int x = (bar.getWidth()  - metrics.stringWidth(text)) / 2;
-            int y = (bar.getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
+            int x = box.x + ( box.width  - metrics.stringWidth(text) ) / 2;
+            int y = box.y + ( box.height - metrics.getHeight() ) / 2 + metrics.getAscent();
             g2.drawString(text, x, y);
         } finally {
             g2.dispose();

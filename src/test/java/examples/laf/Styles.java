@@ -5,6 +5,7 @@ import examples.laf.SwingTreeLookAndFeel.ThemedStyler;
 import sprouts.Tuple;
 import swingtree.UI;
 import swingtree.api.Painter;
+import swingtree.layout.Bounds;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.GradientConf;
 
@@ -41,35 +42,47 @@ final class Styles
      */
     private static final class DragHandlePainter implements Painter
     {
-        private final Theme    _theme;
-        private final JToolBar _bar;
-        private final boolean  _floatable;
-        private final int      _orientation;
+        private final Theme     _theme;
+        /** Where the grip goes: the room the border and the padding leave inside the tool bar's box,
+         *  before its first button, in the tool bar's own pixels. */
+        private final Rectangle _grip;
+        private final boolean   _floatable;
+        private final int       _orientation;
 
-        DragHandlePainter( Theme theme, JToolBar bar ) {
+        DragHandlePainter( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
+            JToolBar  bar    = it.component();
+            Rectangle box    = LafUtilities.marginBoxOf(bar);
+            Insets    insets = bar.getInsets();
             _theme       = theme;
-            _bar         = bar;
             _floatable   = bar.isFloatable();
             _orientation = bar.getOrientation();
+            _grip        = _orientation == JToolBar.HORIZONTAL
+                             ? new Rectangle(box.x, box.y, Math.max(0, insets.left - box.x), box.height)
+                             : new Rectangle(box.x, box.y, box.width, Math.max(0, insets.top - box.y));
         }
 
         @Override
         public void paint( Graphics2D g ) {
-            if ( !_floatable )
+            if ( !_floatable || _grip.isEmpty() )
                 return;
             Graphics2D scratch = (Graphics2D) g.create();
             try {
-                boolean horizontal = _orientation == JToolBar.HORIZONTAL;
-                Insets  insets     = _bar.getInsets();
+                float scale = UI.scale();
+                scratch.scale(1 / scale, 1 / scale); // A symbol set draws in the component's own pixels.
+                scratch.translate(_grip.x, _grip.y);
                 _theme.symbols().paintDragHandle(
-                        scratch, _theme.palette(),
-                        horizontal ? insets.left : _bar.getWidth(),
-                        horizontal ? _bar.getHeight() : insets.top,
-                        horizontal
+                        scratch, _theme.palette(), _grip.width, _grip.height,
+                        _orientation == JToolBar.HORIZONTAL
                 );
             } finally {
                 scratch.dispose();
             }
+        }
+
+        @Override
+        public boolean canBeCached() {
+            return true;
         }
 
         @Override
@@ -78,19 +91,20 @@ final class Styles
             if ( !(other instanceof DragHandlePainter) ) return false;
             DragHandlePainter that = (DragHandlePainter) other;
             return this._theme == that._theme
-                && this._bar == that._bar
+                && this._grip.equals(that._grip)
                 && this._floatable == that._floatable
                 && this._orientation == that._orientation;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(System.identityHashCode(_theme), System.identityHashCode(_bar), _floatable, _orientation);
+            return Objects.hash(System.identityHashCode(_theme), _grip, _floatable, _orientation);
         }
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + "[floatable=" + _floatable + ", orientation=" + _orientation + "]";
+            return getClass().getSimpleName() + "[grip=" + _grip + ", floatable=" + _floatable +
+                   ", orientation=" + _orientation + "]";
         }
     }
 
@@ -527,7 +541,7 @@ final class Styles
                     .borderRadius(6)
                     .borderWidth(1)
                     .borderColor(p.borderSoft())
-                    .painter(UI.Layer.CONTENT, new DragHandlePainter(theme, it.component()));
+                    .painter(UI.Layer.CONTENT, new DragHandlePainter(theme, it));
         }
 
         private static ComponentStyleDelegate<JList> list( Theme theme, ComponentStyleDelegate<JList> it ) {
@@ -3149,6 +3163,14 @@ final class Styles
         private static final int MARGIN = 2;
 
         /**
+         *  How far the focus ring of a square control - a text field, a scroll pane - stands out
+         *  from its edge on each of the four sides. Nimbus draws that ring from six tenths of a
+         *  pixel inside the bounds of a control inset by the whole {@link #MARGIN}, which leaves
+         *  the one and two fifths of a pixel that the ring keeps whatever margin it ends up in.
+         */
+        private static final float[] SQUARE_RING = { MARGIN - 0.6f, MARGIN - 0.6f, MARGIN - 0.6f, MARGIN - 0.6f };
+
+        /**
          *  What a button keeps between its label and its edge, vertically and then horizontally.
          *  Nimbus lays a button out to its {@code Button.contentMargins} of six by fourteen, which
          *  is measured from the component's bounds and therefore has to lose the {@link #MARGIN} and
@@ -3287,8 +3309,8 @@ final class Styles
                     .border(1, s.get(NimbusScheme.Key.BORDER))
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "ring", NimbusRing.of(
-                        pane, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT,
-                        new float[]{ 0.6f, 0.6f, 0.6f, 0.6f, 0 }, new float[]{ 2, 2, 2, 2, 0 }
+                        it, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT,
+                        SQUARE_RING, 0, 0
                     ));
         }
 
@@ -3370,7 +3392,7 @@ final class Styles
                         .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
                         .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                         .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "ring", NimbusRing.aroundEdge(
-                            b, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT, (float) arc
+                            it, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT, (float) arc
                         ));
 
             return mould.style(it, s, arc, tint, focused);
@@ -3483,8 +3505,8 @@ final class Styles
                     .gradient(UI.Layer.BACKGROUND, "shade", g -> innerShade(g, text, enabled ? FIELD_SHADE : FIELD_DISABLED_SHADE, s,
                                                                             enabled ? 0.1f : 0f, enabled ? 0.9f : 1f))
                     .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "ring", NimbusRing.of(
-                        text, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT,
-                        new float[]{ 0.6f, 0.6f, 0.6f, 0.6f, 0 }, new float[]{ 2, 2, 2, 2, 0 }
+                        it, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT,
+                        SQUARE_RING, 0, 0
                     ));
         }
 
@@ -3501,9 +3523,13 @@ final class Styles
             Color     ground  = enabled ? page : OPEN_FIELD_DISABLED_FACE.in(s);
             NimbusScheme.Gradient top = enabled ? OPEN_FIELD_EDGE_TOP : FIELD_DISABLED_EDGE_TOP;
             Color     lip     = focused ? s.get(NimbusScheme.Key.FOCUS) : OPEN_FIELD_LIP.in(s);
-            float[]   outer   = focused ? new float[]{ 0.67f, 0.67f, 0, 0.75f, 0 } : new float[]{ 2, 3, 0, 1, 0 };
+            // The focus ring stands out from the box on the three sides that have one, and the lip
+            // is the single row under the box; on the right the buttons continue the box, so
+            // neither reaches past it there.
+            float[]   outsets = focused ? new float[]{ MARGIN - 0.67f, MARGIN - 0.67f, 0, MARGIN - 0.75f }
+                                        : new float[]{ 0, -1, 0, 1 };
             return it
-                    .margin(2, 0, 2, 2)
+                    .margin(MARGIN, 0, MARGIN, MARGIN)
                     .padding(inSpinner ? 3 : 2, inSpinner ? 6 : 3, 2, 3)
                     .borderWidths(1, 0, 1, 1)
                     .borderColors(topEdge(s, top, 0f, enabled ? 0.496f : 0.5f), edge, edge, edge)
@@ -3512,7 +3538,7 @@ final class Styles
                                     ? innerShade(g, text, SPINNER_FIELD_SHADE, s, 0f, 1f).fractions(0, 0.168 * shadeFraction(text), shadeFraction(text))
                                     : innerShade(g, text, enabled ? FIELD_SHADE : FIELD_DISABLED_SHADE, s, enabled ? 0.1f : 0f, enabled ? 0.9f : 1f))
                     .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "ring",
-                             NimbusRing.of(text, lip, outer, new float[]{ 2, 2, 0, 2, 0 }));
+                             NimbusRing.of(it, lip, outsets, 0, 0));
         }
 
         /**
@@ -3662,7 +3688,7 @@ final class Styles
                     .gradient(UI.Layer.BACKGROUND, "face", g -> face.over(g, s, null)
                                                                    .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
                                                                    .clipTo(UI.ComponentArea.INTERIOR))
-                    .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "glow", new ProgressGlow(theme, it.component()))
+                    .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "glow", new ProgressGlow(theme, it))
                     .foregroundColor(s.get(NimbusScheme.Key.TEXT));
         }
 
@@ -3674,16 +3700,19 @@ final class Styles
          */
         private static final class ProgressGlow implements Painter
         {
-            private final Theme        _theme;
-            private final JProgressBar _bar;
-            private final double       _ratio;
-            private final boolean      _horizontal;
-            private final boolean      _enabled;
+            private final Theme   _theme;
+            /** The trough the glow runs along, in "developer pixel" from the component's corner. */
+            private final Bounds  _box;
+            private final double  _ratio;
+            private final boolean _horizontal;
+            private final boolean _enabled;
 
-            ProgressGlow( Theme theme, JProgressBar bar ) {
-                _theme      = theme;
-                _bar        = bar;
+            ProgressGlow( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+                @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
+                JProgressBar bar = it.component();
                 int range   = Math.max(1, bar.getMaximum() - bar.getMinimum());
+                _theme      = theme;
+                _box        = LafUtilities.marginBoxOf(it);
                 _ratio      = bar.isIndeterminate() ? 0 : Math.max(0, Math.min(1, ( bar.getValue() - bar.getMinimum() ) / (double) range));
                 _horizontal = bar.getOrientation() == SwingConstants.HORIZONTAL;
                 _enabled    = bar.isEnabled();
@@ -3691,22 +3720,37 @@ final class Styles
 
             @Override
             public void paint( Graphics2D g ) {
-                float scale = UI.scale();
-                Symbols.Nimbus.paintProgressGlow(g, _theme.nimbusScheme(),
-                        Math.round(_bar.getWidth() / scale), Math.round(_bar.getHeight() / scale), _ratio, _horizontal, _enabled);
+                Graphics2D g2 = (Graphics2D) g.create();
+                try {
+                    g2.translate(_box.location().x(), _box.location().y());
+                    Symbols.Nimbus.paintProgressGlow(g2, _theme.nimbusScheme(),
+                            _box.size().widthOrElse(0f), _box.size().heightOrElse(0f), _ratio, _horizontal, _enabled);
+                } finally {
+                    g2.dispose();
+                }
+            }
+
+            @Override
+            public boolean canBeCached() {
+                return true;
             }
 
             @Override
             public boolean equals( Object other ) {
                 if ( !(other instanceof ProgressGlow) ) return false;
                 ProgressGlow that = (ProgressGlow) other;
-                return _theme == that._theme && _bar == that._bar && _ratio == that._ratio
+                return _theme == that._theme && _box.equals(that._box) && _ratio == that._ratio
                     && _horizontal == that._horizontal && _enabled == that._enabled;
             }
 
             @Override
             public int hashCode() {
-                return Objects.hash(System.identityHashCode(_theme), System.identityHashCode(_bar), _ratio, _horizontal, _enabled);
+                return Objects.hash(System.identityHashCode(_theme), _box, _ratio, _horizontal, _enabled);
+            }
+
+            @Override
+            public String toString() {
+                return getClass().getSimpleName() + "[box=" + _box + ", ratio=" + _ratio + "]";
             }
         }
 
@@ -3856,7 +3900,7 @@ final class Styles
                     .borderColor(s.get(NimbusScheme.Key.BORDER))
                     .backgroundColor(s.get(NimbusScheme.Key.CONTROL))
                     .foregroundColor(s.get(NimbusScheme.Key.TEXT))
-                    .painter(UI.Layer.CONTENT, new DragHandlePainter(theme, bar));
+                    .painter(UI.Layer.CONTENT, new DragHandlePainter(theme, it));
         }
     }
 

@@ -1,12 +1,15 @@
 package examples.laf;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Subscriber;
 import sprouts.ValDelegate;
 import swingtree.UI;
 import swingtree.api.Painter;
+import swingtree.layout.Bounds;
 import swingtree.style.ComponentBackend;
+import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 
 import javax.swing.AbstractButton;
@@ -33,6 +36,7 @@ import java.awt.LinearGradientPaint;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
@@ -42,6 +46,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
 /**
@@ -229,6 +234,94 @@ final class LafUtilities
     private static int channel( int from, int to, double t ) {
         return Math.max(0, Math.min(255, (int) Math.round(from + (to - from) * t)));
     }
+
+
+    // ── Box model ────────────────────────────────────────────────────────
+
+    /**
+     *  The box the style engine leaves for a control inside its margin, in "developer pixel" and
+     *  measured from the component's top left corner, which is the coordinate system a
+     *  {@link Painter} draws in. Everything the look and feel paints around a control - a focus
+     *  ring, the lip under a raised control - belongs against this box rather than against the
+     *  component's bounds, so that a margin the application adds moves it along with the gradients
+     *  filling the control.
+     *  <p>
+     *  The margin is taken as the distance between the component's area and its body area, which
+     *  survives a component the engine has not laid out yet: such a component has no size, so the
+     *  two areas come back as an empty rectangle and a body of negative width and height, and the
+     *  distances between their edges are still the margin. The size is read from the component
+     *  itself for the same reason, so that a control being resized keeps its box around the
+     *  gradients filling it rather than trailing a frame behind them.
+     *  <p>
+     *  What the box cannot follow within one paint is a margin the <b>application</b> changes after
+     *  the component has been painted, because a style is gathered from the style sheet first, this
+     *  look and feel second and {@code withStyle(..)} last: a rule here reads the margin that was in
+     *  force, not the one being built. Such a change reaches the box on the next repaint.
+     *
+     * @param it the style being built, which is asked for the component's areas
+     * @return the margin box, which is the component's bounds for a component without a margin
+     */
+    @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
+    static Bounds marginBoxOf( ComponentStyleDelegate<?> it ) {
+        final JComponent c      = it.component();
+        final float[]    margin = _marginOf(c);
+        // The size is divided down here rather than read through ComponentStyleDelegate#componentWidth,
+        // which rounds to whole developer pixels: a 230 pixel component at a scale of 1.5 is 153.33 of
+        // them, and a box 153 wide leaves the ring half a device pixel short of the body it closes on.
+        final float width  = UI.unscale((float) c.getWidth());
+        final float height = UI.unscale((float) c.getHeight());
+        final float left   = UI.unscale(margin[0]);
+        final float top    = UI.unscale(margin[1]);
+        final float right  = UI.unscale(margin[2]);
+        final float bottom = UI.unscale(margin[3]);
+        return Bounds.of(left, top, width - left - right, height - top - bottom);
+    }
+
+    /**
+     *  The same box in the component's own pixels, for a {@link javax.swing.plaf.ComponentUI} laying
+     *  out the parts of a control or drawing chrome across it. A part of a control - the button at
+     *  the end of a combo box - belongs in this box: a child component is not clipped by the engine
+     *  the way a delegate's own painting is, so one placed against the component's bounds stays
+     *  behind at the component's edge when the control moves in.
+     *
+     * @param c the component whose control box is asked for
+     * @return the margin box, which is the component's bounds for a component without a margin
+     */
+    static Rectangle marginBoxOf( JComponent c ) {
+        final float[] margin = _marginOf(c);
+        final int left = Math.round(margin[0]);
+        final int top  = Math.round(margin[1]);
+        return new Rectangle(
+                    left, top,
+                    c.getWidth()  - left - Math.round(margin[2]),
+                    c.getHeight() - top  - Math.round(margin[3])
+                );
+    }
+
+    /** The left, top, right and bottom of the installed margin, in the component's own pixels. */
+    private static float[] _marginOf( JComponent c ) {
+        final Rectangle2D whole = _areaOf(c, UI.ComponentArea.ALL);
+        final Rectangle2D body  = _areaOf(c, UI.ComponentArea.BODY);
+        if ( whole == null || body == null )
+            return NO_MARGIN;
+        if ( body.getWidth() >= whole.getWidth() && body.getHeight() >= whole.getHeight() )
+            return NO_MARGIN; // A style leaving no margin has no body area of its own.
+        return new float[]{
+                    (float) ( body.getMinX()  - whole.getMinX() ),
+                    (float) ( body.getMinY()  - whole.getMinY() ),
+                    (float) ( whole.getMaxX() - body.getMaxX()  ),
+                    (float) ( whole.getMaxY() - body.getMaxY()  )
+                };
+    }
+
+    private static @Nullable Rectangle2D _areaOf( JComponent c, UI.ComponentArea area ) {
+        return ComponentBackend.installedOn(c)
+                               .flatMap( backend -> backend.getComponentArea(area) )
+                               .map(Shape::getBounds2D)
+                               .orElse(null);
+    }
+
+    private static final float[] NO_MARGIN = { 0, 0, 0, 0 };
 
 
     // ── Painting ─────────────────────────────────────────────────────────

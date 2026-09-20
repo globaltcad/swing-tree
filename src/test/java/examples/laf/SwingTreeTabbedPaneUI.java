@@ -298,16 +298,20 @@ public final class SwingTreeTabbedPaneUI
         Graphics2D g2 = (Graphics2D) g.create();
         try {
             int n = Math.max(1, UI.scale(_theme.symbols().tabEdgeThickness()));
-            int w = tabPane.getWidth(), h = tabPane.getHeight();
-            int tabAreaH = calculateTabAreaHeight(tabPlacement, runCount, maxTabHeight);
-            int tabAreaW = calculateTabAreaWidth(tabPlacement, runCount, maxTabWidth);
+            // The strip starts where the insets end, because that is where the tabs are laid out,
+            // while the edge runs the whole width of the control, which the margin alone takes in:
+            // a padding moves the page in from the edge without shortening the line above it.
+            Insets    insets   = tabPane.getInsets();
+            Rectangle box      = LafUtilities.marginBoxOf(tabPane);
+            int       tabAreaH = calculateTabAreaHeight(tabPlacement, runCount, maxTabHeight);
+            int       tabAreaW = calculateTabAreaWidth(tabPlacement, runCount, maxTabWidth);
             Rectangle edge;
             switch ( tabPlacement ) {
-                case SwingConstants.BOTTOM: edge = new Rectangle(0, h - tabAreaH - n, w, n); break;
-                case SwingConstants.LEFT:   edge = new Rectangle(tabAreaW, 0, n, h);         break;
-                case SwingConstants.RIGHT:  edge = new Rectangle(w - tabAreaW - n, 0, n, h); break;
+                case SwingConstants.BOTTOM: edge = new Rectangle(box.x, tabPane.getHeight() - insets.bottom - tabAreaH - n, box.width, n); break;
+                case SwingConstants.LEFT:   edge = new Rectangle(insets.left + tabAreaW, box.y, n, box.height);                            break;
+                case SwingConstants.RIGHT:  edge = new Rectangle(tabPane.getWidth() - insets.right - tabAreaW - n, box.y, n, box.height);  break;
                 case SwingConstants.TOP:
-                default:                    edge = new Rectangle(0, tabAreaH, w, n);         break;
+                default:                    edge = new Rectangle(box.x, insets.top + tabAreaH, box.width, n);                             break;
             }
             _theme.symbols().paintTabEdge(
                     g2, _theme.palette(), edge, selectedTabBounds(selectedIndex), tabPlacement
