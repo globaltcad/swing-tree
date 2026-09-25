@@ -946,12 +946,16 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             return id.endsWith("UI") ? id.substring(0, id.length() - 2) : id;
         }
 
-        /** Runs the configured style rules of the component being styled. Every UI delegate's
-         *  {@code style(..)} method is a call to this and nothing else. */
+        /** Runs the configured style rules of the component being styled, and fits the result into
+         *  the cell of a table or a tree where that is what the component is editing. Every UI
+         *  delegate's {@code style(..)} method is a call to this and nothing else. */
         @SuppressWarnings({"unchecked", "rawtypes", "deprecation"}) // component() is the documented hook for LAF state reads
         <C extends JComponent> ComponentStyleDelegate<C> applyStyle( ComponentStyleDelegate<C> delegate ) throws Exception {
-            Styler styler = stylerFor(delegate.component().getClass());
-            return (ComponentStyleDelegate<C>) styler.style((ComponentStyleDelegate) delegate);
+            JComponent component = delegate.component();
+            Styler styler = stylerFor(component.getClass());
+            ComponentStyleDelegate<C> styled = (ComponentStyleDelegate<C>) styler.style((ComponentStyleDelegate) delegate);
+            JComponent host = styler == Styler.none() ? null : LafUtilities.cellEditorHost(component);
+            return host == null ? styled : Styles.fittedIntoCell(styled, component, host);
         }
     }
 

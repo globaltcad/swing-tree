@@ -228,9 +228,10 @@ public final class SwingTreeComboBoxUI
                 super.layoutContainer(parent);
                 if ( arrowButton == null || !_theme.symbols().actuatorReachesBounds() )
                     return;
+                Rectangle box = _actuatorBox();
                 int width = arrowButton.getPreferredSize().width;
                 boolean leftToRight = comboBox.getComponentOrientation().isLeftToRight();
-                arrowButton.setBounds(leftToRight ? comboBox.getWidth() - width : 0, 0, width, comboBox.getHeight());
+                arrowButton.setBounds(leftToRight ? box.x + box.width - width : box.x, box.y, width, box.height);
                 if ( editor != null )
                     editor.setBounds(rectangleForCurrentValue());
             }
@@ -242,12 +243,39 @@ public final class SwingTreeComboBoxUI
         Rectangle value = super.rectangleForCurrentValue();
         if ( arrowButton == null || !_theme.symbols().actuatorReachesBounds() )
             return value;
-        Insets  insets      = comboBox.getInsets();
-        int     width       = arrowButton.getPreferredSize().width;
-        boolean leftToRight = comboBox.getComponentOrientation().isLeftToRight();
-        value.x     = leftToRight ? insets.left : width;
-        value.width = comboBox.getWidth() - width - ( leftToRight ? insets.left : insets.right );
+        Insets    insets      = comboBox.getInsets();
+        Rectangle box         = _actuatorBox();
+        int       width       = arrowButton.getPreferredSize().width;
+        boolean   leftToRight = comboBox.getComponentOrientation().isLeftToRight();
+        value.x     = leftToRight ? insets.left : box.x + width;
+        value.width = ( leftToRight ? box.x + box.width - width : comboBox.getWidth() - insets.right ) - value.x;
         return value;
+    }
+
+    /**
+     *  The box the button stands in, in the combo box's own pixels: the box the style engine leaves
+     *  inside the combo box's margin, so that the button ends where the control ends rather than
+     *  where the component does.
+     *  <p>
+     *  An editable combo box keeps no room of its own, because it paints nothing: the text field
+     *  inside it is the control and carries the margin. The button then stands in that field's box
+     *  and keeps, on the side it is on, the room the field keeps on the side away from it, which is
+     *  what lines the blue end up with the field's outline instead of letting it run past that
+     *  outline to the component's edge.
+     */
+    private Rectangle _actuatorBox() {
+        Rectangle box = LafUtilities.marginBoxOf(comboBox);
+        if ( comboBox.isEditable() && editor instanceof JComponent ) {
+            Rectangle field       = LafUtilities.marginBoxOf((JComponent) editor);
+            boolean   leftToRight = comboBox.getComponentOrientation().isLeftToRight();
+            int       room        = leftToRight ? field.x : editor.getWidth() - field.x - field.width;
+            box.y      = editor.getY() + field.y;
+            box.height = field.height;
+            box.width -= room;
+            if ( !leftToRight )
+                box.x += room;
+        }
+        return box;
     }
 
     @Override

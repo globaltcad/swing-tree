@@ -12,8 +12,11 @@ import swingtree.style.StyleConf
 import swingtree.style.StyleSheet
 
 import javax.swing.*
+import javax.swing.border.LineBorder
 import javax.swing.plaf.metal.MetalButtonUI
 import javax.swing.plaf.metal.MetalTextFieldUI
+import javax.swing.tree.DefaultTreeCellEditor
+import javax.swing.tree.DefaultTreeCellRenderer
 import java.awt.*
 import java.awt.image.BufferedImage
 
@@ -339,6 +342,121 @@ class Style_Installation_Spec extends Specification
             false    | { it.parentFilter( conf -> conf.blur(0.75) ) }
             false    | { it.parentFilter( conf -> conf.blur(0.0) ) }
             false    | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
+    }
+
+    def 'A component whose border was replaced by somebody else wears the style border again after the next repaint.'()
+    {
+        reportInfo """
+            A style is not only painted, it is also **measured**. SwingTree keeps the margin, the
+            padding and the border widths of a style in a `Border` which it installs on the
+            component, so that the text of a text field is laid out inside them and a layout manager
+            asking the component for its size is told about them.
+            
+            Swing replaces borders behind your back. The editor a `JTable` uses for the cells of an
+            ordinary column is a `JTextField`, and `JTable.GenericEditor` calls
+            `setBorder(new LineBorder(Color.black))` on it every single time the editing of a cell
+            begins. If the style engine let that stand, the two halves of the component's appearance
+            would disagree with each other: the text would be laid out one pixel from the edge,
+            inside the foreign border, while the style is still painted and clipped where the style
+            says it goes. The first letter of the text is then cut in half by that clip, which is
+            precisely the bug this scenario was written for.
+            
+            So a border which is no longer the one the style engine installed is a reason to install
+            the style again, even when nothing about the style itself has changed since the last
+            repaint. The repair happens on the next repaint, which is the moment the disagreement
+            would otherwise have become visible.
+            
+            The component below is a panel rather than the cell editor of the story, because the
+            requirement is about any component whose style both measures and paints it, and a panel
+            with a fill is the smallest of those.
+        """
+        given : 'A scale factor of one, so that every number in this scenario is a plain pixel.'
+            var formerScale = SwingTree.get().getUiScaleFactor()
+            SwingTree.get().setUiScaleFactor(1)
+        and : 'A component which is both measured and painted by its style, which a panel with a fill is.'
+            var panel =
+                    UI.panel()
+                    .withSize(120, 30)
+                    .withStyle( it -> it
+                        .margin(6).padding(3).border(1, Color.BLACK).backgroundColor(Color.WHITE)
+                    )
+                    .get(JPanel)
+
+        expect : 'The style engine has installed a border of its own, ten pixels deep on every side.'
+            panel.getBorder() instanceof swingtree.style.StyleAndAnimationBorder
+            panel.getInsets() == new Insets(10, 10, 10, 10)
+
+        when : 'Somebody else - a cell editor, say - gives the component a border of its own.'
+            panel.setBorder(new LineBorder(Color.BLACK))
+        then : 'The component is measured by that border now, and it knows nothing about the style.'
+            panel.getInsets() == new Insets(1, 1, 1, 1)
+
+        when : 'The component is repainted, which is when the style engine looks at it again.'
+            Utility.renderSingleComponent(panel)
+        then : 'The style border is back, and the component is measured by the style once more.'
+            panel.getBorder() instanceof swingtree.style.StyleAndAnimationBorder
+            panel.getInsets() == new Insets(10, 10, 10, 10)
+
+        cleanup:
+            SwingTree.get().setUiScaleFactor(formerScale)
+    }
+
+    def 'Styling the text field Swing edits a tree cell with does not send the style engine round in circles.'()
+    {
+        reportInfo """
+            `JComponent.setBorder(Border)` asks the new border for its insets before it returns, so
+            that it can tell whether the component has to be laid out again. A SwingTree border
+            answers that question by gathering and installing the style, because the insets are part
+            of the style and it may be the first time anybody asked.
+            
+            Usually that is harmless: the component reports the new border the moment it is given
+            one, so the style engine sees its own border and leaves it there. Swing has one class
+            for which this is not true. `DefaultTreeCellEditor.DefaultTextField`, the text field a
+            tree edits its cells with, keeps the border in a field of its own which it assigns
+            *after* `super.setBorder(..)` has returned:
+            
+            ```java
+                public void setBorder(Border border) {
+                    super.setBorder(border);
+                    this.border = border;      // ... only now does getBorder() agree
+                }
+            ```
+            
+            So while the style engine installs its border, that component still reports the border it
+            had before, the engine concludes that it has no border of its own yet, and installs one
+            from inside the installation it is already in. Left alone, that recursion ends a tree
+            cell edit in a `StackOverflowError` instead of an editor.
+            
+            An installation which is already under way therefore never starts a second one. The
+            insets of such a component are worked out on the repaint that follows instead, which is
+            what the last step of this scenario checks.
+        """
+        given : 'A scale factor of one, so that every number in this scenario is a plain pixel.'
+            var formerScale = SwingTree.get().getUiScaleFactor()
+            SwingTree.get().setUiScaleFactor(1)
+        and : 'Swing\'s own tree cell editor, asked for the component it edits a cell with.'
+            var tree = new JTree()
+            var cellEditor = new DefaultTreeCellEditor(tree, new DefaultTreeCellRenderer())
+            var editorBox = cellEditor.getTreeCellEditorComponent(tree, "Loom A", true, false, true, 0)
+            var field = editorBox.getComponent(0)
+
+        expect : 'It is the text field whose `getBorder()` lags behind by one call.'
+            field instanceof DefaultTreeCellEditor.DefaultTextField
+
+        when : 'We style it the way a look and feel styles every text field of an application.'
+            var styled = UI.of((JComponent) field)
+                           .withStyle( it -> it.margin(4).padding(2).border(1, Color.BLACK) )
+                           .get(JTextField)
+        then : 'The style engine installed its border once, instead of calling itself until the stack is full.'
+            styled.getBorder() instanceof swingtree.style.StyleAndAnimationBorder
+
+        when : 'The editor is painted, the way it would be after Swing added it to the tree.'
+            Utility.renderSingleComponent(styled)
+        then : 'It is measured by the style: four pixels of margin, two of padding and the border.'
+            styled.getInsets() == new Insets(7, 7, 7, 7)
+
+        cleanup:
+            SwingTree.get().setUiScaleFactor(formerScale)
     }
 
     def 'Different `Styler`s may or may not override the `JButton.setContentAreaFilled(boolean)` property.'(

@@ -193,12 +193,11 @@ enum NimbusMould
      * @param <C> the type of the component
      * @return the style
      */
-    @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
     <C extends JComponent> ComponentStyleDelegate<C> style(
         ComponentStyleDelegate<C> it, NimbusScheme scheme, double arc, @Nullable Color tint, boolean focused
     ) {
-        NimbusRing ring = focused ? NimbusRing.aroundEdge(it.component(), scheme.get(NimbusScheme.Key.FOCUS), (float) arc)
-                                  : NimbusRing.underEdge(it.component(), _lip.in(scheme), (float) arc);
+        NimbusRing ring = focused ? NimbusRing.aroundEdge(it, scheme.get(NimbusScheme.Key.FOCUS), (float) arc)
+                                  : NimbusRing.underEdge(it, _lip.in(scheme), (float) arc);
         return it
                 .margin(2)
                 .borderRadius(arc)

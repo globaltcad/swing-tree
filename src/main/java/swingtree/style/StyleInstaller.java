@@ -91,6 +91,8 @@ final class StyleInstaller<C extends JComponent>
     // value to stick when it is switched off, rather than snap back to a natural size.
     private boolean            _styleOwnsMinSize = false;
     private boolean            _styleOwnsMaxSize = false;
+    private boolean            _styleBorderIsInstalled = false;
+    private boolean            _styleBorderInstallationIsInProgress = false;
     private @Nullable Dimension _initialMinSize  = null;
     private @Nullable Dimension _initialMaxSize  = null;
 
@@ -103,9 +105,22 @@ final class StyleInstaller<C extends JComponent>
     }
 
     void installCustomBorderBasedStyleAndAnimationRenderer( C owner, StyleConf styleConf) {
+        if ( _styleBorderInstallationIsInProgress )
+            return;
         Border currentBorder = owner.getBorder();
-        if ( !(currentBorder instanceof StyleAndAnimationBorder) )
+        if ( currentBorder instanceof StyleAndAnimationBorder )
+            return;
+        _styleBorderInstallationIsInProgress = true;
+        try {
             owner.setBorder(new StyleAndAnimationBorder<>(ComponentBackend.powering(owner), currentBorder, styleConf));
+        } finally {
+            _styleBorderInstallationIsInProgress = false;
+        }
+        _styleBorderIsInstalled = true;
+    }
+
+    private boolean _styleBorderWasReplacedBySomeoneElse( C owner ) {
+        return _styleBorderIsInstalled && !(owner.getBorder() instanceof StyleAndAnimationBorder);
     }
 
     StyleConf recalculateInsets( C owner, StyleConf styleConf ) {
@@ -218,7 +233,7 @@ final class StyleInstaller<C extends JComponent>
         StyleConf oldStyle = engine.getComponentConf().style();
         if ( !force ) {
             // We check if it makes sense to apply the new style:
-            if ( !backgroundWasSetSomewhereElse && oldStyle.equals(newStyle) )
+            if ( !backgroundWasSetSomewhereElse && oldStyle.equals(newStyle) && !_styleBorderWasReplacedBySomeoneElse(owner) )
                 doInstallation = false;
         }
 
@@ -1029,6 +1044,7 @@ final class StyleInstaller<C extends JComponent>
 
         if ( currentBorder instanceof StyleAndAnimationBorder) {
             StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) currentBorder;
+            _styleBorderIsInstalled = false;
             owner.setBorder(border.getFormerBorder());
             border.restoreBorderPaintedFlagOfOwner();
         }

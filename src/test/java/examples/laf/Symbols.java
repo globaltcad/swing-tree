@@ -139,7 +139,11 @@ interface Symbols
     /** @return the side of the square a menu entry's tick or mark is drawn in, in developer pixels */
     default int menuMarkSize() { return checkGlyphSize(); }
 
-    /** Draws the arrow on a combo box's drop-down button. */
+    /**
+     *  Draws the arrow on a combo box's drop-down button, filling it: for a set whose actuator
+     *  {@linkplain #actuatorReachesBounds() reaches the control's edge}, the button is the end of
+     *  the control, and the margin is already outside it.
+     */
     void paintComboArrow(
         Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
     );
@@ -172,12 +176,18 @@ interface Symbols
     /** Draws the centre line and grip of a split pane's divider. */
     void paintSplitGrip( Graphics2D g, Palette p, int w, int h, boolean horizontalSplit, boolean enabled );
 
-    /** Draws the handle a floatable tool bar is dragged by. */
+    /**
+     *  Draws the handle a floatable tool bar is dragged by, in the room the tool bar's border and
+     *  padding leave before its first button. The context is already at the corner of that room,
+     *  so {@code w} and {@code h} are its size and not the tool bar's.
+     */
     void paintDragHandle( Graphics2D g, Palette p, int w, int h, boolean horizontal );
 
     /**
-     *  Draws the filled part of a determinate progress bar. The trough underneath it is a
-     *  style rule, not a symbol.
+     *  Draws the filled part of a determinate progress bar. The trough underneath it is a style
+     *  rule, not a symbol, and {@code w} and {@code h} are that trough: the box the bar's margin
+     *  leaves, which the context is already at the corner of. A set that keeps the fill clear of
+     *  the trough's edge measures its own padding in from there.
      */
     void paintProgressFill(
         Graphics2D g, Palette p, int w, int h, double ratio, boolean horizontal, boolean enabled
@@ -247,12 +257,16 @@ interface Symbols
      * @return whether {@link #paintScrollStepper} should be asked for those two buttons
      */
     /**
-     *  Whether the button of a combo box stands at the very end of the combo box and spans its
-     *  whole height, over the combo box's margin and edge, instead of inside its insets. A set
-     *  whose actuators carry an outline of their own, rather than sitting inside the control's
-     *  outline, answers {@code true} and draws that outline two pixels in from the button's bounds.
+     *  Whether the button of a combo box stands at the very end of the control and spans its whole
+     *  height, over the combo box's own edge, instead of inside its insets. A set whose actuators
+     *  carry an outline of their own, rather than sitting inside the control's outline, answers
+     *  {@code true} and fills the button it is given.
+     *  <p>
+     *  The end of the <i>control</i> is not the edge of the component: a margin takes room outside
+     *  it, and {@link SwingTreeComboBoxUI} lays the button out in the box the margin leaves, so
+     *  that the actuator moves in with the rest of the control instead of staying at the edge.
      *
-     * @return whether a combo box's button reaches its bounds
+     * @return whether a combo box's button reaches the control's edge
      */
     default boolean actuatorReachesBounds() { return false; }
 
@@ -2526,7 +2540,10 @@ interface Symbols
         // The metrics the original lays out with, read out of its own UIDefaults.
         @Override public int checkGlyphSize()        { return 18; }
         @Override public int arrowGlyphSize()        { return 12; }
-        @Override public int comboArrowButtonSize()  { return 19; }
+        // Nimbus's own number is 19, which is this end plus the two pixels of room its focus ring
+        // and lip need on the right - room that is the control's margin here, and is already kept
+        // outside the button by the box the button is laid out in.
+        @Override public int comboArrowButtonSize()  { return 17; }
         @Override public int spinnerButtonWidth()    { return 20; }
         @Override public int spinnerButtonHeight()   { return 14; }
         @Override public int sliderThumbDiameter()   { return 17; }
@@ -2837,10 +2854,10 @@ interface Symbols
             float bh    = h / scale;
             LafUtilities.antialiasShapes(g);
             g.scale(scale, scale);
-            g.setPaint(mould.edge().paint(s, 2, bh - 2));
-            g.fill(roundedOnTheRight(0, 2, bw - 2, bh - 4, 10, true, true));
-            g.setPaint(mould.face().paint(s, 3, bh - 3));
-            g.fill(roundedOnTheRight(0.25f, 3, bw - 3.25f, bh - 6, 8, true, true));
+            g.setPaint(mould.edge().paint(s, 0, bh));
+            g.fill(roundedOnTheRight(0, 0, bw, bh, 10, true, true));
+            g.setPaint(mould.face().paint(s, 1, bh - 1));
+            g.fill(roundedOnTheRight(0.25f, 1, bw - 1.25f, bh - 2, 8, true, true));
             float top = bh / 2f - 1.92f;
             Shape wedge = polygon(5, top, 12, top, 8.53f, top + 5);
             if ( !enabled )
@@ -3467,48 +3484,48 @@ interface Symbols
             float scale  = UI.scale();
             float length = ( horizontal ? w : h ) / scale;
             float across = ( horizontal ? h : w ) / scale;
-            float end    = ratio >= 1 ? Math.round(length * ratio) - 2 : Math.round(length * ratio);
+            float end    = Math.round(length * ratio);
             LafUtilities.antialiasShapes(g);
             g.scale(scale, scale);
             if ( !horizontal )
                 g.transform(new java.awt.geom.AffineTransform(0, -1, 1, 0, 0, length));
-            g.setPaint(( enabled ? FILL_EDGE : FILL_EDGE_DISABLED ).paint(s, 2, across - 2));
-            OptimizedShapeRendering.fill(g, new java.awt.geom.Rectangle2D.Float(2, 2, end - 2, across - 4));
-            g.setPaint(( enabled ? FILL_FACE : FILL_FACE_DISABLED ).paint(s, 3, across - 3));
-            OptimizedShapeRendering.fill(g, new java.awt.geom.Rectangle2D.Float(3, 3, end - 4, across - 6));
+            g.setPaint(( enabled ? FILL_EDGE : FILL_EDGE_DISABLED ).paint(s, 0, across));
+            OptimizedShapeRendering.fill(g, new java.awt.geom.Rectangle2D.Float(0, 0, end, across));
+            g.setPaint(( enabled ? FILL_FACE : FILL_FACE_DISABLED ).paint(s, 1, across - 1));
+            OptimizedShapeRendering.fill(g, new java.awt.geom.Rectangle2D.Float(1, 1, end - 2, across - 2));
         }
 
         /**
-         *  The glow around the filled part of a progress bar: a ring from six tenths of a pixel inside
-         *  the bar's bounds to its trough's edge, rounded at the start, open at the moving end until
-         *  the bar is full.
+         *  The glow around the filled part of a progress bar: a ring reaching out of the trough into the
+         *  bar's margin, rounded at the start, open at the moving end until the bar is full.
          *
-         * @param g the context, in component pixels
+         * @param g the context, at the corner of the trough the glow runs along
          * @param s the Nimbus colours in force
-         * @param w the width of the bar
+         * @param w the width of that trough
          * @param h its height
          * @param ratio how much of it is filled
          * @param horizontal whether it fills from left to right rather than from bottom to top
          * @param enabled whether it is enabled
          */
         static void paintProgressGlow(
-            Graphics2D g, NimbusScheme s, int w, int h, double ratio, boolean horizontal, boolean enabled
+            Graphics2D g, NimbusScheme s, float w, float h, double ratio, boolean horizontal, boolean enabled
         ) {
             if ( ratio <= 0 )
                 return;
-            float   scale    = UI.scale();
-            float   length   = ( horizontal ? w : h ) / scale;
-            float   across   = ( horizontal ? h : w ) / scale;
+            float   length   = horizontal ? w : h;
+            float   across   = horizontal ? h : w;
             float   filled   = Math.round(length * ratio);
             boolean finished = ratio >= 1;
             LafUtilities.antialiasShapes(g);
             if ( !horizontal )
                 g.transform(new java.awt.geom.AffineTransform(0, -1, 1, 0, 0, length));
+            // The ring lies outside the trough, in the bar's margin, reaching this far past it:
+            final float reach = 1.37f;
             java.awt.geom.Area glow = new java.awt.geom.Area(new RoundRectangle2D.Float(
-                    0.63f, 0.63f, finished ? filled - 1.27f : filled + 5, across - 1.26f, 4.7f, 4.7f));
+                    -reach, -reach, finished ? filled + 2 * reach : filled + 5, across + 2 * reach, 4.7f, 4.7f));
             if ( !finished )
-                glow.intersect(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(0, 0, filled, across)));
-            glow.subtract(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(2, 2, finished ? filled - 4 : filled, across - 4)));
+                glow.intersect(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(-reach, -reach, filled + reach, across + 2 * reach)));
+            glow.subtract(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(0, 0, filled, across)));
             fill(g, glow, ( enabled ? FILL_GLOW : FILL_GLOW_DISABLED ).in(s));
         }
 

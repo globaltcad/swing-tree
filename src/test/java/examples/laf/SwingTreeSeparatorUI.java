@@ -12,6 +12,7 @@ import javax.swing.plaf.basic.BasicSeparatorUI;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 /** The {@link JSeparator} UI delegate: one hairline as thick as the symbol set asks for. */
 public final class SwingTreeSeparatorUI
@@ -67,13 +68,15 @@ public final class SwingTreeSeparatorUI
 
     /** Down or across the middle of whatever box a layout gave it, rather than along its near edge:
      *  a tool bar hands a separator a box several pixels wide, and a line drawn at the edge of that
-     *  box sits against the control beside it instead of between the two. */
+     *  box sits against the control beside it instead of between the two. A margin takes part of
+     *  that box away, so the middle it is centred in is the box the margin leaves. */
     private void drawHairline( Graphics2D g, JSeparator separator ) {
-        int thickness = thickness();
+        int       thickness = thickness();
+        Rectangle box       = LafUtilities.marginBoxOf(separator);
         g.setColor(_theme.palette().borderSoft());
         if ( separator.getOrientation() == SwingConstants.VERTICAL )
-            g.fillRect(( separator.getWidth() - thickness ) / 2, 0, thickness, separator.getHeight());
+            g.fillRect(box.x + ( box.width - thickness ) / 2, box.y, thickness, box.height);
         else
-            g.fillRect(0, ( separator.getHeight() - thickness ) / 2, separator.getWidth(), thickness);
+            g.fillRect(box.x, box.y + ( box.height - thickness ) / 2, box.width, thickness);
     }
 }

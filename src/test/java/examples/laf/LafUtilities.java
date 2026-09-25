@@ -1,12 +1,15 @@
 package examples.laf;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Action;
 import sprouts.From;
 import sprouts.Subscriber;
 import sprouts.ValDelegate;
 import swingtree.UI;
 import swingtree.api.Painter;
+import swingtree.layout.Bounds;
 import swingtree.style.ComponentBackend;
+import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 
 import javax.swing.AbstractButton;
@@ -15,9 +18,12 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.JViewport;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.event.CaretListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
@@ -29,10 +35,12 @@ import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.LinearGradientPaint;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.event.ContainerEvent;
 import java.awt.event.ContainerListener;
@@ -42,6 +50,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
 /**
@@ -229,6 +238,94 @@ final class LafUtilities
     private static int channel( int from, int to, double t ) {
         return Math.max(0, Math.min(255, (int) Math.round(from + (to - from) * t)));
     }
+
+
+    // ── Box model ────────────────────────────────────────────────────────
+
+    /**
+     *  The box the style engine leaves for a control inside its margin, in "developer pixel" and
+     *  measured from the component's top left corner, which is the coordinate system a
+     *  {@link Painter} draws in. Everything the look and feel paints around a control - a focus
+     *  ring, the lip under a raised control - belongs against this box rather than against the
+     *  component's bounds, so that a margin the application adds moves it along with the gradients
+     *  filling the control.
+     *  <p>
+     *  The margin is taken as the distance between the component's area and its body area, which
+     *  survives a component the engine has not laid out yet: such a component has no size, so the
+     *  two areas come back as an empty rectangle and a body of negative width and height, and the
+     *  distances between their edges are still the margin. The size is read from the component
+     *  itself for the same reason, so that a control being resized keeps its box around the
+     *  gradients filling it rather than trailing a frame behind them.
+     *  <p>
+     *  What the box cannot follow within one paint is a margin the <b>application</b> changes after
+     *  the component has been painted, because a style is gathered from the style sheet first, this
+     *  look and feel second and {@code withStyle(..)} last: a rule here reads the margin that was in
+     *  force, not the one being built. Such a change reaches the box on the next repaint.
+     *
+     * @param it the style being built, which is asked for the component's areas
+     * @return the margin box, which is the component's bounds for a component without a margin
+     */
+    @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
+    static Bounds marginBoxOf( ComponentStyleDelegate<?> it ) {
+        final JComponent c      = it.component();
+        final float[]    margin = _marginOf(c);
+        // The size is divided down here rather than read through ComponentStyleDelegate#componentWidth,
+        // which rounds to whole developer pixels: a 230 pixel component at a scale of 1.5 is 153.33 of
+        // them, and a box 153 wide leaves the ring half a device pixel short of the body it closes on.
+        final float width  = UI.unscale((float) c.getWidth());
+        final float height = UI.unscale((float) c.getHeight());
+        final float left   = UI.unscale(margin[0]);
+        final float top    = UI.unscale(margin[1]);
+        final float right  = UI.unscale(margin[2]);
+        final float bottom = UI.unscale(margin[3]);
+        return Bounds.of(left, top, width - left - right, height - top - bottom);
+    }
+
+    /**
+     *  The same box in the component's own pixels, for a {@link javax.swing.plaf.ComponentUI} laying
+     *  out the parts of a control or drawing chrome across it. A part of a control - the button at
+     *  the end of a combo box - belongs in this box: a child component is not clipped by the engine
+     *  the way a delegate's own painting is, so one placed against the component's bounds stays
+     *  behind at the component's edge when the control moves in.
+     *
+     * @param c the component whose control box is asked for
+     * @return the margin box, which is the component's bounds for a component without a margin
+     */
+    static Rectangle marginBoxOf( JComponent c ) {
+        final float[] margin = _marginOf(c);
+        final int left = Math.round(margin[0]);
+        final int top  = Math.round(margin[1]);
+        return new Rectangle(
+                    left, top,
+                    c.getWidth()  - left - Math.round(margin[2]),
+                    c.getHeight() - top  - Math.round(margin[3])
+                );
+    }
+
+    /** The left, top, right and bottom of the installed margin, in the component's own pixels. */
+    private static float[] _marginOf( JComponent c ) {
+        final Rectangle2D whole = _areaOf(c, UI.ComponentArea.ALL);
+        final Rectangle2D body  = _areaOf(c, UI.ComponentArea.BODY);
+        if ( whole == null || body == null )
+            return NO_MARGIN;
+        if ( body.getWidth() >= whole.getWidth() && body.getHeight() >= whole.getHeight() )
+            return NO_MARGIN; // A style leaving no margin has no body area of its own.
+        return new float[]{
+                    (float) ( body.getMinX()  - whole.getMinX() ),
+                    (float) ( body.getMinY()  - whole.getMinY() ),
+                    (float) ( whole.getMaxX() - body.getMaxX()  ),
+                    (float) ( whole.getMaxY() - body.getMaxY()  )
+                };
+    }
+
+    private static @Nullable Rectangle2D _areaOf( JComponent c, UI.ComponentArea area ) {
+        return ComponentBackend.installedOn(c)
+                               .flatMap( backend -> backend.getComponentArea(area) )
+                               .map(Shape::getBounds2D)
+                               .orElse(null);
+    }
+
+    private static final float[] NO_MARGIN = { 0, 0, 0, 0 };
 
 
     // ── Painting ─────────────────────────────────────────────────────────
@@ -471,6 +568,66 @@ final class LafUtilities
     static boolean isControlInternal( JComponent inner ) {
         return SwingUtilities.getAncestorOfClass(JSpinner.class, inner) != null
             || SwingUtilities.getAncestorOfClass(JComboBox.class, inner) != null;
+    }
+
+    /**
+     *  The table or the tree a component is editing a cell of, or {@code null} for a component that
+     *  is editing nothing.
+     *  <p>
+     *  Swing gives a cell editor the bounds of the cell and nothing besides, so every pixel a
+     *  control usually keeps around itself - a margin, the padding of a text field - is taken out
+     *  of a box one row high and is missing from the text the person came to edit. What a rule does
+     *  about that is in {@link Styles#fittedIntoCell}.
+     *  <p>
+     *  The editor of a table is the child of the table, and the editor of a tree is a plain
+     *  {@link Container} the tree puts around it, so the search climbs past a container which is no
+     *  {@link JComponent} and no further. That is also what keeps the text field inside an editable
+     *  combo box out of this: the combo box is the editor of the cell, and the field inside it is
+     *  the inside of the combo box, which {@link #isInsideAnotherControl} already answers for.
+     *  <p>
+     *  A cell renderer is not a cell editor, although it is painted with the same component types:
+     *  a renderer is drawn through a {@link CellRendererPane}, which is a child of the table or the
+     *  tree just as the editor is, so the search finds the pane where it looks for the editor.
+     *
+     * @param inner the component whose place in a table or a tree is asked for
+     * @return the table or the tree whose cell it edits, or {@code null} for anything else
+     */
+    static @Nullable JComponent cellEditorHost( JComponent inner ) {
+        Component child  = inner;
+        Container parent = inner.getParent();
+        if ( parent != null && !(parent instanceof JComponent) ) {
+            child  = parent;
+            parent = parent.getParent();
+        }
+        if ( parent instanceof JTable )
+            return child == ((JTable) parent).getEditorComponent() ? (JTable) parent : null;
+        if ( parent instanceof JTree )
+            return ((JTree) parent).isEditing() && !(child instanceof CellRendererPane) ? (JTree) parent : null;
+        return null;
+    }
+
+    /**
+     *  The room a cell renderer leaves between the edge of a cell and the text in it, in "developer
+     *  pixel", which is the room a cell editor has to leave as well if the text is not to jump
+     *  sideways the moment the editing starts.
+     *  <p>
+     *  A table takes it from {@code Table.cellNoFocusBorder}, which is the border every
+     *  {@link javax.swing.table.DefaultTableCellRenderer} wears and which this look and feel writes
+     *  per preset; a renderer of a tree wears none, because a tree lays its rows out around the
+     *  label rather than inside a grid of cells.
+     *
+     * @param host the table or the tree the cell belongs to
+     * @return the room around the text of one of its cells
+     */
+    static Insets cellTextRoomOf( JComponent host ) {
+        Border room = host instanceof JTable ? UIManager.getBorder("Table.cellNoFocusBorder") : null;
+        if ( room == null )
+            return new Insets(1, 1, 1, 1);
+        Insets scaled = room.getBorderInsets(host);
+        return new Insets(
+                    Math.round(UI.unscale((float) scaled.top)),    Math.round(UI.unscale((float) scaled.left)),
+                    Math.round(UI.unscale((float) scaled.bottom)), Math.round(UI.unscale((float) scaled.right))
+                );
     }
 
     /**
