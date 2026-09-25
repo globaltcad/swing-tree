@@ -174,6 +174,39 @@ class Render_Cache_Reclamation_Spec extends Specification
             globalStyleLayerCacheBytesReserved() <= bytesBefore
     }
 
+    def 'A settled component takes its baked rendering with it.'()
+    {
+        reportInfo """
+            A component which kept its size for a few paints is painted from a baked rendering:
+            its stretched exemplar, copied into an image of the component's full size. That
+            image is by far the larger of the two, so it is the one that most needs to go
+            when the component goes.
+        """
+        given : 'An empty cache to measure against.'
+            final var styleLayerEntries = {return UI.runAndGet({ComponentBackend.globalRenderCacheEntryCounts().toMap()["style layers"]})}
+            final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentBackend.globalStyleLayerCacheBytesReserved()})}
+            var entriesBefore = styleLayerEntries()
+            var bytesBefore = globalStyleLayerCacheBytesReserved()
+
+        when : 'A component is painted at one size until it is baked, and then dropped.'
+            var box = UI.box().withStyle({ it.backgroundColor("#2f4f6f").borderRadius(14).margin(6) }).get(JBox)
+            box.setSize(420, 260)
+            12.times { Utility.renderSingleComponent(box) }
+            var wasBaked = ComponentBackend.powering(box).bakedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            var ghost = new WeakReference<>(box)
+            box = null
+        then : 'It really was baked, so its full size image is part of what the cache holds.'
+            wasBaked
+            globalStyleLayerCacheBytesReserved() >= bytesBefore + 420 * 260 * 4
+
+        when : 'The garbage collector gets its chance.'
+            var componentWasCollected = eventually(24, { ghost.get() == null })
+        then : 'The component is gone, and so are its exemplar and its baked rendering.'
+            componentWasCollected
+            eventually(24, { styleLayerEntries() <= entriesBefore })
+            globalStyleLayerCacheBytesReserved() <= bytesBefore
+    }
+
     def 'Dropping one of two identically styled components does not disturb the other.'()
     {
         reportInfo """

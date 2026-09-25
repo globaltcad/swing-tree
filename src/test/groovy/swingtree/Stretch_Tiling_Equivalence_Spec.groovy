@@ -145,6 +145,17 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             var tiled = Utility.renderSingleComponent(tiledBox)
             Utility.similarityBetween(classic, tiled) >= 99.9
 
+        when : 'The tiled box keeps its size for a few more paints, so it settles and is baked.'
+            4.times { Utility.renderSingleComponent(tiledBox) }
+            var baked = Utility.renderSingleComponent(tiledBox)
+        then : 'It is now painted from a baked rendering of exactly its size...'
+            var bakedRenderings = ComponentBackend.powering(tiledBox).bakedRendering(layer)
+            bakedRenderings.size() == 1
+            bakedRenderings.first().width  == width
+            bakedRenderings.first().height == height
+        and : '...which is just as true to the classic painting.'
+            Utility.similarityBetween(classic, baked) >= 99.9
+
         where :
             description                                 | layer               | width | height | styler
             "rounded background and foundation, wide"   | UI.Layer.BACKGROUND | 400   | 80     | { it.backgroundColor("#d14a4a").foundationColor("#1a1d22").borderRadius(12).margin(5) }
@@ -441,6 +452,17 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             for ( int y = 0; y < classic.getHeight(); y++ )
                 for ( int x = 0; x < classic.getWidth(); x++ )
                     assert classic.getRGB(x, y) == tiled.getRGB(x, y)
+
+        when : 'A tiled box of that style keeps its size until it is baked.'
+            var box = tiledAndWarmed(300, 200, styler)
+            5.times { Utility.renderSingleComponent(box) }
+            var baked = Utility.renderSingleComponent(box)
+        then : 'It really is painted from a baked rendering now...'
+            ComponentBackend.powering(box).bakedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+        and : '...and still, every single pixel is identical:'
+            for ( int y = 0; y < classic.getHeight(); y++ )
+                for ( int x = 0; x < classic.getWidth(); x++ )
+                    assert classic.getRGB(x, y) == baked.getRGB(x, y)
     }
 
     def 'The two switch positions agree at every size across the range where tiling begins to apply.'()
@@ -507,6 +529,20 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         and : 'The scaled reconstruction stays true to the scaled classic painting:'
             Utility.similarityBetween(classic, tiled) >= 99.5
 
+        when : 'The box keeps painting at this scale until it is baked.'
+            5.times { paintScaled(box, deviceWidth, deviceHeight, scale) }
+            var baked = paintScaled(box, deviceWidth, deviceHeight, scale)
+        then : 'It is painted from a baked rendering of its size in user space...'
+            ComponentBackend.powering(box).bakedRendering(UI.Layer.BACKGROUND).first().width  == width
+            ComponentBackend.powering(box).bakedRendering(UI.Layer.BACKGROUND).first().height == height
+        and : '...which has no seams either...'
+            for ( int x = 1; x < (int) Math.floor(width * scale) - 1; x++ )
+                assert ((baked.getRGB(x, centerY) >> 24) & 0xFF) == 255
+            for ( int y = 1; y < (int) Math.floor(height * scale) - 1; y++ )
+                assert ((baked.getRGB(centerX, y) >> 24) & 0xFF) == 255
+        and : '...and is just as true to the scaled classic painting.'
+            Utility.similarityBetween(classic, baked) >= 99.5
+
         where :
             scale << [1.0d, 1.25d, 1.5d, 2.0d]
     }
@@ -551,6 +587,12 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             for ( int y = 0; y < uncached.getHeight(); y++ )
                 for ( int x = 0; x < uncached.getWidth(); x++ )
                     assert uncached.getRGB(x, y) == tiled.getRGB(x, y)
+
+        when : 'The box keeps its size and is painted through that transform many more times.'
+            6.times { paintTransformed(box, transformer) }
+        then : 'Nothing was baked, because there never was a reconstruction to bake, and no paint hit the cache.'
+            backend.bakedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND) == 0
 
         cleanup :
             CacheBudget.UNITS_OVERRIDE = 10
@@ -598,6 +640,107 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             for ( int y = 0; y < classic.getHeight(); y++ )
                 for ( int x = 0; x < classic.getWidth(); x++ )
                     assert classic.getRGB(x, y) == shrunk.getRGB(x, y)
+
+        when : 'The small box keeps its size for many more paints, with stretch tiling on again.'
+            SwingTree.get().setCacheTilingEnabled(true)
+            6.times { Utility.renderSingleComponent(box) }
+        then : 'Nothing is baked: an image of the real size is already what it is painted from.'
+            backend.bakedRendering(UI.Layer.BACKGROUND).isEmpty()
+    }
+
+    def 'A component which keeps its size is painted from a baked rendering of its full size. (#description)'(
+        String description, UI.Layer layer, Closure styler
+    ) {
+        reportInfo """
+            Stretching the exemplar back to a component's size takes up to nine
+            image draws on every paint. While the component is being resized
+            that is a bargain, because one small exemplar serves every size.
+            Once a component has kept its size for a few paints, though, a single
+            draw of an image of exactly that size is cheaper. So the stretched
+            exemplar is then baked into such an image, while the exemplar stays
+            cached for the next resize.
+
+            Baking copies the stretched exemplar pixel for pixel, so the switch
+            is invisible. This scenario follows one component through the whole
+            cycle: tiled, baked, resized, and baked again at its new size.
+        """
+        given : 'A stretch tiled box and its very first paint, stretched from the exemplar:'
+            SwingTree.get().setCacheTilingEnabled(true)
+            var box = boxWith(400, 300, styler)
+            var backend = ComponentBackend.powering(box)
+            var stretched = Utility.renderSingleComponent(box)
+        expect : 'The exemplar is far smaller than the box, and nothing is baked yet.'
+            backend.cachedRendering(layer).first().width  < 400
+            backend.cachedRendering(layer).first().height < 300
+            backend.bakedRendering(layer).isEmpty()
+
+        when : 'The box keeps its size for a few more paints.'
+            5.times { Utility.renderSingleComponent(box) }
+            var baked = Utility.renderSingleComponent(box)
+        then : 'It is painted from a baked rendering of its full size, and the small exemplar is still cached.'
+            backend.bakedRendering(layer).size() == 1
+            backend.bakedRendering(layer).first().width  == 400
+            backend.bakedRendering(layer).first().height == 300
+            backend.cachedRendering(layer).first().width < 400
+        and : 'Painting from it changed not a single pixel.'
+            for ( int y = 0; y < stretched.getHeight(); y++ )
+                for ( int x = 0; x < stretched.getWidth(); x++ )
+                    assert stretched.getRGB(x, y) == baked.getRGB(x, y)
+
+        when : 'The box is resized.'
+            int missesBeforeResize = backend.cacheMissCount(layer)
+            box.setSize(460, 320)
+            var resized = Utility.renderSingleComponent(box)
+        then : 'The baked rendering is gone, and the exemplar serves the new size without rendering the style again...'
+            box.width == 460 && box.height == 320
+            backend.bakedRendering(layer).isEmpty()
+            backend.cacheMissCount(layer) == missesBeforeResize
+        and : '...with the pixels of the classic rendering at that size.'
+            var classic = renderedClassically(460, 320, styler)
+            Utility.similarityBetween(classic, resized) >= 99.9
+
+        when : 'The box keeps its new size for a few paints.'
+            SwingTree.get().setCacheTilingEnabled(true)
+            6.times { Utility.renderSingleComponent(box) }
+            var bakedAgain = Utility.renderSingleComponent(box)
+        then : 'It is baked again, at its new size, and still true to the classic rendering.'
+            backend.bakedRendering(layer).first().width  == 460
+            backend.bakedRendering(layer).first().height == 320
+            Utility.similarityBetween(classic, bakedAgain) >= 99.9
+
+        where :
+            description                          | layer               | styler
+            "flat background, square corners"    | UI.Layer.BACKGROUND | { it.backgroundColor("#4a6fb1").foundationColor("#404040").margin(1, 2, 3, 4) }
+            "rounded border"                     | UI.Layer.BORDER     | { it.border(3, "#202430").borderRadius(16) }
+            "outset drop shadow with offset"     | UI.Layer.CONTENT    | { it.shadowColor("#101010").shadowBlurRadius(6).shadowSpreadRadius(2).shadowOffset(2, 3).borderRadius(12) }
+    }
+
+    def 'A style which changes on every paint is never baked.'()
+    {
+        reportInfo """
+            Baking an image of a component's full size pays off only when that
+            image is drawn again and again. An animation, like a hover fading in,
+            gives a component a new style on every frame, and a baked image of
+            one frame would be drawn exactly once. A baked rendering is copied
+            from the exemplar, so the exemplar has to be rendered by an earlier
+            paint first, and a style which changes on every paint never has one
+            in time.
+        """
+        given : 'Two boxes of the same size: one with a fixed colour, one whose colour changes with every paint.'
+            SwingTree.get().setCacheTilingEnabled(true)
+            int frame = 0
+            var steady    = boxWith(200, 120, { it.backgroundColor("#4a6fb1").borderRadius(12).margin(4) })
+            var animating = boxWith(200, 120, { it.backgroundColor(new Color((40 + frame++) % 256, 100, 180)).borderRadius(12).margin(4) })
+        when : 'Both are painted a dozen times.'
+            12.times {
+                Utility.renderSingleComponent(steady)
+                Utility.renderSingleComponent(animating)
+            }
+        then : 'The animation really did give every paint a new style...'
+            frame >= 12
+        and : '...so only the steady box was baked.'
+            ComponentBackend.powering(steady).bakedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ComponentBackend.powering(animating).bakedRendering(UI.Layer.BACKGROUND).isEmpty()
     }
 
     def 'Stretch tiled painting survives the accelerated graphics pipeline, even for extremely long edges.'()

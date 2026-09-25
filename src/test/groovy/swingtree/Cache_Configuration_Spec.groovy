@@ -183,6 +183,19 @@ class Cache_Configuration_Spec extends Specification
         then : 'Resizing is miss-resistant again.'
             SwingTree.get().isCacheTilingEnabled()
             backend.cacheMissCount(UI.Layer.BACKGROUND) == missesAfterRepopulation
+
+        when : 'The button keeps its size for a few paints, so its stretched exemplar is baked.'
+            6.times { Utility.renderSingleComponent(button) }
+        then :
+            backend.bakedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'We flip the safety hatch once more, and the button keeps its size for a few paints again.'
+            SwingTree.get().setCacheTilingEnabled(false)
+            6.times { Utility.renderSingleComponent(button) }
+        then : 'Nothing is baked, because without stretch tiling there is no exemplar to bake.'
+            backend.bakedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width  == 400
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().height == 130
     }
 
     def 'Turning stretch tiling off also stops layers being cut around their noises.'()

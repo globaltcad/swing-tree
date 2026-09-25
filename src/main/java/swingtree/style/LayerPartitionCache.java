@@ -73,6 +73,11 @@ import java.util.function.BiConsumer;
  *  measurement in that dimension, and the other dimension can still be compacted, which is what
  *  lets a wide, short bar be cached at all. <br>
  *  <br>
+ *  Nine blits cost more than one, so a component which stopped resizing is {@code Settled}:
+ *  once its exemplar is rendered, the stretched exemplar is baked into an image of the full
+ *  size, which is then drawn with a single blit. The exemplar is kept, and it takes over again
+ *  as soon as the component resizes. <br>
+ *  <br>
  *  So two configurations are in play at once, and most of the code below only makes sense if
  *  you keep them apart:
  *  <ul>
@@ -133,6 +138,14 @@ final class LayerPartitionCache
                 _image = image;
             }
         }
+        final class Settled  implements CacheState {
+            final Cached _exemplar;
+            final Cached _fullSize;
+            Settled( Cached exemplar, Cached fullSize ) {
+                _exemplar = exemplar;
+                _fullSize = fullSize;
+            }
+        }
     }
 
     private final UI.Layer                 _layer;
@@ -157,10 +170,20 @@ final class LayerPartitionCache
     }
 
     public @Nullable BufferedImage renderedImage() {
-        if ( !(_state instanceof CacheState.Cached) )
-            return null;
-        final CachedImage image = ((CacheState.Cached) _state)._image;
-        return image.isRendered() ? image.getImage() : null;
+        final CacheState.@Nullable Cached cached = _keyedState();
+        return cached == null ? null : cached._image.getImage();
+    }
+
+    @Nullable BufferedImage bakedImage() {
+        return _state instanceof CacheState.Settled ? ((CacheState.Settled) _state)._fullSize._image.getImage() : null;
+    }
+
+    private CacheState.@Nullable Cached _keyedState() {
+        if ( _state instanceof CacheState.Settled )
+            return ((CacheState.Settled) _state)._exemplar;
+        if ( _state instanceof CacheState.Cached )
+            return (CacheState.Cached) _state;
+        return null;
     }
 
     public void validate( ComponentConf newConf, boolean isResizing )
@@ -182,22 +205,45 @@ final class LayerPartitionCache
                                             ? _renderInput.canonicalRepresentation()
                                             : _renderInput;
 
-        if ( _state instanceof CacheState.Cached && ((CacheState.Cached) _state)._key.get().equals(keyConf) )
-            return;
+        final CacheState keyed = _keyedStateFor(keyConf, previousInput, isResizing);
+        if ( !isResizing && keyed instanceof CacheState.Cached && _isTiled((CacheState.Cached) keyed) )
+            _state = _settled((CacheState.Cached) keyed);
+        else
+            _state = keyed;
+    }
+
+    private CacheState _keyedStateFor( LayerRenderConf keyConf, LayerRenderConf previousInput, boolean isResizing ) {
+        final CacheState.@Nullable Cached current = _keyedState();
+        if ( current != null && current._key.get().equals(keyConf) )
+            return current;
 
         final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, previousInput, isResizing);
-        if ( hitsUntilAllocation < 0 ) {
-            _state = CacheState.Rejected.INSTANCE; // The cache refused admission!
-        } else {
-            final Pooled<LayerRenderConf> key = new Pooled<>(keyConf).intern();
+        if ( hitsUntilAllocation < 0 )
+            return CacheState.Rejected.INSTANCE; // The cache refused admission!
+        return _cachedFor(keyConf, hitsUntilAllocation);
+    }
 
-            CachedImage image = _CACHE.get(key);
-            if (image == null) {
-                image = new CachedImage(keyConf.boxModel().size(), hitsUntilAllocation);
-                _CACHE.put(key, image);
-            }
-            _state = new CacheState.Cached(key, image);
+    private CacheState _settled( CacheState.Cached exemplar ) {
+        if ( _state instanceof CacheState.Settled && ((CacheState.Settled) _state)._fullSize._key.get().equals(_renderInput) )
+            return _state;
+        final int hitsUntilAllocation = _cachingMakesSenseFor(_layer, _renderInput);
+        if ( hitsUntilAllocation < 0 )
+            return exemplar;
+        return new CacheState.Settled(exemplar, _cachedFor(_renderInput, hitsUntilAllocation));
+    }
+
+    private static CacheState.Cached _cachedFor( LayerRenderConf keyConf, int hitsUntilAllocation ) {
+        final Pooled<LayerRenderConf> key = new Pooled<>(keyConf).intern();
+        CachedImage image = _CACHE.get(key);
+        if ( image == null ) {
+            image = new CachedImage(keyConf.boxModel().size(), hitsUntilAllocation);
+            _CACHE.put(key, image);
         }
+        return new CacheState.Cached(key, image);
+    }
+
+    private boolean _isTiled( CacheState.Cached cached ) {
+        return !cached._key.get().boxModel().size().equals(_renderInput.boxModel().size());
     }
 
     PaintOutcome paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
@@ -210,12 +256,41 @@ final class LayerPartitionCache
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
             return PaintOutcome.NOTHING_RENDERED;
 
-        if ( !(_state instanceof CacheState.Cached) ) {
-            renderer.accept(_renderInput, g);
-            return PaintOutcome.RENDERED_FROM_STYLE;
-        }
+        if ( _state instanceof CacheState.Settled )
+            return _paintSettled(g, (CacheState.Settled) _state, renderer);
 
-        final CacheState.Cached cached = (CacheState.Cached) _state;
+        if ( _state instanceof CacheState.Cached )
+            return _paintCached(g, (CacheState.Cached) _state, renderer);
+
+        renderer.accept(_renderInput, g);
+        return PaintOutcome.RENDERED_FROM_STYLE;
+    }
+
+    private PaintOutcome _paintSettled( Graphics2D g, CacheState.Settled settled, BiConsumer<LayerRenderConf, Graphics2D> renderer )
+    {
+        final CachedImage fullSize = settled._fullSize._image;
+        if ( !fullSize.isRendered() && settled._exemplar._image.isRendered() ) {
+            final @Nullable Graphics2D g2 = fullSize.createGraphics(g.getDeviceConfiguration());
+            if ( g2 != null ) {
+                try {
+                    g2.setComposite(AlphaComposite.Src);
+                    settled._exemplar._image.paintStretched(g2, settled._exemplar._key.get(), _renderInput.boxModel().size());
+                } finally {
+                    g2.dispose();
+                }
+            }
+        }
+        final @Nullable BufferedImage baked = fullSize.getImage();
+        if ( baked == null )
+            return _paintCached(g, settled._exemplar, renderer);
+
+        g.drawImage(baked, 0, 0, null);
+        return PaintOutcome.RENDERED_FROM_CACHE;
+    }
+
+    private PaintOutcome _paintCached( Graphics2D g, CacheState.Cached cached, BiConsumer<LayerRenderConf, Graphics2D> renderer )
+    {
+        final Size size                = _renderInput.boxModel().size();
         final CachedImage image        = cached._image;
         final LayerRenderConf cacheKey = cached._key.get();
         /*
@@ -225,7 +300,7 @@ final class LayerPartitionCache
             under anything more exotic (rotation, shear, flips) we render directly
             instead of using the cache for this paint.
         */
-        final boolean isTiled = !cacheKey.boxModel().size().equals(size);
+        final boolean isTiled = _isTiled(cached);
         if ( isTiled && !_isBlitCompatible(g.getTransform()) ) {
             renderer.accept(_renderInput, g);
             return PaintOutcome.RENDERED_FROM_STYLE;

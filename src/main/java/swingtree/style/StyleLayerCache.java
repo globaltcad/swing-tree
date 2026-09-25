@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  *  Caches and paints one {@link UI.Layer} of a component's style, by composing the
@@ -181,11 +182,19 @@ final class StyleLayerCache
     }
 
     Tuple<BufferedImage> renderedImages() {
+        return _imagesOfParts(LayerPartitionCache::renderedImage);
+    }
+
+    Tuple<BufferedImage> bakedImages() {
+        return _imagesOfParts(LayerPartitionCache::bakedImage);
+    }
+
+    private Tuple<BufferedImage> _imagesOfParts( Function<LayerPartitionCache, @Nullable BufferedImage> imageOfPart ) {
         List<BufferedImage> images = new ArrayList<>(_parts.length);
         for ( LayerPartitionCache part : _parts ) {
-            BufferedImage rendered = part.renderedImage();
-            if ( rendered != null )
-                images.add(rendered);
+            BufferedImage image = imageOfPart.apply(part);
+            if ( image != null )
+                images.add(image);
         }
         return Tuple.of(BufferedImage.class, images);
     }
