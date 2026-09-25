@@ -109,6 +109,41 @@ final class Styles
     }
 
     /**
+     *  The correction a preset's rule is given when the component it just styled turns out to be
+     *  editing a cell of a table or of a tree.
+     *  <p>
+     *  A cell editor is handed the bounds of the cell and is expected to fill them, which makes the
+     *  cell the box of the control: a margin would leave the row showing around the editor, and the
+     *  padding of a text field, which is room a field keeps between its outline and its text, is
+     *  measured for a field standing on its own rather than for a box one row high. Under the
+     *  preset with the most generous inputs that came to seventeen pixels of the width and twelve of
+     *  the height of the cell, which is most of a row: the text was cut off above and below.
+     *  <p>
+     *  So the margin goes, and a text editor keeps the room the renderer of that cell leaves around
+     *  its own text, less the pixel its outline takes, so that the text stays where it was when the
+     *  person double-clicked it. One pixel of it always stays, because a preset drawing its inputs
+     *  with rounded corners and no outline would otherwise cut the corner off the first letter.
+     *  Everything else is left as the preset wrote it - the outline, the radius, the fill and the
+     *  colour of the text are what tells a reader which cell is live, and each preset says that in
+     *  its own way.
+     *
+     * @param it the style the preset's rule built for the editor
+     * @param editor the component editing the cell
+     * @param host the table or the tree whose cell is being edited
+     * @param <C> the type of the component being styled
+     * @return the style it is given inside a cell
+     */
+    static <C extends JComponent> ComponentStyleDelegate<C> fittedIntoCell(
+        ComponentStyleDelegate<C> it, JComponent editor, JComponent host
+    ) {
+        it = it.margin(0);
+        if ( !(editor instanceof JTextComponent) )
+            return it;
+        Insets room = LafUtilities.cellTextRoomOf(host);
+        return it.padding(0, Math.max(1, room.right - 1), 0, Math.max(1, room.left - 1));
+    }
+
+    /**
      *  <b>Linen</b>: a calm, paper-like theme of cream surfaces, taupe borders and a woven grain on
      *  the window. A control that takes focus grows its border and gives the same amount back from
      *  its margin, so tabbing through a form never shifts the layout around it.
@@ -3849,7 +3884,7 @@ final class Styles
          *  while its list is open, and a titled border's title above its line rather than on it.
          *
          * @param table the defaults of the look and feel being installed
-         * @param palette its palette
+         * @param theme the theme being installed, which the colours are taken from
          */
         static void installDefaults( UIDefaults table, Theme theme ) {
             NimbusScheme.install(table, theme.palette());

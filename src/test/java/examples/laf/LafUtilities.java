@@ -18,9 +18,12 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.JViewport;
 import javax.swing.UIManager;
+import javax.swing.border.Border;
 import javax.swing.event.CaretListener;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicGraphicsUtils;
@@ -32,6 +35,7 @@ import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.LinearGradientPaint;
 import java.awt.Paint;
 import java.awt.Rectangle;
@@ -564,6 +568,66 @@ final class LafUtilities
     static boolean isControlInternal( JComponent inner ) {
         return SwingUtilities.getAncestorOfClass(JSpinner.class, inner) != null
             || SwingUtilities.getAncestorOfClass(JComboBox.class, inner) != null;
+    }
+
+    /**
+     *  The table or the tree a component is editing a cell of, or {@code null} for a component that
+     *  is editing nothing.
+     *  <p>
+     *  Swing gives a cell editor the bounds of the cell and nothing besides, so every pixel a
+     *  control usually keeps around itself - a margin, the padding of a text field - is taken out
+     *  of a box one row high and is missing from the text the person came to edit. What a rule does
+     *  about that is in {@link Styles#fittedIntoCell}.
+     *  <p>
+     *  The editor of a table is the child of the table, and the editor of a tree is a plain
+     *  {@link Container} the tree puts around it, so the search climbs past a container which is no
+     *  {@link JComponent} and no further. That is also what keeps the text field inside an editable
+     *  combo box out of this: the combo box is the editor of the cell, and the field inside it is
+     *  the inside of the combo box, which {@link #isInsideAnotherControl} already answers for.
+     *  <p>
+     *  A cell renderer is not a cell editor, although it is painted with the same component types:
+     *  a renderer is drawn through a {@link CellRendererPane}, which is a child of the table or the
+     *  tree just as the editor is, so the search finds the pane where it looks for the editor.
+     *
+     * @param inner the component whose place in a table or a tree is asked for
+     * @return the table or the tree whose cell it edits, or {@code null} for anything else
+     */
+    static @Nullable JComponent cellEditorHost( JComponent inner ) {
+        Component child  = inner;
+        Container parent = inner.getParent();
+        if ( parent != null && !(parent instanceof JComponent) ) {
+            child  = parent;
+            parent = parent.getParent();
+        }
+        if ( parent instanceof JTable )
+            return child == ((JTable) parent).getEditorComponent() ? (JTable) parent : null;
+        if ( parent instanceof JTree )
+            return ((JTree) parent).isEditing() && !(child instanceof CellRendererPane) ? (JTree) parent : null;
+        return null;
+    }
+
+    /**
+     *  The room a cell renderer leaves between the edge of a cell and the text in it, in "developer
+     *  pixel", which is the room a cell editor has to leave as well if the text is not to jump
+     *  sideways the moment the editing starts.
+     *  <p>
+     *  A table takes it from {@code Table.cellNoFocusBorder}, which is the border every
+     *  {@link javax.swing.table.DefaultTableCellRenderer} wears and which this look and feel writes
+     *  per preset; a renderer of a tree wears none, because a tree lays its rows out around the
+     *  label rather than inside a grid of cells.
+     *
+     * @param host the table or the tree the cell belongs to
+     * @return the room around the text of one of its cells
+     */
+    static Insets cellTextRoomOf( JComponent host ) {
+        Border room = host instanceof JTable ? UIManager.getBorder("Table.cellNoFocusBorder") : null;
+        if ( room == null )
+            return new Insets(1, 1, 1, 1);
+        Insets scaled = room.getBorderInsets(host);
+        return new Insets(
+                    Math.round(UI.unscale((float) scaled.top)),    Math.round(UI.unscale((float) scaled.left)),
+                    Math.round(UI.unscale((float) scaled.bottom)), Math.round(UI.unscale((float) scaled.right))
+                );
     }
 
     /**
