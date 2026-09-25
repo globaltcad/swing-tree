@@ -126,6 +126,21 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             backend.cacheHitCount(layer)  >  hitsBeforeResize
             backend.cachedRendering(layer).isNotEmpty()
 
+        when : 'The button keeps its new size for a few paints.'
+            6.times { Utility.renderSingleComponent(button) }
+        then : 'It is baked into a rendering of exactly that size, without rendering the style again.'
+            backend.bakedRendering(layer).first().width  == 420
+            backend.bakedRendering(layer).first().height == 240
+            backend.cacheMissCount(layer) == missesBeforeResize
+
+        when : 'It is resized once more.'
+            button.setSize(460, 260)
+            Utility.renderSingleComponent(button)
+        then : 'The baked rendering is dropped, and the exemplar serves the new size, still without a fresh rendering.'
+            backend.bakedRendering(layer).isEmpty()
+            backend.cachedRendering(layer).isNotEmpty()
+            backend.cacheMissCount(layer) == missesBeforeResize
+
         where :
             description                               | layer               | styler
             "flat rounded background and foundation"  | UI.Layer.BACKGROUND | { it.borderRadius(16).margin(6).backgroundColor("#385d8a").foundationColor("#eae6da") }

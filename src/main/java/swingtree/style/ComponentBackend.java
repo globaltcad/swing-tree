@@ -566,7 +566,9 @@ public final class ComponentBackend<C extends JComponent>
      *  running straight up, down or across is stored that way in one dimension only. A gradient
      *  from top to bottom paints every pixel strip along the y axis alike, so we render it at
      *  the component's real height but only a fraction of its width. Everything else is cached at
-     *  exactly the component size.
+     *  exactly the component size. A component which has kept its size for a few paints may
+     *  also get a full size copy of a stretched exemplar, see {@link #bakedRendering(UI.Layer)};
+     *  that copy is not among the returned images.
      *  <p>
      *  The returned images are defensive copies: a cached rendering is shared by all components
      *  with an equal style, so callers may examine (or even modify) the copies freely without
@@ -582,6 +584,37 @@ public final class ComponentBackend<C extends JComponent>
         Objects.requireNonNull(layer);
         StyleLayerCache[] caches = _styleEngine.getLayerCaches();
         return caches[layer.ordinal()].renderedImages()
+                                      .mapTo(BufferedImage.class, ComponentBackend::_defensiveCopyOf);
+    }
+
+    /**
+     *  Returns copies of the full size images this component's given style {@link swingtree.UI.Layer}
+     *  is currently painted from with a single blit, instead of being stretch tiled from the small
+     *  exemplar that {@link #cachedRendering(UI.Layer)} returns. <br>
+     *  (The difference in short: a cached rendering is painted by the style renderer, and as an
+     *  exemplar it serves every size; a baked rendering is a style rendering
+     *  in the full component size, so as if that exemplar is stretched to the
+     *  component's full size, meaning can only serve that one size.) <br>
+     *  <br>
+     *  Stretch tiling redraws a component of any size from one small exemplar, which is what
+     *  keeps a live resize cheap. But it takes up to nine image draws per paint, so once a
+     *  component has kept its size for a few paints, the stretched exemplar is <em>baked</em>
+     *  into an image of the component's full size, pixel for pixel, and the exemplar is kept
+     *  for the next resize. That is why this is empty for a component which is being resized,
+     *  which has not painted often enough at its current size yet, whose full size is too large
+     *  for the cache budget, or whose layer is cached at exactly its size anyway.
+     *  <p>
+     *  The returned images are defensive copies, in paint order.
+     *
+     * @param layer The style layer to query.
+     * @return Copies of the baked full size images of the given layer, or an empty tuple if
+     *         that layer is not painted from one.
+     */
+    @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
+    public Tuple<BufferedImage> bakedRendering( UI.Layer layer ) {
+        Objects.requireNonNull(layer);
+        StyleLayerCache[] caches = _styleEngine.getLayerCaches();
+        return caches[layer.ordinal()].bakedImages()
                                       .mapTo(BufferedImage.class, ComponentBackend::_defensiveCopyOf);
     }
 
