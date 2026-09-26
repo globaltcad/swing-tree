@@ -1036,4 +1036,69 @@ class Combo_Box_Spec extends Specification
             rendered[11] == "Month: DECEMBER"
     }
 
+    def 'The cells of a combo box built with `withCells(..)` follow a switch of the look and feel.'()
+    {
+        reportInfo """
+            When your application switches the look and feel while it is running, every
+            component on screen has to be handed a UI delegate of the new look and feel,
+            and that includes the labels a combo box draws its items with. SwingTree makes
+            sure the component its cell renderer hands out for an item carries a delegate of
+            the look and feel that is installed now, not of the one that was installed when
+            the combo box was built.
+
+            The usual way to switch is to call `UIManager.setLookAndFeel(..)` and then
+            `SwingUtilities.updateComponentTreeUI(..)` on each window. That second call walks
+            the component tree and calls `updateUI()` on every component it finds. The label
+            a cell renderer paints an item with is not in that tree. To paint one item,
+            Swing adds the label to a hidden `CellRendererPane`, paints it there, and removes
+            it again, so between two paints the label has no parent at all. That is why
+            `JComboBox.updateUI()` also calls `updateComponentTreeUI(..)` on its renderer, but only
+            if the renderer is itself a `Component`. The renderer SwingTree builds from your `withCells(..)` rules is not
+            a component, it only creates and keeps the labels it hands out. So if SwingTree left
+            those labels alone, they would keep the delegate of the old look and feel forever,
+            and every item would be painted with the old look and feel's colours and fonts.
+            With a dark look and feel replacing a light one, that is dark text on a dark popup.
+
+            In this scenario we switch from Metal, Swing's cross-platform look and feel, to
+            Nimbus, because both ship with every JDK and they draw a label with different
+            delegate classes: Metal with a `MetalLabelUI`, and Nimbus with a `SynthLabelUI`.
+            So the class of the label's delegate tells us which look and feel it follows. We
+            ask the renderer for an item the way Swing does, handing it the list of the combo
+            box's own popup, because that list is where Swing draws the items. At the end we
+            install Metal again, so that no other scenario runs under Nimbus.
+        """
+        given : 'Metal is the installed look and feel.'
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+        and : 'A combo box whose items are rendered as text through `withCells(..)`.'
+            var combo =
+                        UI.comboBox("Hemp", "Linen", "Cotton")
+                        .withCells(it -> it
+                            .when(String).asText( cell -> cell.entryAsString() )
+                        )
+                        .get(JComboBox)
+        and : 'The list of the combo box popup, which is the list Swing paints the items in.'
+            var popupList = combo.getUI().getAccessibleChild(combo, 0).getList()
+        and : 'The label the renderer hands out for an item, while Metal is installed.'
+            var labelUnderMetal = combo.renderer.getListCellRendererComponent(popupList, "Linen", 1, false, false)
+
+        expect : 'The label is drawn by Metal.'
+            labelUnderMetal.getUI() instanceof javax.swing.plaf.metal.MetalLabelUI
+
+        when : 'The application switches to Nimbus the way Swing recommends it.'
+            UIManager.setLookAndFeel(new javax.swing.plaf.nimbus.NimbusLookAndFeel())
+            SwingUtilities.updateComponentTreeUI(combo)
+        and : '''
+                Swing asks the renderer for the same item again. `updateUI()` gave the combo box
+                a new delegate, which built a new popup with a new list, so that is the list we hand over.
+            '''
+            popupList = combo.getUI().getAccessibleChild(combo, 0).getList()
+            var labelUnderNimbus = combo.renderer.getListCellRendererComponent(popupList, "Linen", 1, false, false)
+
+        then : 'The label it hands out is now drawn by Nimbus.'
+            labelUnderNimbus.getUI() instanceof javax.swing.plaf.synth.SynthLabelUI
+
+        cleanup : 'We give every other scenario back the look and feel it expects.'
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+    }
+
 }

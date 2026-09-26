@@ -9,6 +9,7 @@ import swingtree.api.Configurator;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.event.CellEditorListener;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
@@ -19,6 +20,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellEditor;
 import javax.swing.tree.TreeCellRenderer;
 import java.awt.*;
+import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -65,6 +67,29 @@ public final class CellBuilder<C extends JComponent, E> {
         @Nullable Component _renderer = null;
         @Nullable Component _editor = null;
         final List<Configurator<CellConf<C, ?>>> _configurators = new ArrayList<>();
+    }
+
+    static final class HostDelegateSeenLast {
+        private WeakReference<ComponentUI> _delegate = new WeakReference<>(null);
+
+        boolean isReplacedBy( @Nullable ComponentUI currentDelegate ) {
+            if ( currentDelegate == null || _delegate.get() == currentDelegate )
+                return false;
+            _delegate = new WeakReference<>(currentDelegate);
+            return true;
+        }
+    }
+
+    static void _updateUIOfCachedCellViews( BuiltCells<?,?> state ) {
+        for ( Pair<? extends Class<?>, ? extends CellView<?>> entry : state.rendererLookup().entrySet() ) {
+            _updateComponentTreeUI(entry.second()._renderer);
+            _updateComponentTreeUI(entry.second()._editor);
+        }
+    }
+
+    static void _updateComponentTreeUI( @Nullable Object view ) {
+        if ( view instanceof Component )
+            SwingUtilities.updateComponentTreeUI((Component) view);
     }
 
     static <E> CellBuilder<JList<E>,E> forList(Class<E> elementType) {
@@ -235,7 +260,17 @@ public final class CellBuilder<C extends JComponent, E> {
         /* What a tree cell falls back to when no rule of this builder covers its value. */
         private final TreeCellRenderer _defaultTreeRenderer;
         private final InternalCellEditor _basicEditor;
+        private final HostDelegateSeenLast _hostDelegate = new HostDelegateSeenLast();
         private BuiltCells<JTable,Object> _state;
+
+        private void _updateCachedViewsIfHostDelegateWasReplaced( @Nullable ComponentUI hostDelegate ) {
+            if ( !_hostDelegate.isReplacedBy(hostDelegate) )
+                return;
+            _updateComponentTreeUI(_defaultRenderer);
+            _updateComponentTreeUI(_defaultTreeRenderer);
+            _updateComponentTreeUI(_basicEditor.getComponent());
+            _updateUIOfCachedCellViews(_state);
+        }
 
         SimpleTableCellRenderer(Class<? extends JComponent> hostType, BuiltCells<JTable, Object> state) {
             this(hostType, state, new DefaultTreeCellRenderer());
@@ -393,6 +428,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              column
         ) {
             _state.checkTypeValidity(entryFromModel);
+            _updateCachedViewsIfHostDelegateWasReplaced(table == null ? null : table.getUI());
             return _fit(table, row, column,
                         _updateAndGetComponent(
                             _state,
@@ -416,6 +452,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              column
         ) {
             _state.checkTypeValidity(entryFromModel);
+            _updateCachedViewsIfHostDelegateWasReplaced(table == null ? null : table.getUI());
             _basicEditor.ini(table, row, column);
             _basicEditor.updateForTable(table, column);
             _basicEditor.setEntry(entryFromModel, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
@@ -444,6 +481,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean          hasFocus
         ) {
             _state.checkTypeValidity(entryFromModel);
+            _updateCachedViewsIfHostDelegateWasReplaced(tree == null ? null : tree.getUI());
             String entryAsString = tree.convertValueToText(entryFromModel, selected, expanded, leaf, row, false);
             _basicEditor.ini(tree, row, 0);
             _basicEditor.setEntry(entryAsString, entryFromModel, entryFromModel == null ? Object.class : entryFromModel.getClass());
@@ -469,6 +507,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final int              row
         ) {
             _state.checkTypeValidity(entryFromModel);
+            _updateCachedViewsIfHostDelegateWasReplaced(tree == null ? null : tree.getUI());
             _basicEditor.ini(tree, row, 0);
             return _updateAndGetComponent(
                          _state,
@@ -523,7 +562,15 @@ public final class CellBuilder<C extends JComponent, E> {
     {
         private final O _component;
         private final ListCellRenderer<Object> _defaultRenderer;
+        private final HostDelegateSeenLast _hostDelegate = new HostDelegateSeenLast();
         private BuiltCells<O, E> _state;
+
+        private void _updateCachedViewsIfHostDelegateWasReplaced( @Nullable ComponentUI hostDelegate ) {
+            if ( !_hostDelegate.isReplacedBy(hostDelegate) )
+                return;
+            _updateComponentTreeUI(_defaultRenderer);
+            _updateUIOfCachedCellViews(_state);
+        }
 
 
         private SimpleListCellRenderer(O component, BuiltCells<O, E> state) {
@@ -559,6 +606,7 @@ public final class CellBuilder<C extends JComponent, E> {
             final boolean isSelected,
             final boolean hasFocus
         ) {
+            _updateCachedViewsIfHostDelegateWasReplaced(list == null ? null : list.getUI());
             _state.checkTypeValidity(value);
             List<Configurator<CellConf<O, ?>>> interpreter = _find(value, _state.rendererLookup());
             if (interpreter.isEmpty())
