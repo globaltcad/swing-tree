@@ -144,6 +144,49 @@ final class Styles
     }
 
     /**
+     *  The fill of an affirmative or a destructive control in one state, as the palette names it,
+     *  moved until the palette's {@code onFilled} label reads on it at
+     *  {@link Legibility#TEXT}. Every preset that writes {@code onFilled} on
+     *  {@code primary} and {@code danger} takes its fill from here, so that a palette whose
+     *  affirmative green or whose destructive pink is too light for a white label gets a
+     *  darker fill rather than an unreadable label. A palette whose fills already carry the label
+     *  gets its own colours back unchanged. See {@link Legibility#fill}.
+     *
+     * @param p        the palette of the theme
+     * @param variant  {@link SwingTreeLookAndFeel.Variant#PRIMARY} or {@link SwingTreeLookAndFeel.Variant#DANGER}
+     * @param sunken   whether the control is pressed or selected
+     * @param rollover whether the pointer is over it
+     * @return the fill to paint
+     */
+    static Color filled( SwingTreeLookAndFeel.Palette p, SwingTreeLookAndFeel.Variant variant, boolean sunken, boolean rollover ) {
+        return filled(p, variant, sunken, rollover, p.onFilled(), 0);
+    }
+
+    /**
+     *  The same, for a preset which does not paint the fill as the palette names it but mixes
+     *  another colour into it behind the label: {@code mixed} of {@code mixedWith}.
+     *
+     * @param p         the palette of the theme
+     * @param variant   {@link SwingTreeLookAndFeel.Variant#PRIMARY} or {@link SwingTreeLookAndFeel.Variant#DANGER}
+     * @param sunken    whether the control is pressed or selected
+     * @param rollover  whether the pointer is over it
+     * @param mixedWith the colour the preset mixes into the fill where the label is written
+     * @param mixed     how much of it, 0 to 1
+     * @return the fill to paint, before the preset mixes anything into it
+     */
+    static Color filled(
+        SwingTreeLookAndFeel.Palette p, SwingTreeLookAndFeel.Variant variant, boolean sunken, boolean rollover,
+        Color mixedWith, double mixed
+    ) {
+        boolean danger  = variant == SwingTreeLookAndFeel.Variant.DANGER;
+        Color   resting = danger ? p.danger() : p.primary();
+        Color   state   = sunken   ? ( danger ? p.dangerPressed() : p.primaryPressed() )
+                        : rollover ? ( danger ? p.dangerHover()   : p.primaryHover()   )
+                        : resting;
+        return Legibility.fill(state, resting, p.onFilled(), Legibility.TEXT, mixedWith, mixed);
+    }
+
+    /**
      *  <b>Linen</b>: a calm, paper-like theme of cream surfaces, taupe borders and a woven grain on
      *  the window. A control that takes focus grows its border and gives the same amount back from
      *  its margin, so tabbing through a form never shifts the layout around it.
@@ -219,7 +262,7 @@ final class Styles
                             .backgroundColor(p.surface())
                             .borderRadius(14)
                             .border(1, p.borderSoft())
-                            .shadowColor(shadowOf(p.text(), 28))
+                            .shadowColor(theme.shadow(shadowOf(p.text(), 28), SwingTreeLookAndFeel.Palette::background))
                             .shadowBlurRadius(14)
                             .shadowSpreadRadius(-2)
                             .shadowOffset(0, 3);
@@ -233,7 +276,7 @@ final class Styles
                             .backgroundColor(p.background())
                             .noise(n -> n
                                     .function(UI.NoiseType.STOCHASTIC)
-                                    .colors(p.textureLight(), p.textureDark())
+                                    .colors(Legibility.speck(p.textureLight(), p.background()), Legibility.speck(p.textureDark(), p.background()))
                                     .scale(0.6)
                                     .clipTo(UI.ComponentArea.BODY)
                             );
@@ -328,7 +371,7 @@ final class Styles
 
             if ( sunken )
                 return it
-                        .shadowColor(PRESSED_SHADOW)
+                        .shadowColor(theme.shadow(PRESSED_SHADOW, SwingTreeLookAndFeel.Palette::surface))
                         .shadowBlurRadius(4)
                         .shadowSpreadRadius(0)
                         .shadowOffset(0, 1)
@@ -341,7 +384,7 @@ final class Styles
 
             Color top = surfaceOf(variant, p, true, false, true);
             return it
-                    .shadowColor(rollover ? HOVERED_SHADOW : RESTING_SHADOW)
+                    .shadowColor(theme.shadow(rollover ? HOVERED_SHADOW : RESTING_SHADOW, SwingTreeLookAndFeel.Palette::surface))
                     .shadowBlurRadius(rollover ? 8 : 3)
                     .shadowSpreadRadius(-1)
                     .shadowOffset(0, rollover ? 2 : 1)
@@ -386,7 +429,7 @@ final class Styles
                     .borderRadius(6)
                     .borderWidth(0)
                     .backgroundColor(armed ? p.accentSoft() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                    .foregroundColor(enabled ? p.text() : p.textDisabled());
+                    .foregroundColor(!enabled ? p.textDisabled() : armed ? Legibility.ink(p.text(), Legibility.TEXT, p.accentSoft()) : p.text());
         }
 
         private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
@@ -407,7 +450,7 @@ final class Styles
                     .borderRadius(8)
                     .borderWidth(1)
                     .borderColor(p.border())
-                    .shadowColor(FLOATING_SHADOW)
+                    .shadowColor(theme.shadow(FLOATING_SHADOW, SwingTreeLookAndFeel.Palette::background))
                     .shadowBlurRadius(10)
                     .shadowSpreadRadius(-2)
                     .shadowOffset(0, 3)
@@ -477,8 +520,8 @@ final class Styles
                     .borderRadius(6)
                     .borderWidth(0)
                     .backgroundColor(p.accent())
-                    .foregroundColor(p.onFilled())
-                    .shadowColor(FLOATING_SHADOW)
+                    .foregroundColor(Legibility.ink(p.onFilled(), Legibility.TEXT, p.accent()))
+                    .shadowColor(theme.shadow(FLOATING_SHADOW, SwingTreeLookAndFeel.Palette::background))
                     .shadowBlurRadius(8)
                     .shadowSpreadRadius(-2)
                     .shadowOffset(0, 3)
@@ -608,8 +651,8 @@ final class Styles
             if ( !enabled )
                 return variant == SwingTreeLookAndFeel.Variant.QUIET ? SwingTreeLookAndFeel.Palette.TRANSPARENT : p.surfaceDisabled();
             switch ( variant ) {
-                case PRIMARY: return sunken ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-                case DANGER:  return sunken ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
+                case PRIMARY:
+                case DANGER:  return filled(p, variant, sunken, rollover);
                 case QUIET:   return sunken ? p.surfacePressed() : rollover ? p.surfaceHover() : SwingTreeLookAndFeel.Palette.TRANSPARENT;
                 case NEUTRAL:
                 default:      return sunken ? p.surfacePressed() : rollover ? p.surfaceHover() : p.surface();
@@ -1035,7 +1078,7 @@ final class Styles
                     .borderRadius(12)
                     .borderWidth(0)
                     .backgroundColor(armed ? p.accentSoft() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                    .foregroundColor(enabled ? p.text() : p.textDisabled());
+                    .foregroundColor(!enabled ? p.textDisabled() : armed ? Legibility.ink(p.text(), Legibility.TEXT, p.accentSoft()) : p.text());
         }
 
         private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
@@ -1131,8 +1174,8 @@ final class Styles
             if ( !enabled )
                 return variant == SwingTreeLookAndFeel.Variant.QUIET ? SwingTreeLookAndFeel.Palette.TRANSPARENT : p.surfaceDisabled();
             switch ( variant ) {
-                case PRIMARY: return sunkenIn ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-                case DANGER:  return sunkenIn ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
+                case PRIMARY:
+                case DANGER:  return filled(p, variant, sunkenIn, rollover);
                 case QUIET:   return sunkenIn || rollover ? p.surface() : SwingTreeLookAndFeel.Palette.TRANSPARENT;
                 case NEUTRAL:
                 default:      return sunkenIn ? p.surfacePressed() : rollover ? p.surfaceHover() : p.surface();
@@ -1168,6 +1211,11 @@ final class Styles
         /** The far side of that break. A gradient's stops have to increase, so the hard line is the
          *  smallest step there is rather than no step at all. */
         private static final double BREAK_END = 0.482;
+        /** How far towards white the gloss lifts a fill where the letters of a label sit: across
+         *  the break, where the top half of each letter is on the lit side. Measured on the Aero
+         *  palette, whose affirmative green is painted three quarters of the way from itself to the
+         *  colour this names. */
+        private static final double LIFT_BEHIND_LABEL = 0.26;
 
         private static final Tuple<StyleRule> RULES = Tuple.of(
             StyleRule.of(JPanel.class,         FrutigerAero::panel),
@@ -1207,38 +1255,39 @@ final class Styles
          *  The four stops that make a surface look like glass: bright at the top, dimming to the break,
          *  then a jump back up and a gentle darkening to the bottom edge.
          */
-        private static GradientConf gloss(GradientConf g, Color base ) {
+        private static GradientConf gloss( GradientConf g, Color base, Color ink ) {
             return g
-                    .colors(LafUtilities.shadeTowardsWhite(base, 0.42), LafUtilities.shadeTowardsWhite(base, 0.14),
-                            base,                        LafUtilities.shadeTowardsBlack(base, 0.12))
+                    .colors(Legibility.ground(LafUtilities.shadeTowardsWhite(base, 0.42), ink, Legibility.SECONDARY),
+                            Legibility.ground(LafUtilities.shadeTowardsWhite(base, 0.14), ink, Legibility.TEXT),
+                            base, LafUtilities.shadeTowardsBlack(base, 0.12))
                     .fractions(0, BREAK, BREAK_END, 1)
                     .span(UI.Span.TOP_TO_BOTTOM)
                     .clipTo(UI.ComponentArea.BODY);
         }
 
-        /** The same glass, upside down, which is what a reflective thing does when pushed in. */
-        private static GradientConf pressedGloss( GradientConf g, Color base ) {
+        private static GradientConf pressedGloss( GradientConf g, Color base, Color ink ) {
             return g
-                    .colors(LafUtilities.shadeTowardsBlack(base, 0.16), LafUtilities.shadeTowardsBlack(base, 0.04),
-                            base,                       LafUtilities.shadeTowardsWhite(base, 0.18))
+                    .colors(Legibility.ground(LafUtilities.shadeTowardsBlack(base, 0.16), ink, Legibility.SECONDARY),
+                            Legibility.ground(LafUtilities.shadeTowardsBlack(base, 0.04), ink, Legibility.TEXT),
+                            base, Legibility.ground(LafUtilities.shadeTowardsWhite(base, 0.18), ink, Legibility.TEXT))
                     .fractions(0, BREAK, BREAK_END, 1)
                     .span(UI.Span.TOP_TO_BOTTOM)
                     .clipTo(UI.ComponentArea.BODY);
         }
 
-        /** A soft vertical wash, for the large surfaces that are sky rather than glass. */
-        private static GradientConf sky( GradientConf g, Color base ) {
+        private static GradientConf sky( GradientConf g, Color base, SwingTreeLookAndFeel.Palette p ) {
+            Color lit = Legibility.ground(LafUtilities.shadeTowardsWhite(base, 0.30), p.text(), Legibility.TEXT);
             return g
-                    .colors(LafUtilities.shadeTowardsWhite(base, 0.30), base)
+                    .colors(Legibility.ground(lit, p.textMuted(), Legibility.SECONDARY), base)
                     .span(UI.Span.TOP_TO_BOTTOM)
                     .clipTo(UI.ComponentArea.BODY);
         }
 
         private static <C extends JComponent> ComponentStyleDelegate<C> lifted(
-            ComponentStyleDelegate<C> it, int blur, int alpha
+            Theme theme, ComponentStyleDelegate<C> it, int blur, int alpha
         ) {
             return it
-                    .shadowColor(new Color(0, 0, 0, alpha))
+                    .shadowColor(theme.shadow(new Color(0, 0, 0, alpha), SwingTreeLookAndFeel.Palette::background))
                     .shadowBlurRadius(blur)
                     .shadowSpreadRadius(-1)
                     .shadowOffset(0, 2)
@@ -1253,23 +1302,24 @@ final class Styles
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case CARD:
-                    return lifted(it
+                    return lifted(theme, it
                             .backgroundColor(p.surface())
                             .borderRadius(14)
                             .border(1, p.border())
                             .margin(4), 12, 46)
                             .gradient("glass", g -> g
-                                    .colors(LafUtilities.withOpacity(Color.WHITE, 190), LafUtilities.withOpacity(Color.WHITE, 0))
+                                    .colors(Legibility.sheen(LafUtilities.withOpacity(Color.WHITE, 190), p.surface(), p.textMuted(), Legibility.SECONDARY),
+                                            LafUtilities.withOpacity(Color.WHITE, 0))
                                     .fractions(0, 0.55)
                                     .span(UI.Span.TOP_TO_BOTTOM)
                                     .clipTo(UI.ComponentArea.BODY));
                 case RAIL:
-                    return it.backgroundColor(p.surface()).gradient(g -> sky(g, p.surface()));
+                    return it.backgroundColor(p.surface()).gradient(g -> sky(g, p.surface(), p));
                 case TRANSPARENT:
                     return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
                 case WINDOW:
                 default:
-                    return it.backgroundColor(p.background()).gradient(g -> sky(g, p.background()));
+                    return it.backgroundColor(p.background()).gradient(g -> sky(g, p.background(), p));
             }
         }
 
@@ -1281,7 +1331,7 @@ final class Styles
                 case TRANSPARENT:
                     return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
                 case CARD:
-                    return lifted(it.backgroundColor(p.surface()).borderRadius(12).border(1, p.border()).padding(2), 10, 40);
+                    return lifted(theme, it.backgroundColor(p.surface()).borderRadius(12).border(1, p.border()).padding(2), 10, 40);
                 case RAIL:
                     return it.backgroundColor(p.surface()).borderWidth(0).borderRadius(0).padding(0);
                 case WINDOW:
@@ -1291,7 +1341,7 @@ final class Styles
                             .borderRadius(10)
                             .border(1, p.border())
                             .padding(2)
-                            .shadowColor(LafUtilities.withOpacity(p.text(), 46))
+                            .shadowColor(theme.shadow(LafUtilities.withOpacity(p.text(), 46), SwingTreeLookAndFeel.Palette::surfaceField))
                             .shadowBlurRadius(5)
                             .shadowOffset(0, 2)
                             .shadowIsInset(true);
@@ -1344,12 +1394,12 @@ final class Styles
                 return it.borderColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
             if ( sunken )
                 return it
-                        .gradient(g -> pressedGloss(g, base))
-                        .shadowColor(new Color(0, 0, 0, 80))
+                        .gradient(g -> pressedGloss(g, base, ink(variant, p, enabled)))
+                        .shadowColor(theme.shadow(new Color(0, 0, 0, 80), SwingTreeLookAndFeel.Palette::surface))
                         .shadowBlurRadius(5)
                         .shadowOffset(0, 2)
                         .shadowIsInset(true);
-            return lifted(it.gradient(g -> gloss(g, base)), rollover ? 9 : 6, rollover ? 70 : 50);
+            return lifted(theme, it.gradient(g -> gloss(g, base, ink(variant, p, enabled))), rollover ? 9 : 6, rollover ? 70 : 50);
         }
 
         @SuppressWarnings("deprecation")
@@ -1377,7 +1427,7 @@ final class Styles
                     .borderColor(focused ? p.accent() : p.border())
                     .backgroundColor(base)
                     .foregroundColor(enabled ? p.text() : p.textDisabled())
-                    .gradient(g -> gloss(g, base));
+                    .gradient(g -> gloss(g, base, p.text()));
         }
 
         @SuppressWarnings("deprecation")
@@ -1395,7 +1445,7 @@ final class Styles
                     .borderColor(focused ? p.accent() : p.border())
                     .backgroundColor(base)
                     .foregroundColor(enabled ? p.text() : p.textDisabled())
-                    .gradient(g -> gloss(g, base));
+                    .gradient(g -> gloss(g, base, p.text()));
         }
 
         // ── Inputs ───────────────────────────────────────────────────────────
@@ -1426,7 +1476,7 @@ final class Styles
                     .borderColor(focused ? p.accent() : p.border())
                     .backgroundColor(editable ? p.surfaceField() : p.surfaceDisabled())
                     .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled())
-                    .shadow("sunk", s -> s.color(LafUtilities.withOpacity(p.text(), 40)).offset(0, 2).blurRadius(4).isInset(true));
+                    .shadow("sunk", s -> s.color(theme.shadow(LafUtilities.withOpacity(p.text(), 40), SwingTreeLookAndFeel.Palette::surfaceField)).offset(0, 2).blurRadius(4).isInset(true));
             if ( !focused )
                 return it;
             return it.shadow("glow", s -> s.color(LafUtilities.withOpacity(p.accent(), 110)).offset(0, 0).blurRadius(7).isInset(false));
@@ -1447,13 +1497,14 @@ final class Styles
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
             boolean     armed   = enabled && ( m.isArmed() || m.isSelected() );
+            Color       highlighted = Legibility.fill(p.accent(), p.accent(), p.onFilled(), Legibility.TEXT, Color.WHITE, LIFT_BEHIND_LABEL);
             it = it
                     .padding(4, 9, 4, 9)
                     .borderRadius(7)
                     .borderWidth(0)
-                    .backgroundColor(armed ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                    .backgroundColor(armed ? highlighted : SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(!enabled ? p.textDisabled() : armed ? p.onFilled() : p.text());
-            return armed ? it.gradient(g -> gloss(g, p.accent())) : it;
+            return armed ? it.gradient(g -> gloss(g, highlighted, p.onFilled())) : it;
         }
 
         private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
@@ -1462,13 +1513,13 @@ final class Styles
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
                     .padding(2, 4, 2, 4)
-                    .gradient(g -> gloss(g, p.surface()))
+                    .gradient(g -> gloss(g, p.surface(), p.text()))
                     .borderAt(UI.Edge.BOTTOM, 1, p.border());
         }
 
         private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return lifted(it
+            return lifted(theme, it
                     .backgroundColor(p.surfaceField())
                     .foregroundColor(p.text())
                     .margin(3)
@@ -1479,14 +1530,14 @@ final class Styles
 
         private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return lifted(it
+            return lifted(theme, it
                     .margin(3)
                     .padding(4, 10, 4, 10)
                     .borderRadius(8)
                     .border(1, p.border())
                     .backgroundColor(p.surfaceField())
                     .foregroundColor(p.text())
-                    .gradient(g -> gloss(g, p.surfaceField())), 8, 80);
+                    .gradient(g -> gloss(g, p.surfaceField(), p.text())), 8, 80);
         }
 
         private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
@@ -1501,7 +1552,7 @@ final class Styles
                     .border(1, p.border())
                     .backgroundColor(p.surfaceDisabled())
                     .foregroundColor(p.primary())
-                    .shadowColor(LafUtilities.withOpacity(p.text(), 50))
+                    .shadowColor(theme.shadow(LafUtilities.withOpacity(p.text(), 50), SwingTreeLookAndFeel.Palette::surfaceDisabled))
                     .shadowBlurRadius(4)
                     .shadowOffset(0, 1)
                     .shadowIsInset(true);
@@ -1537,7 +1588,7 @@ final class Styles
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.textMuted())
-                    .gradient(g -> gloss(g, p.surface()))
+                    .gradient(g -> gloss(g, p.surface(), p.text()))
                     .borderAt(UI.Edge.BOTTOM, 1, p.border());
         }
 
@@ -1549,7 +1600,7 @@ final class Styles
                     .padding(4, 8, 4, 8)
                     .borderRadius(10)
                     .border(1, p.borderSoft())
-                    .gradient(g -> gloss(g, p.surface()));
+                    .gradient(g -> gloss(g, p.surface(), p.text()));
         }
 
         // ── Variant colours ──────────────────────────────────────────────────
@@ -1558,8 +1609,8 @@ final class Styles
             if ( !enabled )
                 return variant == SwingTreeLookAndFeel.Variant.QUIET ? SwingTreeLookAndFeel.Palette.TRANSPARENT : p.surfaceDisabled();
             switch ( variant ) {
-                case PRIMARY: return sunken ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-                case DANGER:  return sunken ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
+                case PRIMARY:
+                case DANGER:  return filled(p, variant, sunken, rollover, Color.WHITE, LIFT_BEHIND_LABEL);
                 case QUIET:   return sunken ? p.surfacePressed() : rollover ? p.surfaceHover() : SwingTreeLookAndFeel.Palette.TRANSPARENT;
                 case NEUTRAL:
                 default:      return sunken ? p.surfacePressed() : rollover ? p.surfaceHover() : p.surface();
@@ -1641,14 +1692,14 @@ final class Styles
          *  the one thing: a wide soft shadow for the distance and a tight dark one for the contact edge,
          *  both growing with the step.
          */
-        private static <C extends JComponent> ComponentStyleDelegate<C> elevation( ComponentStyleDelegate<C> it, int step ) {
+        private static <C extends JComponent> ComponentStyleDelegate<C> elevation( Theme theme, ComponentStyleDelegate<C> it, int step ) {
             if ( step <= 0 )
                 return it;
             int spread = step;
             return it
-                    .shadow("ambient", s -> s.color(new Color(0, 0, 0, 30))
+                    .shadow("ambient", s -> s.color(theme.shadow(new Color(0, 0, 0, 30), SwingTreeLookAndFeel.Palette::background))
                                              .offset(0, spread).blurRadius(spread * 3).spreadRadius(-1).isInset(false))
-                    .shadow("contact", s -> s.color(new Color(0, 0, 0, 38))
+                    .shadow("contact", s -> s.color(theme.shadow(new Color(0, 0, 0, 38), SwingTreeLookAndFeel.Palette::background))
                                              .offset(0, Math.max(1, spread / 2)).blurRadius(spread).isInset(false));
         }
 
@@ -1660,9 +1711,9 @@ final class Styles
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case CARD:
-                    return elevation(it.backgroundColor(p.surface()).borderRadius(RADIUS).borderWidth(0).margin(3), 2);
+                    return elevation(theme, it.backgroundColor(p.surface()).borderRadius(RADIUS).borderWidth(0).margin(3), 2);
                 case RAIL:
-                    return elevation(it.backgroundColor(p.surface()).borderWidth(0), 1);
+                    return elevation(theme, it.backgroundColor(p.surface()).borderWidth(0), 1);
                 case TRANSPARENT:
                     return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
                 case WINDOW:
@@ -1679,7 +1730,7 @@ final class Styles
                 case TRANSPARENT:
                     return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
                 case CARD:
-                    return elevation(it.backgroundColor(p.surface()).borderRadius(RADIUS).borderWidth(0).margin(3), 2);
+                    return elevation(theme, it.backgroundColor(p.surface()).borderRadius(RADIUS).borderWidth(0).margin(3), 2);
                 case RAIL:
                     return it.backgroundColor(p.surface()).borderWidth(0).borderRadius(0).padding(0);
                 case WINDOW:
@@ -1743,7 +1794,7 @@ final class Styles
             if ( !enabled || !contained )
                 return it;
             // Only a contained button is above the page, and pressing it lifts it further.
-            return elevation(it, sunken ? 4 : rollover ? 3 : 2);
+            return elevation(theme, it, sunken ? 4 : rollover ? 3 : 2);
         }
 
         @SuppressWarnings("deprecation")
@@ -1834,12 +1885,12 @@ final class Styles
                     .borderRadius(0)
                     .borderWidth(0)
                     .backgroundColor(armed ? p.accentSoft() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                    .foregroundColor(enabled ? p.text() : p.textDisabled());
+                    .foregroundColor(!enabled ? p.textDisabled() : armed ? Legibility.ink(p.text(), Legibility.TEXT, p.accentSoft()) : p.text());
         }
 
         private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return elevation(it
+            return elevation(theme, it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
                     .padding(2, 4, 2, 4)
@@ -1848,7 +1899,7 @@ final class Styles
 
         private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return elevation(it
+            return elevation(theme, it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
                     .margin(4)
@@ -1864,7 +1915,7 @@ final class Styles
                     .borderRadius(RADIUS)
                     .borderWidth(0)
                     .backgroundColor(LafUtilities.withOpacity(p.text(), 229))
-                    .foregroundColor(p.onFilled());
+                    .foregroundColor(Legibility.ink(p.onFilled(), Legibility.TEXT, Legibility.over(LafUtilities.withOpacity(p.text(), 229), p.background())));
         }
 
         private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
@@ -1916,7 +1967,7 @@ final class Styles
 
         private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return elevation(it
+            return elevation(theme, it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
                     .padding(4, 8, 4, 8)
@@ -1933,8 +1984,8 @@ final class Styles
             if ( !enabled )
                 return p.surfaceDisabled();
             switch ( variant ) {
-                case PRIMARY: return sunken ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-                case DANGER:  return sunken ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
+                case PRIMARY:
+                case DANGER:  return filled(p, variant, sunken, rollover);
                 case QUIET:
                 case NEUTRAL:
                 default:      return sunken ? p.accentSoft()
@@ -1948,7 +1999,23 @@ final class Styles
                 return p.textDisabled();
             // An outlined or text button carries the accent as its label; a contained one has to be
             // legible on top of a saturated fill instead.
-            return variant.isFilled() ? p.onFilled() : p.accent();
+            return variant.isFilled() ? p.onFilled() : accentInk(p);
+        }
+
+        /**
+         *  The accent as the label of an outlined or a text button, moved until it reads as text on
+         *  everything such a button is written on: the card, the window, the faint accent wash it
+         *  takes on under the pointer and the pale accent it sinks into when pressed. An accent is
+         *  chosen to be seen as a ring or a fill, where a contrast of three is plenty; a label needs
+         *  more, and on a pale sky-blue palette the accent is a shade too light to give it.
+         *
+         * @param p the palette of the theme
+         * @return the accent to write a label in
+         */
+        private static Color accentInk( SwingTreeLookAndFeel.Palette p ) {
+            return Legibility.ink(p.accent(), Legibility.TEXT,
+                                  p.surface(), p.background(), p.accentSoft(),
+                                  Legibility.over(LafUtilities.withOpacity(p.accent(), 28), p.surface()));
         }
     }
 
@@ -2069,7 +2136,7 @@ final class Styles
                     .borderWidth(focused ? 2 : 0)
                     .borderColor(focused ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .backgroundColor(fill(variant, p, enabled, sunken, rollover))
-                    .foregroundColor(ink(variant, p, enabled, sunken));
+                    .foregroundColor(ink(variant, p, enabled, sunken, rollover));
         }
 
         @SuppressWarnings("deprecation")
@@ -2190,7 +2257,7 @@ final class Styles
                     .borderRadius(0)
                     .borderWidth(0)
                     .backgroundColor(p.text())
-                    .foregroundColor(p.onFilled());
+                    .foregroundColor(Legibility.ink(p.onFilled(), Legibility.TEXT, p.text()));
         }
 
         /** The delegate draws the hairline itself, so the rule leaves the rest of the strip alone. */
@@ -2252,19 +2319,22 @@ final class Styles
             if ( !enabled )
                 return p.surfaceDisabled();
             switch ( variant ) {
-                case PRIMARY: return sunken ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-                case DANGER:  return sunken ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
-                case QUIET:   return sunken ? p.accent() : rollover ? p.accentSoft() : SwingTreeLookAndFeel.Palette.TRANSPARENT;
+                case PRIMARY:
+                case DANGER:  return filled(p, variant, sunken, rollover);
+                case QUIET:   return sunken ? Legibility.ground(p.accent(), p.onFilled(), Legibility.TEXT) : rollover ? p.accentSoft() : SwingTreeLookAndFeel.Palette.TRANSPARENT;
                 case NEUTRAL:
-                default:      return sunken ? p.accent() : rollover ? p.accentSoft() : p.surfaceHover();
+                default:      return sunken ? Legibility.ground(p.accent(), p.onFilled(), Legibility.TEXT) : rollover ? p.accentSoft() : p.surfaceHover();
             }
         }
 
-        private static Color ink(SwingTreeLookAndFeel.Variant variant, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean sunken ) {
+        private static Color ink(SwingTreeLookAndFeel.Variant variant, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean sunken, boolean rollover ) {
             if ( !enabled )
                 return p.textDisabled();
             // The last rung of the ladder is a saturated fill, so the label has to invert with it.
-            return variant.isFilled() || sunken ? p.onFilled() : p.text();
+            if ( variant.isFilled() || sunken )
+                return p.onFilled();
+            Color fill = fill(variant, p, true, false, rollover);
+            return fill.getAlpha() == 0 ? p.text() : Legibility.ink(p.text(), Legibility.TEXT, fill);
         }
     }
 
@@ -2342,7 +2412,7 @@ final class Styles
          * @return the styled delegate
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> plate(
-            ComponentStyleDelegate<C> it, Color base, boolean pressed
+            Theme theme, ComponentStyleDelegate<C> it, Color base, boolean pressed
         ) {
             int lift = pressed ? -SHEEN : SHEEN;
             it = it
@@ -2357,8 +2427,8 @@ final class Styles
                             .clipTo(UI.ComponentArea.BODY))
                     .noise(GRAIN, n -> n
                             .function(UI.NoiseType.BRUSHED_METAL)
-                            .colors(LafUtilities.withOpacity(Color.WHITE, 30),
-                                    LafUtilities.withOpacity(Color.BLACK, 22))
+                            .colors(theme.highlight(LafUtilities.withOpacity(Color.WHITE, 30), SwingTreeLookAndFeel.Palette::surface),
+                                    theme.shadow(LafUtilities.withOpacity(Color.BLACK, 22), SwingTreeLookAndFeel.Palette::surface))
                             .scale(0.3, 5)
                             .clipTo(UI.ComponentArea.BODY))
                     .borderColors(
@@ -2368,10 +2438,10 @@ final class Styles
                         LafUtilities.shadeBySteps(base, -BEVEL / 2)
                     );
             if ( pressed )
-                return it.shadow(WALL, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 90))
+                return it.shadow(WALL, s -> s.color(theme.shadow(LafUtilities.withOpacity(Color.BLACK, 90), SwingTreeLookAndFeel.Palette::surface))
                                              .offset(0, 2).blurRadius(3)
                                              .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true));
-            return it.shadow(DROP, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 60))
+            return it.shadow(DROP, s -> s.color(theme.shadow(LafUtilities.withOpacity(Color.BLACK, 60), SwingTreeLookAndFeel.Palette::surface))
                                          .offset(0, 2).blurRadius(3)
                                          .falloff(UI.ShadowFalloff.BLUR).isInset(false));
         }
@@ -2381,13 +2451,13 @@ final class Styles
          *  floor catching the light that spills over the far lip.
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> well(
-            ComponentStyleDelegate<C> it, int depth
+            Theme theme, ComponentStyleDelegate<C> it, int depth
         ) {
             return it
-                    .shadow(WALL,  s -> s.color(LafUtilities.withOpacity(Color.BLACK, 105))
+                    .shadow(WALL,  s -> s.color(theme.shadow(LafUtilities.withOpacity(Color.BLACK, 105), SwingTreeLookAndFeel.Palette::surfaceField))
                                          .offset(0, depth).blurRadius(depth * 2)
                                          .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true))
-                    .shadow(FLOOR, s -> s.color(LafUtilities.withOpacity(Color.WHITE, 120))
+                    .shadow(FLOOR, s -> s.color(theme.highlight(LafUtilities.withOpacity(Color.WHITE, 120), SwingTreeLookAndFeel.Palette::surfaceField))
                                          .offset(0, -depth).blurRadius(depth * 2)
                                          .falloff(UI.ShadowFalloff.GLOW).isInset(true));
         }
@@ -2399,8 +2469,8 @@ final class Styles
             SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
-                case CARD:        return sheet(it, p).margin(5).padding(2);
-                case RAIL:        return plate(it.borderRadius(0).border(1, p.border()), p.surface(), false);
+                case CARD:        return sheet(theme, it, p).margin(5).padding(2);
+                case RAIL:        return plate(theme, it.borderRadius(0).border(1, p.border()), p.surface(), false);
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
                 case WINDOW:
                 default:          return LafUtilities.isControlInternal(it.component())
@@ -2415,11 +2485,11 @@ final class Styles
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
-                case CARD:        return sheet(it, p).margin(5).padding(3);
+                case CARD:        return sheet(theme, it, p).margin(5).padding(3);
                 case RAIL:        return it.backgroundColor(p.surface()).borderWidth(0).borderRadius(0).padding(0);
                 case WINDOW:
                 default:
-                    return well(it
+                    return well(theme, it
                             .backgroundColor(p.surfaceField())
                             .borderRadius(RADIUS)
                             .border(1, p.border())
@@ -2434,18 +2504,18 @@ final class Styles
         }
 
         /** A sheet of paper: its own grain, a hairline edge and a shadow where it lifts off the bench. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> sheet( ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p ) {
+        private static <C extends JComponent> ComponentStyleDelegate<C> sheet( Theme theme, ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p ) {
             return it
                     .backgroundColor(p.surface())
                     .borderRadius(RADIUS)
                     .border(1, p.borderSoft())
                     .noise(GRAIN, n -> n
                             .function(UI.NoiseType.PAPER)
-                            .colors(LafUtilities.withOpacity(Color.WHITE, 40),
+                            .colors(theme.highlight(LafUtilities.withOpacity(Color.WHITE, 40), SwingTreeLookAndFeel.Palette::surface),
                                     LafUtilities.withOpacity(p.textMuted(), 26))
                             .scale(1.4)
                             .clipTo(UI.ComponentArea.BODY))
-                    .shadow(DROP, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 70))
+                    .shadow(DROP, s -> s.color(theme.shadow(LafUtilities.withOpacity(Color.BLACK, 70), SwingTreeLookAndFeel.Palette::background))
                                         .offset(0, 3).blurRadius(6).spreadRadius(-1)
                                         .falloff(UI.ShadowFalloff.BLUR).isInset(false));
         }
@@ -2456,7 +2526,7 @@ final class Styles
                     .backgroundColor(p.background())
                     .noise(GRAIN, n -> n
                             .function(UI.NoiseType.LEATHER)
-                            .colors(p.textureLight(), p.textureDark())
+                            .colors(Legibility.speck(p.textureLight(), p.background()), Legibility.speck(p.textureDark(), p.background()))
                             .scale(0.3)
                             .clipTo(UI.ComponentArea.BODY));
         }
@@ -2494,7 +2564,7 @@ final class Styles
                 return it.borderColor(p.border());
             if ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover )
                 return it.borderColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
-            return plate(it, base, sunken);
+            return plate(theme, it, base, sunken);
         }
 
         @SuppressWarnings("deprecation")
@@ -2510,14 +2580,14 @@ final class Styles
         private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
             SwingTreeLookAndFeel.Palette p     = theme.palette();
             JComboBox<?> combo = it.component();
-            return machined(it, p, combo.isEnabled(), LafUtilities.hasFocus(combo), 5, 10, 4);
+            return machined(theme, it, p, combo.isEnabled(), LafUtilities.hasFocus(combo), 5, 10, 4);
         }
 
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
             SwingTreeLookAndFeel.Palette p       = theme.palette();
             JSpinner spinner = it.component();
-            return machined(it, p, spinner.isEnabled(), LafUtilities.hasFocus(spinner), 3, 6, 3);
+            return machined(theme, it, p, spinner.isEnabled(), LafUtilities.hasFocus(spinner), 3, 6, 3);
         }
 
         /**
@@ -2529,7 +2599,7 @@ final class Styles
          */
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> machined(
-                ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean focused,
+                Theme theme, ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean focused,
                 int padY, int padX, int padRight
         ) {
             Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
@@ -2540,7 +2610,7 @@ final class Styles
                     .border(1, focused ? p.accent() : p.border())
                     .backgroundColor(LafUtilities.underPointer(p, resting, it.component()))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
-            return enabled ? well(it, 3) : it;
+            return enabled ? well(theme, it, 3) : it;
         }
 
         // ── Inputs ───────────────────────────────────────────────────────────
@@ -2574,7 +2644,7 @@ final class Styles
                     .border(1, focused ? p.accent() : p.border())
                     .backgroundColor(editable ? p.surfaceField() : p.surfaceDisabled())
                     .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
-            return well(it, 3);
+            return well(theme, it, 3);
         }
 
         // ── The rest ─────────────────────────────────────────────────────────
@@ -2598,12 +2668,12 @@ final class Styles
                     .borderWidth(0)
                     .backgroundColor(armed ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(!enabled ? p.textDisabled() : armed ? p.onFilled() : p.text());
-            return armed ? plate(it, p.accent(), false) : it;
+            return armed ? plate(theme, it, p.accent(), false) : it;
         }
 
         private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return plate(it
+            return plate(theme, it
                     .foregroundColor(p.text())
                     .padding(2, 4, 2, 4)
                     .borderRadius(0)
@@ -2612,7 +2682,7 @@ final class Styles
 
         private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return sheet(it
+            return sheet(theme, it
                     .foregroundColor(p.text())
                     .margin(5)
                     .padding(4, 0, 4, 0), p);
@@ -2620,7 +2690,7 @@ final class Styles
 
         private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return sheet(it
+            return sheet(theme, it
                     .foregroundColor(p.text())
                     .margin(4)
                     .padding(4, 8, 4, 8), p);
@@ -2636,13 +2706,13 @@ final class Styles
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(p.border())
-                    .shadow(FLOOR, s -> s.color(LafUtilities.withOpacity(Color.WHITE, 130))
+                    .shadow(FLOOR, s -> s.color(theme.highlight(LafUtilities.withOpacity(Color.WHITE, 130), SwingTreeLookAndFeel.Palette::surface))
                                          .offset(0, 1).blurRadius(0).isInset(false));
         }
 
         private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return well(it
+            return well(theme, it
                     .margin(2)
                     .borderRadius(6)
                     .border(1, p.border())
@@ -2652,7 +2722,7 @@ final class Styles
 
         private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return well(it
+            return well(theme, it
                     .backgroundColor(p.surfaceDisabled())
                     .foregroundColor(p.border()), 2);
         }
@@ -2664,7 +2734,7 @@ final class Styles
 
         private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return plate(it
+            return plate(theme, it
                     .foregroundColor(p.textMuted())
                     .borderRadius(0)
                     .borderWidth(1), p.surface(), false);
@@ -2672,7 +2742,7 @@ final class Styles
 
         private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
-            return plate(it
+            return plate(theme, it
                     .foregroundColor(p.text())
                     .margin(4)
                     .padding(4, 8, 4, 8)
@@ -2696,8 +2766,8 @@ final class Styles
             if ( !enabled )
                 return p.surfaceDisabled();
             switch ( variant ) {
-                case PRIMARY: return sunken ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-                case DANGER:  return sunken ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
+                case PRIMARY:
+                case DANGER:  return filled(p, variant, sunken, rollover);
                 case QUIET:   return sunken || rollover ? p.surface() : SwingTreeLookAndFeel.Palette.TRANSPARENT;
                 case NEUTRAL:
                 default:      return sunken ? p.surfacePressed() : rollover ? p.surfaceHover() : p.surface();
@@ -2740,6 +2810,8 @@ final class Styles
         private static final int RADIUS = 16;
         /** How opaque a pane is when nothing behind it can be frosted, out of 255. */
         private static final int UNFROSTED_PANE = 232;
+        /** The opacity of the tint an affirmative or a destructive control lays over the glass. */
+        private static final int TINT = 150;
 
         private static final String DROP  = "drop";
         private static final String SHEEN = "sheen";
@@ -2777,6 +2849,92 @@ final class Styles
 
         static Tuple<StyleRule> rules() { return RULES; }
 
+        /**
+         *  Every colour a reader may see where this preset paints a surface colour: that colour laid
+         *  over the window at the opacity of a pane, over each of {@link #windowGrounds}.
+         *
+         * @param p the palette the preset is handed
+         * @return the colours seen where a surface colour is painted
+         */
+        static java.util.function.Function<Color, Color[]> seenOver( SwingTreeLookAndFeel.Palette p ) {
+            Color[] grounds = windowGrounds(p);
+            return surface -> {
+                Color   wash = LafUtilities.withOpacity(surface, surface.getAlpha() * PANE / 255);
+                Color[] seen = new Color[grounds.length];
+                for ( int i = 0; i < grounds.length; i++ )
+                    seen[i] = Legibility.over(wash, grounds[i]);
+                return seen;
+            };
+        }
+
+        /**
+         *  Every colour a reader may see where the field colour is painted. This preset lays it over
+         *  the window as a wash like any other surface, but Swing fills a list, a table and the value
+         *  strip of a combo box straight from it, at the opacity the palette gives it, and so does
+         *  an application painting something of its own in it. So both are seen.
+         *
+         * @param p the palette the preset is handed
+         * @return the colours seen where the field colour is painted
+         */
+        static java.util.function.Function<Color, Color[]> fieldSeenOver( SwingTreeLookAndFeel.Palette p ) {
+            Color[] grounds = windowGrounds(p);
+            java.util.function.Function<Color, Color[]> washed = seenOver(p);
+            return field -> {
+                Color[] wash = washed.apply(field);
+                Color[] seen = java.util.Arrays.copyOf(wash, wash.length + grounds.length);
+                for ( int i = 0; i < grounds.length; i++ )
+                    seen[wash.length + i] = Legibility.over(field, grounds[i]);
+                return seen;
+            };
+        }
+
+        /**
+         *  Every colour the window shows through the glass: the plain background, the two blooms
+         *  {@link #aurora} lays across it, and each bloom where the cloud grain over it is densest.
+         *
+         * @param p the palette the preset is handed
+         * @return those colours, opaque
+         */
+        private static Color[] windowGrounds( SwingTreeLookAndFeel.Palette p ) {
+            Color lightBloom = LafUtilities.shadeTowards(p.background(), p.textureLight(), 0.55);
+            Color darkBloom  = LafUtilities.shadeTowards(p.background(), p.textureDark(), 0.42);
+            return new Color[]{
+                p.background(), lightBloom, darkBloom,
+                Legibility.over(LafUtilities.withOpacity(p.textureLight(), 120), lightBloom),
+                Legibility.over(LafUtilities.withOpacity(p.textureDark(), 90), darkBloom)
+            };
+        }
+
+        /**
+         *  Whichever of the {@link #windowGrounds} leaves the palette's text least readable. Text on
+         *  glass is read against everything that shows through it, so a wash that keeps it readable
+         *  over this one keeps it readable over all of them.
+         *
+         * @param p the palette the preset is handed
+         * @return the opaque colour text on glass has to be readable against
+         */
+        static Color groundBehindGlass( SwingTreeLookAndFeel.Palette p ) {
+            return groundBehindGlass(p, p.text());
+        }
+
+        /**
+         *  The same, for text written in {@code ink} rather than in the palette's text colour:
+         *  the white label of a tinted button is least readable over the brightest bloom, whatever
+         *  is least readable for the palette's own text.
+         *
+         * @param p   the palette the preset is handed
+         * @param ink the colour of the text
+         * @return the opaque colour that text has to be readable against
+         */
+        static Color groundBehindGlass( SwingTreeLookAndFeel.Palette p, Color ink ) {
+            Color[] grounds = windowGrounds(p);
+            Color   worst   = grounds[0];
+            for ( Color ground : grounds )
+                if ( Legibility.contrast(ground, ink) < Legibility.contrast(worst, ink) )
+                    worst = ground;
+            return worst;
+        }
+
         // ── Glass ────────────────────────────────────────────────────────────
 
         /**
@@ -2792,22 +2950,55 @@ final class Styles
         private static <C extends JComponent> ComponentStyleDelegate<C> pane(
             Theme theme, ComponentStyleDelegate<C> it, int wash, int lift
         ) {
+            return pane(theme, it, wash, lift, theme.palette().text());
+        }
+
+        /**
+         *  The same, for a pane whose text is written in {@code ink} rather than in the palette's
+         *  text colour, which the sheen across its top corner has to leave readable.
+         */
+        private static <C extends JComponent> ComponentStyleDelegate<C> pane(
+            Theme theme, ComponentStyleDelegate<C> it, int wash, int lift, Color ink
+        ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
-                    .backgroundColor(LafUtilities.withOpacity(p.surface(), wash))
+                    .backgroundColor(glass(p, p.surface(), wash))
                     .parentFilter(f -> f.blur(FROST).area(UI.ComponentArea.BODY))
                     .borderColor(LafUtilities.withOpacity(p.border(), RIM))
                     // The light falls on the top left corner of a bevel and runs out well before the
                     // opposite one, so the sheen is a short gradient rather than a fill.
                     .gradient(SHEEN, g -> g
                             .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
-                            .colors(LafUtilities.withOpacity(p.surface(), 46),
+                            .colors(Legibility.sheen(LafUtilities.withOpacity(p.surface(), 46),
+                                                     Legibility.over(glass(p, p.surface(), wash), groundBehindGlass(p, ink)),
+                                                     ink, Legibility.TEXT),
                                     LafUtilities.withOpacity(p.surface(), 0))
                             .fractions(0, 0.55)
                             .clipTo(UI.ComponentArea.BODY))
-                    .shadow(DROP, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 90))
+                    .shadow(DROP, s -> s.color(theme.shadow(LafUtilities.withOpacity(Color.BLACK, 90), SwingTreeLookAndFeel.Palette::background))
                                         .offset(0, lift).blurRadius(lift * 2)
                                         .falloff(UI.ShadowFalloff.BLUR).isInset(false));
+        }
+
+        /**
+         *  A wash of {@code colour} at {@code alpha}, as every pane, well and field of this preset
+         *  lays one over the window, made smokier where it has to be for the palette's text to read
+         *  through it: tinted towards the window's own background and made more opaque, together,
+         *  and only as far as the text and the muted text need. Over a plain night sky nothing
+         *  changes. Over a bright bloom, or over another pane that already lightened the ground,
+         *  the glass darkens the way tinted glass does. See {@link Legibility#veil}.
+         *
+         * @param p      the palette of the theme
+         * @param colour the colour of the wash
+         * @param alpha  the opacity the preset gives it, 0 to 255
+         * @return the wash to paint
+         */
+        private static Color glass( SwingTreeLookAndFeel.Palette p, Color colour, int alpha ) {
+            Color bare    = groundBehindGlass(p);
+            Color stacked = Legibility.over(LafUtilities.withOpacity(p.surface(), PANE), bare);
+            Color wash    = LafUtilities.withOpacity(colour, alpha);
+            wash = Legibility.veil(wash, p.text(),      Legibility.TEXT,      p.background(), bare, stacked);
+            return Legibility.veil(wash, p.textMuted(), Legibility.SECONDARY, p.background(), bare, stacked);
         }
 
         // ── Surfaces ─────────────────────────────────────────────────────────
@@ -2908,8 +3099,8 @@ final class Styles
             if ( variant.isFilled() )
                 // A tinted pane rather than a white one: the colour is what says which button this is,
                 // and it still has to let the ground through or it stops being glass.
-                return pane(theme, it, PANE, sunken ? 2 : 5)
-                        .backgroundColor(LafUtilities.withOpacity(tint(variant, p, sunken, rollover), 150));
+                return pane(theme, it, PANE, sunken ? 2 : 5, p.onFilled())
+                        .backgroundColor(tint(variant, p, sunken, rollover));
             if ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover )
                 return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
             return pane(theme, it, sunken ? WELL : rollover ? PANE + 22 : PANE, sunken ? 2 : 5);
@@ -2984,7 +3175,7 @@ final class Styles
             // through the glass rather than by moving the colour behind it.
             int veil = WELL + 40 + ( LafUtilities.isUnderPointer(it.component()) ? 22 : 0 );
             return pane(theme, it, WELL, 2)
-                    .backgroundColor(LafUtilities.withOpacity(p.surfaceField(), veil))
+                    .backgroundColor(glass(p, p.surfaceField(), veil))
                     .borderColor(LafUtilities.withOpacity(focused ? p.accent() : p.border(), focused ? 220 : RIM));
         }
 
@@ -3007,7 +3198,7 @@ final class Styles
                     .padding(6, 12, 6, 12)
                     .borderRadius(RADIUS - 6)
                     .borderWidth(0)
-                    .backgroundColor(armed ? LafUtilities.withOpacity(p.surface(), 62) : SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                    .backgroundColor(armed ? glass(p, p.surface(), 62) : SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
@@ -3103,7 +3294,7 @@ final class Styles
         private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
             SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
-                    .backgroundColor(LafUtilities.withOpacity(p.surface(), 26))
+                    .backgroundColor(glass(p, p.surface(), 26))
                     .foregroundColor(p.textMuted())
                     .borderAt(UI.Edge.BOTTOM, 1, LafUtilities.withOpacity(p.border(), 60));
         }
@@ -3125,12 +3316,22 @@ final class Styles
 
         // ── Variant colours ──────────────────────────────────────────────────
 
+        /**
+         *  The tint an affirmative or a destructive button lays over the glass: its fill at
+         *  {@link #TINT}, made more opaque where the white label would not read through it. The fill
+         *  itself is first moved until the label reads on it laid solid, and then the tint is made
+         *  just opaque enough for the label to read over every colour the window can show under it,
+         *  bare or under another pane.
+         */
         private static Color tint(SwingTreeLookAndFeel.Variant variant, SwingTreeLookAndFeel.Palette p, boolean sunken, boolean rollover ) {
-            switch ( variant ) {
-                case DANGER: return sunken ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
-                case PRIMARY:
-                default:     return sunken ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-            }
+            SwingTreeLookAndFeel.Variant filled = variant == SwingTreeLookAndFeel.Variant.DANGER
+                                                    ? variant : SwingTreeLookAndFeel.Variant.PRIMARY;
+            Color   fill    = filled(p, filled, sunken, rollover);
+            Color[] window  = windowGrounds(p);
+            Color[] grounds = java.util.Arrays.copyOf(window, window.length * 2);
+            for ( int i = 0; i < window.length; i++ )
+                grounds[window.length + i] = Legibility.over(glass(p, p.surface(), PANE), window[i]);
+            return Legibility.veil(LafUtilities.withOpacity(fill, TINT), p.onFilled(), Legibility.TEXT, fill, grounds);
         }
 
         private static Color ink(SwingTreeLookAndFeel.Variant variant, SwingTreeLookAndFeel.Palette p, boolean enabled ) {
@@ -3430,7 +3631,32 @@ final class Styles
                             it, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT, (float) arc
                         ));
 
-            return mould.style(it, s, arc, tint, focused);
+            return mould.style(it.foregroundColor(readableOn(mould, s, tint, ink(s, enabled, isDefault && pressed), enabled)),
+                               s, arc, tint, focused);
+        }
+
+        /**
+         *  The label ink Nimbus chose for a moulded control, moved until it reads on the face of
+         *  that mould where the label sits: from a fifth to four fifths of its height.
+         *  <p>
+         *  Nimbus lifts every raised control towards the light by a fixed step in brightness, which
+         *  on its own blue-grey gives a pale face under black text. The same step lifts the surface
+         *  of a dark palette to a pale face too, while the palette's text stays pale, so the label
+         *  has to follow the face rather than the palette. A label that already reads on the face,
+         *  which is every label in Nimbus's own colours, keeps its ink.
+         *
+         * @param mould   the mould painted behind the label
+         * @param s       the Nimbus colours of the theme
+         * @param tint    the colour the mould is laid over, or {@code null} for its named colours
+         * @param ink     the ink Nimbus chose
+         * @param enabled whether the control can be used, which decides how much contrast it needs
+         * @return the ink to write the label in
+         */
+        private static Color readableOn( NimbusMould mould, NimbusScheme s, @org.jspecify.annotations.Nullable Color tint, Color ink, boolean enabled ) {
+            Color[] face = mould.face().colorsBetween(s, tint, 0.2, 0.8);
+            for ( int i = 0; i < face.length; i++ )
+                face[i] = Legibility.over(face[i], s.get(NimbusScheme.Key.CONTROL));
+            return Legibility.ink(ink, enabled ? Legibility.TEXT : Legibility.DISABLED, face);
         }
 
         /**
@@ -3479,7 +3705,8 @@ final class Styles
                               : combo.isPopupVisible()             ? NimbusMould.COMBO_BOX_PRESSED
                               : LafUtilities.isUnderPointer(combo) ? NimbusMould.COMBO_BOX_MOUSE_OVER
                               :                                      NimbusMould.COMBO_BOX;
-            return mould.style(it, s, COMBO_ARC, null, enabled && LafUtilities.hasFocus(combo))
+            Color label = readableOn(mould, s, null, s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT), enabled);
+            return mould.style(it.foregroundColor(label), s, COMBO_ARC, null, enabled && LafUtilities.hasFocus(combo))
                         .padding(COMBO_PAD_Y, 0, COMBO_PAD_Y, COMBO_PAD_X);
         }
 
@@ -3624,14 +3851,34 @@ final class Styles
             boolean      armed   = enabled && ( m.isArmed() || ( item instanceof JMenu && m.isSelected() ) );
             boolean      onBar   = item.getParent() instanceof JMenuBar;
             Color        ink     = !enabled ? s.get(NimbusScheme.Key.DISABLED_TEXT)
-                                 : armed    ? s.get(NimbusScheme.Key.SELECTED_TEXT)
-                                 :            MENU_TEXT.in(s);
+                                 : armed    ? Legibility.ink(s.get(NimbusScheme.Key.SELECTED_TEXT), Legibility.TEXT, s.get(NimbusScheme.Key.SELECTION))
+                                 :            menuInk(s, onBar);
             return it
                     .padding(1, onBar ? 4 : item instanceof JMenu ? 5 : 13, 2, onBar ? 4 : 12)
                     .borderRadius(0)
                     .borderWidth(0)
                     .backgroundColor(armed ? s.get(NimbusScheme.Key.SELECTION) : SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(ink);
+        }
+
+        /**
+         *  The grey only just off black Nimbus writes a menu's label in, moved until it reads on
+         *  what the menu is written on: the control colour and its sheen on the menu bar, the pale
+         *  sheet of a popup inside one. Nimbus writes it down as a value rather than deriving it, so
+         *  on a dark palette it would be near-black on near-black.
+         *
+         * @param s     the Nimbus colours of the theme
+         * @param onBar whether the menu is written on the menu bar rather than in a popup
+         * @return the ink of a menu's label at rest
+         */
+        private static Color menuInk( NimbusScheme s, boolean onBar ) {
+            Color   under   = s.get(onBar ? NimbusScheme.Key.CONTROL : NimbusScheme.Key.LIGHT_BACKGROUND);
+            Color[] grounds = onBar ? MENU_BAR_SHEEN.colors(s) : POPUP_SHEET.colorsBetween(s, null, 0.02, 0.98);
+            Color[] seen    = new Color[grounds.length + 1];
+            for ( int i = 0; i < grounds.length; i++ )
+                seen[i] = Legibility.over(grounds[i], under);
+            seen[grounds.length] = under;
+            return Legibility.ink(MENU_TEXT.in(s), Legibility.TEXT, seen);
         }
 
         /** A menu bar: the control colour with a white sheen fading out down its top quarter, and a rule under it. */
@@ -3643,7 +3890,7 @@ final class Styles
                     .borderColor(s.get(NimbusScheme.Key.BORDER))
                     .backgroundColor(s.get(NimbusScheme.Key.CONTROL))
                     .gradient(UI.Layer.BACKGROUND, "sheen", g -> MENU_BAR_SHEEN.over(g, s, null).clipTo(UI.ComponentArea.BODY))
-                    .foregroundColor(MENU_TEXT.in(s));
+                    .foregroundColor(menuInk(s, true));
         }
 
         /** A popup menu: a square grey outline around a sheet shading from white at its ends to the pale {@code menu} colour. */
@@ -3658,7 +3905,7 @@ final class Styles
                     .gradient(UI.Layer.BACKGROUND, "sheet", g -> POPUP_SHEET.over(g, s, null)
                                                                     .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
                                                                     .clipTo(UI.ComponentArea.INTERIOR))
-                    .foregroundColor(MENU_TEXT.in(s));
+                    .foregroundColor(menuInk(s, false));
         }
 
         /** A tool tip: {@code info} in a square outline of {@code nimbusBorder}. */
@@ -3670,7 +3917,7 @@ final class Styles
                     .borderRadius(0)
                     .border(1, s.get(NimbusScheme.Key.BORDER))
                     .backgroundColor(s.get(NimbusScheme.Key.INFO))
-                    .foregroundColor(s.get(NimbusScheme.Key.TEXT));
+                    .foregroundColor(Legibility.ink(s.get(NimbusScheme.Key.TEXT), Legibility.TEXT, s.get(NimbusScheme.Key.INFO)));
         }
 
         /** The ink of a menu's label, which Nimbus writes down as a value rather than deriving it. */
@@ -4256,7 +4503,7 @@ final class Styles
                     .borderRadius(radiusOf(item))
                     .borderWidth(0)
                     .backgroundColor(armed ? p.accentSoft() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                    .foregroundColor(enabled ? p.text() : p.textDisabled());
+                    .foregroundColor(!enabled ? p.textDisabled() : armed ? Legibility.ink(p.text(), Legibility.TEXT, p.accentSoft()) : p.text());
         }
 
         private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
@@ -4324,8 +4571,8 @@ final class Styles
             if ( !enabled )
                 return variant == SwingTreeLookAndFeel.Variant.QUIET ? SwingTreeLookAndFeel.Palette.TRANSPARENT : p.surfaceDisabled();
             switch ( variant ) {
-                case PRIMARY: return sunken ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-                case DANGER:  return sunken ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
+                case PRIMARY:
+                case DANGER:  return filled(p, variant, sunken, rollover);
                 case QUIET:   return sunken || rollover ? p.surface() : SwingTreeLookAndFeel.Palette.TRANSPARENT;
                 case NEUTRAL:
                 default:      return sunken ? p.surfacePressed() : rollover ? p.surfaceHover() : p.surface();

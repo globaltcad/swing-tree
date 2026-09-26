@@ -457,6 +457,25 @@ final class NimbusScheme
         float[] fractions() { return _fractions.clone(); }
 
         /**
+         *  The colours of the stops a line of text laid across the middle of the gradient is written
+         *  on: every stop from {@code from} to {@code to}, and the stop on either side of that
+         *  band, because the colour between two stops is a blend of both.
+         *
+         * @param scheme the scheme in force
+         * @param tint see {@link #colors(NimbusScheme, Color)}
+         * @param from where the text starts, as a fraction of the height
+         * @param to   where it ends
+         * @return those colours, a new array the caller may keep
+         */
+        Color[] colorsBetween( NimbusScheme scheme, @Nullable Color tint, double from, double to ) {
+            Color[] all   = colors(scheme, tint);
+            int     first = 0, last = all.length - 1;
+            while ( first + 1 < all.length && _fractions[first + 1] <= from ) first++;
+            while ( last - 1 >= 0 && _fractions[last - 1] >= to ) last--;
+            return java.util.Arrays.copyOfRange(all, first, last + 1);
+        }
+
+        /**
          *  Lays this gradient down a style's component area, top to bottom.
          *
          * @param g the gradient being configured
