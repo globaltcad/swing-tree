@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
@@ -35,6 +36,8 @@ final class StyleSource<C extends JComponent>
     private final StyleSheet _styleSheet;
     private final Styler<C> _localStyler;
     private final Expirable<Styler<C>>[] _animationStylers;
+
+    private @Nullable ScaledStyle _lastScaledStyle = null;
 
 
 
@@ -145,11 +148,7 @@ final class StyleSource<C extends JComponent>
                 */
             }
 
-        styleConf = styleConf.simplified();
-
-        styleConf = _applyDPIScaling(styleConf);
-
-        styleConf = styleConf.correctedForRounding();
+        styleConf = _scaledAndCorrectedForRounding(styleConf.simplified());
 
         styleConf = styleConf.determineTextConfObstaclesFromChildrenOf(owner);
         styleConf = styleConf.determinePreferredHeightFromTextConfigs(owner);
@@ -157,11 +156,35 @@ final class StyleSource<C extends JComponent>
         return styleConf;
     }
 
-    private static StyleConf _applyDPIScaling(StyleConf styleConf) {
-        if ( UI.scale() == 1f )
-            return styleConf;
+    private StyleConf _scaledAndCorrectedForRounding( StyleConf simplified ) {
+        final float scale = UI.scale();
+        if ( scale == 1f )
+            return simplified.correctedForRounding();
 
-        return styleConf.scale( UI.scale() );
+        final @Nullable ScaledStyle previous = _lastScaledStyle;
+        if ( previous != null && previous.isFor(simplified, scale) )
+            return previous.result;
+
+        StyleConf result = simplified.scale(scale).correctedForRounding();
+        _lastScaledStyle = new ScaledStyle(simplified, scale, result);
+        return result;
+    }
+
+    private static final class ScaledStyle
+    {
+        final StyleConf simplified;
+        final float     scale;
+        final StyleConf result;
+
+        ScaledStyle( StyleConf simplified, float scale, StyleConf result ) {
+            this.simplified = simplified;
+            this.scale      = scale;
+            this.result     = result;
+        }
+
+        boolean isFor( StyleConf otherSimplified, float otherScale ) {
+            return scale == otherScale && simplified.equals(otherSimplified);
+        }
     }
 
 }
