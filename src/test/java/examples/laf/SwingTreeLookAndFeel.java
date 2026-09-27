@@ -803,7 +803,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         Theme( Conf conf ) {
             SymbolPreset symbols = conf._symbolPreset != null ? conf._symbolPreset : conf._stylePreset.preferredSymbols();
             _stylePreset     = conf._stylePreset;
-            _palette         = conf.palette();
+            _palette         = _stylePreset.legible(conf.palette());
             _nimbusScheme    = NimbusScheme.readFor(_palette);
             _symbols         = new CachedSymbols(symbols.symbolsFor(_palette, _nimbusScheme), _palette);
             _popupWindowMode = conf._popupWindowMode == PopupWindowMode.AUTO
@@ -815,6 +815,32 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 
         /** @return the colours this theme paints with */
         public Palette palette() { return _palette; }
+
+        /**
+         *  A shadow a rule designed against its preset's own palette, made as deep on this theme's
+         *  palette as it was on that one. A rule names the ground the shadow falls on by the palette
+         *  slot it reads it from, {@code Palette::background} for a card on the window, so that the
+         *  same slot can be read from both palettes. See {@link Legibility#shade}.
+         *
+         * @param designed the shadow as the rule wrote it, opacity included
+         * @param ground   the slot of the colour the shadow falls on
+         * @return the shadow to paint on this theme's palette
+         */
+        Color shadow( Color designed, java.util.function.Function<Palette, Color> ground ) {
+            return Legibility.shade(designed, ground.apply(_palette), ground.apply(_stylePreset.preferredPalette().palette()));
+        }
+
+        /**
+         *  A highlight a rule designed against its preset's own palette, made as bright on this
+         *  theme's palette as it was on that one. See {@link Legibility#light}.
+         *
+         * @param designed the highlight as the rule wrote it, opacity included
+         * @param ground   the slot of the colour the highlight lies over
+         * @return the highlight to paint on this theme's palette
+         */
+        Color highlight( Color designed, java.util.function.Function<Palette, Color> ground ) {
+            return Legibility.light(designed, ground.apply(_palette), ground.apply(_stylePreset.preferredPalette().palette()));
+        }
 
         /** @return the symbol set chosen for this theme's palette, rasterizing through a cache that
          *          belongs to this theme */
@@ -1276,6 +1302,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.GLASS; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.AURORA; }
             @Override String               displayName()      { return "Glassmorphic"; }
+            @Override Palette              legible( Palette p ) { return Legibility.adapt(p, Styles.Glassmorphic.seenOver(p), Styles.Glassmorphic.fieldSeenOver(p)); }
         },
         /**
          *  Nimbus, the look and feel Sun shipped with Java 6 update 10, rebuilt on the style
@@ -1333,6 +1360,22 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 
         /** @return the name the look and feel reports to {@link UIManager}. */
         abstract String displayName();
+
+        /**
+         *  The palette this preset actually paints with, when handed {@code p}: the same palette,
+         *  except that every text colour which would not be readable on a ground this preset
+         *  writes it on has been moved until it is, and every surface too light or too dark for
+         *  any text colour to read on has been moved towards the background. What a preset
+         *  writes text on is the one thing that differs between presets here, because a preset
+         *  that lays its surfaces over the window as a translucent wash shows the reader a
+         *  different colour than one that paints them solid. See {@link Legibility#adapt}.
+         *
+         * @param p the palette the application chose
+         * @return the palette the rules of this preset are handed
+         */
+        Palette legible( Palette p ) {
+            return Legibility.adapt(p, surface -> new Color[]{ Legibility.over(surface, p.background()) });
+        }
 
         /**
          *  Puts whatever the rules expect to find in {@link UIManager} into the look and feel's
