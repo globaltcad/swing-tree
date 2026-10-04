@@ -1777,20 +1777,7 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     void _setSelectedSilently( B thisButton, boolean isSelected ) {
-        /*
-            This is used to change the selection state of the button without triggering
-            any action listeners. We need this because we want to construct the
-            GUI and the state of its properties without side effects.
-         */
-        ItemListener[] listeners = thisButton.getItemListeners();
-        for ( ItemListener l : listeners )
-            thisButton.removeItemListener(l);
-
-        thisButton.setSelected(isSelected);
-
-        for ( ItemListener l : listeners )
-            thisButton.addItemListener(l);
-
+        SilentSet.run(thisButton, () -> thisButton.setSelected(isSelected));
     }
 
     /**
@@ -2101,7 +2088,10 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         for (ItemListener listener : listeners)
             button.removeItemListener(listener);
 
-        button.addItemListener(action::accept);
+        button.addItemListener(event -> {
+            if ( !SilentSet.isOngoingFor(button) )
+                action.accept(event);
+        });
 
         for ( int i = listeners.length - 1; i >= 0; i-- ) // reverse order because swing does not give us the listeners in the order they were added!
             button.addItemListener(listeners[i]);

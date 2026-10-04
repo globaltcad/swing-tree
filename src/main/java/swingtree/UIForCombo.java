@@ -7,11 +7,8 @@ import sprouts.Action;
 import swingtree.api.Configurator;
 
 import javax.swing.*;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -221,6 +218,9 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
                 So we filter the event:
             */
             if ( "comboBoxEdited".equals(e.getActionCommand()) )
+                return;
+
+            if ( SilentSet.isOngoingFor(thisComponent) )
                 return;
 
             /*
@@ -707,50 +707,10 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     }
 
     private void _setSelectedItem( JComboBox<E> thisComponent, E item ) {
-        // Ok, so a combo box fires an event when the selection is changed programmatically.
-        // This is a problem, because we don't want to trigger the action listener.
-        // So we temporarily remove the action listener(s), and then add them back.
-        // 1. Get the action listener(s)
-        Component editor = thisComponent.getEditor().getEditorComponent();
-        AbstractDocument abstractDocument = null;
-        ActionListener[]   listeners    = thisComponent.getActionListeners();
-        DocumentListener[] docListeners = {};
-        if ( editor instanceof JTextField ) {
-            JTextField field = (JTextField) editor;
-            Document doc = field.getDocument();
-            if ( doc instanceof AbstractDocument ) {
-                abstractDocument = (AbstractDocument) doc;
-                docListeners = ((AbstractDocument)doc).getDocumentListeners();
-            }
-        }
-
-        // 2. Remove them
-        for ( ActionListener listener : listeners )
-            thisComponent.removeActionListener(listener);
-        if ( abstractDocument != null ) {
-            for (DocumentListener listener : docListeners) {
-                abstractDocument.removeDocumentListener(listener);
-            }
-        }
-
-        try {
-            // 3. Set the selected item
+        SilentSet.run(thisComponent, () -> {
             thisComponent.setSelectedItem(item);
-            // 3.1 We make sure the editor also gets an update!
             thisComponent.getEditor().setItem(item);
-
-        } catch ( Exception e ) {
-            throw new RuntimeException(e);
-        }
-
-        // 4. Add them back
-        for ( ActionListener listener : listeners )
-            thisComponent.addActionListener(listener);
-        if ( abstractDocument != null ) {
-            for (DocumentListener listener : docListeners) {
-                abstractDocument.addDocumentListener(listener);
-            }
-        }
+        });
     }
 
     private void _bindComboModelToEditor( JComboBox<E> thisComponent, AbstractComboModel<E> model ) {
