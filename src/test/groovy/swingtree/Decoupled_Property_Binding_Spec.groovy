@@ -390,6 +390,53 @@ class Decoupled_Property_Binding_Spec extends Specification
             'background color'           | Var.of(UI.Color.RED)   | UI.Color.BLUE | { p -> UI.label("Colorful!").withBackground(p).get(JLabel) }                            | { c -> c.background }
     }
 
+    def 'Text which a bound `Var<String>` puts into a text field does not travel back to the application thread.'()
+    {
+        reportInfo """
+            A text field bound to a `Var<String>` connects the property and the
+            field in both directions: a new property value travels to the UI
+            thread and becomes the text of the field, and the text the user
+            types travels to the application thread and becomes the value of
+            the property.
+
+            Text which came from the property must not make that second trip.
+            Swing replaces a text by first removing the old text and then
+            inserting the new one, so the field changes twice, and the first
+            change leaves it empty. If both changes travelled back, the property
+            would first be set to the empty text and then to the new text,
+            and each of these values would travel to the UI thread again,
+            where they would replace the text once more, and so on.
+            So the field keeps the text which the property puts into it
+            to itself, and only the text the user types travels back.
+        """
+        given : 'A text property which records every change it is told about, and the channel the change came through.'
+            var trace = new CopyOnWriteArrayList<String>()
+            var text = Var.of("Hello")
+            text.onChange(From.ALL, it -> trace << "${it.channel()}: ${it.currentValue().orElseNull()}".toString())
+        and : 'A text field built in decoupled mode, with its text bound to the property.'
+            var field = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.textField(text)).get(JTextField)
+            })
+
+        when : 'The view model changes the text, and both threads work through everything this causes.'
+            text.set(From.VIEW_MODEL, "World")
+            letBothWorldsSettle()
+        then : 'The text field shows the new text...'
+            UI.runAndGet({ field.text }) == "World"
+        and : '...and the property was told about the change of the view model only.'
+            trace == ["VIEW_MODEL: World"]
+
+        when : 'The user types a character at the end of the text, on the UI thread.'
+            UI.runNow({
+                field.caretPosition = field.text.length()
+                field.replaceSelection("!")
+            })
+            letBothWorldsSettle()
+        then : 'The typed text travelled to the property, through the view channel.'
+            text.get() == "World!"
+            trace == ["VIEW_MODEL: World", "VIEW: World!"]
+    }
+
     def 'A combo box selection made by the user travels to the application thread before it reaches the bound property.'()
     {
         reportInfo """
