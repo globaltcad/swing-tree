@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends UIForAnySwing<I, C>
 {
     private static final Logger log = LoggerFactory.getLogger(UIForAnyTextComponent.class);
+    private static final String SILENT_TEXT_SET = "swingtree.silentTextSet";
 
     /**
      * Sets the text of the wrapped <code>{@link TextComponent}</code>
@@ -139,23 +140,17 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
 
     protected final void _setTextSilently( C thisComponent, String text ) {
         Document doc = thisComponent.getDocument();
-        if (doc instanceof AbstractDocument) {
-            AbstractDocument abstractDoc = (AbstractDocument) doc;
-            // We remove all document listeners to avoid infinite recursion
-            // and other Swing weirdness.
-            DocumentListener[] listeners = abstractDoc.getListeners(DocumentListener.class);
-            for ( DocumentListener listener : listeners )
-                abstractDoc.removeDocumentListener(listener);
-
+        Object textSetBefore = doc.getProperty(SILENT_TEXT_SET);
+        doc.putProperty(SILENT_TEXT_SET, Boolean.TRUE);
+        try {
             thisComponent.setText(text);
-
-            for ( DocumentListener listener : listeners )
-                abstractDoc.addDocumentListener(listener);
-
-            thisComponent.repaint(); // otherwise the text is not updated until the next repaint
+        } finally {
+            doc.putProperty(SILENT_TEXT_SET, textSetBefore);
         }
-        else
-            thisComponent.setText(text);
+    }
+
+    private static boolean _isSilentTextSet( DocumentEvent event ) {
+        return event.getDocument().getProperty(SILENT_TEXT_SET) != null;
     }
 
     /**
@@ -226,6 +221,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
         return _with( thisComponent -> {
                     thisComponent.getDocument().addDocumentListener(new DocumentListener() {
                         @Override public void insertUpdate(DocumentEvent e)  {
+                            if ( _isSilentTextSet(e) ) return;
                             _runInApp(()->{
                                 try {
                                     action.accept(new ComponentDelegate<>(thisComponent, e));
@@ -235,6 +231,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                             });
                         }
                         @Override public void removeUpdate(DocumentEvent e)  {
+                            if ( _isSilentTextSet(e) ) return;
                             _runInApp(()->{
                                 try {
                                     action.accept(new ComponentDelegate<>(thisComponent, e));
@@ -244,6 +241,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
                             });
                         }
                         @Override public void changedUpdate(DocumentEvent e) {
+                            if ( _isSilentTextSet(e) ) return;
                             _runInApp(()->{
                                 try {
                                     action.accept(new ComponentDelegate<>(thisComponent, e));
@@ -280,8 +278,8 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
 
     protected final void _onTextChange( C thisComponent, Consumer<DocumentEvent> action ) {
         thisComponent.getDocument().addDocumentListener(new DocumentListener() {
-            @Override public void insertUpdate(DocumentEvent e) { action.accept(e); }
-            @Override public void removeUpdate(DocumentEvent e) { action.accept(e); }
+            @Override public void insertUpdate(DocumentEvent e) { if ( !_isSilentTextSet(e) ) action.accept(e); }
+            @Override public void removeUpdate(DocumentEvent e) { if ( !_isSilentTextSet(e) ) action.accept(e); }
             @Override public void changedUpdate(DocumentEvent e) {}
         });
     }
