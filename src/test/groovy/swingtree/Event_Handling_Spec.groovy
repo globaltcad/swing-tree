@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Title
 import sprouts.Event
+import sprouts.From
 import sprouts.Var
 import swingtree.threading.EventProcessor
 
@@ -56,6 +57,77 @@ class Event_Handling_Spec extends Specification
 
         then : 'The handlers are triggered in the same order as they were registered.'
             trace == ["1", "2", "3", "4", "5", "6", "7"]
+    }
+
+    def 'The "onChange" handlers of a toggle button stay in the order they were registered after a bound property changed the selection #changes time(s).'(
+        int changes
+    ) {
+        reportInfo """
+            A button whose selection is bound to a property through `isSelectedIf(Var<Boolean>)`
+            receives a new selection state every time the property changes.
+            The order in which the button calls your `onChange` handlers
+            must not depend on how often that has happened:
+            the handler you registered first is called first, no matter
+            how many times the view model changed the selection before.
+        """
+        given : 'A list where handlers are going to leave a trace.'
+            var trace = []
+        and : 'A selection property, and a toggle button with three "onChange" handlers, bound to that property.'
+            var isBold = Var.of(false)
+            var button =
+                    UI.toggleButton("Bold")
+                    .onChange( it -> trace.add("1") )
+                    .onChange( it -> trace.add("2") )
+                    .onChange( it -> trace.add("3") )
+                    .isSelectedIf(isBold)
+                    .get(JToggleButton)
+
+        when : 'The view model changes the selection a number of times. (See the `where` table for the current case!)'
+            changes.times { isBold.set(From.VIEW_MODEL, !isBold.get()) }
+        and : 'The user clicks the button.'
+            button.doClick()
+
+        then : 'The handlers are triggered in the same order as they were registered.'
+            trace == ["1", "2", "3"]
+
+        where : 'We check the order after the following numbers of changes made by the view model:'
+            changes << [0, 1, 2, 3]
+    }
+
+    def 'The "onSelection" handlers of a combo box stay in the order they were registered after a bound property changed the selection #changes time(s).'(
+        int changes
+    ) {
+        reportInfo """
+            A combo box with a model of your own can still have its selected
+            item bound to a property, through `withSelectedItem(Var)`.
+            The combo box then receives a new selection every time the
+            property changes. The order in which the combo box calls your
+            `onSelection` handlers must not depend on how often that has happened:
+            the handler you registered first is called first, no matter
+            how many times the view model changed the selection before.
+        """
+        given : 'A list where handlers are going to leave a trace.'
+            var trace = []
+        and : 'A selection property, and a combo box with a model of its own and three "onSelection" handlers, bound to that property.'
+            var size = Var.of("S")
+            var combo =
+                    UI.comboBox(new DefaultComboBoxModel<String>(["S", "M", "L"] as String[]))
+                    .onSelection( it -> trace.add("1") )
+                    .onSelection( it -> trace.add("2") )
+                    .onSelection( it -> trace.add("3") )
+                    .withSelectedItem(size)
+                    .get(JComboBox)
+
+        when : 'The view model changes the selection a number of times. (See the `where` table for the current case!)'
+            changes.times { size.set(From.VIEW_MODEL, size.is("S") ? "M" : "S") }
+        and : 'The user selects the large size.'
+            combo.setSelectedItem("L")
+
+        then : 'The handlers are triggered in the same order as they were registered.'
+            trace == ["1", "2", "3"]
+
+        where : 'We check the order after the following numbers of changes made by the view model:'
+            changes << [0, 1, 2, 3]
     }
 
     def 'The "onClick" event handlers are triggered in the same order as they were registered.'()

@@ -508,6 +508,122 @@ class Combo_Box_Spec extends Specification
 		    combo.editor.item == 1
     }
 
+    def 'An editable combo box with a model of your own moves its editor caret into the item which a bound property selects.'()
+    {
+        reportInfo """
+            An editable combo box shows its selected item in a text field, its editor,
+            where the user can type. When a property bound through `withSelectedItem(Var)`
+            selects another item, the editor gets the text of that item, and the caret
+            of the editor, which is managed by Swing, has to follow it:
+            when the new text is shorter than the old one, a caret left at its old
+            position would point past the end of the new text, and every key the user
+            types after that would be rejected with an error beep.
+
+            Note that we type into the editor on the Swing thread, like a real key
+            press does, because a Swing caret only follows the edits which are made
+            on that thread.
+        """
+        given : 'A selection property, and an editable combo box with a model of its own, bound to that property.'
+            var selection = Var.of("A")
+            var combo = comboBox(new DefaultComboBoxModel<String>(["A", "B", "A long item"] as String[]))
+                            .isEditableIf(true)
+                            .withSelectedItem(selection)
+                            .get(JComboBox)
+        and : 'The text field in which the user edits the selected item.'
+            var editor = (JTextField) combo.editor.editorComponent
+
+        when : 'The user types a long text into the editor.'
+            UI.runNow {
+                editor.text = "A long item"
+                editor.caretPosition = editor.text.length()
+            }
+        and : 'The view model selects the item "B".'
+            UI.runNow { selection.set(From.VIEW_MODEL, "B") }
+        then : 'The editor shows the new item, and its caret sits within the new text.'
+            editor.text == "B"
+            editor.caretPosition <= editor.text.length()
+
+        when : 'The user types the next character.'
+            UI.runNow { editor.replaceSelection("!") }
+        then : 'The character lands in the editor.'
+            editor.text.contains("!")
+    }
+
+    def 'An item which a bound property selects in a combo box with a model of your own is not reported back to the property, nor to `onSelection`.'()
+    {
+        reportInfo """
+            A combo box whose selection is bound to a property through `withSelectedItem(Var)`
+            writes every selection the user makes into the property, and it shows every new
+            value of the property. A selection which came from the property must not travel
+            back into it, and the `onSelection` handlers of the combo box stay silent as well.
+            They react to the selections the user makes.
+        """
+        given : 'A list which the property and the `onSelection` handler leave a trace in.'
+            var trace = []
+        and : 'A selection property which records every change it is told about, and the channel the change came through.'
+            var size = Var.of("S")
+            size.onChange(From.ALL, it -> trace << "property ${it.channel()}: ${it.currentValue().orElseNull()}".toString())
+        and : 'A combo box with a model of its own and an `onSelection` handler, bound to the property.'
+            var combo = comboBox(new DefaultComboBoxModel<String>(["S", "M", "L"] as String[]))
+                            .onSelection( it -> trace << "onSelection: ${it.component.selectedItem}".toString() )
+                            .withSelectedItem(size)
+                            .get(JComboBox)
+
+        when : 'The view model selects the medium size.'
+            UI.runNow { size.set(From.VIEW_MODEL, "M") }
+            UI.sync()
+        then : 'The combo box shows the medium size...'
+            combo.selectedItem == "M"
+        and : '...and the only trace is the change made by the view model.'
+            trace == ["property VIEW_MODEL: M"]
+
+        when : 'The user selects the large size.'
+            UI.runNow { combo.setSelectedItem("L") }
+            UI.sync()
+        then : 'Both the `onSelection` handler and the property hear about it, the property through the view channel.'
+            trace.drop(1).toSet() == ["onSelection: L", "property VIEW: L"].toSet()
+    }
+
+    def 'Building an editable combo box with a selected item does not report that item as a selection.'()
+    {
+        reportInfo """
+            An editable combo box shows its selected item in a text field, its editor,
+            and everything the user types into the editor travels into the model of
+            the combo box, and from there into the bound selection property.
+
+            The item which `withSelectedItem(..)` puts into the editor while the combo
+            box is being built must not make that trip, because it is not something
+            the user typed. Building the combo box neither tells the selection property
+            about a change, nor calls the `onSelection` handlers of the combo box.
+        """
+        given : 'A list which the property and the `onSelection` handler leave a trace in.'
+            var trace = []
+        and : 'A selection property which records every change it is told about, and the channel the change came through.'
+            var size = Var.of("M")
+            size.onChange(From.ALL, it -> trace << "property ${it.channel()}: ${it.currentValue().orElseNull()}".toString())
+
+        when : 'We build an editable combo box from a list of options, with an `onSelection` handler and the selected item bound to the property.'
+            var combo = comboBox(Vars.of("S", "M", "L"))
+                            .isEditableIf(true)
+                            .onSelection( it -> trace << "onSelection: ${it.component.selectedItem}".toString() )
+                            .withSelectedItem(size)
+                            .get(JComboBox)
+            UI.sync()
+
+        then : 'The combo box and its editor show the selected item...'
+            combo.selectedItem == "M"
+            ((JTextField) combo.editor.editorComponent).text == "M"
+        and : '...and nobody was told about a selection.'
+            trace == []
+
+        when : 'The view model selects the large size.'
+            size.set(From.VIEW_MODEL, "L")
+            UI.sync()
+        then : 'The editor shows the large size, and the property was told about the change of the view model only.'
+            ((JTextField) combo.editor.editorComponent).text == "L"
+            trace == ["property VIEW_MODEL: L"]
+    }
+
     def 'Create combo box UIs with simple text render functions.'(
         Supplier<UIForCombo<?, JComboBox<?>>> uiSupplier
     ) {

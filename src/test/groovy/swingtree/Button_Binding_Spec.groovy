@@ -4,12 +4,16 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.From
 import sprouts.Val
 import sprouts.Var
 import swingtree.api.IconDeclaration
 import swingtree.threading.EventProcessor
 
+import javax.accessibility.AccessibleContext
+import javax.accessibility.AccessibleState
 import javax.swing.*
+import java.awt.event.ItemEvent
 
 @Title("Button Binding")
 @Narrative('''
@@ -89,6 +93,119 @@ class Button_Binding_Spec extends Specification
             UI.sync()
         then : 'The button should be updated.'
             button.selected == true
+    }
+
+    def 'A toggle button tells assistive technologies about the selection which a bound property makes.'()
+    {
+        reportInfo """
+            Assistive technologies, like screen readers, learn about the state
+            of a Swing component through its `AccessibleContext`. When the
+            selection of a toggle button changes, its accessible context reports
+            the new state as a change of the `ACCESSIBLE_STATE_PROPERTY`, so that
+            a screen reader can announce that the button is now checked.
+
+            This has to work for a selection which a bound property makes, too.
+            Otherwise a screen reader would keep announcing the selection the
+            button had before the view model changed it.
+        """
+        given : 'A list where the accessible context of the button leaves a trace.'
+            var trace = []
+        and : 'A selection property, and a toggle button bound to it.'
+            var isBold = Var.of(false)
+            var button = UI.toggleButton("Bold").isSelectedIf(isBold).get(JToggleButton)
+        and : 'A screen reader listening to the accessible state of the button, and noting when the "checked" state comes or goes.'
+            button.accessibleContext.addPropertyChangeListener( event -> {
+                if ( event.propertyName != AccessibleContext.ACCESSIBLE_STATE_PROPERTY )
+                    return
+                if ( event.newValue == AccessibleState.CHECKED )
+                    trace << "now checked"
+                if ( event.oldValue == AccessibleState.CHECKED )
+                    trace << "no longer checked"
+            })
+
+        when : 'The view model selects the button.'
+            isBold.set(From.VIEW_MODEL, true)
+        then : 'The button is selected, and the screen reader heard that it is checked now.'
+            button.selected
+            trace == ["now checked"]
+
+        when : 'The view model unselects the button again.'
+            isBold.set(From.VIEW_MODEL, false)
+        then : 'The screen reader heard that it is no longer checked.'
+            !button.selected
+            trace == ["now checked", "no longer checked"]
+    }
+
+    def 'A selection which a bound property makes is not reported back to the property, nor to `onChange`.'()
+    {
+        reportInfo """
+            A button bound to a `Var<Boolean>` through `isSelectedIf(..)` writes every
+            change of its selection into the property, and it shows every new
+            value of the property. A selection which came from the property
+            must not travel back into it, and the `onChange` handlers of the
+            button stay silent as well. They react to the selections the user makes.
+        """
+        given : 'A list which the property and the `onChange` handler leave a trace in.'
+            var trace = []
+        and : 'A selection property which records every change it is told about, and the channel the change came through.'
+            var isBold = Var.of(false)
+            isBold.onChange(From.ALL, it -> trace << "property ${it.channel()}: ${it.currentValue().orElseNull()}".toString())
+        and : 'A toggle button bound to the property, with an `onChange` handler.'
+            var button = UI.toggleButton("Bold")
+                            .onChange( it -> trace << "onChange: ${it.event.stateChange == ItemEvent.SELECTED}".toString() )
+                            .isSelectedIf(isBold)
+                            .get(JToggleButton)
+
+        when : 'The view model selects the button.'
+            isBold.set(From.VIEW_MODEL, true)
+        then : 'The button is selected...'
+            button.selected
+        and : '...and the only trace is the change made by the view model.'
+            trace == ["property VIEW_MODEL: true"]
+
+        when : 'The user clicks the button to unselect it.'
+            button.doClick()
+            UI.sync()
+        then : 'Both the `onChange` handler and the property hear about it, the property through the view channel.'
+            trace.drop(1).toSet() == ["onChange: false", "property VIEW: false"].toSet()
+    }
+
+    def 'An enum selection which a bound property makes is not fired again by the radio buttons bound to it.'()
+    {
+        reportInfo """
+            Radio buttons bound through `isSelectedIf(state, Var<E>)` share one
+            enum property. When the user selects one of them, the button writes
+            its state into the property and fires a change of the property,
+            so that every radio button bound to it shows the new selection.
+
+            A selection which came from the property must not cause this:
+            the property would be fired once more, which would make every
+            radio button set its selection again. The property is told about
+            the change of the view model once, and that is all.
+        """
+        given : 'A list which the property leaves a trace in.'
+            var trace = []
+        and : 'A size property which records every change it is told about, and the channel the change came through.'
+            var size = Var.of(Size.SMALL)
+            size.onChange(From.ALL, it -> trace << "${it.channel()}: ${it.currentValue().orElseNull()}".toString())
+        and : 'Three radio buttons, one for every size, bound to the property.'
+            var small  = UI.radioButton("Small").isSelectedIf(Size.SMALL, size).get(JRadioButton)
+            var medium = UI.radioButton("Medium").isSelectedIf(Size.MEDIUM, size).get(JRadioButton)
+            var large  = UI.radioButton("Large").isSelectedIf(Size.LARGE, size).get(JRadioButton)
+
+        when : 'The view model selects the large size.'
+            size.set(From.VIEW_MODEL, Size.LARGE)
+        then : 'Only the large radio button is selected...'
+            !small.selected && !medium.selected && large.selected
+        and : '...and the property was told about the change of the view model only.'
+            trace == ["VIEW_MODEL: LARGE"]
+
+        when : 'The user selects the medium size.'
+            medium.doClick()
+            UI.sync()
+        then : 'The property holds the medium size, which it was told about through the view channel first.'
+            size.is(Size.MEDIUM)
+            trace.drop(1).first() == "VIEW: MEDIUM"
     }
 
     def 'You can bind to the enabled state of a button.'()
