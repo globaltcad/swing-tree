@@ -2646,6 +2646,7 @@ public final class UI extends UIFactoryMethods
         public ScrollPane(java.awt.@Nullable Component view) {
             super(view);
             addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
+            ScrollPaneParentLayoutCorrection.installOn(this);
         }
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
