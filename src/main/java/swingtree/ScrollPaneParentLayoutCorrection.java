@@ -1,8 +1,11 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
+
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ContainerAdapter;
@@ -27,15 +30,27 @@ import java.util.Optional;
  *  It keeps listening when the view or the viewport is replaced, and it does nothing for a
  *  scroll pane which is not a validate root, because Swing already lays out its parent.
  *  <p>
+ *  The view is also resized whenever the parent gives the scroll pane a new size,
+ *  for example on every step of resizing the window. Then the parent has just been laid out,
+ *  and laying it out again would double the cost of resizing the window. So this class only
+ *  revalidates the parent when the preferred size of the scroll pane changed since the last time,
+ *  because only a new preferred size can give the scroll pane a different place in its parent.
+ *  <p>
  *  The SwingTree native {@link UI.ScrollPane} installs this class on itself.
  */
 final class ScrollPaneParentLayoutCorrection
 {
     private final JScrollPane _ownerScrollPane;
+    private @Nullable Dimension _preferredSizeAtLastRevalidation;
     private final ComponentAdapter _revalidateParentWhenTheViewIsResized = new ComponentAdapter() {
         @Override public void componentResized( ComponentEvent e ) {
-            if ( _ownerScrollPane.isValidateRoot() )
-                Optional.ofNullable(_ownerScrollPane.getParent()).ifPresent(Component::revalidate);
+            if ( !_ownerScrollPane.isValidateRoot() )
+                return;
+            Dimension preferredSize = _ownerScrollPane.getPreferredSize();
+            if ( preferredSize.equals(_preferredSizeAtLastRevalidation) )
+                return;
+            _preferredSizeAtLastRevalidation = preferredSize;
+            Optional.ofNullable(_ownerScrollPane.getParent()).ifPresent(Component::revalidate);
         }
     };
     private final ContainerAdapter _followTheViewWhenItIsReplaced = new ContainerAdapter() {
