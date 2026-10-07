@@ -448,6 +448,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component!");
         return _withOnShow( isVisible, (c, v) -> {
                     c.setVisible(v);
+                    _revalidateParentOfValidateRoot(c);
                 })
                 ._with( c -> {
                     c.setVisible( isVisible.orElseThrowUnchecked() );
@@ -477,6 +478,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullPropertyCheck(isVisible, "isVisible", "Null is not allowed to model the visibility of a UI component! A boolean should only be true or false!");
         return _withOnShow( isVisible, (c, v) -> {
                     c.setVisible(!v);
+                    _revalidateParentOfValidateRoot(c);
                 })
                 ._with( c -> {
                     c.setVisible( !isVisible.orElseThrowUnchecked() );
@@ -508,6 +510,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "Null is not allowed to model the visibility of a UI component!");
         return _withOnShow( enumProperty, (c,v) -> {
                     c.setVisible( v == enumValue );
+                    _revalidateParentOfValidateRoot(c);
                 })
                 ._with( c -> {
                     c.setVisible( enumValue == enumProperty.orElseThrowUnchecked() );
@@ -538,6 +541,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullPropertyCheck(enumProperty, "enumProperty", "Null is not allowed to model the visibility of a UI component!");
         return _withOnShow( enumProperty, (c,v) -> {
                     c.setVisible( v != enumValue );
+                    _revalidateParentOfValidateRoot(c);
                 })
                 ._with( c -> {
                     c.setVisible( enumValue != enumProperty.orElseThrowUnchecked() );
@@ -3999,6 +4003,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     });
                 })
                 ._this();
+    }
+
+    private static void _revalidateParentOfValidateRoot( JComponent comp ) {
+        if ( comp.isValidateRoot() )
+            Optional.ofNullable(comp.getParent()).ifPresent(Component::revalidate);
     }
 
     private static void _revalidate( Component comp ) {

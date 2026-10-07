@@ -7,18 +7,16 @@ import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Var
 import swingtree.api.Layout
-import swingtree.layout.AddConstraint
-import swingtree.layout.MigAddConstraint
-import swingtree.layout.ResponsiveGridFlowLayout
-import swingtree.layout.UniformGridLayout
 import swingtree.components.JBox
-import swingtree.layout.LayoutConstraint
+import swingtree.layout.*
 import swingtree.threading.EventProcessor
 
-import java.awt.BorderLayout
-import javax.swing.BoxLayout
-import javax.swing.JPanel
-import swingtree.layout.Bounds
+import javax.swing.*
+import java.awt.*
+import java.awt.event.ComponentAdapter
+import java.awt.event.ComponentEvent
+import java.util.List
+import java.util.concurrent.atomic.AtomicInteger
 
 @Title("Reactive Layouts")
 @Narrative("""
@@ -1130,5 +1128,562 @@ class Reactive_Layout_Spec extends Specification
 
         cleanup:
             UI.runNow { frame.dispose() }
+    }
+
+    def 'Hiding a #kind through `isVisibleIf` gives its room to the component below it.'( String kind, Closure<UIForAnySwing> component )
+    {
+        reportInfo """
+            This scenario makes sure that hiding a ${kind} through `isVisibleIf` looks the same as
+            if the ${kind} had never been added: the components after it move up and close the gap.
+
+            You might expect that to happen all by itself, and for a label or a plain panel it
+            does. Hiding a Swing component through `setVisible(false)` calls `revalidate()` on that
+            component, and `revalidate()` schedules a new layout for the parent of the component,
+            and for every container around that, up to the nearest *validate root*. A validate root
+            is a component whose `isValidateRoot()` method returns `true`, which tells Swing that
+            nothing inside it can change its size. A `JTextField`, a `JScrollPane` and a `JSplitPane`
+            all return `true`. So when a ${kind} is hidden, the nearest validate root is the
+            ${kind} itself. Swing also skips a validate root which is invisible, so if SwingTree
+            left this to Swing alone, hiding the ${kind} would schedule no layout at all. The parent
+            of the ${kind} would never be laid out again, and your users would look at an empty hole
+            where the ${kind} used to be, until some unrelated change elsewhere in the window
+            happened to lay the parent out.
+
+            SwingTree prevents this: whenever `isVisibleIf` changes the visibility of a validate
+            root, it also calls `revalidate()` on the parent of that validate root, so the parent
+            is laid out again. (For any other component Swing already does this by itself.)
+            SwingTree does the same when you change a size of a validate root through a property,
+            for example through `withPrefHeight(Val)`.
+
+            Here is a column holding the ${kind} before it is hidden, what you see afterwards, and
+            what your users would see if the column were not laid out again. In this diagram,
+            `[validate root]` stands for a `JTextField`, a `JScrollPane` or a `JSplitPane`, because
+            the scenario is run once for each of them:
+
+            ```
+              before hiding          after hiding             after hiding, if the column
+                                     (what you see)           were not laid out again
+              ┌─────────────────┐    ┌─────────────────┐      ┌─────────────────┐
+              │ Above           │    │ Above           │      │ Above           │
+              │ [validate root] │    │ Below           │      │                 │ ← empty hole
+              │ Below           │    │                 │      │ Below           │
+              └─────────────────┘    └─────────────────┘      └─────────────────┘
+            ```
+
+            The scenario walks through exactly this picture. We build the column, show it in a real
+            window, remember where the ${kind} starts, hide the ${kind} through its property, let
+            Swing carry out whatever layouts this scheduled, and then check that the label "Below"
+            now sits where the ${kind} used to start.
+        """
+        given : 'A UI scale of 1, so that the sizes in this scenario map one-to-one to pixels.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A property which decides whether the middle component is visible. It starts out as `true`.'
+            var isShown = Var.of(true)
+        and : """
+            A column of three rows: a label, the middle component bound to the property, and
+            another label. The column is laid out by MigLayout with `hidemode 3`. By default,
+            MigLayout keeps the room of an invisible component reserved, so that nothing moves
+            when something disappears. `hidemode 3` tells MigLayout to give an invisible component
+            no room and no gaps at all, so a hidden middle component should leave no trace.
+        """
+            var middle = null
+            var below = null
+            var column =
+                    UI.panel("wrap 1, hidemode 3")
+                    .add(UI.label("Above"))
+                    .add(component().isVisibleIf(isShown).peek(c -> middle = c))
+                    .add(UI.label("Below").peek(c -> below = c))
+                    .get(JPanel)
+        and : """
+            We show the column in a real window, because Swing only lays out components which
+            sit inside a window that is on screen. A window which was just shown receives a few
+            more resize and move events from the window system of the operating system over the
+            next moments, and Swing lays out the whole window for each of them. If one of those
+            events arrived while we check what hiding the middle component has scheduled, it would
+            lay out the column no matter what, and the scenario would pass or fail depending on
+            timing. So `showAndWaitUntilTheWindowHasSettled` waits until no such event has arrived
+            for 200 milliseconds, and then lays the window out one final time.
+        """
+            var frame = new JFrame()
+            UI.runNow {
+                frame.setContentPane(column)
+                frame.pack()
+            }
+            showAndWaitUntilTheWindowHasSettled(frame)
+            int middleY = UI.runAndGet({ middle.getY() })
+            int belowY = UI.runAndGet({ below.getY() })
+        expect : 'The middle component is a validate root, and the label "Below" starts out underneath it.'
+            middle.isValidateRoot()
+            belowY > middleY
+
+        when : """
+            Now we hide the middle component through the property. Then we let Swing work through
+            everything this has queued up, the way the event loop of a real application would:
+            `waitUntilSwingHasWorkedThroughItsQueue` calls `UI.runNow` three times in a row, which
+            waits until every event posted before it has been handled, and inside it calls
+            `RepaintManager.validateInvalidComponents()`, which carries out the layouts that
+            `revalidate()` has queued up. It takes three rounds, because a layout can post a
+            resize event, and handling that event can queue up another layout. We never call
+            `validate()` on the window here, because that would lay out the whole window no matter
+            what was queued, and so it would hide whether the column was ever scheduled for a new
+            layout.
+        """
+            UI.runNow { isShown.set(false) }
+            waitUntilSwingHasWorkedThroughItsQueue(column)
+            int belowYAfterHiding = UI.runAndGet({ below.getY() })
+        then : 'The label "Below" has moved up to where the middle component used to start.'
+            belowYAfterHiding == middleY
+
+        cleanup :
+            UI.runNow { frame.dispose() }
+
+        where : 'The middle component is one of these components, each of which is a validate root:'
+            kind          | component
+            "JTextField"  | { UI.textField("Some text") }
+            "JScrollPane" | { UI.scrollPane().add(UI.label("Inside a scroll pane")) }
+            "JSplitPane"  | { UI.splitPane(UI.Axis.HORIZONTAL).add(UI.label("Left")).add(UI.label("Right")) }
+    }
+
+    def 'Showing a #kind through `isVisibleIf` makes room for it in its parent.'( String kind, Closure<UIForAnySwing> component )
+    {
+        reportInfo """
+            This scenario makes sure that showing a ${kind} through `isVisibleIf` looks the same as
+            if the ${kind} had been visible from the start: the ${kind} gets at least its preferred
+            height, and the components after it move down to make room for it.
+
+            You might expect that to happen all by itself, and for a label or a plain panel it
+            does. Showing a Swing component through `setVisible(true)` calls `revalidate()` on that
+            component, and `revalidate()` schedules a new layout for the parent of the component,
+            and for every container around that, up to the nearest *validate root*. A validate root
+            is a component whose `isValidateRoot()` method returns `true`, which tells Swing that
+            nothing inside it can change its size. A `JTextField`, a `JScrollPane` and a `JSplitPane`
+            all return `true`. So when a ${kind} is shown, the nearest validate root is the ${kind}
+            itself, and if SwingTree left this to Swing alone, Swing would lay out only what is
+            inside the ${kind}. Its parent would never be laid out again, the ${kind} would keep the
+            height of zero it had while it was hidden, and your users would not see it at all, until
+            some unrelated change elsewhere in the window happened to lay the parent out.
+
+            SwingTree prevents this: whenever `isVisibleIf` changes the visibility of a validate
+            root, it also calls `revalidate()` on the parent of that validate root, so the parent
+            is laid out again. (For any other component Swing already does this by itself.)
+            SwingTree does the same when you change a size of a validate root through a property,
+            for example through `withPrefHeight(Val)`.
+
+            Here is a column holding the ${kind} before it is shown, what you see afterwards, and
+            what your users would see if the column were not laid out again. In this diagram,
+            `[validate root]` stands for a `JTextField`, a `JScrollPane` or a `JSplitPane`, because
+            the scenario is run once for each of them:
+
+            ```
+              before showing         after showing            after showing, if the column
+                                     (what you see)           were not laid out again
+              ┌─────────────────┐    ┌─────────────────┐      ┌─────────────────┐
+              │ Above           │    │ Above           │      │ Above           │
+              │ Below           │    │ [validate root] │      │ Below           │ ← the validate root is
+              │                 │    │ Below           │      │                 │   0 pixels high
+              └─────────────────┘    └─────────────────┘      └─────────────────┘
+            ```
+
+            The scenario walks through exactly this picture. We build the column with the ${kind}
+            hidden, show the column in a real window, show the ${kind} through its property, let
+            Swing carry out whatever layouts this scheduled, and then check the height of the
+            ${kind} and the position of the label "Below".
+        """
+        given : 'A UI scale of 1, so that the sizes in this scenario map one-to-one to pixels.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A property which decides whether the middle component is visible. It starts out as `false`.'
+            var isShown = Var.of(false)
+        and : """
+            A column of three rows: a label, the middle component bound to the property, and
+            another label. The column is laid out by MigLayout with `hidemode 3`, which tells
+            MigLayout to give an invisible component no room and no gaps at all. So while the
+            middle component is hidden, it has a height of zero, and the label "Below" sits right
+            where the middle component would start.
+        """
+            var middle = null
+            var below = null
+            var column =
+                    UI.panel("wrap 1, hidemode 3")
+                    .add(UI.label("Above"))
+                    .add(component().isVisibleIf(isShown).peek(c -> middle = c))
+                    .add(UI.label("Below").peek(c -> below = c))
+                    .get(JPanel)
+        and : """
+            We show the column in a real window while the middle component is still hidden,
+            because Swing only lays out components which sit inside a window that is on screen.
+            A window which was just shown receives a few more resize and move events from the
+            window system of the operating system over the next moments, and Swing lays out the
+            whole window for each of them. If one of those events arrived while we check what
+            showing the middle component has scheduled, it would lay out the column no matter
+            what, and the scenario would pass or fail depending on timing. So
+            `showAndWaitUntilTheWindowHasSettled` waits until no such event has arrived for
+            200 milliseconds, and then lays the window out one final time.
+        """
+            var frame = new JFrame()
+            UI.runNow {
+                frame.setContentPane(column)
+                frame.setSize(300, 300)
+            }
+            showAndWaitUntilTheWindowHasSettled(frame)
+            int belowY = UI.runAndGet({ below.getY() })
+        expect : 'The middle component is a validate root, and it has no room in the column yet.'
+            middle.isValidateRoot()
+            UI.runAndGet({ middle.getHeight() }) == 0
+
+        when : """
+            Now we show the middle component through the property. Then we let Swing work through
+            everything this has queued up, the way the event loop of a real application would:
+            `waitUntilSwingHasWorkedThroughItsQueue` calls `UI.runNow` three times in a row, which
+            waits until every event posted before it has been handled, and inside it calls
+            `RepaintManager.validateInvalidComponents()`, which carries out the layouts that
+            `revalidate()` has queued up. It takes three rounds, because a layout can post a
+            resize event, and handling that event can queue up another layout. We never call
+            `validate()` on the window here, because that would lay out the whole window no matter
+            what was queued, and so it would hide whether the column was ever scheduled for a new
+            layout.
+        """
+            UI.runNow { isShown.set(true) }
+            waitUntilSwingHasWorkedThroughItsQueue(column)
+            int middleHeight = UI.runAndGet({ middle.getHeight() })
+            int preferredHeight = UI.runAndGet({ middle.getPreferredSize().height })
+            int belowYAfterShowing = UI.runAndGet({ below.getY() })
+        then : """
+            The middle component has been given at least its preferred height. We say "at least",
+            because MigLayout never makes a component smaller than its minimum size, and the
+            minimum height of a `JScrollPane` can be a little larger than its preferred height.
+        """
+            preferredHeight > 0
+            middleHeight >= preferredHeight
+        and : 'The label "Below" has moved down by at least that height, to make room for the middle component.'
+            belowYAfterShowing >= belowY + middleHeight
+
+        cleanup :
+            UI.runNow { frame.dispose() }
+
+        where : 'The middle component is one of these components, each of which is a validate root:'
+            kind          | component
+            "JTextField"  | { UI.textField("Some text") }
+            "JScrollPane" | { UI.scrollPane().add(UI.label("Inside a scroll pane")) }
+            "JSplitPane"  | { UI.splitPane(UI.Axis.HORIZONTAL).add(UI.label("Left")).add(UI.label("Right")) }
+    }
+
+    def 'A scroll pane which is laid out at its preferred height grows as soon as its content grows.'()
+    {
+        reportInfo """
+            This scenario makes sure that a scroll pane grows together with its content, in a
+            layout which gives every row its preferred height. A scroll pane prefers to be as large
+            as the content inside it plus its own border, so in such a layout the scroll pane is
+            just as tall as its content. When the content grows, for example because a row of a
+            `JTree` inside it was expanded or a list inside it got more items, the scroll pane
+            grows with it, and the components below the scroll pane move down.
+
+            You might expect that to happen all by itself, but plain Swing does not do it. A
+            `JScrollPane` is a *validate root*: its `isValidateRoot()` method returns `true`, which
+            tells Swing that nothing inside the scroll pane can change the size of the scroll pane.
+            When the content calls `revalidate()`, Swing marks the content, the scroll pane and
+            every container around it, all the way up to the window, as invalid, which means "needs
+            a new layout". But it schedules a layout only for the scroll pane. If SwingTree left
+            this to Swing alone, the scroll pane would keep its old height and show a vertical
+            scroll bar, and the containers around it would stay marked as invalid with no layout
+            scheduled for them. That is worse than it sounds: the new height would still arrive
+            later, the next time anything else in the window calls `revalidate()`, and the scroll
+            pane would jump at a moment which has nothing to do with its content. To your users the
+            layout would look flaky.
+
+            SwingTree prevents this: a scroll pane made by SwingTree keeps track of the size of its
+            content, and whenever that content is given a new size, the scroll pane calls
+            `revalidate()` on its own parent as well. Swing delivers the news of a new size as a
+            resize event after the layout which caused it has finished, so the parent is laid out
+            right after the scroll pane, and not in the middle of it.
+
+            Here is a column holding a scroll pane before the content of the scroll pane grows,
+            what you see afterwards, and what your users would see if the column were not laid out
+            again:
+
+            ```
+              before growing             after growing              after growing, if the column
+                                         (what you see)             were not laid out again
+              ┌────────────────────────┐ ┌────────────────────────┐ ┌────────────────────────┐
+              │┌──────────────────────┐│ │┌──────────────────────┐│ │┌────────────────────┬─┐│
+              ││ Row 1                ││ ││ Row 1                ││ ││ Row 1              │▲││ ← old height,
+              │└──────────────────────┘│ ││ Row 2                ││ │└────────────────────┴─┘│   rows 2 to 4 are
+              │ Below the scroll pane  │ ││ Row 3                ││ │ Below the scroll pane  │   only reachable by
+              │                        │ ││ Row 4                ││ │                        │   scrolling
+              │                        │ │└──────────────────────┘│ │                        │
+              │                        │ │ Below the scroll pane  │ │                        │
+              └────────────────────────┘ └────────────────────────┘ └────────────────────────┘
+            ```
+
+            The scenario walks through exactly this picture. We build the column, show it in a real
+            window, add three rows to the content of the scroll pane, let Swing carry out whatever
+            events and layouts this scheduled, and then check the height of the scroll pane and the
+            position of the label below it.
+        """
+        given : 'A UI scale of 1, so that the sizes in this scenario map one-to-one to pixels.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : """
+            A column which gives every row its preferred height: a scroll pane holding a panel
+            with one label, and a label below the scroll pane. The column is laid out by MigLayout
+            without any row constraint, so no row grows beyond its preferred height.
+        """
+            var scrollPane = null
+            var content = null
+            var below = null
+            var column =
+                    UI.panel("wrap 1, ins 0", "[grow]")
+                    .add("growx",
+                        UI.scrollPane().peek(c -> scrollPane = c)
+                        .add(
+                            UI.panel("wrap 1, ins 0").peek(c -> content = c)
+                            .add(UI.label("Row 1"))
+                        )
+                    )
+                    .add(UI.label("Below the scroll pane").peek(c -> below = c))
+                    .get(JPanel)
+        and : """
+            We show the column in a real window, because Swing only lays out components which
+            sit inside a window that is on screen. The window is much taller than the column
+            needs, so that there is room for the scroll pane to grow into.
+
+            A window which was just shown receives a few more resize and move events from the
+            window system of the operating system over the next moments, and Swing lays out the
+            whole window for each of them. If one of those events arrived while we check what
+            growing the content has scheduled, it would lay out the column no matter what, and
+            the scenario would pass or fail depending on timing. So
+            `showAndWaitUntilTheWindowHasSettled` waits until no such event has arrived for
+            200 milliseconds, and then lays the window out one final time.
+
+            That final layout matters for a second reason as well. When the window is shown for
+            the first time, the content of the scroll pane gets its first size, and Swing posts a
+            resize event for it. The `JViewport` of the scroll pane handles that event by calling
+            `revalidate()` on itself, which marks the column as invalid but schedules a layout
+            only for the scroll pane. The final layout makes sure that the column starts out fully
+            laid out.
+        """
+            var frame = new JFrame()
+            UI.runNow {
+                frame.setContentPane(column)
+                frame.setSize(300, 500)
+            }
+            showAndWaitUntilTheWindowHasSettled(frame)
+            int startHeight = UI.runAndGet({ scrollPane.getHeight() })
+            int belowY = UI.runAndGet({ below.getY() })
+        expect : 'Swing has laid out everything in the column, so the column starts out valid.'
+            UI.runAndGet({ column.isValid() })
+            startHeight > 0
+
+        when : """
+            Now the content grows: we add three more labels to it and call `revalidate()` on it,
+            which is what Swing components do themselves whenever their content changes. Then we
+            let Swing work through everything this has queued up, the way the event loop of a real
+            application would: `waitUntilSwingHasWorkedThroughItsQueue` calls `UI.runNow` three times in a row,
+            which waits until every event posted before it has been handled, and inside it calls
+            `RepaintManager.validateInvalidComponents()`, which carries out the layouts that
+            `revalidate()` has queued up. It takes three rounds, because a layout can post a
+            resize event, and handling that event can queue up another layout. We never call
+            `validate()` on the window here, because that would lay out the whole window no matter
+            what was queued, and so it would hide whether the column was ever scheduled for a new
+            layout.
+        """
+            UI.runNow {
+                content.add(new JLabel("Row 2"))
+                content.add(new JLabel("Row 3"))
+                content.add(new JLabel("Row 4"))
+                content.revalidate()
+            }
+            waitUntilSwingHasWorkedThroughItsQueue(column)
+            int grownHeight = UI.runAndGet({ scrollPane.getHeight() })
+            int preferredHeight = UI.runAndGet({ scrollPane.getPreferredSize().height })
+            int belowYAfterGrowing = UI.runAndGet({ below.getY() })
+        then : 'The scroll pane now prefers to be taller than it was at the start, about four times as tall.'
+            preferredHeight > startHeight
+        and : 'It has been laid out at that new preferred height.'
+            grownHeight == preferredHeight
+        and : 'The label below the scroll pane has moved down by as much as the scroll pane grew.'
+            belowYAfterGrowing == belowY + (grownHeight - startHeight)
+
+        cleanup :
+            UI.runNow { frame.dispose() }
+    }
+
+    def 'An unrelated change in the window does not resize a scroll pane whose content grew earlier.'()
+    {
+        reportInfo """
+            This scenario makes sure that a scroll pane whose content grew keeps its height when
+            something unrelated changes elsewhere in the window. The size of a component on screen
+            should change because something about that component changed, and never later because
+            something else changed. Otherwise your users see a layout which seems to jump at random.
+
+            You might expect that to hold all by itself, but plain Swing does not guarantee it. A
+            `JScrollPane` is a *validate root*: its `isValidateRoot()` method returns `true`, which
+            tells Swing that nothing inside the scroll pane can change the size of the scroll pane.
+            When the content calls `revalidate()`, Swing marks the content, the scroll pane and
+            every container around it, all the way up to the window, as invalid, which means "needs
+            a new layout". But it schedules a layout only for the scroll pane. If SwingTree left
+            this to Swing alone, the scroll pane would keep its old height, and the containers
+            around it would stay marked as invalid with no layout scheduled for them. Then any
+            later `revalidate()` elsewhere in the window, for example from a label which gets a new
+            text, would make Swing lay out the whole window, including those invalid containers,
+            and the scroll pane would suddenly jump to the height its content asked for earlier.
+
+            SwingTree prevents this: a scroll pane made by SwingTree keeps track of the size of its
+            content, and whenever that content is given a new size, the scroll pane calls
+            `revalidate()` on its own parent as well. So the scroll pane reaches its new height
+            right after its content grew, and a later, unrelated layout finds nothing left to
+            change.
+
+            Here is a column with a header label and a scroll pane, after the content of the
+            scroll pane grew and after the text of the header label changed. First as you see it,
+            and then as your users would see it if the column were not laid out when the content
+            grew:
+
+            ```
+              what you see:
+              after the content grew            after the header text changed
+              ┌──────────────────────────────┐  ┌──────────────────────────────┐
+              │ Header                       │  │ A header with a longer text  │
+              │┌────────────────────────────┐│  │┌────────────────────────────┐│
+              ││ Row 1                      ││  ││ Row 1                      ││
+              ││ Row 2                      ││  ││ Row 2                      ││ ← same height
+              ││ Row 3                      ││  ││ Row 3                      ││
+              ││ Row 4                      ││  ││ Row 4                      ││
+              │└────────────────────────────┘│  │└────────────────────────────┘│
+              └──────────────────────────────┘  └──────────────────────────────┘
+
+              if the column were not laid out when the content grew:
+              after the content grew            after the header text changed
+              ┌──────────────────────────────┐  ┌──────────────────────────────┐
+              │ Header                       │  │ A header with a longer text  │
+              │┌──────────────────────────┬─┐│  │┌────────────────────────────┐│
+              ││ Row 1                    │▲││  ││ Row 1                      ││
+              │└──────────────────────────┴─┘│  ││ Row 2                      ││ ← jumps to the
+              │                              │  ││ Row 3                      ││   new height
+              │                              │  ││ Row 4                      ││
+              │                              │  │└────────────────────────────┘│
+              └──────────────────────────────┘  └──────────────────────────────┘
+            ```
+
+            The scenario walks through exactly this picture. We build the column, show it in a real
+            window, add three rows to the content of the scroll pane and note the height of the
+            scroll pane, then change only the text of the header label, and check that the height
+            of the scroll pane stayed the same.
+        """
+        given : 'A UI scale of 1, so that the sizes in this scenario map one-to-one to pixels.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : """
+            A column which gives every row its preferred height: a header label, and a scroll
+            pane holding a panel with one label. The column is laid out by MigLayout without any
+            row constraint, so no row grows beyond its preferred height.
+        """
+            var header = null
+            var scrollPane = null
+            var content = null
+            var column =
+                    UI.panel("wrap 1, ins 0", "[grow]")
+                    .add(UI.label("Header").peek(c -> header = c))
+                    .add("growx",
+                        UI.scrollPane().peek(c -> scrollPane = c)
+                        .add(
+                            UI.panel("wrap 1, ins 0").peek(c -> content = c)
+                            .add(UI.label("Row 1"))
+                        )
+                    )
+                    .get(JPanel)
+        and : """
+            We show the column in a real window, because Swing only lays out components which
+            sit inside a window that is on screen. The window is much taller than the column
+            needs, so that there is room for the scroll pane to grow into.
+
+            A window which was just shown receives a few more resize and move events from the
+            window system of the operating system over the next moments, and Swing lays out the
+            whole window for each of them. If one of those events arrived while we check what
+            our changes have scheduled, it would lay out the column no matter what, and the
+            scenario would pass or fail depending on timing. So
+            `showAndWaitUntilTheWindowHasSettled` waits until no such event has arrived for
+            200 milliseconds, and then lays the window out one final time.
+
+            That final layout matters for a second reason as well. When the window is shown for
+            the first time, the content of the scroll pane gets its first size, and Swing posts a
+            resize event for it. The `JViewport` of the scroll pane handles that event by calling
+            `revalidate()` on itself, which marks the column as invalid but schedules a layout
+            only for the scroll pane. The final layout makes sure that the column starts out fully
+            laid out.
+        """
+            var frame = new JFrame()
+            UI.runNow {
+                frame.setContentPane(column)
+                frame.setSize(300, 500)
+            }
+            showAndWaitUntilTheWindowHasSettled(frame)
+        expect : 'Swing has laid out everything in the column, so the column starts out valid.'
+            UI.runAndGet({ column.isValid() })
+
+        when : """
+            Now the content grows: we add three more labels to it and call `revalidate()` on it,
+            which is what Swing components do themselves whenever their content changes. Then we
+            let Swing work through everything this has queued up, the way the event loop of a real
+            application would: `waitUntilSwingHasWorkedThroughItsQueue` calls `UI.runNow` three times in a row,
+            which waits until every event posted before it has been handled, and inside it calls
+            `RepaintManager.validateInvalidComponents()`, which carries out the layouts that
+            `revalidate()` has queued up. It takes three rounds, because a layout can post a
+            resize event, and handling that event can queue up another layout. We never call
+            `validate()` on the window here, because that would lay out the whole window no matter
+            what was queued, and so it would hide which layouts were actually scheduled.
+        """
+            UI.runNow {
+                content.add(new JLabel("Row 2"))
+                content.add(new JLabel("Row 3"))
+                content.add(new JLabel("Row 4"))
+                content.revalidate()
+            }
+            waitUntilSwingHasWorkedThroughItsQueue(column)
+            int heightAfterGrowing = UI.runAndGet({ scrollPane.getHeight() })
+        and : """
+            We change only the text of the header label, and again let Swing work through
+            everything this has queued up. Setting the text of a label calls `revalidate()` on
+            the label, and the nearest validate root of a label in a window is the root pane of
+            the window, so this makes Swing lay out the whole window.
+        """
+            UI.runNow { header.setText("A header with a longer text") }
+            waitUntilSwingHasWorkedThroughItsQueue(column)
+            int heightAfterHeaderChange = UI.runAndGet({ scrollPane.getHeight() })
+        then : 'The scroll pane is exactly as tall as it was before the text of the header label changed.'
+            heightAfterHeaderChange == heightAfterGrowing
+
+        cleanup :
+            UI.runNow { frame.dispose() }
+    }
+
+    private static void showAndWaitUntilTheWindowHasSettled( JFrame frame ) {
+        var windowEvents = new AtomicInteger(0)
+        var countWindowEvents = new ComponentAdapter() {
+            @Override void componentResized( ComponentEvent e ) { windowEvents.incrementAndGet() }
+            @Override void componentMoved( ComponentEvent e ) { windowEvents.incrementAndGet() }
+        }
+        UI.runNow {
+            frame.addComponentListener(countWindowEvents)
+            frame.setVisible(true)
+            frame.validate()
+        }
+        int quietRounds = 0
+        int eventsSeen = -1
+        for ( int round = 0; round < 60 && quietRounds < 4; round++ ) {
+            Thread.sleep(50)
+            int eventsNow = UI.runAndGet({ windowEvents.get() })
+            quietRounds = eventsNow == eventsSeen ? quietRounds + 1 : 0
+            eventsSeen = eventsNow
+        }
+        UI.runNow {
+            frame.removeComponentListener(countWindowEvents)
+            frame.validate()
+        }
+        waitUntilSwingHasWorkedThroughItsQueue(frame.getRootPane())
+        UI.runNow { frame.validate() }
+    }
+
+    private static void waitUntilSwingHasWorkedThroughItsQueue( JComponent anyComponentOfTheWindow ) {
+        3.times {
+            UI.runNow { RepaintManager.currentManager(anyComponentOfTheWindow).validateInvalidComponents() }
+        }
     }
 }
