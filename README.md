@@ -172,6 +172,7 @@ instead of guessing.
   <version>1.0.1</version>
 </dependency>
 ```
+**Note:** If you are experiencing issues with SLF4J checkout [the workaround in this ticket](https://github.com/globaltcad/swing-tree/issues/787#issuecomment-6016062421).
 
 ---
 
