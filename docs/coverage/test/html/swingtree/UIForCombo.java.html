@@ -7,11 +7,8 @@ import sprouts.Action;
 import swingtree.api.Configurator;
 
 import javax.swing.*;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -31,13 +28,13 @@ import java.util.function.Function;
  */
 public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIForAnySwing&lt;UIForCombo&lt;E,C&gt;, JComboBox&lt;E&gt;&gt;
 {
-<span class="fc" id="L34">    private static final Logger log = LoggerFactory.getLogger(UIForCombo.class);</span>
+<span class="fc" id="L31">    private static final Logger log = LoggerFactory.getLogger(UIForCombo.class);</span>
     private final BuilderState&lt;JComboBox&lt;E&gt;&gt; _state;
 
-<span class="fc" id="L37">    UIForCombo( BuilderState&lt;JComboBox&lt;E&gt;&gt; state ) {</span>
-<span class="fc" id="L38">        Objects.requireNonNull(state);</span>
-<span class="fc" id="L39">        _state = state;</span>
-<span class="fc" id="L40">    }</span>
+<span class="fc" id="L34">    UIForCombo( BuilderState&lt;JComboBox&lt;E&gt;&gt; state ) {</span>
+<span class="fc" id="L35">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L36">        _state = state;</span>
+<span class="fc" id="L37">    }</span>
 
     /**
      *  Builds and returns the configured {@link JComboBox} instance.
@@ -45,17 +42,17 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
      * @return The configured {@link JComboBox} instance.
      */
     public JComboBox&lt;E&gt; getComboBox() {
-<span class="nc" id="L48">        return this.get(getType());</span>
+<span class="nc" id="L45">        return this.get(getType());</span>
     }
 
     @Override
     protected BuilderState&lt;JComboBox&lt;E&gt;&gt; _state() {
-<span class="fc" id="L53">        return _state;</span>
+<span class="fc" id="L50">        return _state;</span>
     }
     
     @Override
     protected UIForCombo&lt;E,C&gt; _newBuilderWithState(BuilderState&lt;JComboBox&lt;E&gt;&gt; newState ) {
-<span class="fc" id="L58">        return new UIForCombo&lt;&gt;(newState);</span>
+<span class="fc" id="L55">        return new UIForCombo&lt;&gt;(newState);</span>
     }
 
     /**
@@ -66,32 +63,32 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
      * @return this
      */
     public UIForCombo&lt;E,C&gt; onOpen( Action&lt;ComponentDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L69">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L70">        return _with( thisComponent -&gt; {</span>
-<span class="pc" id="L71">                    _onPopupOpen(thisComponent, e -&gt; _runInApp(()-&gt;{</span>
+<span class="fc" id="L66">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L67">        return _with( thisComponent -&gt; {</span>
+<span class="pc" id="L68">                    _onPopupOpen(thisComponent, e -&gt; _runInApp(()-&gt;{</span>
                         try {
-<span class="nc" id="L73">                            action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
-<span class="nc" id="L74">                        } catch (Exception ex) {</span>
-<span class="nc" id="L75">                            log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup open!&quot;, ex);</span>
-<span class="nc" id="L76">                        }</span>
-<span class="nc" id="L77">                    }));</span>
-<span class="fc" id="L78">                })</span>
-<span class="fc" id="L79">                ._this();</span>
+<span class="nc" id="L70">                            action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
+<span class="nc" id="L71">                        } catch (Exception ex) {</span>
+<span class="nc" id="L72">                            log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup open!&quot;, ex);</span>
+<span class="nc" id="L73">                        }</span>
+<span class="nc" id="L74">                    }));</span>
+<span class="fc" id="L75">                })</span>
+<span class="fc" id="L76">                ._this();</span>
     }
 
     private void _onPopupOpen( JComboBox&lt;E&gt; thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
-<span class="fc" id="L83">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
+<span class="fc" id="L80">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
             @Override
             public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 // This method is called before the popup menu becomes visible.
-<span class="nc" id="L87">                consumer.accept(e);</span>
-<span class="nc" id="L88">            }</span>
+<span class="nc" id="L84">                consumer.accept(e);</span>
+<span class="nc" id="L85">            }</span>
             @Override
-<span class="nc" id="L90">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L87">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
             @Override
-<span class="nc" id="L92">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L89">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
         });
-<span class="fc" id="L94">    }</span>
+<span class="fc" id="L91">    }</span>
 
     /**
      *  Registers a listener to be notified when the combo box is closed,
@@ -101,33 +98,33 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
      * @return this
      */
     public UIForCombo&lt;E,C&gt; onClose( Action&lt;ComponentDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L104">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L105">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L106">                    _onPopupClose(thisComponent,</span>
-<span class="nc" id="L107">                        e -&gt; _runInApp(()-&gt;{</span>
+<span class="fc" id="L101">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L102">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L103">                    _onPopupClose(thisComponent,</span>
+<span class="nc" id="L104">                        e -&gt; _runInApp(()-&gt;{</span>
                             try {
-<span class="nc" id="L109">                                action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
-<span class="nc" id="L110">                            } catch (Exception ex) {</span>
-<span class="nc" id="L111">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup close!&quot;, ex);</span>
-<span class="nc" id="L112">                            }</span>
-<span class="nc" id="L113">                        })</span>
+<span class="nc" id="L106">                                action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
+<span class="nc" id="L107">                            } catch (Exception ex) {</span>
+<span class="nc" id="L108">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup close!&quot;, ex);</span>
+<span class="nc" id="L109">                            }</span>
+<span class="nc" id="L110">                        })</span>
                     );
-<span class="fc" id="L115">                })</span>
-<span class="fc" id="L116">                ._this();</span>
+<span class="fc" id="L112">                })</span>
+<span class="fc" id="L113">                ._this();</span>
     }
 
     private void _onPopupClose( JComboBox&lt;E&gt; thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
-<span class="fc" id="L120">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
+<span class="fc" id="L117">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
             @Override
-<span class="nc" id="L122">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L119">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
             @Override
             public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-<span class="nc" id="L125">                consumer.accept(e); // This method is called before the popup menu becomes invisible</span>
-<span class="nc" id="L126">            }</span>
+<span class="nc" id="L122">                consumer.accept(e); // This method is called before the popup menu becomes invisible</span>
+<span class="nc" id="L123">            }</span>
             @Override
-<span class="nc" id="L128">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L125">            public void popupMenuCanceled(PopupMenuEvent e) {/* Not relevant here */}</span>
         });
-<span class="fc" id="L130">    }</span>
+<span class="fc" id="L127">    }</span>
 
     /**
      *  Registers a listener to be notified when the combo box is canceled,
@@ -138,33 +135,33 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
      * @return this
      */
     public UIForCombo&lt;E,C&gt; onCancel( Action&lt;ComponentDelegate&lt;C, PopupMenuEvent&gt;&gt; action ) {
-<span class="fc" id="L141">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L142">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L143">                    _onPopupCancel(thisComponent,</span>
-<span class="nc" id="L144">                        e -&gt; _runInApp(()-&gt;{</span>
+<span class="fc" id="L138">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L139">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L140">                    _onPopupCancel(thisComponent,</span>
+<span class="nc" id="L141">                        e -&gt; _runInApp(()-&gt;{</span>
                             try {
-<span class="nc" id="L146">                                action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
-<span class="nc" id="L147">                            } catch (Exception ex) {</span>
-<span class="nc" id="L148">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup cancel!&quot;, ex);</span>
-<span class="nc" id="L149">                            }</span>
-<span class="nc" id="L150">                        })</span>
+<span class="nc" id="L143">                                action.accept(new ComponentDelegate&lt;&gt;((C) thisComponent, e));</span>
+<span class="nc" id="L144">                            } catch (Exception ex) {</span>
+<span class="nc" id="L145">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup cancel!&quot;, ex);</span>
+<span class="nc" id="L146">                            }</span>
+<span class="nc" id="L147">                        })</span>
                     );
-<span class="fc" id="L152">                })</span>
-<span class="fc" id="L153">                ._this();</span>
+<span class="fc" id="L149">                })</span>
+<span class="fc" id="L150">                ._this();</span>
     }
 
     private void _onPopupCancel( JComboBox&lt;E&gt; thisComponent, Consumer&lt;PopupMenuEvent&gt; consumer ) {
-<span class="fc" id="L157">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
+<span class="fc" id="L154">        thisComponent.addPopupMenuListener(new PopupMenuListener() {</span>
             @Override
-<span class="nc" id="L159">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L156">            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {/* Not relevant here */}</span>
             @Override
-<span class="nc" id="L161">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
+<span class="nc" id="L158">            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {/* Not relevant here */}</span>
             @Override
             public void popupMenuCanceled(PopupMenuEvent e) {
-<span class="nc" id="L164">                consumer.accept(e); // This method is called when the popup menu is canceled</span>
-<span class="nc" id="L165">            }</span>
+<span class="nc" id="L161">                consumer.accept(e); // This method is called when the popup menu is canceled</span>
+<span class="nc" id="L162">            }</span>
         });
-<span class="fc" id="L167">    }</span>
+<span class="fc" id="L164">    }</span>
 
     /**
      * Adds an {@link Action} to the underlying {@link JComboBox}
@@ -178,19 +175,19 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
      * @throws IllegalArgumentException if {@code action} is {@code null}.
      */
     public UIForCombo&lt;E,C&gt; onSelection( Action&lt;ComponentDelegate&lt;JComboBox&lt;E&gt;, ActionEvent&gt;&gt; action ) {
-<span class="fc" id="L181">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
-<span class="fc" id="L182">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L183">                   _onSelection(thisComponent,</span>
-<span class="fc" id="L184">                       e -&gt; _runInApp(()-&gt;{</span>
+<span class="fc" id="L178">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
+<span class="fc" id="L179">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L180">                   _onSelection(thisComponent,</span>
+<span class="fc" id="L181">                       e -&gt; _runInApp(()-&gt;{</span>
                            try {
-<span class="fc" id="L186">                               action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
-<span class="nc" id="L187">                           } catch (Exception ex) {</span>
-<span class="nc" id="L188">                               log.error(SwingTree.get().logMarker(), &quot;Error while executing action on selection!&quot;, ex);</span>
-<span class="fc" id="L189">                           }</span>
-<span class="fc" id="L190">                       })</span>
+<span class="fc" id="L183">                               action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
+<span class="nc" id="L184">                           } catch (Exception ex) {</span>
+<span class="nc" id="L185">                               log.error(SwingTree.get().logMarker(), &quot;Error while executing action on selection!&quot;, ex);</span>
+<span class="fc" id="L186">                           }</span>
+<span class="fc" id="L187">                       })</span>
                    );
-<span class="fc" id="L192">               })</span>
-<span class="fc" id="L193">               ._this();</span>
+<span class="fc" id="L189">               })</span>
+<span class="fc" id="L190">               ._this();</span>
     }
 
     private void _onSelection( JComboBox&lt;E&gt; thisComponent, Consumer&lt;ActionEvent&gt; consumer ) {
@@ -205,11 +202,11 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
             simply because it was added first.
             This is especially true in the context of declarative UI design.
         */
-<span class="fc" id="L208">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
-<span class="fc bfc" id="L209" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
-<span class="fc" id="L210">            thisComponent.removeActionListener(listener);</span>
+<span class="fc" id="L205">        ActionListener[] listeners = thisComponent.getActionListeners();</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">        for (ActionListener listener : listeners)</span>
+<span class="fc" id="L207">            thisComponent.removeActionListener(listener);</span>
 
-<span class="fc" id="L212">        thisComponent.addActionListener(e -&gt; {</span>
+<span class="fc" id="L209">        thisComponent.addActionListener(e -&gt; {</span>
             /*
                 Unfortunately, this event is fired in all kinds of
                 annoying situations, so we need to filter things that
@@ -220,8 +217,11 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
                 This is also fired when the user presses enter!
                 So we filter the event:
             */
-<span class="pc bpc" id="L223" title="1 of 2 branches missed.">            if ( &quot;comboBoxEdited&quot;.equals(e.getActionCommand()) )</span>
-<span class="nc" id="L224">                return;</span>
+<span class="pc bpc" id="L220" title="1 of 2 branches missed.">            if ( &quot;comboBoxEdited&quot;.equals(e.getActionCommand()) )</span>
+<span class="nc" id="L221">                return;</span>
+
+<span class="fc bfc" id="L223" title="All 2 branches covered.">            if ( SilentSet.isOngoingFor(thisComponent) )</span>
+<span class="fc" id="L224">                return;</span>
 
             /*
                 Now another big problem is that when a user types
@@ -235,10 +235,10 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
             */
 <span class="pc bpc" id="L236" title="1 of 2 branches missed.">            if ( e.getSource() instanceof JComboBox ) {</span>
 <span class="fc" id="L237">                ComboBoxModel&lt;?&gt; model = ((JComboBox&lt;?&gt;) e.getSource()).getModel();</span>
-<span class="pc bpc" id="L238" title="1 of 2 branches missed.">                if ( model instanceof AbstractComboModel ) {</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">                if ( model instanceof AbstractComboModel ) {</span>
 <span class="fc" id="L239">                    AbstractComboModel&lt;?&gt; swingTreeModel = (AbstractComboModel&lt;?&gt;) model;</span>
-<span class="pc bpc" id="L240" title="1 of 2 branches missed.">                    if ( !swingTreeModel.acceptsEditorChanges() )</span>
-<span class="nc" id="L241">                        return;</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">                    if ( !swingTreeModel.acceptsEditorChanges() )</span>
+<span class="fc" id="L241">                        return;</span>
                 }
             }
 <span class="fc" id="L244">            consumer.accept(e);</span>
@@ -692,13 +692,13 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
 <span class="fc" id="L692">        NullUtil.nullArgCheck(item, &quot;item&quot;, Var.class);</span>
 <span class="fc" id="L693">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L694">                    ComboBoxModel&lt;E&gt; model = thisComponent.getModel();</span>
-<span class="pc bpc" id="L695" title="1 of 2 branches missed.">                    if ( model instanceof AbstractComboModel )</span>
+<span class="fc bfc" id="L695" title="All 2 branches covered.">                    if ( model instanceof AbstractComboModel )</span>
 <span class="fc" id="L696">                        _setModel(((AbstractComboModel&lt;E&gt;)model).withVar(item), thisComponent);</span>
                     else {
                         // The user has a custom model AND wants to bind to a property:
-<span class="nc" id="L699">                        _onShow( item, thisComponent, (c,v) -&gt; _setSelectedItem(c, v) );</span>
-<span class="nc" id="L700">                        _onSelection(thisComponent,</span>
-<span class="nc" id="L701">                            e -&gt; _runInApp( (E)thisComponent.getSelectedItem(), newItem -&gt; item.set(From.VIEW, newItem)  )</span>
+<span class="fc" id="L699">                        _onShow( item, thisComponent, (c,v) -&gt; _setSelectedItem(c, v) );</span>
+<span class="fc" id="L700">                        _onSelection(thisComponent,</span>
+<span class="fc" id="L701">                            e -&gt; _runInApp( (E)thisComponent.getSelectedItem(), newItem -&gt; item.set(From.VIEW, newItem)  )</span>
                         );
                     }
 <span class="fc" id="L704">                    _setSelectedItem(thisComponent, item.get());</span>
@@ -707,69 +707,29 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
     }
 
     private void _setSelectedItem( JComboBox&lt;E&gt; thisComponent, E item ) {
-        // Ok, so a combo box fires an event when the selection is changed programmatically.
-        // This is a problem, because we don't want to trigger the action listener.
-        // So we temporarily remove the action listener(s), and then add them back.
-        // 1. Get the action listener(s)
-<span class="fc" id="L714">        Component editor = thisComponent.getEditor().getEditorComponent();</span>
-<span class="fc" id="L715">        AbstractDocument abstractDocument = null;</span>
-<span class="fc" id="L716">        ActionListener[]   listeners    = thisComponent.getActionListeners();</span>
-<span class="fc" id="L717">        DocumentListener[] docListeners = {};</span>
-<span class="pc bpc" id="L718" title="1 of 2 branches missed.">        if ( editor instanceof JTextField ) {</span>
-<span class="fc" id="L719">            JTextField field = (JTextField) editor;</span>
-<span class="fc" id="L720">            Document doc = field.getDocument();</span>
-<span class="pc bpc" id="L721" title="1 of 2 branches missed.">            if ( doc instanceof AbstractDocument ) {</span>
-<span class="fc" id="L722">                abstractDocument = (AbstractDocument) doc;</span>
-<span class="fc" id="L723">                docListeners = ((AbstractDocument)doc).getDocumentListeners();</span>
-            }
-        }
-
-        // 2. Remove them
-<span class="pc bpc" id="L728" title="1 of 2 branches missed.">        for ( ActionListener listener : listeners )</span>
-<span class="nc" id="L729">            thisComponent.removeActionListener(listener);</span>
-<span class="pc bpc" id="L730" title="1 of 2 branches missed.">        if ( abstractDocument != null ) {</span>
-<span class="fc bfc" id="L731" title="All 2 branches covered.">            for (DocumentListener listener : docListeners) {</span>
-<span class="fc" id="L732">                abstractDocument.removeDocumentListener(listener);</span>
-            }
-        }
-
-        try {
-            // 3. Set the selected item
-<span class="fc" id="L738">            thisComponent.setSelectedItem(item);</span>
-            // 3.1 We make sure the editor also gets an update!
-<span class="fc" id="L740">            thisComponent.getEditor().setItem(item);</span>
-
-<span class="nc" id="L742">        } catch ( Exception e ) {</span>
-<span class="nc" id="L743">            throw new RuntimeException(e);</span>
-<span class="fc" id="L744">        }</span>
-
-        // 4. Add them back
-<span class="pc bpc" id="L747" title="1 of 2 branches missed.">        for ( ActionListener listener : listeners )</span>
-<span class="nc" id="L748">            thisComponent.addActionListener(listener);</span>
-<span class="pc bpc" id="L749" title="1 of 2 branches missed.">        if ( abstractDocument != null ) {</span>
-<span class="fc bfc" id="L750" title="All 2 branches covered.">            for (DocumentListener listener : docListeners) {</span>
-<span class="fc" id="L751">                abstractDocument.addDocumentListener(listener);</span>
-            }
-        }
-<span class="fc" id="L754">    }</span>
+<span class="fc" id="L710">        SilentSet.run(thisComponent, () -&gt; {</span>
+<span class="fc" id="L711">            thisComponent.setSelectedItem(item);</span>
+<span class="fc" id="L712">            thisComponent.getEditor().setItem(item);</span>
+<span class="fc" id="L713">        });</span>
+<span class="fc" id="L714">    }</span>
 
     private void _bindComboModelToEditor( JComboBox&lt;E&gt; thisComponent, AbstractComboModel&lt;E&gt; model ) {
-<span class="fc" id="L757">        Component editor = thisComponent.getEditor().getEditorComponent();</span>
-<span class="pc bpc" id="L758" title="1 of 2 branches missed.">        if ( editor instanceof JTextField ) {</span>
-<span class="fc" id="L759">            JTextField field = (JTextField) editor;</span>
-<span class="fc" id="L760">            MemSafeBinding&lt;E&gt; memSafeBinding = new MemSafeBinding&lt;&gt;(field, thisComponent, model);</span>
+<span class="fc" id="L717">        Component editor = thisComponent.getEditor().getEditorComponent();</span>
+<span class="pc bpc" id="L718" title="1 of 2 branches missed.">        if ( editor instanceof JTextField ) {</span>
+<span class="fc" id="L719">            JTextField field = (JTextField) editor;</span>
+<span class="fc" id="L720">            MemSafeBinding&lt;E&gt; memSafeBinding = new MemSafeBinding&lt;&gt;(field, thisComponent, model);</span>
 
-<span class="fc" id="L762">            UI.of(field).onTextChange( it -&gt; {</span>
-<span class="fc" id="L763">                memSafeBinding.textChanged();</span>
-<span class="fc" id="L764">            });</span>
-<span class="fc" id="L765">            _onShow( model._getSelectedItemVar(), thisComponent, (c, v) -&gt; {</span>
-<span class="fc" id="L766">                memSafeBinding.itemChanged(c, v);</span>
-<span class="fc" id="L767">            });</span>
+<span class="fc" id="L722">            UI.of(field).onTextChange( it -&gt; {</span>
+<span class="fc" id="L723">                memSafeBinding.textChanged();</span>
+<span class="fc" id="L724">            });</span>
+<span class="fc" id="L725">            _onShow( model._getSelectedItemVar(), thisComponent, (c, v) -&gt; {</span>
+<span class="fc" id="L726">                memSafeBinding.itemChanged(c, v);</span>
+<span class="fc" id="L727">            });</span>
             // Adds a PopupMenu listener which will listen to notification
             // messages from the popup portion of the combo box.
-<span class="fc" id="L770">            thisComponent.addPopupMenuListener(memSafeBinding);</span>
+<span class="fc" id="L730">            thisComponent.addPopupMenuListener(memSafeBinding);</span>
         }
-<span class="fc" id="L772">    }</span>
+<span class="fc" id="L732">    }</span>
 
     /**
      *  A popup menu listener for the combo box which synchronizes text field, model
@@ -783,58 +743,58 @@ public final class UIForCombo&lt;E,C extends JComboBox&lt;E&gt;&gt; extends UIFo
         private final WeakReference&lt;JComboBox&lt;E&gt;&gt; weakCombo;
         private final WeakReference&lt;AbstractComboModel&lt;E&gt;&gt; weakModel;
 
-<span class="fc" id="L786">        private boolean comboIsOpen = false;</span>
+<span class="fc" id="L746">        private boolean comboIsOpen = false;</span>
 
         private MemSafeBinding(
                 JTextField field,
                 JComboBox&lt;E&gt; combo,
                 AbstractComboModel&lt;E&gt; model
-<span class="fc" id="L792">        ) {</span>
-<span class="fc" id="L793">            this.weakField = new WeakReference&lt;&gt;(field);</span>
-<span class="fc" id="L794">            this.weakCombo = new WeakReference&lt;&gt;(combo);</span>
-<span class="fc" id="L795">            this.weakModel = new WeakReference&lt;&gt;(model);</span>
-<span class="fc" id="L796">        }</span>
+<span class="fc" id="L752">        ) {</span>
+<span class="fc" id="L753">            this.weakField = new WeakReference&lt;&gt;(field);</span>
+<span class="fc" id="L754">            this.weakCombo = new WeakReference&lt;&gt;(combo);</span>
+<span class="fc" id="L755">            this.weakModel = new WeakReference&lt;&gt;(model);</span>
+<span class="fc" id="L756">        }</span>
 
         public void textChanged() {
-<span class="fc" id="L799">            JTextField field = weakField.get();</span>
-<span class="fc" id="L800">            AbstractComboModel&lt;E&gt; strongModel = weakModel.get();</span>
-<span class="pc bpc" id="L801" title="2 of 4 branches missed.">            if ( strongModel != null &amp;&amp; field != null ) {</span>
-<span class="fc" id="L802">                JComboBox&lt;E&gt; strongCombo = weakCombo.get();</span>
-<span class="pc bpc" id="L803" title="2 of 6 branches missed.">                if (!comboIsOpen &amp;&amp; strongCombo != null &amp;&amp; strongCombo.isEditable())</span>
-<span class="fc" id="L804">                    strongModel.setFromEditor(field.getText());</span>
+<span class="fc" id="L759">            JTextField field = weakField.get();</span>
+<span class="fc" id="L760">            AbstractComboModel&lt;E&gt; strongModel = weakModel.get();</span>
+<span class="pc bpc" id="L761" title="2 of 4 branches missed.">            if ( strongModel != null &amp;&amp; field != null ) {</span>
+<span class="fc" id="L762">                JComboBox&lt;E&gt; strongCombo = weakCombo.get();</span>
+<span class="pc bpc" id="L763" title="2 of 6 branches missed.">                if (!comboIsOpen &amp;&amp; strongCombo != null &amp;&amp; strongCombo.isEditable())</span>
+<span class="fc" id="L764">                    strongModel.setFromEditor(field.getText());</span>
             }
-<span class="fc" id="L806">        }</span>
+<span class="fc" id="L766">        }</span>
 
         public void itemChanged(JComboBox&lt;E&gt; combo, E newItem) {
-<span class="fc" id="L809">            AbstractComboModel&lt;E&gt; strongModel = weakModel.get();</span>
-<span class="pc bpc" id="L810" title="1 of 2 branches missed.">            if ( strongModel != null ) {</span>
-<span class="fc" id="L811">                strongModel.doQuietly(() -&gt; {</span>
-<span class="fc" id="L812">                    combo.getEditor().setItem(newItem);</span>
+<span class="fc" id="L769">            AbstractComboModel&lt;E&gt; strongModel = weakModel.get();</span>
+<span class="pc bpc" id="L770" title="1 of 2 branches missed.">            if ( strongModel != null ) {</span>
+<span class="fc" id="L771">                strongModel.doQuietly(() -&gt; {</span>
+<span class="fc" id="L772">                    combo.getEditor().setItem(newItem);</span>
                     /*
                         Note that the combo box itself is notified about the new
                         selection state by `_updateSelectionFromProperty(..)`,
                         which runs before this editor sync. Here we only need
                         to keep the editor component in line.
                     */
-<span class="fc" id="L819">                });</span>
+<span class="fc" id="L779">                });</span>
             }
-<span class="fc" id="L821">        }</span>
+<span class="fc" id="L781">        }</span>
 
         @Override
         public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
             // This method is called before the popup menu becomes visible.
-<span class="nc" id="L826">            comboIsOpen = true;</span>
-<span class="nc" id="L827">        }</span>
+<span class="nc" id="L786">            comboIsOpen = true;</span>
+<span class="nc" id="L787">        }</span>
         @Override
         public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
             // This method is called before the popup menu becomes invisible
-<span class="nc" id="L831">            comboIsOpen = false;</span>
-<span class="nc" id="L832">        }</span>
+<span class="nc" id="L791">            comboIsOpen = false;</span>
+<span class="nc" id="L792">        }</span>
         @Override
         public void popupMenuCanceled(PopupMenuEvent e) {
             // This method is called when the popup menu is canceled
-<span class="nc" id="L836">            comboIsOpen = false;</span>
-<span class="nc" id="L837">        }</span>
+<span class="nc" id="L796">            comboIsOpen = false;</span>
+<span class="nc" id="L797">        }</span>
     }
 
 }

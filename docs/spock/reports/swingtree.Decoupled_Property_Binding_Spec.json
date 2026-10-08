@@ -4,7 +4,7 @@
   "narrative":"Swing only knows one thread, the event dispatch thread (EDT),\n    which performs both the rendering of the UI as well as the event handling.\n    This is a problem for applications that need to perform long running\n    tasks in the background, because the EDT is blocked until a task\n    is complete, freezing the UI. The decoupled threading mode solves this\n    by dispatching your business logic to a custom application thread, while\n    ensuring that all UI related operations still happen on the EDT.\n    This specification demonstrates how this threading model interacts\n    with the MVVM pattern and the binding of properties to UI components.\n\n    The single most important boundary in a decoupled SwingTree application\n    is the one between your property based view models, which live on the\n    application thread, and the Swing components, which live on the UI thread.\n\n    Whenever a bound property changes, the new state has to travel from the\n    application thread to the UI thread, and whenever the user interacts\n    with a component, the event has to travel from the UI thread to the\n    application thread. Both directions cross a thread boundary,\n    which raises delicate questions:\n    Do updates get lost? Can a stale value overtake a newer one?\n    Which thread executes what?\n\n    This specification answers these questions. To keep the concurrency\n    easy to reason about, most tests use two simple tricks:\n    the test thread itself plays the role of the application thread\n    (by draining the application event queue on demand), and where\n    necessary the UI thread is temporarily parked behind a latch so that\n    in-flight updates can be observed before they are applied.\n    No mocks are involved, everything runs through the real\n    event processor, real components and real properties.",
   "subjects":["swingtree.UIForAnySwing","swingtree.UIForTabbedPane","swingtree.threading.EventProcessor"],
   "statistics":{
-    "runs":"37",
+    "runs":"38",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -521,6 +521,31 @@
         {"kind":"and","text":"...but as soon as the UI thread caught up, the new state arrived.","code":["read(component) == newValue"]},
 
         {"kind":"where","text":"The same asynchronous update contract holds for all of the following widget states:","code":{"widgetState":["'JLabel text'","'JTextField text'","'JCheckBox selection'","'JToggleButton selection'","'JSlider value'","'JProgressBar value'","'JSpinner value'","'JComboBox selection'","'JTabbedPane selected index'","'enabled flag'","'visible flag'","'background color'"],"property":["Var.of(\"Old\")","Var.of(\"Old\")","Var.of(false)","Var.of(false)","Var.of(10)","Var.of(10)","Var.of(5)","Var.of(\"B\")","Var.of(0)","Var.of(true)","Var.of(true)","Var.of(UI.Color.RED)"],"newValue":["\"New!\"","\"New!\"","true","true","90","90","42","\"C\"","1","false","false","UI.Color.BLUE"],"declare":["{ p -> UI.label(p).get(JLabel) }","{ p -> UI.textField(p).get(JTextField) }","{ p -> UI.checkBox(\"Check me\", p).get(JCheckBox) }","{ p -> UI.toggleButton(\"Toggle me\", p).get(JToggleButton) }","{ p -> UI.slider(UI.Axis.HORIZONTAL).withMin(0).withMax(100).withValue(p).get(JSlider) }","{ p -> UI.progressBar(0, 100, p).get(JProgressBar) }","{ p -> UI.spinner(p).get(JSpinner) }","{ p -> UI.comboBox(p, [\"A\", \"B\", \"C\"]).get(JComboBox) }","{ p -> UI.tabbedPane().add(UI.tab(\"One\")).add(UI.tab(\"Two\")).withSelectedIndex(p).get(JTabbedPane) }","{ p -> UI.button(\"Button\").isEnabledIf(p).get(JButton) }","{ p -> UI.button(\"Button\").isVisibleIf(p).get(JButton) }","{ p -> UI.label(\"Colorful!\").withBackground(p).get(JLabel) }"],"read":["{ c -> c.text }","{ c -> c.text }","{ c -> c.selected }","{ c -> c.selected }","{ c -> c.value }","{ c -> c.value }","{ c -> c.value }","{ c -> c.selectedItem }","{ c -> c.selectedIndex }","{ c -> c.enabled }","{ c -> c.visible }","{ c -> c.background }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Text which a bound `Var<String>` puts into a text field does not travel back to the application thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A text field bound to a `Var<String>` connects the property and the\n            field in both directions: a new property value travels to the UI\n            thread and becomes the text of the field, and the text the user\n            types travels to the application thread and becomes the value of\n            the property.\n\n            Text which came from the property must not make that second trip.\n            Swing replaces a text by first removing the old text and then\n            inserting the new one, so the field changes twice, and the first\n            change leaves it empty. If both changes travelled back, the property\n            would first be set to the empty text and then to the new text,\n            and each of these values would travel to the UI thread again,\n            where they would replace the text once more, and so on.\n            So the field keeps the text which the property puts into it\n            to itself, and only the text the user types travels back.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A text property which records every change it is told about, and the channel the change came through.","code":["var trace = new CopyOnWriteArrayList<String>()","var text = Var.of(\"Hello\")","text.onChange(From.ALL, it -> trace << \"${it.channel()}: ${it.currentValue().orElseNull()}\".toString())"]},
+
+        {"kind":"and","text":"A text field built in decoupled mode, with its text bound to the property.","code":["var field = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.textField(text)).get(JTextField)","})"]},
+
+        {"kind":"when","text":"The view model changes the text, and both threads work through everything this causes.","code":["text.set(From.VIEW_MODEL, \"World\")","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The text field shows the new text...","code":["UI.runAndGet({ field.text }) == \"World\""]},
+
+        {"kind":"and","text":"...and the property was told about the change of the view model only.","code":["trace == [\"VIEW_MODEL: World\"]"]},
+
+        {"kind":"when","text":"The user types a character at the end of the text, on the UI thread.","code":["UI.runNow({","    field.caretPosition = field.text.length()","    field.replaceSelection(\"!\")","})","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The typed text travelled to the property, through the view channel.","code":["text.get() == \"World!\"","trace == [\"VIEW_MODEL: World\", \"VIEW: World!\"]"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

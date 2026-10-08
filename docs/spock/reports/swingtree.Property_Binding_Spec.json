@@ -4,7 +4,7 @@
   "narrative":"SwingTree includes support for writing UIs using the MVVM pattern,\n    by shipping with a set of properties that can be bound to UI components\n    to model their state.\n    This specification demonstrates how to bind the properties of\n    you view model to the SwingTree UI.",
   "subjects":["sprouts.Val","sprouts.Var"],
   "statistics":{
-    "runs":"32",
+    "runs":"38",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -320,6 +320,152 @@
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
         {"kind":"then","text":"The text field will have the new text.","code":["panel.components[1].text == \"Goodbye World\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a bound `Var<String>` replaces the text, the caret moves into the new text and typing keeps working.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A common use of `UI.textArea(Var<String>)` is a message box which\n            the view model clears once the message is sent. The caret of the\n            text area is managed by Swing, and it has to follow the text\n            which the property puts into the area: when the old text is\n            longer than the new one, a caret left at its old position would\n            point past the end of the new text. Every key the user types\n            after that would be rejected with an error beep, until a mouse\n            click moves the caret back into the text.\n\n            Note that we type into the text area on the Swing thread, like a\n            real key press does, because a Swing caret only follows the\n            edits which are made on that thread. And the text area hands\n            what the user typed to the property in a later turn of the Swing\n            thread, which is why we wait for it with `UI.sync()`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A message property and a text area bound to it.","code":["Var<String> message = Var.of(\"\")","var area = UI.textArea(message).get(JTextArea)"]},
+
+        {"kind":"when","text":"The user types two lines into the text area.","code":["UI.runNow { area.replaceSelection(\"Hello\\nWorld\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The property holds what the user typed, and the caret sits at the end of it.","code":["message.get() == \"Hello\\nWorld\"","area.caretPosition == \"Hello\\nWorld\".length()"]},
+
+        {"kind":"when","text":"The view model clears the message, as if it had just been sent.","code":["UI.runNow { message.set(From.VIEW_MODEL, \"\") }"]},
+
+        {"kind":"then","text":"The text area is empty, and its caret sits at the start of the empty text.","code":["area.text == \"\"","area.caretPosition == 0"]},
+
+        {"kind":"when","text":"The user types the next character.","code":["UI.runNow { area.replaceSelection(\"!\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The character lands in the text area and travels to the property.","code":["area.text == \"!\"","message.get() == \"!\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a bound `Var<String>` replaces the text of a wrapping JTextArea, the component takes the height of the new text. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing does not paint the text of a text component directly from\n            the text. It builds a tree of views from the document, typically\n            one view per line or paragraph, and those views compute the\n            preferred size of the component and decide which strip of it\n            needs to be repainted after a key press.\n\n            So when a property replaces the text, the views have to be\n            rebuilt for the new text. If they still described the old text,\n            a component which wraps its lines would keep the height of the old\n            text, and the characters typed afterwards would land outside the\n            repainted strip, so they would only show up after something\n            repaints the whole component.\n\n            We use the height the component has while it is empty as the\n            reference: after the property clears a two line text, the\n            component must be exactly as tall as it was before anything\n            was typed into it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A component bound to a text property, with a fixed width so that its lines wrap. (See the `where` table for the current case!)","code":["var component = build(text)","component.setSize(200, 100)"]},
+
+        {"kind":"and","text":"We remember how tall the component wants to be while it is empty.","code":["int heightWhileEmpty = component.preferredSize.height"]},
+
+        {"kind":"when","text":"The user types two lines into the component.","code":["component.replaceSelection(\"Hello\\nWorld\")"]},
+
+        {"kind":"then","text":"The component wants to be taller now.","code":["component.preferredSize.height > heightWhileEmpty"]},
+
+        {"kind":"when","text":"The view model clears the text.","code":["text.set(From.VIEW_MODEL, \"\")"]},
+
+        {"kind":"then","text":"The component wants to be exactly as tall as it was before anything was typed.","code":["component.text == \"\"","component.preferredSize.height == heightWhileEmpty"]},
+
+        {"kind":"where","text":"We check two text components which build one view per line:","code":{"componentType":["'wrapping JTextArea'","'JTextPane'"],"text":["Var.of(\"\")","Var.of(\"\")"],"build":["{ Var<String> t -> UI.textArea(t).peek(it -> it.setLineWrap(true)).get(JTextArea) }","{ Var<String> t -> UI.textPane().withText(t).get(JTextPane) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a bound `Var<String>` replaces the text of a JTextPane, the component takes the height of the new text. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing does not paint the text of a text component directly from\n            the text. It builds a tree of views from the document, typically\n            one view per line or paragraph, and those views compute the\n            preferred size of the component and decide which strip of it\n            needs to be repainted after a key press.\n\n            So when a property replaces the text, the views have to be\n            rebuilt for the new text. If they still described the old text,\n            a component which wraps its lines would keep the height of the old\n            text, and the characters typed afterwards would land outside the\n            repainted strip, so they would only show up after something\n            repaints the whole component.\n\n            We use the height the component has while it is empty as the\n            reference: after the property clears a two line text, the\n            component must be exactly as tall as it was before anything\n            was typed into it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A component bound to a text property, with a fixed width so that its lines wrap. (See the `where` table for the current case!)","code":["var component = build(text)","component.setSize(200, 100)"]},
+
+        {"kind":"and","text":"We remember how tall the component wants to be while it is empty.","code":["int heightWhileEmpty = component.preferredSize.height"]},
+
+        {"kind":"when","text":"The user types two lines into the component.","code":["component.replaceSelection(\"Hello\\nWorld\")"]},
+
+        {"kind":"then","text":"The component wants to be taller now.","code":["component.preferredSize.height > heightWhileEmpty"]},
+
+        {"kind":"when","text":"The view model clears the text.","code":["text.set(From.VIEW_MODEL, \"\")"]},
+
+        {"kind":"then","text":"The component wants to be exactly as tall as it was before anything was typed.","code":["component.text == \"\"","component.preferredSize.height == heightWhileEmpty"]},
+
+        {"kind":"where","text":"We check two text components which build one view per line:","code":{"componentType":["'wrapping JTextArea'","'JTextPane'"],"text":["Var.of(\"\")","Var.of(\"\")"],"build":["{ Var<String> t -> UI.textArea(t).peek(it -> it.setLineWrap(true)).get(JTextArea) }","{ Var<String> t -> UI.textPane().withText(t).get(JTextPane) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A HTML `JEditorPane` bound to a `Val<String>` lays out the HTML which the property puts into it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `JEditorPane` with the content type \"text/html\" parses its text\n            into a structured document, and Swing builds a view for every\n            paragraph of that document. These views are what you actually\n            see, so they have to be built for every page the property puts\n            into the editor pane. Without them the editor pane would hold the\n            right text, report the size of an empty page and paint nothing at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a HTML page, and a HTML editor pane bound to it.","code":["Var<String> page = Var.of(\"\")","var editor = UI.editorPane()","                .peek(it -> it.setContentType(\"text/html\"))","                .withText(page)","                .get(JEditorPane)","editor.setSize(300, 200)"]},
+
+        {"kind":"when","text":"The property delivers a page with one paragraph.","code":["page.set(From.VIEW_MODEL, \"<html><body><p>Hello</p></body></html>\")","int heightOfOneParagraph = editor.preferredSize.height"]},
+
+        {"kind":"and","text":"Then a page with two paragraphs.","code":["page.set(From.VIEW_MODEL, \"<html><body><p>Hello</p><p>World</p></body></html>\")","int heightOfTwoParagraphs = editor.preferredSize.height"]},
+
+        {"kind":"then","text":"The editor pane holds the text of the second page...","code":["editor.document.getText(0, editor.document.length).contains(\"World\")"]},
+
+        {"kind":"and","text":"...and it wants to be taller for two paragraphs than for one.","code":["heightOfTwoParagraphs > heightOfOneParagraph"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `DocumentListener` of your own hears about text which a bound property puts into a text component.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree keeps its own listeners from reacting to text which a\n            bound property puts into a text component, because they would\n            only write that same text back into the property.\n            Every other listener of the document is left alone:\n            Swing's own listeners move the caret and rebuild the views,\n            and a listener you add to the document yourself hears about the\n            change just like it would for any other call to `setText`.\n\n            The order of the listeners is left alone as well. A Swing document\n            tells its newest listener first, so changing the order would change\n            which listener sees a change before the others.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which our own listener leaves a trace in.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A text property, and a text area bound to it, whose document gets a listener of our own.","code":["Var<String> text = Var.of(\"Hello\")","var area = UI.textArea(text)","            .peek(it -> it.document.addDocumentListener(new DocumentListener() {","                @Override void insertUpdate(DocumentEvent e)  { trace << \"insert\" }","                @Override void removeUpdate(DocumentEvent e)  { trace << \"remove\" }","                @Override void changedUpdate(DocumentEvent e) { trace << \"change\" }","            }))","            .get(JTextArea)"]},
+
+        {"kind":"and","text":"We remember which listeners the document has, in the order the document tells them.","code":["var listenersBefore = (area.document as AbstractDocument).documentListeners.toList()"]},
+
+        {"kind":"when","text":"The view model changes the text.","code":["text.set(From.VIEW_MODEL, \"World\")"]},
+
+        {"kind":"then","text":"Our listener heard the old text being removed and the new text being inserted.","code":["trace == [\"remove\", \"insert\"]"]},
+
+        {"kind":"and","text":"The document has the same listeners as before, in the same order.","code":["(area.document as AbstractDocument).documentListeners.toList() == listenersBefore"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Text which a bound `Var<String>` puts into a text component is not reported back to the property, nor to `onTextChange`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A text component bound to a `Var<String>` writes every change of\n            its text into the property, and it shows every new value of the\n            property. Text which came from the property must not travel back\n            into it: the property would be told the same text again, or worse,\n            the empty text in between, because Swing replaces a text by first\n            removing the old text and then inserting the new one.\n            For the same reason, the `onTextChange` handlers of the text\n            component stay silent while the property sets the text.\n            They react to the text the user types.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which the property and the `onTextChange` handler leave a trace in.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A text property which records every change it is told about, and the channel the change came through.","code":["Var<String> text = Var.of(\"Hello\")","text.onChange(From.ALL, it -> trace << \"property ${it.channel()}: ${it.currentValue().orElseNull()}\".toString())"]},
+
+        {"kind":"and","text":"A text field bound to the property, with an `onTextChange` handler.","code":["var field = UI.textField(text)","             .onTextChange(it -> trace << \"onTextChange: ${it.event.document.getText(0, it.event.document.length)}\".toString())","             .get(JTextField)"]},
+
+        {"kind":"when","text":"The view model changes the text.","code":["text.set(From.VIEW_MODEL, \"World\")"]},
+
+        {"kind":"then","text":"The text field shows the new text...","code":["field.text == \"World\""]},
+
+        {"kind":"and","text":"...and the only trace is the change made by the view model.","code":["trace == [\"property VIEW_MODEL: World\"]"]},
+
+        {"kind":"when","text":"The user types a character at the end of the text, on the Swing thread, and we wait for the text to reach the property.","code":["UI.runNow {","    field.caretPosition = field.text.length()","    field.replaceSelection(\"!\")","}","UI.sync()"]},
+
+        {"kind":"then","text":"Both the `onTextChange` handler and the property hear about it, the property through the view channel.","code":["trace.drop(1).toSet() == [\"onTextChange: World!\", \"property VIEW: World!\"].toSet()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

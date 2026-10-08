@@ -4,7 +4,7 @@
   "narrative":"Swing-Tree exposes a user friendly API for rendering table cells.\n    For simple table UIs none of this is necessary, but it\n    is important when you want to populate your table with more complex data.\n    The renderer is a simple function that takes a value and returns a UI node.\n    The UI node is then rendered as a table cell.",
   "subjects":[],
   "statistics":{
-    "runs":"5",
+    "runs":"6",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -132,6 +132,33 @@
         {"kind":"and","text":"Finally we access the component from the renderer (which is responsible for the actual rendering).","code":["var component = UI.runAndGet({found.getTableCellRendererComponent(new JTable(), 1, false, false, 0, 0)})"]},
 
         {"kind":"then","text":"The cell is rendered as text (based on a JLabel).","code":["component instanceof JLabel","component.text == \"1!\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The cells of a table built with `withCells(..)` follow a switch of the look and feel.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When your application switches the look and feel while it is running, every\n            component on screen has to be handed a UI delegate of the new look and feel,\n            and that includes the labels a table draws its cells with. SwingTree makes sure\n            the component its cell renderer hands out for a cell carries a delegate of the\n            look and feel that is installed now, not of the one that was installed when the\n            table was built.\n\n            The usual way to switch is to call `UIManager.setLookAndFeel(..)` and then\n            `SwingUtilities.updateComponentTreeUI(..)` on each window. That second call walks\n            the component tree and calls `updateUI()` on every component it finds. The label\n            a cell renderer paints a cell with is not in that tree. To paint one cell,\n            Swing adds the label to a hidden `CellRendererPane`, paints it there, and removes\n            it again, so between two paints the label has no parent at all. That is why\n            `JTable.updateUI()` also calls `updateUI()` on the renderers of its columns and on its\n            default renderers, but only on those which are themselves a `Component`. The renderer\n            SwingTree builds from your `withCells(..)` rules is not a component, it only creates\n            and keeps the labels it hands out. So if SwingTree left those labels alone, they would keep the delegate of\n            the old look and feel forever, and every cell would be painted with the old look and\n            feel's colours and fonts.\n\n            In this scenario we switch from Metal, Swing's cross-platform look and feel, to\n            Nimbus, because both ship with every JDK and they draw a label with different\n            delegate classes: Metal with a `MetalLabelUI`, and Nimbus with a `SynthLabelUI`.\n            So the class of the label's delegate tells us which look and feel it follows. We\n            ask the renderer for a cell the way Swing does, handing it the table itself. This\n            specification runs with the strict event processor, which only allows Swing work on\n            the event dispatch thread, so every step that touches Swing runs through\n            `UI.runAndGet(..)`. At the end we install Metal again, so that no other scenario\n            runs under Nimbus.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Metal is the installed look and feel.","code":["UI.runNow({ UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()) })"]},
+
+        {"kind":"and","text":"A table whose cells are rendered as text through `withCells(..)`.","code":["var table =","            UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { [[1, 2, 3], [7, 8, 9]] })","            .withCells(","                it -> it.when(Integer).asText( cell -> cell.entryAsString() )","            )","            .get(JTable)"]},
+
+        {"kind":"and","text":"The label the renderer hands out for a cell, while Metal is installed.","code":["var labelUnderMetal = UI.runAndGet({","    table.getDefaultRenderer(Object).getTableCellRendererComponent(table, 1, false, false, 0, 0)","})"]},
+
+        {"kind":"expect","text":"The label is drawn by Metal.","code":["labelUnderMetal.getUI() instanceof javax.swing.plaf.metal.MetalLabelUI"]},
+
+        {"kind":"when","text":"The application switches to Nimbus the way Swing recommends it.","code":["UI.runNow({","    UIManager.setLookAndFeel(new javax.swing.plaf.nimbus.NimbusLookAndFeel())","    SwingUtilities.updateComponentTreeUI(table)","})"]},
+
+        {"kind":"and","text":"Swing asks the renderer for the same cell again.","code":["var labelUnderNimbus = UI.runAndGet({","    table.getDefaultRenderer(Object).getTableCellRendererComponent(table, 1, false, false, 0, 0)","})"]},
+
+        {"kind":"then","text":"The label it hands out is now drawn by Nimbus.","code":["labelUnderNimbus.getUI() instanceof javax.swing.plaf.synth.SynthLabelUI"]},
+
+        {"kind":"cleanup","text":"We give every other scenario back the look and feel it expects.","code":["UI.runNow({ UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName()) })"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

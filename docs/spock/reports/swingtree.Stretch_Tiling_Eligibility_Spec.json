@@ -31,6 +31,14 @@
 
         {"kind":"and","text":"...and the paint at the new size was still served from the cache.","code":["backend.cacheMissCount(layer) == missesBeforeResize","backend.cacheHitCount(layer)  >  hitsBeforeResize","backend.cachedRendering(layer).isNotEmpty()"]},
 
+        {"kind":"when","text":"The button keeps its new size for a few paints.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"It is baked into a rendering of exactly that size, without rendering the style again.","code":["backend.bakedRendering(layer).first().width  == 420","backend.bakedRendering(layer).first().height == 240","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
+        {"kind":"when","text":"It is resized once more.","code":["button.setSize(460, 260)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The baked rendering is dropped, and the exemplar serves the new size, still without a fresh rendering.","code":["backend.bakedRendering(layer).isEmpty()","backend.cachedRendering(layer).isNotEmpty()","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
         {"kind":"where","text":"","code":{"description":["\"flat rounded background and foundation\"","\"uniformly colored rounded border\"","\"a different arc for every corner\"","\"per-edge border colors, square corners\"","\"an offset drop shadow\"","\"an inset shadow\""],"layer":["UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.CONTENT","UI.Layer.CONTENT"],"styler":["{ it.borderRadius(16).margin(6).backgroundColor(\"#385d8a\").foundationColor(\"#eae6da\") }","{ it.border(3, \"#233240\").borderRadius(16) }","{ it.backgroundColor(\"#8a5d38\")\n                                                                       .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 0)\n                                                                       .borderRadiusAt(UI.Corner.TOP_RIGHT, 8, 8)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 16, 16)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }","{ it.borderWidths(1, 2, 3, 4).borderColors(\"#a03030\", \"#30a030\", \"#3030a0\", \"#a0a030\") }","{ it.shadowColor(\"#101010\").shadowBlurRadius(6).shadowSpreadRadius(2).shadowOffset(2, 3).borderRadius(12) }","{ it.shadowColor(\"#242424\").shadowBlurRadius(4).shadowIsInset(true).borderRadius(10) }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -53,6 +61,14 @@
         {"kind":"then","text":"The resize took effect...","code":["button.width == 420 && button.height == 240"]},
 
         {"kind":"and","text":"...and the paint at the new size was still served from the cache.","code":["backend.cacheMissCount(layer) == missesBeforeResize","backend.cacheHitCount(layer)  >  hitsBeforeResize","backend.cachedRendering(layer).isNotEmpty()"]},
+
+        {"kind":"when","text":"The button keeps its new size for a few paints.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"It is baked into a rendering of exactly that size, without rendering the style again.","code":["backend.bakedRendering(layer).first().width  == 420","backend.bakedRendering(layer).first().height == 240","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
+        {"kind":"when","text":"It is resized once more.","code":["button.setSize(460, 260)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The baked rendering is dropped, and the exemplar serves the new size, still without a fresh rendering.","code":["backend.bakedRendering(layer).isEmpty()","backend.cachedRendering(layer).isNotEmpty()","backend.cacheMissCount(layer) == missesBeforeResize"]},
 
         {"kind":"where","text":"","code":{"description":["\"flat rounded background and foundation\"","\"uniformly colored rounded border\"","\"a different arc for every corner\"","\"per-edge border colors, square corners\"","\"an offset drop shadow\"","\"an inset shadow\""],"layer":["UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.CONTENT","UI.Layer.CONTENT"],"styler":["{ it.borderRadius(16).margin(6).backgroundColor(\"#385d8a\").foundationColor(\"#eae6da\") }","{ it.border(3, \"#233240\").borderRadius(16) }","{ it.backgroundColor(\"#8a5d38\")\n                                                                       .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 0)\n                                                                       .borderRadiusAt(UI.Corner.TOP_RIGHT, 8, 8)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 16, 16)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }","{ it.borderWidths(1, 2, 3, 4).borderColors(\"#a03030\", \"#30a030\", \"#3030a0\", \"#a0a030\") }","{ it.shadowColor(\"#101010\").shadowBlurRadius(6).shadowSpreadRadius(2).shadowOffset(2, 3).borderRadius(12) }","{ it.shadowColor(\"#242424\").shadowBlurRadius(4).shadowIsInset(true).borderRadius(10) }"]}}
       ],
@@ -77,6 +93,14 @@
 
         {"kind":"and","text":"...and the paint at the new size was still served from the cache.","code":["backend.cacheMissCount(layer) == missesBeforeResize","backend.cacheHitCount(layer)  >  hitsBeforeResize","backend.cachedRendering(layer).isNotEmpty()"]},
 
+        {"kind":"when","text":"The button keeps its new size for a few paints.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"It is baked into a rendering of exactly that size, without rendering the style again.","code":["backend.bakedRendering(layer).first().width  == 420","backend.bakedRendering(layer).first().height == 240","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
+        {"kind":"when","text":"It is resized once more.","code":["button.setSize(460, 260)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The baked rendering is dropped, and the exemplar serves the new size, still without a fresh rendering.","code":["backend.bakedRendering(layer).isEmpty()","backend.cachedRendering(layer).isNotEmpty()","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
         {"kind":"where","text":"","code":{"description":["\"flat rounded background and foundation\"","\"uniformly colored rounded border\"","\"a different arc for every corner\"","\"per-edge border colors, square corners\"","\"an offset drop shadow\"","\"an inset shadow\""],"layer":["UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.CONTENT","UI.Layer.CONTENT"],"styler":["{ it.borderRadius(16).margin(6).backgroundColor(\"#385d8a\").foundationColor(\"#eae6da\") }","{ it.border(3, \"#233240\").borderRadius(16) }","{ it.backgroundColor(\"#8a5d38\")\n                                                                       .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 0)\n                                                                       .borderRadiusAt(UI.Corner.TOP_RIGHT, 8, 8)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 16, 16)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }","{ it.borderWidths(1, 2, 3, 4).borderColors(\"#a03030\", \"#30a030\", \"#3030a0\", \"#a0a030\") }","{ it.shadowColor(\"#101010\").shadowBlurRadius(6).shadowSpreadRadius(2).shadowOffset(2, 3).borderRadius(12) }","{ it.shadowColor(\"#242424\").shadowBlurRadius(4).shadowIsInset(true).borderRadius(10) }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -99,6 +123,14 @@
         {"kind":"then","text":"The resize took effect...","code":["button.width == 420 && button.height == 240"]},
 
         {"kind":"and","text":"...and the paint at the new size was still served from the cache.","code":["backend.cacheMissCount(layer) == missesBeforeResize","backend.cacheHitCount(layer)  >  hitsBeforeResize","backend.cachedRendering(layer).isNotEmpty()"]},
+
+        {"kind":"when","text":"The button keeps its new size for a few paints.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"It is baked into a rendering of exactly that size, without rendering the style again.","code":["backend.bakedRendering(layer).first().width  == 420","backend.bakedRendering(layer).first().height == 240","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
+        {"kind":"when","text":"It is resized once more.","code":["button.setSize(460, 260)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The baked rendering is dropped, and the exemplar serves the new size, still without a fresh rendering.","code":["backend.bakedRendering(layer).isEmpty()","backend.cachedRendering(layer).isNotEmpty()","backend.cacheMissCount(layer) == missesBeforeResize"]},
 
         {"kind":"where","text":"","code":{"description":["\"flat rounded background and foundation\"","\"uniformly colored rounded border\"","\"a different arc for every corner\"","\"per-edge border colors, square corners\"","\"an offset drop shadow\"","\"an inset shadow\""],"layer":["UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.CONTENT","UI.Layer.CONTENT"],"styler":["{ it.borderRadius(16).margin(6).backgroundColor(\"#385d8a\").foundationColor(\"#eae6da\") }","{ it.border(3, \"#233240\").borderRadius(16) }","{ it.backgroundColor(\"#8a5d38\")\n                                                                       .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 0)\n                                                                       .borderRadiusAt(UI.Corner.TOP_RIGHT, 8, 8)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 16, 16)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }","{ it.borderWidths(1, 2, 3, 4).borderColors(\"#a03030\", \"#30a030\", \"#3030a0\", \"#a0a030\") }","{ it.shadowColor(\"#101010\").shadowBlurRadius(6).shadowSpreadRadius(2).shadowOffset(2, 3).borderRadius(12) }","{ it.shadowColor(\"#242424\").shadowBlurRadius(4).shadowIsInset(true).borderRadius(10) }"]}}
       ],
@@ -123,6 +155,14 @@
 
         {"kind":"and","text":"...and the paint at the new size was still served from the cache.","code":["backend.cacheMissCount(layer) == missesBeforeResize","backend.cacheHitCount(layer)  >  hitsBeforeResize","backend.cachedRendering(layer).isNotEmpty()"]},
 
+        {"kind":"when","text":"The button keeps its new size for a few paints.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"It is baked into a rendering of exactly that size, without rendering the style again.","code":["backend.bakedRendering(layer).first().width  == 420","backend.bakedRendering(layer).first().height == 240","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
+        {"kind":"when","text":"It is resized once more.","code":["button.setSize(460, 260)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The baked rendering is dropped, and the exemplar serves the new size, still without a fresh rendering.","code":["backend.bakedRendering(layer).isEmpty()","backend.cachedRendering(layer).isNotEmpty()","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
         {"kind":"where","text":"","code":{"description":["\"flat rounded background and foundation\"","\"uniformly colored rounded border\"","\"a different arc for every corner\"","\"per-edge border colors, square corners\"","\"an offset drop shadow\"","\"an inset shadow\""],"layer":["UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.CONTENT","UI.Layer.CONTENT"],"styler":["{ it.borderRadius(16).margin(6).backgroundColor(\"#385d8a\").foundationColor(\"#eae6da\") }","{ it.border(3, \"#233240\").borderRadius(16) }","{ it.backgroundColor(\"#8a5d38\")\n                                                                       .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 0)\n                                                                       .borderRadiusAt(UI.Corner.TOP_RIGHT, 8, 8)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 16, 16)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }","{ it.borderWidths(1, 2, 3, 4).borderColors(\"#a03030\", \"#30a030\", \"#3030a0\", \"#a0a030\") }","{ it.shadowColor(\"#101010\").shadowBlurRadius(6).shadowSpreadRadius(2).shadowOffset(2, 3).borderRadius(12) }","{ it.shadowColor(\"#242424\").shadowBlurRadius(4).shadowIsInset(true).borderRadius(10) }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
@@ -145,6 +185,14 @@
         {"kind":"then","text":"The resize took effect...","code":["button.width == 420 && button.height == 240"]},
 
         {"kind":"and","text":"...and the paint at the new size was still served from the cache.","code":["backend.cacheMissCount(layer) == missesBeforeResize","backend.cacheHitCount(layer)  >  hitsBeforeResize","backend.cachedRendering(layer).isNotEmpty()"]},
+
+        {"kind":"when","text":"The button keeps its new size for a few paints.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"It is baked into a rendering of exactly that size, without rendering the style again.","code":["backend.bakedRendering(layer).first().width  == 420","backend.bakedRendering(layer).first().height == 240","backend.cacheMissCount(layer) == missesBeforeResize"]},
+
+        {"kind":"when","text":"It is resized once more.","code":["button.setSize(460, 260)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The baked rendering is dropped, and the exemplar serves the new size, still without a fresh rendering.","code":["backend.bakedRendering(layer).isEmpty()","backend.cachedRendering(layer).isNotEmpty()","backend.cacheMissCount(layer) == missesBeforeResize"]},
 
         {"kind":"where","text":"","code":{"description":["\"flat rounded background and foundation\"","\"uniformly colored rounded border\"","\"a different arc for every corner\"","\"per-edge border colors, square corners\"","\"an offset drop shadow\"","\"an inset shadow\""],"layer":["UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.BACKGROUND","UI.Layer.BORDER","UI.Layer.CONTENT","UI.Layer.CONTENT"],"styler":["{ it.borderRadius(16).margin(6).backgroundColor(\"#385d8a\").foundationColor(\"#eae6da\") }","{ it.border(3, \"#233240\").borderRadius(16) }","{ it.backgroundColor(\"#8a5d38\")\n                                                                       .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 0)\n                                                                       .borderRadiusAt(UI.Corner.TOP_RIGHT, 8, 8)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 16, 16)\n                                                                       .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }","{ it.borderWidths(1, 2, 3, 4).borderColors(\"#a03030\", \"#30a030\", \"#3030a0\", \"#a0a030\") }","{ it.shadowColor(\"#101010\").shadowBlurRadius(6).shadowSpreadRadius(2).shadowOffset(2, 3).borderRadius(12) }","{ it.shadowColor(\"#242424\").shadowBlurRadius(4).shadowIsInset(true).borderRadius(10) }"]}}
       ],

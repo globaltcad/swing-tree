@@ -4,7 +4,7 @@
   "narrative":"As a developer, I want to bind a button to a property so\n    that is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.\n\n    A typical use case for button types is to bind\n    their selection state to a property in the view model.\n    This property may be boolean based, or something entirely\n    different.",
   "subjects":["swingtree.UIForAnyButton","swingtree.UIForToggleButton","swingtree.UIForRadioButton"],
   "statistics":{
-    "runs":"9",
+    "runs":"12",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -59,6 +59,85 @@
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
         {"kind":"then","text":"The button should be updated.","code":["button.selected == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A toggle button tells assistive technologies about the selection which a bound property makes.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Assistive technologies, like screen readers, learn about the state\n            of a Swing component through its `AccessibleContext`. When the\n            selection of a toggle button changes, its accessible context reports\n            the new state as a change of the `ACCESSIBLE_STATE_PROPERTY`, so that\n            a screen reader can announce that the button is now checked.\n\n            This has to work for a selection which a bound property makes, too.\n            Otherwise a screen reader would keep announcing the selection the\n            button had before the view model changed it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where the accessible context of the button leaves a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a toggle button bound to it.","code":["var isBold = Var.of(false)","var button = UI.toggleButton(\"Bold\").isSelectedIf(isBold).get(JToggleButton)"]},
+
+        {"kind":"and","text":"A screen reader listening to the accessible state of the button, and noting when the \"checked\" state comes or goes.","code":["button.accessibleContext.addPropertyChangeListener( event -> {","    if ( event.propertyName != AccessibleContext.ACCESSIBLE_STATE_PROPERTY )","        return","    if ( event.newValue == AccessibleState.CHECKED )","        trace << \"now checked\"","    if ( event.oldValue == AccessibleState.CHECKED )","        trace << \"no longer checked\"","})"]},
+
+        {"kind":"when","text":"The view model selects the button.","code":["isBold.set(From.VIEW_MODEL, true)"]},
+
+        {"kind":"then","text":"The button is selected, and the screen reader heard that it is checked now.","code":["button.selected","trace == [\"now checked\"]"]},
+
+        {"kind":"when","text":"The view model unselects the button again.","code":["isBold.set(From.VIEW_MODEL, false)"]},
+
+        {"kind":"then","text":"The screen reader heard that it is no longer checked.","code":["!button.selected","trace == [\"now checked\", \"no longer checked\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A selection which a bound property makes is not reported back to the property, nor to `onChange`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A button bound to a `Var<Boolean>` through `isSelectedIf(..)` writes every\n            change of its selection into the property, and it shows every new\n            value of the property. A selection which came from the property\n            must not travel back into it, and the `onChange` handlers of the\n            button stay silent as well. They react to the selections the user makes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which the property and the `onChange` handler leave a trace in.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property which records every change it is told about, and the channel the change came through.","code":["var isBold = Var.of(false)","isBold.onChange(From.ALL, it -> trace << \"property ${it.channel()}: ${it.currentValue().orElseNull()}\".toString())"]},
+
+        {"kind":"and","text":"A toggle button bound to the property, with an `onChange` handler.","code":["var button = UI.toggleButton(\"Bold\")","                .onChange( it -> trace << \"onChange: ${it.event.stateChange == ItemEvent.SELECTED}\".toString() )","                .isSelectedIf(isBold)","                .get(JToggleButton)"]},
+
+        {"kind":"when","text":"The view model selects the button.","code":["isBold.set(From.VIEW_MODEL, true)"]},
+
+        {"kind":"then","text":"The button is selected...","code":["button.selected"]},
+
+        {"kind":"and","text":"...and the only trace is the change made by the view model.","code":["trace == [\"property VIEW_MODEL: true\"]"]},
+
+        {"kind":"when","text":"The user clicks the button to unselect it.","code":["button.doClick()","UI.sync()"]},
+
+        {"kind":"then","text":"Both the `onChange` handler and the property hear about it, the property through the view channel.","code":["trace.drop(1).toSet() == [\"onChange: false\", \"property VIEW: false\"].toSet()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An enum selection which a bound property makes is not fired again by the radio buttons bound to it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Radio buttons bound through `isSelectedIf(state, Var<E>)` share one\n            enum property. When the user selects one of them, the button writes\n            its state into the property and fires a change of the property,\n            so that every radio button bound to it shows the new selection.\n\n            A selection which came from the property must not cause this:\n            the property would be fired once more, which would make every\n            radio button set its selection again. The property is told about\n            the change of the view model once, and that is all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which the property leaves a trace in.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A size property which records every change it is told about, and the channel the change came through.","code":["var size = Var.of(Size.SMALL)","size.onChange(From.ALL, it -> trace << \"${it.channel()}: ${it.currentValue().orElseNull()}\".toString())"]},
+
+        {"kind":"and","text":"Three radio buttons, one for every size, bound to the property.","code":["var small  = UI.radioButton(\"Small\").isSelectedIf(Size.SMALL, size).get(JRadioButton)","var medium = UI.radioButton(\"Medium\").isSelectedIf(Size.MEDIUM, size).get(JRadioButton)","var large  = UI.radioButton(\"Large\").isSelectedIf(Size.LARGE, size).get(JRadioButton)"]},
+
+        {"kind":"when","text":"The view model selects the large size.","code":["size.set(From.VIEW_MODEL, Size.LARGE)"]},
+
+        {"kind":"then","text":"Only the large radio button is selected...","code":["!small.selected && !medium.selected && large.selected"]},
+
+        {"kind":"and","text":"...and the property was told about the change of the view model only.","code":["trace == [\"VIEW_MODEL: LARGE\"]"]},
+
+        {"kind":"when","text":"The user selects the medium size.","code":["medium.doClick()","UI.sync()"]},
+
+        {"kind":"then","text":"The property holds the medium size, which it was told about through the view channel first.","code":["size.is(Size.MEDIUM)","trace.drop(1).first() == \"VIEW: MEDIUM\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

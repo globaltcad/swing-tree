@@ -3814,8 +3814,8 @@ import java.util.function.Supplier;
      * @param &lt;E&gt; The type of the elements in the combo box.
      */
     public static &lt;E&gt; UIForCombo&lt;E,JComboBox&lt;E&gt;&gt; comboBox( ComboBoxModel&lt;E&gt; model ) {
-<span class="nc" id="L3817">        NullUtil.nullArgCheck(model, &quot;model&quot;, ComboBoxModel.class);</span>
-<span class="nc" id="L3818">        return (UIForCombo)comboBox().peek( c -&gt; ((JComboBox)c).setModel(model) );</span>
+<span class="fc" id="L3817">        NullUtil.nullArgCheck(model, &quot;model&quot;, ComboBoxModel.class);</span>
+<span class="fc" id="L3818">        return (UIForCombo)comboBox().peek( c -&gt; ((JComboBox)c).setModel(model) );</span>
     }
 
     /**

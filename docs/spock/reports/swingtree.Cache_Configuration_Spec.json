@@ -92,7 +92,15 @@
 
         {"kind":"when","text":"We re-enable tiling, let one paint repopulate the canonical rendering, and resize again.","code":["SwingTree.get().setCacheTilingEnabled(true)","button.setSize(360, 120)","Utility.renderSingleComponent(button)","int missesAfterRepopulation = backend.cacheMissCount(UI.Layer.BACKGROUND)","button.setSize(400, 130)","Utility.renderSingleComponent(button)"]},
 
-        {"kind":"then","text":"Resizing is miss-resistant again.","code":["SwingTree.get().isCacheTilingEnabled()","backend.cacheMissCount(UI.Layer.BACKGROUND) == missesAfterRepopulation"]}
+        {"kind":"then","text":"Resizing is miss-resistant again.","code":["SwingTree.get().isCacheTilingEnabled()","backend.cacheMissCount(UI.Layer.BACKGROUND) == missesAfterRepopulation"]},
+
+        {"kind":"when","text":"The button keeps its size for a few paints, so its stretched exemplar is baked.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"","code":["backend.bakedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"We flip the safety hatch once more, and the button keeps its size for a few paints again.","code":["SwingTree.get().setCacheTilingEnabled(false)","6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"Nothing is baked, because without stretch tiling there is no exemplar to bake.","code":["backend.bakedRendering(UI.Layer.BACKGROUND).isEmpty()","backend.cachedRendering(UI.Layer.BACKGROUND).first().width  == 400","backend.cachedRendering(UI.Layer.BACKGROUND).first().height == 130"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

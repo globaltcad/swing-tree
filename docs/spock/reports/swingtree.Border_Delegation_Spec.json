@@ -4,7 +4,7 @@
   "narrative":"A Swing component usually arrives with a border its look and feel installed, and\n    SwingTree replaces that border with one of its own, so that it can paint styles,\n    animations and borders of your own. It does not throw the original away though:\n    as long as your style does not define a border itself, the original is still\n    painted, so a component you did not style in that respect keeps looking exactly\n    the way the look and feel intended.\n\n    \"Exactly\" is the word this specification is about. `getBorder()` really does hand\n    back a different object afterwards, so \"it still looks the same\" is a claim about\n    SwingTree rather than something Swing guarantees for us, and claims like that are\n    worth holding to pixels.\n\n    Every test below therefore renders a component SwingTree built next to a plain Swing\n    component wearing the very same border, and insists the two images are identical -\n    at a modest size and at a maximized one, on an ordinary screen and on a high\n    resolution one, for every border we could get our hands on.",
   "subjects":["swingtree.UI"],
   "statistics":{
-    "runs":"26",
+    "runs":"29",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -621,6 +621,99 @@
         {"kind":"when","text":"We render the component,","code":["render(panel, 1400, 1000)"]},
 
         {"kind":"then","text":"the border it came with was never asked to paint anything.","code":["counting.timesPainted == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A border set after the style was installed is delegated to, just like one set before it. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Every scenario above hands SwingTree a component which is already wearing its border,\n            which is the ordinary case: a look and feel installs a border long before any styling\n            happens. An application may just as well set one afterwards though, and by then\n            SwingTree has replaced the border with one of its own - so the border it sets is a\n            border SwingTree has to take over a second time.\n\n            It does, the next time it paints the component (the `Style Installation` specification\n            pins that repair, and names the Swing classes which make it necessary). What this\n            scenario is about is the other half of that promise: **taking a border over must never\n            mean losing it**. Which of the two happened first may not change what the border does.\n\n            The three rows below are the three things a style can say about the matter, and each\n            one is checked on a panel which wore the border first and on a panel which was given it\n            last:\n\n            - A style which states a **padding** has already said how much room the contents keep,\n              so that padding is the whole of the insets. The inherited border is painted all the\n              same; it simply does not get to ask for room of its own on top.\n            - A style which states no padding lets the inherited border say how much room it needs:\n              a margin of one around a border whose insets are two makes three.\n            - A style with a **border of its own** replaces the inherited one, which is then not\n              painted at all. An inherited border is a fallback, never an addition - and a border\n              which arrived late is inherited in exactly the same way, or else the moment at which\n              an application happened to call `setBorder(..)` would decide what its component looks\n              like.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scale factor of one, so that every number in this scenario is a plain pixel.","code":["var formerScale = SwingTree.get().getUiScaleFactor()","SwingTree.get().setUiScaleFactor(1)"]},
+
+        {"kind":"and","text":"A border two pixels deep, which counts how often it is asked to paint.","code":["var wornFirst = new CountingBorder(new LineBorder(Color.RED, 2, false))","var givenLast = new CountingBorder(new LineBorder(Color.RED, 2, false))"]},
+
+        {"kind":"and","text":"A panel which is already wearing it when SwingTree styles it,","code":["var bordered = UI.panel().get(JPanel)","bordered.setBorder(wornFirst)","var early = UI.of(bordered).withStyle(styler).get(JPanel)"]},
+
+        {"kind":"and","text":"and a panel which SwingTree styles first and which is given it afterwards.","code":["var late = UI.panel().withStyle(styler).get(JPanel)","late.setBorder(givenLast)"]},
+
+        {"kind":"when","text":"We render both of them twice,","code":["render(early, 200, 120)","render(early, 200, 120)","render(late, 200, 120)","render(late, 200, 120)"]},
+
+        {"kind":"then","text":"SwingTree took both borders over, so neither component wears the one it was given,","code":["early.getBorder() !== wornFirst","late.getBorder()  !== givenLast"]},
+
+        {"kind":"and","text":"the border painted as often in the one as in the other,","code":["wornFirst.timesPainted == expectedPaints","givenLast.timesPainted == expectedPaints"]},
+
+        {"kind":"and","text":"and the two components are measured exactly alike.","code":["early.getInsets() == expectedInsets","late.getInsets()  == expectedInsets"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(formerScale)"]},
+
+        {"kind":"where","text":"We say the three things a style can say about the border a component came with.","code":{"expectedPaints":["2","2","0"],"expectedInsets":["new Insets(1, 1, 1, 1)","new Insets(3, 3, 3, 3)","new Insets(3, 3, 3, 3)"],"styler":["{ it.padding(1) }","{ it.margin(1) }","{ it.border(3, Color.BLUE) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A border set after the style was installed is delegated to, just like one set before it. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Every scenario above hands SwingTree a component which is already wearing its border,\n            which is the ordinary case: a look and feel installs a border long before any styling\n            happens. An application may just as well set one afterwards though, and by then\n            SwingTree has replaced the border with one of its own - so the border it sets is a\n            border SwingTree has to take over a second time.\n\n            It does, the next time it paints the component (the `Style Installation` specification\n            pins that repair, and names the Swing classes which make it necessary). What this\n            scenario is about is the other half of that promise: **taking a border over must never\n            mean losing it**. Which of the two happened first may not change what the border does.\n\n            The three rows below are the three things a style can say about the matter, and each\n            one is checked on a panel which wore the border first and on a panel which was given it\n            last:\n\n            - A style which states a **padding** has already said how much room the contents keep,\n              so that padding is the whole of the insets. The inherited border is painted all the\n              same; it simply does not get to ask for room of its own on top.\n            - A style which states no padding lets the inherited border say how much room it needs:\n              a margin of one around a border whose insets are two makes three.\n            - A style with a **border of its own** replaces the inherited one, which is then not\n              painted at all. An inherited border is a fallback, never an addition - and a border\n              which arrived late is inherited in exactly the same way, or else the moment at which\n              an application happened to call `setBorder(..)` would decide what its component looks\n              like.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scale factor of one, so that every number in this scenario is a plain pixel.","code":["var formerScale = SwingTree.get().getUiScaleFactor()","SwingTree.get().setUiScaleFactor(1)"]},
+
+        {"kind":"and","text":"A border two pixels deep, which counts how often it is asked to paint.","code":["var wornFirst = new CountingBorder(new LineBorder(Color.RED, 2, false))","var givenLast = new CountingBorder(new LineBorder(Color.RED, 2, false))"]},
+
+        {"kind":"and","text":"A panel which is already wearing it when SwingTree styles it,","code":["var bordered = UI.panel().get(JPanel)","bordered.setBorder(wornFirst)","var early = UI.of(bordered).withStyle(styler).get(JPanel)"]},
+
+        {"kind":"and","text":"and a panel which SwingTree styles first and which is given it afterwards.","code":["var late = UI.panel().withStyle(styler).get(JPanel)","late.setBorder(givenLast)"]},
+
+        {"kind":"when","text":"We render both of them twice,","code":["render(early, 200, 120)","render(early, 200, 120)","render(late, 200, 120)","render(late, 200, 120)"]},
+
+        {"kind":"then","text":"SwingTree took both borders over, so neither component wears the one it was given,","code":["early.getBorder() !== wornFirst","late.getBorder()  !== givenLast"]},
+
+        {"kind":"and","text":"the border painted as often in the one as in the other,","code":["wornFirst.timesPainted == expectedPaints","givenLast.timesPainted == expectedPaints"]},
+
+        {"kind":"and","text":"and the two components are measured exactly alike.","code":["early.getInsets() == expectedInsets","late.getInsets()  == expectedInsets"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(formerScale)"]},
+
+        {"kind":"where","text":"We say the three things a style can say about the border a component came with.","code":{"expectedPaints":["2","2","0"],"expectedInsets":["new Insets(1, 1, 1, 1)","new Insets(3, 3, 3, 3)","new Insets(3, 3, 3, 3)"],"styler":["{ it.padding(1) }","{ it.margin(1) }","{ it.border(3, Color.BLUE) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A border set after the style was installed is delegated to, just like one set before it. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Every scenario above hands SwingTree a component which is already wearing its border,\n            which is the ordinary case: a look and feel installs a border long before any styling\n            happens. An application may just as well set one afterwards though, and by then\n            SwingTree has replaced the border with one of its own - so the border it sets is a\n            border SwingTree has to take over a second time.\n\n            It does, the next time it paints the component (the `Style Installation` specification\n            pins that repair, and names the Swing classes which make it necessary). What this\n            scenario is about is the other half of that promise: **taking a border over must never\n            mean losing it**. Which of the two happened first may not change what the border does.\n\n            The three rows below are the three things a style can say about the matter, and each\n            one is checked on a panel which wore the border first and on a panel which was given it\n            last:\n\n            - A style which states a **padding** has already said how much room the contents keep,\n              so that padding is the whole of the insets. The inherited border is painted all the\n              same; it simply does not get to ask for room of its own on top.\n            - A style which states no padding lets the inherited border say how much room it needs:\n              a margin of one around a border whose insets are two makes three.\n            - A style with a **border of its own** replaces the inherited one, which is then not\n              painted at all. An inherited border is a fallback, never an addition - and a border\n              which arrived late is inherited in exactly the same way, or else the moment at which\n              an application happened to call `setBorder(..)` would decide what its component looks\n              like.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scale factor of one, so that every number in this scenario is a plain pixel.","code":["var formerScale = SwingTree.get().getUiScaleFactor()","SwingTree.get().setUiScaleFactor(1)"]},
+
+        {"kind":"and","text":"A border two pixels deep, which counts how often it is asked to paint.","code":["var wornFirst = new CountingBorder(new LineBorder(Color.RED, 2, false))","var givenLast = new CountingBorder(new LineBorder(Color.RED, 2, false))"]},
+
+        {"kind":"and","text":"A panel which is already wearing it when SwingTree styles it,","code":["var bordered = UI.panel().get(JPanel)","bordered.setBorder(wornFirst)","var early = UI.of(bordered).withStyle(styler).get(JPanel)"]},
+
+        {"kind":"and","text":"and a panel which SwingTree styles first and which is given it afterwards.","code":["var late = UI.panel().withStyle(styler).get(JPanel)","late.setBorder(givenLast)"]},
+
+        {"kind":"when","text":"We render both of them twice,","code":["render(early, 200, 120)","render(early, 200, 120)","render(late, 200, 120)","render(late, 200, 120)"]},
+
+        {"kind":"then","text":"SwingTree took both borders over, so neither component wears the one it was given,","code":["early.getBorder() !== wornFirst","late.getBorder()  !== givenLast"]},
+
+        {"kind":"and","text":"the border painted as often in the one as in the other,","code":["wornFirst.timesPainted == expectedPaints","givenLast.timesPainted == expectedPaints"]},
+
+        {"kind":"and","text":"and the two components are measured exactly alike.","code":["early.getInsets() == expectedInsets","late.getInsets()  == expectedInsets"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(formerScale)"]},
+
+        {"kind":"where","text":"We say the three things a style can say about the border a component came with.","code":{"expectedPaints":["2","2","0"],"expectedInsets":["new Insets(1, 1, 1, 1)","new Insets(3, 3, 3, 3)","new Insets(3, 3, 3, 3)"],"styler":["{ it.padding(1) }","{ it.margin(1) }","{ it.border(3, Color.BLUE) }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

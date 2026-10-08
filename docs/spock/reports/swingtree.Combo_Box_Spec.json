@@ -4,7 +4,7 @@
   "narrative":"In Swing drop downs are called combo boxes and they are used to select\n    one item from a list of options.\n\n    This specification will show you how you can create them and\n    how you can interact with them using SwingTree.",
   "subjects":["swingtree.UIForCombo"],
   "statistics":{
-    "runs":"41",
+    "runs":"45",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -656,6 +656,83 @@
     },
   
     {
+      "id":"An editable combo box with a model of your own moves its editor caret into the item which a bound property selects.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An editable combo box shows its selected item in a text field, its editor,\n            where the user can type. When a property bound through `withSelectedItem(Var)`\n            selects another item, the editor gets the text of that item, and the caret\n            of the editor, which is managed by Swing, has to follow it:\n            when the new text is shorter than the old one, a caret left at its old\n            position would point past the end of the new text, and every key the user\n            types after that would be rejected with an error beep.\n\n            Note that we type into the editor on the Swing thread, like a real key\n            press does, because a Swing caret only follows the edits which are made\n            on that thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property, and an editable combo box with a model of its own, bound to that property.","code":["var selection = Var.of(\"A\")","var combo = comboBox(new DefaultComboBoxModel<String>([\"A\", \"B\", \"A long item\"] as String[]))","                .isEditableIf(true)","                .withSelectedItem(selection)","                .get(JComboBox)"]},
+
+        {"kind":"and","text":"The text field in which the user edits the selected item.","code":["var editor = (JTextField) combo.editor.editorComponent"]},
+
+        {"kind":"when","text":"The user types a long text into the editor.","code":["UI.runNow {","    editor.text = \"A long item\"","    editor.caretPosition = editor.text.length()","}"]},
+
+        {"kind":"and","text":"The view model selects the item \"B\".","code":["UI.runNow { selection.set(From.VIEW_MODEL, \"B\") }"]},
+
+        {"kind":"then","text":"The editor shows the new item, and its caret sits within the new text.","code":["editor.text == \"B\"","editor.caretPosition <= editor.text.length()"]},
+
+        {"kind":"when","text":"The user types the next character.","code":["UI.runNow { editor.replaceSelection(\"!\") }"]},
+
+        {"kind":"then","text":"The character lands in the editor.","code":["editor.text.contains(\"!\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An item which a bound property selects in a combo box with a model of your own is not reported back to the property, nor to `onSelection`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A combo box whose selection is bound to a property through `withSelectedItem(Var)`\n            writes every selection the user makes into the property, and it shows every new\n            value of the property. A selection which came from the property must not travel\n            back into it, and the `onSelection` handlers of the combo box stay silent as well.\n            They react to the selections the user makes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which the property and the `onSelection` handler leave a trace in.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property which records every change it is told about, and the channel the change came through.","code":["var size = Var.of(\"S\")","size.onChange(From.ALL, it -> trace << \"property ${it.channel()}: ${it.currentValue().orElseNull()}\".toString())"]},
+
+        {"kind":"and","text":"A combo box with a model of its own and an `onSelection` handler, bound to the property.","code":["var combo = comboBox(new DefaultComboBoxModel<String>([\"S\", \"M\", \"L\"] as String[]))","                .onSelection( it -> trace << \"onSelection: ${it.component.selectedItem}\".toString() )","                .withSelectedItem(size)","                .get(JComboBox)"]},
+
+        {"kind":"when","text":"The view model selects the medium size.","code":["UI.runNow { size.set(From.VIEW_MODEL, \"M\") }","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box shows the medium size...","code":["combo.selectedItem == \"M\""]},
+
+        {"kind":"and","text":"...and the only trace is the change made by the view model.","code":["trace == [\"property VIEW_MODEL: M\"]"]},
+
+        {"kind":"when","text":"The user selects the large size.","code":["UI.runNow { combo.setSelectedItem(\"L\") }","UI.sync()"]},
+
+        {"kind":"then","text":"Both the `onSelection` handler and the property hear about it, the property through the view channel.","code":["trace.drop(1).toSet() == [\"onSelection: L\", \"property VIEW: L\"].toSet()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Building an editable combo box with a selected item does not report that item as a selection.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An editable combo box shows its selected item in a text field, its editor,\n            and everything the user types into the editor travels into the model of\n            the combo box, and from there into the bound selection property.\n\n            The item which `withSelectedItem(..)` puts into the editor while the combo\n            box is being built must not make that trip, because it is not something\n            the user typed. Building the combo box neither tells the selection property\n            about a change, nor calls the `onSelection` handlers of the combo box.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list which the property and the `onSelection` handler leave a trace in.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property which records every change it is told about, and the channel the change came through.","code":["var size = Var.of(\"M\")","size.onChange(From.ALL, it -> trace << \"property ${it.channel()}: ${it.currentValue().orElseNull()}\".toString())"]},
+
+        {"kind":"when","text":"We build an editable combo box from a list of options, with an `onSelection` handler and the selected item bound to the property.","code":["var combo = comboBox(Vars.of(\"S\", \"M\", \"L\"))","                .isEditableIf(true)","                .onSelection( it -> trace << \"onSelection: ${it.component.selectedItem}\".toString() )","                .withSelectedItem(size)","                .get(JComboBox)","UI.sync()"]},
+
+        {"kind":"then","text":"The combo box and its editor show the selected item...","code":["combo.selectedItem == \"M\"","((JTextField) combo.editor.editorComponent).text == \"M\""]},
+
+        {"kind":"and","text":"...and nobody was told about a selection.","code":["trace == []"]},
+
+        {"kind":"when","text":"The view model selects the large size.","code":["size.set(From.VIEW_MODEL, \"L\")","UI.sync()"]},
+
+        {"kind":"then","text":"The editor shows the large size, and the property was told about the change of the view model only.","code":["((JTextField) combo.editor.editorComponent).text == \"L\"","trace == [\"property VIEW_MODEL: L\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"Create combo box UIs with simple text render functions. [0]",
       "result":"PASS",
       "duration":"?",
@@ -1076,6 +1153,35 @@
         {"kind":"then","text":"","code":["tooltips[0] == \"Choose january\"","tooltips[1] == \"Choose february\"","tooltips[2] == \"Choose march\"","tooltips[3] == \"Choose april\"","tooltips[4] == \"Choose may\"","tooltips[5] == \"Choose june\"","tooltips[6] == \"Choose july\"","tooltips[7] == \"Choose august\"","tooltips[8] == \"Choose september\"","tooltips[9] == \"Choose october\"","tooltips[10] == \"Choose november\"","tooltips[11] == \"Choose december\""]},
 
         {"kind":"and","text":"The renderer returns the expected text representations.","code":["rendered[0] == \"Month: JANUARY\"","rendered[1] == \"Month: FEBRUARY\"","rendered[2] == \"Month: MARCH\"","rendered[3] == \"Month: APRIL\"","rendered[4] == \"Month: MAY\"","rendered[5] == \"Month: JUNE\"","rendered[6] == \"Month: JULY\"","rendered[7] == \"Month: AUGUST\"","rendered[8] == \"Month: SEPTEMBER\"","rendered[9] == \"Month: OCTOBER\"","rendered[10] == \"Month: NOVEMBER\"","rendered[11] == \"Month: DECEMBER\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The cells of a combo box built with `withCells(..)` follow a switch of the look and feel.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When your application switches the look and feel while it is running, every\n            component on screen has to be handed a UI delegate of the new look and feel,\n            and that includes the labels a combo box draws its items with. SwingTree makes\n            sure the component its cell renderer hands out for an item carries a delegate of\n            the look and feel that is installed now, not of the one that was installed when\n            the combo box was built.\n\n            The usual way to switch is to call `UIManager.setLookAndFeel(..)` and then\n            `SwingUtilities.updateComponentTreeUI(..)` on each window. That second call walks\n            the component tree and calls `updateUI()` on every component it finds. The label\n            a cell renderer paints an item with is not in that tree. To paint one item,\n            Swing adds the label to a hidden `CellRendererPane`, paints it there, and removes\n            it again, so between two paints the label has no parent at all. That is why\n            `JComboBox.updateUI()` also calls `updateComponentTreeUI(..)` on its renderer, but only\n            if the renderer is itself a `Component`. The renderer SwingTree builds from your `withCells(..)` rules is not\n            a component, it only creates and keeps the labels it hands out. So if SwingTree left\n            those labels alone, they would keep the delegate of the old look and feel forever,\n            and every item would be painted with the old look and feel's colours and fonts.\n            With a dark look and feel replacing a light one, that is dark text on a dark popup.\n\n            In this scenario we switch from Metal, Swing's cross-platform look and feel, to\n            Nimbus, because both ship with every JDK and they draw a label with different\n            delegate classes: Metal with a `MetalLabelUI`, and Nimbus with a `SynthLabelUI`.\n            So the class of the label's delegate tells us which look and feel it follows. We\n            ask the renderer for an item the way Swing does, handing it the list of the combo\n            box's own popup, because that list is where Swing draws the items. At the end we\n            install Metal again, so that no other scenario runs under Nimbus.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Metal is the installed look and feel.","code":["UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())"]},
+
+        {"kind":"and","text":"A combo box whose items are rendered as text through `withCells(..)`.","code":["var combo =","            UI.comboBox(\"Hemp\", \"Linen\", \"Cotton\")","            .withCells(it -> it","                .when(String).asText( cell -> cell.entryAsString() )","            )","            .get(JComboBox)"]},
+
+        {"kind":"and","text":"The list of the combo box popup, which is the list Swing paints the items in.","code":["var popupList = combo.getUI().getAccessibleChild(combo, 0).getList()"]},
+
+        {"kind":"and","text":"The label the renderer hands out for an item, while Metal is installed.","code":["var labelUnderMetal = combo.renderer.getListCellRendererComponent(popupList, \"Linen\", 1, false, false)"]},
+
+        {"kind":"expect","text":"The label is drawn by Metal.","code":["labelUnderMetal.getUI() instanceof javax.swing.plaf.metal.MetalLabelUI"]},
+
+        {"kind":"when","text":"The application switches to Nimbus the way Swing recommends it.","code":["UIManager.setLookAndFeel(new javax.swing.plaf.nimbus.NimbusLookAndFeel())","SwingUtilities.updateComponentTreeUI(combo)"]},
+
+        {"kind":"and","text":"\n                Swing asks the renderer for the same item again. `updateUI()` gave the combo box\n                a new delegate, which built a new popup with a new list, so that is the list we hand over.\n            ","code":["popupList = combo.getUI().getAccessibleChild(combo, 0).getList()","var labelUnderNimbus = combo.renderer.getListCellRendererComponent(popupList, \"Linen\", 1, false, false)"]},
+
+        {"kind":"then","text":"The label it hands out is now drawn by Nimbus.","code":["labelUnderNimbus.getUI() instanceof javax.swing.plaf.synth.SynthLabelUI"]},
+
+        {"kind":"cleanup","text":"We give every other scenario back the look and feel it expects.","code":["UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

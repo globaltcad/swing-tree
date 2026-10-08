@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScrollPaneParentLayoutCorrection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">ScrollPaneParentLayoutCorrection.java</span></div><h1>ScrollPaneParentLayoutCorrection.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ContainerAdapter;
+import java.awt.event.ContainerEvent;
+import java.util.Optional;
+
+/**
+ *  This class exists to make a {@link JScrollPane} grow and shrink together with its
+ *  content, the same way any other container in a layout does.
+ *  &lt;p&gt;
+ *  A {@link JScrollPane} is a &quot;validate root&quot;, which means that a {@link Component#revalidate()}
+ *  of anything inside of it lays out the scroll pane, but never the parent of the scroll pane.
+ *  So when the content of a scroll pane grows, Swing marks every ancestor of the scroll pane
+ *  as invalid, but it only lays out the scroll pane itself. The scroll pane keeps its old size
+ *  even if there is room for a bigger one, and then suddenly jumps to its new size much later,
+ *  the next time something else in the window is revalidated.
+ *  &lt;p&gt;
+ *  This class corrects that by listening for new sizes of the view inside the {@link JViewport}
+ *  of the scroll pane. Swing delivers a new size as a resize event after the layout which caused
+ *  it has finished, which is when this class calls {@link Component#revalidate()} on the parent
+ *  of the scroll pane, so that the parent lays out the scroll pane at its new preferred size.
+ *  It keeps listening when the view or the viewport is replaced, and it does nothing for a
+ *  scroll pane which is not a validate root, because Swing already lays out its parent.
+ *  &lt;p&gt;
+ *  The view is also resized whenever the parent gives the scroll pane a new size,
+ *  for example on every step of resizing the window. Then the parent has just been laid out,
+ *  and laying it out again would double the cost of resizing the window. So this class only
+ *  revalidates the parent when the preferred size of the scroll pane changed since the last time,
+ *  because only a new preferred size can give the scroll pane a different place in its parent.
+ *  &lt;p&gt;
+ *  The SwingTree native {@link UI.ScrollPane} installs this class on itself.
+ */
+final class ScrollPaneParentLayoutCorrection
+{
+    private final JScrollPane _ownerScrollPane;
+    private @Nullable Dimension _preferredSizeAtLastRevalidation;
+<span class="fc" id="L45">    private final ComponentAdapter _revalidateParentWhenTheViewIsResized = new ComponentAdapter() {</span>
+        @Override public void componentResized( ComponentEvent e ) {
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">            if ( !_ownerScrollPane.isValidateRoot() )</span>
+<span class="nc" id="L48">                return;</span>
+<span class="fc" id="L49">            Dimension preferredSize = _ownerScrollPane.getPreferredSize();</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">            if ( preferredSize.equals(_preferredSizeAtLastRevalidation) )</span>
+<span class="fc" id="L51">                return;</span>
+<span class="fc" id="L52">            _preferredSizeAtLastRevalidation = preferredSize;</span>
+<span class="fc" id="L53">            Optional.ofNullable(_ownerScrollPane.getParent()).ifPresent(Component::revalidate);</span>
+<span class="fc" id="L54">        }</span>
+    };
+<span class="fc" id="L56">    private final ContainerAdapter _followTheViewWhenItIsReplaced = new ContainerAdapter() {</span>
+<span class="fc" id="L57">        @Override public void componentAdded( ContainerEvent e ) { _followTheSizeOf(e.getChild()); }</span>
+<span class="nc" id="L58">        @Override public void componentRemoved( ContainerEvent e ) { e.getChild().removeComponentListener(_revalidateParentWhenTheViewIsResized); }</span>
+    };
+
+    static void installOn( JScrollPane scrollPane ) {
+<span class="fc" id="L62">        new ScrollPaneParentLayoutCorrection(scrollPane);</span>
+<span class="fc" id="L63">    }</span>
+
+<span class="fc" id="L65">    private ScrollPaneParentLayoutCorrection( JScrollPane scrollPane ) {</span>
+<span class="fc" id="L66">        _ownerScrollPane = scrollPane;</span>
+<span class="fc" id="L67">        scrollPane.addPropertyChangeListener(&quot;viewport&quot;, e -&gt; {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if ( e.getOldValue() instanceof JViewport )</span>
+<span class="nc" id="L69">                _stopFollowingTheViewOf((JViewport) e.getOldValue());</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if ( e.getNewValue() instanceof JViewport )</span>
+<span class="nc" id="L71">                _followTheViewOf((JViewport) e.getNewValue());</span>
+<span class="nc" id="L72">        });</span>
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if ( scrollPane.getViewport() != null )</span>
+<span class="fc" id="L74">            _followTheViewOf(scrollPane.getViewport());</span>
+<span class="fc" id="L75">    }</span>
+
+    private void _followTheViewOf( JViewport viewport ) {
+<span class="fc" id="L78">        viewport.addContainerListener(_followTheViewWhenItIsReplaced);</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        if ( viewport.getView() != null )</span>
+<span class="fc" id="L80">            _followTheSizeOf(viewport.getView());</span>
+<span class="fc" id="L81">    }</span>
+
+    private void _stopFollowingTheViewOf( JViewport viewport ) {
+<span class="nc" id="L84">        viewport.removeContainerListener(_followTheViewWhenItIsReplaced);</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">        if ( viewport.getView() != null )</span>
+<span class="nc" id="L86">            viewport.getView().removeComponentListener(_revalidateParentWhenTheViewIsResized);</span>
+<span class="nc" id="L87">    }</span>
+
+    private void _followTheSizeOf( Component view ) {
+<span class="fc" id="L90">        view.removeComponentListener(_revalidateParentWhenTheViewIsResized);</span>
+<span class="fc" id="L91">        view.addComponentListener(_revalidateParentWhenTheViewIsResized);</span>
+<span class="fc" id="L92">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

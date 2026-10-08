@@ -132,8 +132,8 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
     public Insets getBorderInsets( Component c ) {
 <span class="fc bfc" id="L133" title="All 2 branches covered.">        if ( _insets == null )</span>
 <span class="fc" id="L134">            _compExt.gatherApplyAndInstallStyle(false);</span>
-<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if ( _insets == null )</span>
-<span class="nc" id="L136">            return new Insets(0, 0, 0, 0);</span>
+<span class="fc bfc" id="L135" title="All 2 branches covered.">        if ( _insets == null )</span>
+<span class="fc" id="L136">            return new Insets(0, 0, 0, 0);</span>
         else
 <span class="fc" id="L138">            return _insets;</span>
     }

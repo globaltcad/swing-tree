@@ -4,7 +4,7 @@
   "narrative":"An important part of a UI declaration is the ability to hook up event handlers\n    to your components. In SwingTree you do not need to unpack the underlying Swing\n    component to register a particular event listener, but instead you can register\n    event handlers directly on the UI declaration.\n    This specification demonstrates how different types of event handlers for different\n    types of events and components can be registered using simple lambda expressions.",
   "subjects":[],
   "statistics":{
-    "runs":"17",
+    "runs":"25",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -28,6 +28,190 @@
         {"kind":"when","text":"The button is clicked.","code":["ui.get(JRadioButton).doClick()"]},
 
         {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onChange\" handlers of a toggle button stay in the order they were registered after a bound property changed the selection 0 time(s). [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A button whose selection is bound to a property through `isSelectedIf(Var<Boolean>)`\n            receives a new selection state every time the property changes.\n            The order in which the button calls your `onChange` handlers\n            must not depend on how often that has happened:\n            the handler you registered first is called first, no matter\n            how many times the view model changed the selection before.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a toggle button with three \"onChange\" handlers, bound to that property.","code":["var isBold = Var.of(false)","var button =","        UI.toggleButton(\"Bold\")","        .onChange( it -> trace.add(\"1\") )","        .onChange( it -> trace.add(\"2\") )","        .onChange( it -> trace.add(\"3\") )","        .isSelectedIf(isBold)","        .get(JToggleButton)"]},
+
+        {"kind":"when","text":"The view model changes the selection a number of times. (See the `where` table for the current case!)","code":["changes.times { isBold.set(From.VIEW_MODEL, !isBold.get()) }"]},
+
+        {"kind":"and","text":"The user clicks the button.","code":["button.doClick()"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\"]"]},
+
+        {"kind":"where","text":"We check the order after the following numbers of changes made by the view model:","code":{"changes":["0","1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onChange\" handlers of a toggle button stay in the order they were registered after a bound property changed the selection 1 time(s). [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A button whose selection is bound to a property through `isSelectedIf(Var<Boolean>)`\n            receives a new selection state every time the property changes.\n            The order in which the button calls your `onChange` handlers\n            must not depend on how often that has happened:\n            the handler you registered first is called first, no matter\n            how many times the view model changed the selection before.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a toggle button with three \"onChange\" handlers, bound to that property.","code":["var isBold = Var.of(false)","var button =","        UI.toggleButton(\"Bold\")","        .onChange( it -> trace.add(\"1\") )","        .onChange( it -> trace.add(\"2\") )","        .onChange( it -> trace.add(\"3\") )","        .isSelectedIf(isBold)","        .get(JToggleButton)"]},
+
+        {"kind":"when","text":"The view model changes the selection a number of times. (See the `where` table for the current case!)","code":["changes.times { isBold.set(From.VIEW_MODEL, !isBold.get()) }"]},
+
+        {"kind":"and","text":"The user clicks the button.","code":["button.doClick()"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\"]"]},
+
+        {"kind":"where","text":"We check the order after the following numbers of changes made by the view model:","code":{"changes":["0","1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onChange\" handlers of a toggle button stay in the order they were registered after a bound property changed the selection 2 time(s). [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A button whose selection is bound to a property through `isSelectedIf(Var<Boolean>)`\n            receives a new selection state every time the property changes.\n            The order in which the button calls your `onChange` handlers\n            must not depend on how often that has happened:\n            the handler you registered first is called first, no matter\n            how many times the view model changed the selection before.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a toggle button with three \"onChange\" handlers, bound to that property.","code":["var isBold = Var.of(false)","var button =","        UI.toggleButton(\"Bold\")","        .onChange( it -> trace.add(\"1\") )","        .onChange( it -> trace.add(\"2\") )","        .onChange( it -> trace.add(\"3\") )","        .isSelectedIf(isBold)","        .get(JToggleButton)"]},
+
+        {"kind":"when","text":"The view model changes the selection a number of times. (See the `where` table for the current case!)","code":["changes.times { isBold.set(From.VIEW_MODEL, !isBold.get()) }"]},
+
+        {"kind":"and","text":"The user clicks the button.","code":["button.doClick()"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\"]"]},
+
+        {"kind":"where","text":"We check the order after the following numbers of changes made by the view model:","code":{"changes":["0","1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onChange\" handlers of a toggle button stay in the order they were registered after a bound property changed the selection 3 time(s). [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A button whose selection is bound to a property through `isSelectedIf(Var<Boolean>)`\n            receives a new selection state every time the property changes.\n            The order in which the button calls your `onChange` handlers\n            must not depend on how often that has happened:\n            the handler you registered first is called first, no matter\n            how many times the view model changed the selection before.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a toggle button with three \"onChange\" handlers, bound to that property.","code":["var isBold = Var.of(false)","var button =","        UI.toggleButton(\"Bold\")","        .onChange( it -> trace.add(\"1\") )","        .onChange( it -> trace.add(\"2\") )","        .onChange( it -> trace.add(\"3\") )","        .isSelectedIf(isBold)","        .get(JToggleButton)"]},
+
+        {"kind":"when","text":"The view model changes the selection a number of times. (See the `where` table for the current case!)","code":["changes.times { isBold.set(From.VIEW_MODEL, !isBold.get()) }"]},
+
+        {"kind":"and","text":"The user clicks the button.","code":["button.doClick()"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\"]"]},
+
+        {"kind":"where","text":"We check the order after the following numbers of changes made by the view model:","code":{"changes":["0","1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onSelection\" handlers of a combo box stay in the order they were registered after a bound property changed the selection 0 time(s). [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A combo box with a model of your own can still have its selected\n            item bound to a property, through `withSelectedItem(Var)`.\n            The combo box then receives a new selection every time the\n            property changes. The order in which the combo box calls your\n            `onSelection` handlers must not depend on how often that has happened:\n            the handler you registered first is called first, no matter\n            how many times the view model changed the selection before.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a combo box with a model of its own and three \"onSelection\" handlers, bound to that property.","code":["var size = Var.of(\"S\")","var combo =","        UI.comboBox(new DefaultComboBoxModel<String>([\"S\", \"M\", \"L\"] as String[]))","        .onSelection( it -> trace.add(\"1\") )","        .onSelection( it -> trace.add(\"2\") )","        .onSelection( it -> trace.add(\"3\") )","        .withSelectedItem(size)","        .get(JComboBox)"]},
+
+        {"kind":"when","text":"The view model changes the selection a number of times. (See the `where` table for the current case!)","code":["changes.times { size.set(From.VIEW_MODEL, size.is(\"S\") ? \"M\" : \"S\") }"]},
+
+        {"kind":"and","text":"The user selects the large size.","code":["combo.setSelectedItem(\"L\")"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\"]"]},
+
+        {"kind":"where","text":"We check the order after the following numbers of changes made by the view model:","code":{"changes":["0","1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onSelection\" handlers of a combo box stay in the order they were registered after a bound property changed the selection 1 time(s). [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A combo box with a model of your own can still have its selected\n            item bound to a property, through `withSelectedItem(Var)`.\n            The combo box then receives a new selection every time the\n            property changes. The order in which the combo box calls your\n            `onSelection` handlers must not depend on how often that has happened:\n            the handler you registered first is called first, no matter\n            how many times the view model changed the selection before.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a combo box with a model of its own and three \"onSelection\" handlers, bound to that property.","code":["var size = Var.of(\"S\")","var combo =","        UI.comboBox(new DefaultComboBoxModel<String>([\"S\", \"M\", \"L\"] as String[]))","        .onSelection( it -> trace.add(\"1\") )","        .onSelection( it -> trace.add(\"2\") )","        .onSelection( it -> trace.add(\"3\") )","        .withSelectedItem(size)","        .get(JComboBox)"]},
+
+        {"kind":"when","text":"The view model changes the selection a number of times. (See the `where` table for the current case!)","code":["changes.times { size.set(From.VIEW_MODEL, size.is(\"S\") ? \"M\" : \"S\") }"]},
+
+        {"kind":"and","text":"The user selects the large size.","code":["combo.setSelectedItem(\"L\")"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\"]"]},
+
+        {"kind":"where","text":"We check the order after the following numbers of changes made by the view model:","code":{"changes":["0","1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onSelection\" handlers of a combo box stay in the order they were registered after a bound property changed the selection 2 time(s). [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A combo box with a model of your own can still have its selected\n            item bound to a property, through `withSelectedItem(Var)`.\n            The combo box then receives a new selection every time the\n            property changes. The order in which the combo box calls your\n            `onSelection` handlers must not depend on how often that has happened:\n            the handler you registered first is called first, no matter\n            how many times the view model changed the selection before.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a combo box with a model of its own and three \"onSelection\" handlers, bound to that property.","code":["var size = Var.of(\"S\")","var combo =","        UI.comboBox(new DefaultComboBoxModel<String>([\"S\", \"M\", \"L\"] as String[]))","        .onSelection( it -> trace.add(\"1\") )","        .onSelection( it -> trace.add(\"2\") )","        .onSelection( it -> trace.add(\"3\") )","        .withSelectedItem(size)","        .get(JComboBox)"]},
+
+        {"kind":"when","text":"The view model changes the selection a number of times. (See the `where` table for the current case!)","code":["changes.times { size.set(From.VIEW_MODEL, size.is(\"S\") ? \"M\" : \"S\") }"]},
+
+        {"kind":"and","text":"The user selects the large size.","code":["combo.setSelectedItem(\"L\")"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\"]"]},
+
+        {"kind":"where","text":"We check the order after the following numbers of changes made by the view model:","code":{"changes":["0","1","2","3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"onSelection\" handlers of a combo box stay in the order they were registered after a bound property changed the selection 3 time(s). [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A combo box with a model of your own can still have its selected\n            item bound to a property, through `withSelectedItem(Var)`.\n            The combo box then receives a new selection every time the\n            property changes. The order in which the combo box calls your\n            `onSelection` handlers must not depend on how often that has happened:\n            the handler you registered first is called first, no matter\n            how many times the view model changed the selection before.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A list where handlers are going to leave a trace.","code":["var trace = []"]},
+
+        {"kind":"and","text":"A selection property, and a combo box with a model of its own and three \"onSelection\" handlers, bound to that property.","code":["var size = Var.of(\"S\")","var combo =","        UI.comboBox(new DefaultComboBoxModel<String>([\"S\", \"M\", \"L\"] as String[]))","        .onSelection( it -> trace.add(\"1\") )","        .onSelection( it -> trace.add(\"2\") )","        .onSelection( it -> trace.add(\"3\") )","        .withSelectedItem(size)","        .get(JComboBox)"]},
+
+        {"kind":"when","text":"The view model changes the selection a number of times. (See the `where` table for the current case!)","code":["changes.times { size.set(From.VIEW_MODEL, size.is(\"S\") ? \"M\" : \"S\") }"]},
+
+        {"kind":"and","text":"The user selects the large size.","code":["combo.setSelectedItem(\"L\")"]},
+
+        {"kind":"then","text":"The handlers are triggered in the same order as they were registered.","code":["trace == [\"1\", \"2\", \"3\"]"]},
+
+        {"kind":"where","text":"We check the order after the following numbers of changes made by the view model:","code":{"changes":["0","1","2","3"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

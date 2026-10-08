@@ -4,7 +4,7 @@
   "narrative":"**This specification covers the behaviour of the style installation process!**\n    Which means that the contents of this may not be relevant to you.\n    Keep reading however if you are interested in some of the obscure details\n    of the SwingTree library internals.\n\n    SwingTree offers advanced styling options as part of **the style API**,\n    which is most commonly used through the `withStyle(Styler)` method\n    on any declarative builder node.\n\n    The installation of styles is a complex process that involves\n    the partial override of the component's UI delegate, the application of\n    the style's properties to the component and the installation of\n    a custom border, all depending on the style configuration.\n\n    This is a very finicky process that requires a lot of\n    testing to ensure that the styles are applied correctly.\n    Here you will find most of the tests that ensure that after the\n    installation of a style, the component has the expected plugin installed.",
   "subjects":["swingtree.UI","swingtree.api.Styler"],
   "statistics":{
-    "runs":"334",
+    "runs":"336",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -3681,6 +3681,60 @@
         {"kind":"then","text":"\n            The standard look and feel border based border should be installed\n            because the component is no longer styled.\n            We test this by comparing the border of the button with the border\n            of a new button.\n        ","code":["button.getBorder() == new JButton().getBorder()"]},
 
         {"kind":"where","text":"","code":{"isCustom":["false","false","false","false","false","true","true","true","true","true","true","true","true","true","true","true","true","true","false","false","false","false","false","false","false","false","true","true","true","true","false","false","false","false","true","true","true","true","false","false","true","true","true","true","false","false","true","true","true","true","false","false","false","false"],"styler":["{ it }","{ it.backgroundColor(Color.BLACK) }","{ it.foregroundColor(Color.BLUE) }","{ it.foundationColor(Color.GREEN) }","{ it.cursor(UI.Cursor.HAND) }","{ it.margin(5) }","{ it.padding(5).margin(5) }","{ it.border(2, \"black\") }","{ it.margin(5).border(3, \"red\").cursor(UI.Cursor.CROSS) }","{ it.shadowColor(\"green\") }","{ it.shadowColor(\"blue\").shadowBlurRadius(5) }","{ it.shadowColor(\"pink\").shadowBlurRadius(2).shadowSpreadRadius(7) }","{ it.shadow(UI.Layer.CONTENT, \"myShadow\", conf->conf.color(\"black\").offset(1,2).blurRadius(5)) }","{ it.shadow(UI.Layer.CONTENT, \"myShadow\", conf->conf.color(\"red\").spreadRadius(7).isOutset(true)) }","{ it.shadow(UI.Layer.CONTENT, \"myShadow\", conf->conf.color(\"red\").spreadRadius(1).blurRadius(5)) }","{ it.shadow(UI.Layer.BORDER, \"myShadow\", conf->conf.color(\"black\").offset(1,2).blurRadius(5)) }","{ it.shadow(UI.Layer.BORDER, \"myShadow\", conf->conf.color(\"red\").spreadRadius(7).isOutset(true)) }","{ it.shadow(UI.Layer.BORDER, \"myShadow\", conf->conf.color(\"red\").spreadRadius(1).blurRadius(5)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(\"black\").offset(1,2).blurRadius(5)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(\"red\").spreadRadius(7).isOutset(true)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }","{ it.shadow(UI.Layer.FOREGROUND, \"myShadow\", conf->conf.color(\"red\").spreadRadius(1).blurRadius(5)) }","{ it.gradient(UI.Layer.BACKGROUND, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BACKGROUND, \"myGradient\", conf->conf.colors([] as Color[])) }","{ it.gradient(UI.Layer.FOREGROUND, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.CONTENT, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.CONTENT, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.BACKGROUND, \"myNoise\", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.BACKGROUND, \"myNoise\", conf->conf.colors(Color.GREEN, Color.RED)) }","{ it.noise(UI.Layer.BACKGROUND, \"myNoise\", conf->conf.colors([] as Color[])) }","{ it.noise(UI.Layer.FOREGROUND, \"myNoise\", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.CONTENT, \"myNoise\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.CONTENT, \"myNoise\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.BORDER, \"myNoise\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.BORDER, \"myNoise\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.painter(UI.Layer.BACKGROUND, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.FOREGROUND, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.CONTENT, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.CONTENT, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.BORDER, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.BORDER, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.CONTENT, UI.ComponentArea.ALL, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.BORDER, UI.ComponentArea.BORDER, \"myPainter\", g2d -> {}) }","{ it.parentFilter( conf -> conf.blur(1) ) }","{ it.parentFilter( conf -> conf.blur(0.75) ) }","{ it.parentFilter( conf -> conf.blur(0.0) ) }","{ it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component whose border was replaced by somebody else wears the style border again after the next repaint.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style is not only painted, it is also **measured**. SwingTree keeps the margin, the\n            padding and the border widths of a style in a `Border` which it installs on the\n            component, so that the text of a text field is laid out inside them and a layout manager\n            asking the component for its size is told about them.\n\n            Swing replaces borders behind your back. The editor a `JTable` uses for the cells of an\n            ordinary column is a `JTextField`, and `JTable.GenericEditor` calls\n            `setBorder(new LineBorder(Color.black))` on it every single time the editing of a cell\n            begins. If the style engine let that stand, the two halves of the component's appearance\n            would disagree with each other: the text would be laid out one pixel from the edge,\n            inside the foreign border, while the style is still painted and clipped where the style\n            says it goes. The first letter of the text is then cut in half by that clip, which is\n            precisely the bug this scenario was written for.\n\n            So a border which is no longer the one the style engine installed is a reason to install\n            the style again, even when nothing about the style itself has changed since the last\n            repaint. The repair happens on the next repaint, which is the moment the disagreement\n            would otherwise have become visible.\n\n            The component below is a panel rather than the cell editor of the story, because the\n            requirement is about any component whose style both measures and paints it, and a panel\n            with a fill is the smallest of those.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scale factor of one, so that every number in this scenario is a plain pixel.","code":["var formerScale = SwingTree.get().getUiScaleFactor()","SwingTree.get().setUiScaleFactor(1)"]},
+
+        {"kind":"and","text":"A component which is both measured and painted by its style, which a panel with a fill is.","code":["var panel =","        UI.panel()","        .withSize(120, 30)","        .withStyle( it -> it","            .margin(6).padding(3).border(1, Color.BLACK).backgroundColor(Color.WHITE)","        )","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The style engine has installed a border of its own, ten pixels deep on every side.","code":["panel.getBorder() instanceof swingtree.style.StyleAndAnimationBorder","panel.getInsets() == new Insets(10, 10, 10, 10)"]},
+
+        {"kind":"when","text":"Somebody else - a cell editor, say - gives the component a border of its own.","code":["panel.setBorder(new LineBorder(Color.BLACK))"]},
+
+        {"kind":"then","text":"The component is measured by that border now, and it knows nothing about the style.","code":["panel.getInsets() == new Insets(1, 1, 1, 1)"]},
+
+        {"kind":"when","text":"The component is repainted, which is when the style engine looks at it again.","code":["Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"then","text":"The style border is back, and the component is measured by the style once more.","code":["panel.getBorder() instanceof swingtree.style.StyleAndAnimationBorder","panel.getInsets() == new Insets(10, 10, 10, 10)"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(formerScale)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Styling the text field Swing edits a tree cell with does not send the style engine round in circles.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `JComponent.setBorder(Border)` asks the new border for its insets before it returns, so\n            that it can tell whether the component has to be laid out again. A SwingTree border\n            answers that question by gathering and installing the style, because the insets are part\n            of the style and it may be the first time anybody asked.\n\n            Usually that is harmless: the component reports the new border the moment it is given\n            one, so the style engine sees its own border and leaves it there. Swing has one class\n            for which this is not true. `DefaultTreeCellEditor.DefaultTextField`, the text field a\n            tree edits its cells with, keeps the border in a field of its own which it assigns\n            *after* `super.setBorder(..)` has returned:\n\n            ```java\n                public void setBorder(Border border) {\n                    super.setBorder(border);\n                    this.border = border;      // ... only now does getBorder() agree\n                }\n            ```\n\n            So while the style engine installs its border, that component still reports the border it\n            had before, the engine concludes that it has no border of its own yet, and installs one\n            from inside the installation it is already in. Left alone, that recursion ends a tree\n            cell edit in a `StackOverflowError` instead of an editor.\n\n            An installation which is already under way therefore never starts a second one. The\n            insets of such a component are worked out on the repaint that follows instead, which is\n            what the last step of this scenario checks.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scale factor of one, so that every number in this scenario is a plain pixel.","code":["var formerScale = SwingTree.get().getUiScaleFactor()","SwingTree.get().setUiScaleFactor(1)"]},
+
+        {"kind":"and","text":"Swing's own tree cell editor, asked for the component it edits a cell with.","code":["var tree = new JTree()","var cellEditor = new DefaultTreeCellEditor(tree, new DefaultTreeCellRenderer())","var editorBox = cellEditor.getTreeCellEditorComponent(tree, \"Loom A\", true, false, true, 0)","var field = editorBox.getComponent(0)"]},
+
+        {"kind":"expect","text":"It is the text field whose `getBorder()` lags behind by one call.","code":["field instanceof DefaultTreeCellEditor.DefaultTextField"]},
+
+        {"kind":"when","text":"We style it the way a look and feel styles every text field of an application.","code":["var styled = UI.of((JComponent) field)","               .withStyle( it -> it.margin(4).padding(2).border(1, Color.BLACK) )","               .get(JTextField)"]},
+
+        {"kind":"then","text":"The style engine installed its border once, instead of calling itself until the stack is full.","code":["styled.getBorder() instanceof swingtree.style.StyleAndAnimationBorder"]},
+
+        {"kind":"when","text":"The editor is painted, the way it would be after Swing added it to the tree.","code":["Utility.renderSingleComponent(styled)"]},
+
+        {"kind":"then","text":"It is measured by the style: four pixels of margin, two of padding and the border.","code":["styled.getInsets() == new Insets(7, 7, 7, 7)"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setUiScaleFactor(formerScale)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
