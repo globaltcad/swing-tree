@@ -1,0 +1,320 @@
+{
+  "className":"swingtree.Tree_Forest_Spec",
+  "title":"Growing a Forest from a Property",
+  "narrative":"A great many trees have no root. A workspace holds several open projects, a document\n    holds several top level blocks, a store room holds several shelves, a scene holds\n    several graphs. Their natural shape is not one value but a tuple of them:\n\n    ```java\n    Var<Tuple<FsNode>> projects;\n    ```\n\n    `UI.trees(..)` — plural — binds exactly that. It is the same API as `UI.tree(..)` in\n    every other respect: one `TreeConf` describing the node types, a `children(..)` rule\n    making a type a branch, a wither turning a rule into a two way lens. What differs is\n    only the two ends of it. Nothing is drawn above the top level, and a selection path\n    starts at a top level node rather than at a root.\n\n    The alternative — and this is what the plural form exists to spare you — is to invent a\n    container type for the view:\n\n    ```java\n    record Workspace( Tuple<FsNode> roots ) implements FsNode { .. }   // a case the domain does not have\n    ```\n\n    That is a permitted subtype every `switch` over `FsNode` in the application then has to\n    handle, which is precisely the property a sealed interface was chosen for. And because a\n    selection is a path of ids, the invented id ends up inside every selection path the\n    application persists. The fiction does not stay at the binding site; it contaminates\n    the data.\n\n    Under the hood there is still exactly one `JTree`, because `javax.swing.tree.TreeModel`\n    declares `Object getRoot()` and has never had room for more than one. The container root\n    still exists — it is simply SwingTree's, held inside the model, never drawn, and never\n    named by anything the application can see.",
+  "subjects":["swingtree.UIForTree","swingtree.TreeConf"],
+  "statistics":{
+    "runs":"14",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A forest is a property holding a tuple of top level nodes.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.trees(..)` takes the property and a configurator, exactly like `UI.tree(..)`\n            does. The declaration is the same one; only the property is one dimension wider.\n\n            Note what is *not* in the rules: nothing describes the top level. There is no rule\n            for it because there is no node there — the tuple is the top level, and the tree\n            reads it straight out of the property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two projects, held side by side in a single property.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Dir(\"src\", \"src\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode, new Doc(\"readme\", \"README.md\")))","               ))"]},
+
+        {"kind":"when","text":"We grow a forest from it.","code":["var tree = UI.trees(projects, shape()).get(JTree)"]},
+
+        {"kind":"then","text":"Both projects are top level rows, with nothing above them.","code":["visibleRows(tree) == [\"myapp\", \"notes\"]"]},
+
+        {"kind":"and","text":"The tree draws no root...","code":["!UI.runAndGet({ tree.isRootVisible() })"]},
+
+        {"kind":"and","text":"...and turns on the handles of the top level, which are now the only ones there are.","code":["UI.runAndGet({ tree.getShowsRootHandles() })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The node type is taken from the tuple, which carries it even while empty.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.tree(root, ..)` learns the node type from the property. A property holding a\n            tuple cannot say the same, because its own type is the tuple's — but a sprouts\n            `Tuple` knows what its elements are, and knows it whether or not it holds any.\n\n            So a forest which starts out empty, which is the ordinary case for a workspace on\n            first launch, still knows what it is a forest *of*. Where the tuple was built with\n            a narrower element type than the tree's nodes, name the node type explicitly with\n            `UI.trees(FsNode.class, projects, ..)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty workspace: a property holding a tuple with nothing in it.","code":["var projects = Var.of(Tuple.of(FsNode))"]},
+
+        {"kind":"expect","text":"The tuple still knows what its elements are.","code":["projects.get().type() == FsNode"]},
+
+        {"kind":"when","text":"We bind it, and only afterwards put a project in it.","code":["var tree = UI.trees(projects, shape()).get(JTree)"]},
+
+        {"kind":"then","text":"An empty forest is an empty tree: no rows, and no placeholder row either.","code":["visibleRows(tree) == []"]},
+
+        {"kind":"when","text":"The workspace fills in.","code":["UI.runNow({ projects.set(Tuple.of(FsNode, new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))) })"]},
+
+        {"kind":"then","text":"So does the tree.","code":["visibleRows(tree) == [\"myapp\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A selection path names a top level node, with no synthetic element in front of it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the reason the plural form is worth having. A selection is a path of ids,\n            and that path is what gets written into the view model, persisted, asserted on in\n            tests and restored on the next launch.\n\n            Wrap the tuple in a container to satisfy `UI.tree(..)` and every one of those\n            paths starts with the container's invented id. Bind the tuple directly and the\n            path holds exactly the ids the application chose, and nothing else.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A forest and a property to mirror its selection into.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Dir(\"src\", \"src\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode, new Doc(\"readme\", \"README.md\")))","               ))","var selected = Var.of(Tuple.of(String))","var tree = UI.trees(projects, shape()).withSelection(selected).get(JTree)"]},
+
+        {"kind":"when","text":"We assign a path naming a document three levels down.","code":["UI.runNow({ selected.set(Tuple.of(String, \"app\", \"src\", \"main\")) })"]},
+
+        {"kind":"then","text":"The tree opened every folder above it and selected the row.","code":["selectedRows(tree) == [\"App.java\"]","visibleRows(tree) == [","    \"myapp\",","    \"    src\",","    \"        App.java\",","    \"notes\",","]"]},
+
+        {"kind":"when","text":"And when the user clicks the other project instead...","code":["UI.runNow({ tree.setSelectionRow(3) })"]},
+
+        {"kind":"then","text":"...what arrives in the property is one id, because a top level node is one level deep.","code":["selected.get() == Tuple.of(String, \"doc\")"]},
+
+        {"kind":"when","text":"The selection is cleared.","code":["UI.runNow({ tree.clearSelection() })"]},
+
+        {"kind":"then","text":"The property says so with the empty path, which is the only special case left.","code":["selected.get().isEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A top level node added or removed leaves the rest of the forest as it was.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Adding a project is a structural change at the very top, which is the one place a\n            single rooted tree never has to deal with. The tree still keeps what the user had\n            open, because expansion is captured by ids and put back by ids, and the ids of\n            everything else did not change.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A forest with both of its projects open.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Dir(\"src\", \"src\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode, new Doc(\"readme\", \"README.md\")))","               ))","var tree = UI.trees(projects, shape()).withInitialExpansionDepth(1).get(JTree)"]},
+
+        {"kind":"expect","text":"Both are open to begin with.","code":["expandedRows(tree) == [\"myapp\", \"notes\"]"]},
+
+        {"kind":"when","text":"A third project is opened, at the end.","code":["UI.runNow({ projects.update({ it.add(new Dir(\"new\", \"scratch\", Tuple.of(FsNode, new Doc(\"todo\", \"todo.txt\")))) }) })"]},
+
+        {"kind":"then","text":"It appears, and the two that were open are still open.","code":["visibleRows(tree) == [","    \"myapp\",","    \"    src\",","    \"notes\",","    \"    README.md\",","    \"scratch\",","]"]},
+
+        {"kind":"when","text":"And the first one is closed again.","code":["UI.runNow({ projects.update({ it.removeFirst() }) })"]},
+
+        {"kind":"then","text":"It is gone, and the others kept their place and their expansion.","code":["visibleRows(tree) == [","    \"notes\",","    \"    README.md\",","    \"scratch\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A change inside one project does not so much as look at the others.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cost story of `Tree_Update_Spec` holds at the top level too. The tuple is\n            persistent, so replacing one of its elements leaves the others not merely equal to\n            what they were but the very same objects, and the update walk compares by\n            reference and stops there.\n\n            The counter below records which project gets asked for its entries. After an edit\n            inside the first one, the second is never asked at all, though it is expanded and\n            on screen.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A counter recording which project gets walked into.","code":["var reads = [:].withDefault { 0 }"]},
+
+        {"kind":"and","text":"A forest whose two projects are both open.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"edited\", Tuple.of(FsNode,    new Doc(\"one\", \"one.txt\"))),","                    new Dir(\"doc\", \"untouched\", Tuple.of(FsNode, new Doc(\"two\", \"two.txt\")))","               ))","var tree =","        UI.trees(projects, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> reads[d.name()] = reads[d.name()] + 1; d.entries() },","                                        { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withInitialExpansionDepth(2)","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Both are on screen and open.","code":["visibleRows(tree) == [","    \"edited\",","    \"    one.txt\",","    \"untouched\",","    \"    two.txt\",","]"]},
+
+        {"kind":"when","text":"We forget every read so far and then rename a document in the first project.","code":["reads.clear()","UI.runNow({ projects.update({ Tuple<FsNode> roots ->","    var edited = (Dir) roots.get(0)","    roots.setAt(0, edited.withEntries(","        edited.entries().setAt(0, ((Doc) edited.entries().get(0)).withName(\"ONE.txt\"))","    ))","}) })"]},
+
+        {"kind":"then","text":"The rename is on screen.","code":["visibleRows(tree).contains(\"    ONE.txt\")"]},
+
+        {"kind":"and","text":"The edited project was walked into...","code":["reads[\"edited\"] > 0"]},
+
+        {"kind":"and","text":"...and the untouched one was never asked for anything, being the same object as before.","code":["reads[\"untouched\"] == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An edit deep inside a project comes out the top as one new tuple.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The chain of `children(getter, wither)` rules is what carries a change upwards, and\n            it does not stop at the top level node: a forest's last step is the tuple itself,\n            which the binding rebuilds and writes back into the one property.\n\n            So renaming a document four levels down produces a new document, a new folder, a\n            new project and one new tuple — with every other project shared rather than copied.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A forest, with an editable rule for every node type.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Dir(\"src\", \"src\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode, new Doc(\"readme\", \"README.md\")))","               ))","var untouchedBefore = projects.get().get(1)","var tree = UI.trees(projects, shape()).withInitialExpansionDepth(3).get(JTree)"]},
+
+        {"kind":"when","text":"The user renames the document the third row shows.","code":["var path = UI.runAndGet({ tree.getPathForRow(2) })","UI.runNow({ tree.getModel().valueForPathChanged(path, \"Main.java\") })"]},
+
+        {"kind":"then","text":"The property holds a new tuple, whose first project carries the rename.","code":["((Dir)((Dir) projects.get().get(0)).entries().get(0)).entries().get(0).name() == \"Main.java\""]},
+
+        {"kind":"and","text":"The other project was not copied on the way through: it is the same object.","code":["projects.get().get(1) === untouchedBefore"]},
+
+        {"kind":"and","text":"And the tree shows it.","code":["visibleRows(tree).contains(\"        Main.java\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Renaming a top level node writes straight into the tuple.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A top level node is the shortest possible case of the same walk: there is no\n            branch above it to rebuild, so the write lands directly in the bound tuple.\n\n            Note that this needs no `children(..)` wither anywhere. A single rooted tree can\n            only rename its root because the root *is* the property; a forest can rename any\n            of its top level nodes for exactly the same reason.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A forest of two projects.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode, new Doc(\"readme\", \"README.md\")))","               ))","var tree = UI.trees(projects, shape()).get(JTree)"]},
+
+        {"kind":"when","text":"The user renames the second one in place.","code":["var path = UI.runAndGet({ tree.getPathForRow(1) })","UI.runNow({ tree.getModel().valueForPathChanged(path, \"scratch\") })"]},
+
+        {"kind":"then","text":"The tuple in the property holds the renamed project, in its old position.","code":["projects.get().get(1).name() == \"scratch\"","projects.get().size() == 2"]},
+
+        {"kind":"and","text":"And the row reads differently.","code":["visibleRows(tree) == [\"myapp\", \"scratch\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The initial expansion depth counts what is on screen, not what is in the model.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withInitialExpansionDepth(1)` opens the topmost visible level. For a single rooted\n            tree that is the root; for a forest, whose root is never drawn, it is the top level\n            nodes. The argument means the same thing in both, which is to say it means what\n            the user would count looking at the screen.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A forest three levels deep.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Dir(\"src\", \"src\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode, new Doc(\"readme\", \"README.md\")))","               ))"]},
+
+        {"kind":"when","text":"We build one forest closed and one opened a single level.","code":["var closed = UI.trees(projects, shape()).get(JTree)","var opened = UI.trees(projects, shape()).withInitialExpansionDepth(1).get(JTree)"]},
+
+        {"kind":"then","text":"The first shows only the projects themselves.","code":["visibleRows(closed) == [\"myapp\", \"notes\"]"]},
+
+        {"kind":"and","text":"The second has opened each of them one level.","code":["visibleRows(opened) == [","    \"myapp\",","    \"    src\",","    \"notes\",","    \"    README.md\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A forest has no root, so asking to show one is refused and reported.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withRootVisible(true)` is meaningful on a tree whose data really has a root. A\n            forest has none — the container the `JTree` needs is SwingTree's own, and drawing\n            it would put a row on screen naming nothing in the application.\n\n            So the call is ignored rather than obeyed, and SwingTree says so in the log instead\n            of leaving somebody to wonder why a builder method did nothing.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A forest, and a spy on the log.","code":["var log = LogSpy.attach()","var projects = Var.of(Tuple.of(FsNode, new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\")))))"]},
+
+        {"kind":"when","text":"We ask for a root row anyway.","code":["var tree = UI.trees(projects, shape()).withRootVisible(true).get(JTree)"]},
+
+        {"kind":"then","text":"The tree still draws only what the application has.","code":["!UI.runAndGet({ tree.isRootVisible() })","visibleRows(tree) == [\"myapp\"]"]},
+
+        {"kind":"and","text":"And the log names the method that was ignored.","code":["log.warnings().any { it.contains(\"withRootVisible(boolean)\") }"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The same configuration resolves a forest path back to its nodes.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `TreeConf` describes node types, not the shape of the top level, so one\n            configuration value binds a forest and answers questions about a single rooted\n            tree alike. What differs is only what a path is relative to, which is why\n            `nodeAt(..)` and `nodesAlong(..)` have an overload taking the top level tuple.\n\n            This is how a detail pane learns what is selected: the selection says *where*, and\n            the configuration turns that into *what*.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A configuration kept as an ordinary value, and a forest to ask about.","code":["var shape = TreeConf.of(FsNode)","                .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","                .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Dir(\"src\", \"src\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode))","               ))","var selected = Var.of(Tuple.of(String))"]},
+
+        {"kind":"and","text":"A derived property answering \"which node is selected\", built out of the two.","code":["var selectedNode = Viewable.of(String, projects, selected,","                        { roots, path -> shape.nodeAt(roots, path).map({ it.name() }).orElse(\"\") })"]},
+
+        {"kind":"when","text":"A path is selected.","code":["UI.runNow({ selected.set(Tuple.of(String, \"app\", \"src\", \"main\")) })"]},
+
+        {"kind":"then","text":"The derived property names the node it leads to.","code":["selectedNode.get() == \"App.java\""]},
+
+        {"kind":"and","text":"And the whole trail is what a breadcrumb is made of, starting at the top level node.","code":["shape.nodesAlong(projects.get(), selected.get()).toList()*.name() == [\"myapp\", \"src\", \"App.java\"]"]},
+
+        {"kind":"when","text":"The selection points somewhere the forest no longer goes.","code":["UI.runNow({ selected.set(Tuple.of(String, \"app\", \"gone\")) })"]},
+
+        {"kind":"then","text":"Both answer emptily rather than returning half a trail.","code":["!shape.nodeAt(projects.get(), selected.get()).isPresent()","shape.nodesAlong(projects.get(), selected.get()).isEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Selecting several nodes at once works across the whole forest.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Which overload you call is what puts the tree into multiple selection mode, here\n            just as for a single rooted tree. The one thing worth noticing is that the paths\n            may name nodes in different projects, which is exactly what a container root would\n            have made harder to express rather than easier.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A forest and a property holding one path per selected node.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode, new Doc(\"readme\", \"README.md\")))","               ))","var selected = Var.of(Tuple.of(Tuple.classTyped(String)))","var tree = UI.trees(projects, shape()).withSelectionPaths(selected).withInitialExpansionDepth(2).get(JTree)"]},
+
+        {"kind":"when","text":"We select one document out of each project.","code":["UI.runNow({ selected.set(Tuple.of(Tuple.classTyped(String), [","                Tuple.of(String, \"app\", \"main\"),","                Tuple.of(String, \"doc\", \"readme\")","           ])) })"]},
+
+        {"kind":"then","text":"Both rows are selected.","code":["selectedRows(tree) == [\"App.java\", \"README.md\"]"]},
+
+        {"kind":"when","text":"And the user picks a single row instead.","code":["UI.runNow({ tree.setSelectionRow(0) })"]},
+
+        {"kind":"then","text":"The property holds exactly one path again.","code":["selected.get().toList() == [Tuple.of(String, \"app\")]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A selection action speaks in your own nodes, and its trail starts at the top level.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `onSelection(..)` is the same delegate a single rooted tree hands you. The only\n            difference a forest makes is where the trail begins: there is no root node to put\n            in front of it, because there is no root node.\n\n            The container the `JTree` holds never appears in it. That is deliberate — it is\n            SwingTree's, not yours, and nothing in your own types could describe it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A forest, and somewhere to record what the action was told.","code":["var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Dir(\"src\", \"src\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))),","                    new Dir(\"doc\", \"notes\", Tuple.of(FsNode))","               ))","var trail = []","var leadPath = null","var tree =","        UI.trees(projects, shape())","        .onSelection({ it -> trail = it.pathToLead().toList()*.name(); leadPath = it.leadPath() })","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"when","text":"The user selects the document.","code":["UI.runNow({ tree.setSelectionRow(2) })"]},
+
+        {"kind":"then","text":"The trail is made of your own node values, top level node first.","code":["trail == [\"myapp\", \"src\", \"App.java\"]"]},
+
+        {"kind":"and","text":"And the position it reports is the same path a bound property would receive.","code":["leadPath == Tuple.of(String, \"app\", \"src\", \"main\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A read only forest may be browsed but not edited.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The rule is the one `UI.tree(..)` follows, and it is decided by the *declared* type\n            of what you pass rather than by what the reference happens to point at. A view\n            model exposing its `Var<Tuple<..>>` as a `Val` therefore hands out a genuinely read\n            only forest.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The same two projects and the same renaming rules for both forests.","code":["var roots = Tuple.of(FsNode, new Dir(\"app\", \"myapp\", Tuple.of(FsNode, new Doc(\"main\", \"App.java\"))))"]},
+
+        {"kind":"when","text":"We bind one forest to a mutable property and one to a read only one.","code":["var editable = UI.trees(Var.of(roots), shape()).get(JTree)","var readOnly = UI.trees(Val.of(roots), shape()).get(JTree)"]},
+
+        {"kind":"then","text":"Both draw exactly the same thing.","code":["visibleRows(editable) == [\"myapp\"]","visibleRows(readOnly) == [\"myapp\"]"]},
+
+        {"kind":"and","text":"But only the one bound to a mutable property lets the user start editing.","code":["UI.runAndGet({ editable.isEditable() })","!UI.runAndGet({ readOnly.isEditable() })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Two top level nodes sharing an id are reported rather than silently merged.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An id has to be unique among siblings, and the top level nodes of a forest are\n            siblings like any others — they simply have SwingTree's own container as their\n            parent rather than one of yours.\n\n            Two of them sharing an id are one position, so one is drawn twice and the other\n            never, and SwingTree names the id rather than leaving somebody to work it out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two projects which were given the same id.","code":["var log = LogSpy.attach()","var projects = Var.of(Tuple.of(FsNode,","                    new Dir(\"same\", \"first\", Tuple.of(FsNode,  new Doc(\"a\", \"one.txt\"))),","                    new Dir(\"same\", \"second\", Tuple.of(FsNode, new Doc(\"b\", \"two.txt\")))","               ))"]},
+
+        {"kind":"when","text":"We build a forest out of them and ask what it shows.","code":["var tree = UI.trees(projects, shape()).get(JTree)","var rows = visibleRows(tree)"]},
+
+        {"kind":"then","text":"SwingTree said what went wrong, naming the id the two share.","code":["log.warnings().any { it.contains(\"share the id 'same'\") }"]},
+
+        {"kind":"and","text":"And the two really are one position: two rows showing one and the same project.","code":["rows.size() == 2","rows.toSet().size() == 1"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

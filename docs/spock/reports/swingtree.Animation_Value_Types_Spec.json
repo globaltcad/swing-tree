@@ -1,0 +1,344 @@
+{
+  "className":"swingtree.Animation_Value_Types_Spec",
+  "title":"Animation Value Types",
+  "narrative":"The animation API of SwingTree is centered around a small family of\n    immutable, value based types that you typically combine to describe\n    *what* should be animated and *how* it should progress over time.\n\n    The most fundamental one is the `Progress` interface, which models\n    a single animation snapshot as a number between `0` and `1` and\n    exposes a number of pure-function methods to interpret that number\n    in different ways (linearly, sinusoidally, oscillating, etc.).\n    On top of that we have `LifeTime`, which describes the *duration*,\n    *start delay* and *refresh interval* of an animation, and `Stride`\n    which decides whether the progress runs forward (`PROGRESSIVE`) or\n    backward (`REGRESSIVE`).\n\n    Finally there is `Animatable`, an immutable wrapper that combines\n    a `LifeTime` with a transformation function and an optional initial\n    state. It is the recommended way of describing animations on top of\n    immutable view models.\n\n    This specification describes the contracts of these value types in\n    isolation, without involving any actual `javax.swing.Timer` or UI\n    component. The goal is to act as a living reference for what these\n    objects guarantee about their state and behaviour.",
+  "subjects":["swingtree.animation.Progress","swingtree.animation.LifeTime","swingtree.animation.LifeSpan","swingtree.animation.Stride","swingtree.animation.AnimationStatus","swingtree.animation.Animatable"],
+  "statistics":{
+    "runs":"16",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A `Progress` of `0.5` produces the documented values for all curve methods.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `Progress` interface exposes a family of pure-function methods\n            that interpret a single `progress()` value (a `double` between\n            `0` and `1`) as different animation curves:\n\n            - `regress()` is the linear inverse, going from `1` to `0`.\n            - `pulse()` is a sine wave going from `0` to `1` and back to `0`.\n            - `jumpIn()` and `jumpOut()` are quarter-sine curves.\n            - `fadeIn()` and `fadeOut()` are smooth half-cosine curves.\n            - `cycle()` oscillates between `0`, `1` and `0` over the lifetime.\n\n            At the exact midpoint of the animation, all of these have\n            well known, easy to verify values. We pin them down here so\n            that any change to these formulas is an explicit, conscious one.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A progress snapshot positioned exactly at the halfway point.","code":["var p = progressOf(0.5d)"]},
+
+        {"kind":"expect","text":"The linear progress and its inverse are exactly `0.5`.","code":["p.progress() == 0.5d","p.regress()  == 0.5d"]},
+
+        {"kind":"and","text":"The pulse, which is `sin(PI * progress)`, peaks at `1`.","code":["closeTo(p.pulse(), 1.0d)"]},
+
+        {"kind":"and","text":"Both `jumpIn` and `jumpOut` evaluate to `sin(PI/4)` at the midpoint.","code":["closeTo(p.jumpIn(),  Math.sin(Math.PI / 4d))","closeTo(p.jumpOut(), Math.sin(Math.PI / 4d))"]},
+
+        {"kind":"and","text":"The smooth `fadeIn`/`fadeOut` curve crosses `0.5` exactly at the middle.","code":["closeTo(p.fadeIn(),  0.5d)","closeTo(p.fadeOut(), 0.5d)"]},
+
+        {"kind":"and","text":"The `cycle` reaches its peak of `1.0` at the halfway point.","code":["closeTo(p.cycle(), 1.0d)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `Progress` curve functions agree on their boundary values. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            All curves share the same start and end *anchors*: at `progress() == 0`\n            the animation has not yet started, at `progress() == 1` the animation\n            is finished. The various curves only differ in *how* they\n            travel between these anchors.\n\n            This data driven test pins down what the value of every curve\n            method must be at the start, end and midpoint of an animation.\n            These guarantees are important because they make animation curves\n            composable: regardless of which curve you pick, the start and\n            end values of your animation will line up cleanly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A `Progress` snapshot positioned at the given progress value.","code":["var p = progressOf(progress)"]},
+
+        {"kind":"expect","text":"","code":["closeTo(p.progress(), progress)","closeTo(p.regress(),  regress)","closeTo(p.pulse(),    pulse)","closeTo(p.jumpIn(),   jumpIn)","closeTo(p.jumpOut(),  jumpOut)","closeTo(p.fadeIn(),   fadeIn)","closeTo(p.fadeOut(),  fadeOut)","closeTo(p.cycle(),    cycle)"]},
+
+        {"kind":"where","text":"","code":{"progress":["0.0d","0.5d","1.0d"],"regress":["1.0d","0.5d","0.0d"],"pulse":["0.0d","1.0d","0.0d"],"jumpIn":["0.0d","Math.sin(Math.PI / 4d)","1.0d"],"jumpOut":["1.0d","Math.sin(Math.PI / 4d)","0.0d"],"fadeIn":["0.0d","0.5d","1.0d"],"fadeOut":["1.0d","0.5d","0.0d"],"cycle":["0.0d","1.0d","0.0d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `Progress` curve functions agree on their boundary values. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            All curves share the same start and end *anchors*: at `progress() == 0`\n            the animation has not yet started, at `progress() == 1` the animation\n            is finished. The various curves only differ in *how* they\n            travel between these anchors.\n\n            This data driven test pins down what the value of every curve\n            method must be at the start, end and midpoint of an animation.\n            These guarantees are important because they make animation curves\n            composable: regardless of which curve you pick, the start and\n            end values of your animation will line up cleanly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A `Progress` snapshot positioned at the given progress value.","code":["var p = progressOf(progress)"]},
+
+        {"kind":"expect","text":"","code":["closeTo(p.progress(), progress)","closeTo(p.regress(),  regress)","closeTo(p.pulse(),    pulse)","closeTo(p.jumpIn(),   jumpIn)","closeTo(p.jumpOut(),  jumpOut)","closeTo(p.fadeIn(),   fadeIn)","closeTo(p.fadeOut(),  fadeOut)","closeTo(p.cycle(),    cycle)"]},
+
+        {"kind":"where","text":"","code":{"progress":["0.0d","0.5d","1.0d"],"regress":["1.0d","0.5d","0.0d"],"pulse":["0.0d","1.0d","0.0d"],"jumpIn":["0.0d","Math.sin(Math.PI / 4d)","1.0d"],"jumpOut":["1.0d","Math.sin(Math.PI / 4d)","0.0d"],"fadeIn":["0.0d","0.5d","1.0d"],"fadeOut":["1.0d","0.5d","0.0d"],"cycle":["0.0d","1.0d","0.0d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `Progress` curve functions agree on their boundary values. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            All curves share the same start and end *anchors*: at `progress() == 0`\n            the animation has not yet started, at `progress() == 1` the animation\n            is finished. The various curves only differ in *how* they\n            travel between these anchors.\n\n            This data driven test pins down what the value of every curve\n            method must be at the start, end and midpoint of an animation.\n            These guarantees are important because they make animation curves\n            composable: regardless of which curve you pick, the start and\n            end values of your animation will line up cleanly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A `Progress` snapshot positioned at the given progress value.","code":["var p = progressOf(progress)"]},
+
+        {"kind":"expect","text":"","code":["closeTo(p.progress(), progress)","closeTo(p.regress(),  regress)","closeTo(p.pulse(),    pulse)","closeTo(p.jumpIn(),   jumpIn)","closeTo(p.jumpOut(),  jumpOut)","closeTo(p.fadeIn(),   fadeIn)","closeTo(p.fadeOut(),  fadeOut)","closeTo(p.cycle(),    cycle)"]},
+
+        {"kind":"where","text":"","code":{"progress":["0.0d","0.5d","1.0d"],"regress":["1.0d","0.5d","0.0d"],"pulse":["0.0d","1.0d","0.0d"],"jumpIn":["0.0d","Math.sin(Math.PI / 4d)","1.0d"],"jumpOut":["1.0d","Math.sin(Math.PI / 4d)","0.0d"],"fadeIn":["0.0d","0.5d","1.0d"],"fadeOut":["1.0d","0.5d","0.0d"],"cycle":["0.0d","1.0d","0.0d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The ranged variants of the `Progress` curves linearly map onto the supplied `start..end` interval.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Most of the curve methods on `Progress` come in two flavours:\n            a no-arg version that returns a value in `[0, 1]`, and a\n            ranged version that linearly maps that value onto a custom\n            `[start, end]` interval. This lets you write things like\n            `status.fadeIn(10, 200)` to fade from `10` pixels to `200`\n            pixels along a smooth curve.\n\n            This test pins down the contract that the ranged variants\n            are *exactly* `start + (end - start) * curve()`, even when\n            `start > end` (i.e. when the range is reversed).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A progress snapshot positioned a quarter into the animation.","code":["var p = progressOf(0.25d)"]},
+
+        {"kind":"expect","text":"`progress(start, end)` linearly interpolates between the two values.","code":["closeTo(p.progress(10d, 110d), 35d)"]},
+
+        {"kind":"and","text":"`regress(a, b)` is equivalent to `progress(a, b)` (it inverts the *curve*, not the argument order).","code":["closeTo(p.regress(10d, 110d), p.progress(10d, 110d))"]},
+
+        {"kind":"and","text":"The pulse, jumpIn, jumpOut and fade variants all use the same `start + (end-start)*curve` formula.","code":["closeTo(p.pulse(0d, 100d),   100d * Math.sin(Math.PI * 0.25d))","closeTo(p.jumpIn(0d, 100d),  100d * Math.sin(Math.PI * 0.25d / 2d))","closeTo(p.jumpOut(0d, 100d), 100d * Math.sin(Math.PI * 0.75d / 2d))","closeTo(p.fadeIn(0d, 100d),  50d * (1d + Math.sin(Math.PI * (0.25d - 0.5d))))"]},
+
+        {"kind":"and","text":"A reversed range `start > end` simply reverses the direction of the curve.","code":["closeTo(p.progress(100d, 0d), 75d)","closeTo(p.fadeIn(100d, 0d),   100d - p.fadeIn(0d, 100d))"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `cyclePlus` and `cycleMinus` methods offset the `cycle` wave but stay in `[0, 1]`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The plain `cycle()` method oscillates between `0`, `1` and `0`\n            over a single animation iteration. The `cyclePlus(offset)` and\n            `cycleMinus(offset)` variants do the same, but shift the wave\n            forwards or backwards by the given `offset` (the offset is\n            taken modulo `1`, so any real number is valid).\n\n            This is useful for staggering several animations so they\n            reach their peak at different moments.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A progress snapshot at `0.25`, where `cycle()` is exactly `0.5`.","code":["var p = progressOf(0.25d)"]},
+
+        {"kind":"expect","text":"The plain `cycle` is half way up the wave.","code":["closeTo(p.cycle(), 0.5d)"]},
+
+        {"kind":"and","text":"Adding an offset of `0.25` shifts the wave forward to its peak.","code":["closeTo(p.cyclePlus(0.25d), 1.0d)"]},
+
+        {"kind":"and","text":"Subtracting an offset of `0.25` shifts the wave backward to the start.","code":["closeTo(p.cycleMinus(0.25d), 0.0d)"]},
+
+        {"kind":"and","text":"Any offset, no matter how large or negative, still produces values in `[0, 1]`.","code":["var offsets = (-30..30).collect({ it * 0.1d })","offsets.every({ double off ->","    double up   = p.cyclePlus(off)","    double down = p.cycleMinus(off)","    up >= 0d && up <= 1d && down >= 0d && down <= 1d","})"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The two `Stride` constants are the only valid directions, and `inverse()` swaps them.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Stride` describes the *direction* of an animation:\n            `PROGRESSIVE` runs the progress from `0` to `1`, `REGRESSIVE`\n            runs it from `1` to `0`. There are no other directions, and\n            calling `inverse()` simply swaps the two.\n\n            The `applyTo(progress)` method translates an externally\n            supplied progress value through the stride: it returns the\n            value unchanged for `PROGRESSIVE` and inverts it for `REGRESSIVE`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"There are exactly two stride values.","code":["Stride.values().toList() == [Stride.PROGRESSIVE, Stride.REGRESSIVE]"]},
+
+        {"kind":"and","text":"`inverse()` is a self-inverse operation that swaps the two values.","code":["Stride.PROGRESSIVE.inverse() == Stride.REGRESSIVE","Stride.REGRESSIVE.inverse()  == Stride.PROGRESSIVE","Stride.PROGRESSIVE.inverse().inverse() == Stride.PROGRESSIVE"]},
+
+        {"kind":"and","text":"`PROGRESSIVE.applyTo(p)` returns `p` unchanged, `REGRESSIVE.applyTo(p)` returns `1 - p`.","code":["Stride.PROGRESSIVE.applyTo(0.0d) == 0.0d","Stride.PROGRESSIVE.applyTo(0.4d) == 0.4d","Stride.PROGRESSIVE.applyTo(1.0d) == 1.0d","Stride.REGRESSIVE.applyTo(0.0d)  == 1.0d","closeTo(Stride.REGRESSIVE.applyTo(0.4d), 0.6d)","Stride.REGRESSIVE.applyTo(1.0d)  == 0.0d"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `LifeTime` is an immutable value object whose getters honour the requested `TimeUnit`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `LifeTime` is one of the central building blocks of the SwingTree\n            animation API. It is fully immutable and value based, meaning\n            two life times constructed with the same delay, duration and\n            interval are considered equal regardless of which factory\n            method created them.\n\n            The various `getXxxIn(TimeUnit)` accessors do *not* mutate the\n            life time, they merely convert the internally stored milliseconds\n            into the requested unit.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A life time describing a `2` second animation that starts after a `500` ms delay.","code":["var lifeTime = LifeTime.of(500, TimeUnit.MILLISECONDS, 2, TimeUnit.SECONDS)"]},
+
+        {"kind":"expect","text":"The duration is reported correctly across different time units.","code":["lifeTime.getDurationIn(TimeUnit.MILLISECONDS) == 2_000L","lifeTime.getDurationIn(TimeUnit.SECONDS)      == 2L"]},
+
+        {"kind":"and","text":"The same is true for the start delay.","code":["lifeTime.getDelayIn(TimeUnit.MILLISECONDS) == 500L","lifeTime.getDelayIn(TimeUnit.SECONDS)      == 0L // 500 ms truncates to 0 seconds"]},
+
+        {"kind":"and","text":"Two life times built from the same numbers in different units are equal.","code":["lifeTime == LifeTime.of(500, TimeUnit.MILLISECONDS, 2_000, TimeUnit.MILLISECONDS)","lifeTime.hashCode() == LifeTime.of(500, TimeUnit.MILLISECONDS, 2_000, TimeUnit.MILLISECONDS).hashCode()"]},
+
+        {"kind":"and","text":"A life time with a different duration is *not* equal, even if the delay matches.","code":["lifeTime != LifeTime.of(500, TimeUnit.MILLISECONDS, 3, TimeUnit.SECONDS)"]},
+
+        {"kind":"and","text":"The `toString()` representation contains the canonical fields.","code":["lifeTime.toString().contains(\"delay=500\")","lifeTime.toString().contains(\"duration=2000\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `withInterval` and `startingIn` methods of `LifeTime` are non-mutating \"withers\".",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Like all SwingTree value types, `LifeTime` follows the wither\n            pattern: methods like `withInterval(...)` and `startingIn(...)`\n            return a *new* `LifeTime` rather than modifying the existing one.\n\n            This guarantees that a `LifeTime` instance can be safely shared\n            across threads and reused as a configuration template without\n            risk of accidental mutation.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A baseline life time of `1` second with the configured default refresh interval.","code":["var original = LifeTime.of(1, TimeUnit.SECONDS)","var originalInterval = original.getIntervalIn(TimeUnit.MILLISECONDS)"]},
+
+        {"kind":"when","text":"We derive a new life time with a custom `4` ms interval.","code":["var faster = original.withInterval(4, TimeUnit.MILLISECONDS)"]},
+
+        {"kind":"then","text":"The derived life time has the new interval.","code":["faster.getIntervalIn(TimeUnit.MILLISECONDS) == 4L"]},
+
+        {"kind":"and","text":"The original life time is *unchanged*.","code":["original.getIntervalIn(TimeUnit.MILLISECONDS) == originalInterval"]},
+
+        {"kind":"when","text":"We derive a new life time that starts after a `200` ms delay.","code":["var delayed = original.startingIn(200, TimeUnit.MILLISECONDS)"]},
+
+        {"kind":"then","text":"The derived life time carries the new delay but the same duration.","code":["delayed.getDelayIn(TimeUnit.MILLISECONDS)    == 200L","delayed.getDurationIn(TimeUnit.MILLISECONDS) == 1_000L"]},
+
+        {"kind":"and","text":"The original life time still has no delay.","code":["original.getDelayIn(TimeUnit.MILLISECONDS) == 0L"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `LifeTime.none()` constant represents a no-op animation with zero duration, delay and interval.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `LifeTime.none()` is a shared singleton meant to be used wherever\n            a `null` `LifeTime` would otherwise be tempting. It explicitly\n            communicates \"no animation\" and avoids null-checks throughout\n            the API surface.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The shared \"no-op\" lifetime constant.","code":["var none = LifeTime.none()"]},
+
+        {"kind":"expect","text":"All three of its time aspects are zero.","code":["none.getDelayIn(TimeUnit.MILLISECONDS)    == 0L","none.getDurationIn(TimeUnit.MILLISECONDS) == 0L","none.getIntervalIn(TimeUnit.MILLISECONDS) == 0L"]},
+
+        {"kind":"and","text":"It is equal to itself and any other zero-valued life time built explicitly.","code":["none == LifeTime.none()","none == LifeTime.of(0, TimeUnit.MILLISECONDS, 0, TimeUnit.MILLISECONDS).withInterval(0, TimeUnit.MILLISECONDS)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `Animatable.none()` value is a shared, type-agnostic, no-op animatable.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Animatable.none()` is the recommended replacement for `null`\n            whenever an `Animatable` is expected but no animation should\n            actually run. Because it does not carry any state of its own,\n            the same instance is reused for every type parameter.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two type parametrized references to the no-op animatable.","code":["Animatable<String>  noneA = Animatable.none()","Animatable<Integer> noneB = Animatable.none()"]},
+
+        {"kind":"expect","text":"They are the *same* shared instance, regardless of the type parameter.","code":["noneA.is(noneB)"]},
+
+        {"kind":"and","text":"Their lifetime is `LifeTime.none()`, signalling that nothing will be scheduled.","code":["noneA.lifeTime() == LifeTime.none()"]},
+
+        {"kind":"and","text":"They carry no initial state.","code":["!noneA.initialState().isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `Animatable` built from a single value behaves like an instantaneous \"set this state\" command.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Animatable.of(value)` is a convenience for the common case where\n            you simply want to *jump* to a new model state without any actual\n            animation in between. The lifetime is `LifeTime.none()` and the\n            transformation is an identity function that always returns the\n            supplied initial value.\n\n            This is useful when a view model returns an `Animatable` from a\n            method but, depending on the situation, may not actually want\n            anything to be animated, just the state changed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A target model value that we want to \"animate\" to.","code":["var target = \"Hello, World!\""]},
+
+        {"kind":"when","text":"We wrap it in an `Animatable`.","code":["var animatable = Animatable.of(target)"]},
+
+        {"kind":"then","text":"The lifetime is the no-op lifetime, so no scheduler will ever tick.","code":["animatable.lifeTime() == LifeTime.none()"]},
+
+        {"kind":"and","text":"The supplied value becomes the (single) initial state.","code":["animatable.initialState().isPresent()","animatable.initialState().get() == target"]},
+
+        {"kind":"when","text":"We try to wrap a `null` value, which is meaningless for this factory.","code":["Animatable.of(null)"]},
+
+        {"kind":"then","text":"A `NullPointerException` is raised, signalling the misuse early.","code":["thrown(NullPointerException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `AnimationStatus` reports its progress, repetition count, life span and event.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `AnimationStatus` is the concrete `Progress` implementation that\n            the animation scheduler hands to your `Animation` callbacks\n            on every tick. Beyond just `progress()`, it also exposes:\n\n            - `repeats()` — the number of *completed* loops so far.\n            - `lifeSpan()` — the `LifeSpan` driving this status.\n            - `event()` — the underlying timer `ActionEvent`.\n\n            Two statuses built from the same numbers must be considered\n            equal; their `toString()` representation should reflect every\n            constituent field so that logs and debug traces remain useful.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A 200 ms life span and a deterministic timer event.","code":["var lifeTime = LifeTime.of(0, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS)","                       .withInterval(1, TimeUnit.MILLISECONDS)","var span     = LifeSpan.startingNowWith(lifeTime)","var event    = new ActionEvent(\"source\", 0, \"tick\")"]},
+
+        {"kind":"when","text":"We ask for the status one quarter into the very first iteration.","code":["var status = AnimationStatus.of(span, Stride.PROGRESSIVE, event, span.getStartTimeIn(TimeUnit.MILLISECONDS) + 50)"]},
+
+        {"kind":"then","text":"It reports `progress=0.25`, no completed repeats, and exposes its life span and event.","code":["closeTo(status.progress(), 0.25d)","status.repeats()  == 0L","status.lifeSpan() == span","status.event()    .is(event)"]},
+
+        {"kind":"and","text":"Its `toString` mentions every field so it is useful in debug traces.","code":["status.toString().contains(\"progress=\")","status.toString().contains(\"repeats=\")","status.toString().contains(\"lifeSpan=\")","status.toString().contains(\"event=\")"]},
+
+        {"kind":"and","text":"A second status built from the same arguments is equal and shares its hash code.","code":["var twin = AnimationStatus.of(span, Stride.PROGRESSIVE, event, span.getStartTimeIn(TimeUnit.MILLISECONDS) + 50)","status == twin","status.hashCode() == twin.hashCode()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Stride.REGRESSIVE` `AnimationStatus` runs progress backwards from `1` to `0`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `Stride` of an `AnimationStatus` controls the *direction*\n            of the progress value. A `REGRESSIVE` status produces the same\n            magnitudes as a `PROGRESSIVE` one, but with `1 - p` instead of `p`.\n\n            This is the building block behind effects like fade-outs, where\n            the same animation logic should run \"in reverse\".\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A 200 ms life span and a deterministic event.","code":["var lifeTime = LifeTime.of(0, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS)","                       .withInterval(1, TimeUnit.MILLISECONDS)","var span     = LifeSpan.startingNowWith(lifeTime)","var event    = new ActionEvent(\"source\", 0, \"tick\")","long start   = span.getStartTimeIn(TimeUnit.MILLISECONDS)"]},
+
+        {"kind":"expect","text":"At the very start, the regressive progress is `1`.","code":["closeTo(AnimationStatus.startOf(span, Stride.REGRESSIVE, event).progress(), 1.0d)"]},
+
+        {"kind":"and","text":"A quarter through the iteration, the regressive progress is `0.75`.","code":["closeTo(AnimationStatus.of(span, Stride.REGRESSIVE, event, start + 50).progress(), 0.75d)"]},
+
+        {"kind":"and","text":"And at the very end, the regressive progress drops to `0`.","code":["closeTo(AnimationStatus.endOf(span, Stride.REGRESSIVE, event, 1L).progress(), 0.0d)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `startOf` and `endOf` factories of `AnimationStatus` describe the boundaries of an iteration.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `AnimationStatus.startOf(...)` constructs the snapshot at the\n            *very beginning* of an iteration (`progress == 0`, `repeats == 0`),\n            while `endOf(..., iteration)` constructs the snapshot at the\n            *very end* of the requested iteration (`progress == 1`, `repeats == iteration`).\n\n            These two factories are how the `AnimationRunner` guarantees\n            that an animation always observes both its `0` and its `1`\n            anchor, regardless of how the timer ticks land in real time.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var lifeTime = LifeTime.of(0, TimeUnit.MILLISECONDS, 100, TimeUnit.MILLISECONDS)","                       .withInterval(1, TimeUnit.MILLISECONDS)","var span     = LifeSpan.startingNowWith(lifeTime)","var event    = new ActionEvent(\"source\", 0, \"tick\")"]},
+
+        {"kind":"when","text":"We snapshot the start of the animation.","code":["var atStart = AnimationStatus.startOf(span, Stride.PROGRESSIVE, event)"]},
+
+        {"kind":"then","text":"It is positioned exactly at the beginning, with no completed repeats.","code":["atStart.progress() == 0.0d","atStart.repeats()  == 0L"]},
+
+        {"kind":"when","text":"We snapshot the end of the third iteration (zero indexed).","code":["var atEnd = AnimationStatus.endOf(span, Stride.PROGRESSIVE, event, 3L)"]},
+
+        {"kind":"then","text":"The progress is exactly `1` and the iteration count matches what we asked for.","code":["atEnd.progress() == 1.0d","atEnd.repeats()  == 3L"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `slice(from, to)` method of `AnimationStatus` clamps progress to the requested sub-range.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `slice(from, to)` method on `AnimationStatus` returns a sub\n            `Progress` view whose `progress()` value is the original progress\n            *clamped* to the `[from, to]` interval. This means that:\n\n            - Outside of the `[from, to]` range, the sub-progress is pinned\n              to whichever boundary the animation has not yet crossed.\n            - Inside the range, the sub-progress equals the original progress.\n            - Slicing the full `[0, 1]` range is a no-op and the receiver\n              is returned unchanged, avoiding pointless allocations.\n\n            This is useful for chaining several distinct effects onto a\n            single underlying animation timeline.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A 200 ms life span we will sample at different points in time.","code":["var lifeTime = LifeTime.of(0, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS)","                       .withInterval(1, TimeUnit.MILLISECONDS)","var span     = LifeSpan.startingNowWith(lifeTime)","var event    = new ActionEvent(\"source\", 0, \"tick\")","long start   = span.getStartTimeIn(TimeUnit.MILLISECONDS)"]},
+
+        {"kind":"when","text":"We position the status before the slice (`progress = 0.1`) and slice `[0.5, 1.0]`.","code":["var beforeSlice = AnimationStatus.of(span, Stride.PROGRESSIVE, event, start + 20).slice(0.5d, 1.0d)"]},
+
+        {"kind":"then","text":"The sub-progress is clamped *up* to the lower bound of the slice.","code":["closeTo(beforeSlice.progress(), 0.5d)"]},
+
+        {"kind":"when","text":"We position the status inside the slice (`progress = 0.75`) and slice `[0.5, 1.0]`.","code":["var insideSlice = AnimationStatus.of(span, Stride.PROGRESSIVE, event, start + 150).slice(0.5d, 1.0d)"]},
+
+        {"kind":"then","text":"The sub-progress matches the underlying progress, no remapping occurs.","code":["closeTo(insideSlice.progress(), 0.75d)"]},
+
+        {"kind":"when","text":"We slice the full `[0, 1]` range, which is identified as a no-op.","code":["var full = AnimationStatus.startOf(span, Stride.PROGRESSIVE, event)","var sameAsFull = full.slice(0.0d, 1.0d)"]},
+
+        {"kind":"then","text":"The slice returns the *exact* underlying status instance.","code":["sameAsFull.is(full)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TreeNodeRef.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">TreeNodeRef.java</span></div><h1>TreeNodeRef.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+
+import javax.swing.tree.TreePath;
+import java.util.Arrays;
+
+/**
+ *  The handle a {@link javax.swing.JTree} holds inside its
+ *  {@link javax.swing.tree.TreePath}s when it is bound to a property.
+ *  &lt;p&gt;
+ *  Its identity is the &lt;b&gt;path of ids&lt;/b&gt; leading to the node, never the node's content.
+ *  A {@link javax.swing.tree.TreePath} compares by the nodes it contains, and value objects
+ *  compare by content, so identifying a node by its value would make renaming one leaf
+ *  invalidate every path in the tree at once and collapse everything the user had opened.
+ *  &lt;p&gt;
+ *  A forest has one handle more than it has nodes: {@link #ofForest()} builds the invisible
+ *  one sitting above the top level, whose id path is empty because no id names it and whose
+ *  value is {@code null} because it wraps no node of the user's. Its children then get id
+ *  paths of length one, and everything below them follows without a special case.
+ *  &lt;p&gt;
+ *  Value, parent and index ride along in mutable fields written only by
+ *  {@link PropertyTreeModel} and only on the UI thread. They take no part in
+ *  {@link #equals(Object)}: two handles for the same path &lt;i&gt;are&lt;/i&gt; the same node,
+ *  whatever either of them currently holds.
+ */
+final class TreeNodeRef
+{
+<span class="fc" id="L29">    private static final Object[] NO_IDS = new Object[0];</span>
+
+    private final Object[]              _idPath;
+    private final int                   _hash;
+    private final @Nullable TreeNodeRef _parent;
+    private final int                   _depth;
+    private @Nullable Object            _value; // UI thread owned, never part of identity.
+    private int                         _index;
+
+    static TreeNodeRef ofRoot( @Nullable Object value, Object id ) {
+<span class="fc" id="L39">        return new TreeNodeRef(new Object[]{id}, null, value, 0);</span>
+    }
+
+    static TreeNodeRef ofForest() {
+<span class="fc" id="L43">        return new TreeNodeRef(NO_IDS, null, null, 0);</span>
+    }
+
+<span class="fc" id="L46">    private TreeNodeRef( Object[] idPath, @Nullable TreeNodeRef parent, @Nullable Object value, int index ) {</span>
+<span class="fc" id="L47">        _idPath = idPath;</span>
+<span class="fc" id="L48">        _hash   = Arrays.hashCode(idPath);</span>
+<span class="fc" id="L49">        _parent = parent;</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        _depth  = ( parent == null ? 0 : parent._depth + 1 );</span>
+<span class="fc" id="L51">        _value  = value;</span>
+<span class="fc" id="L52">        _index  = index;</span>
+<span class="fc" id="L53">    }</span>
+
+    TreeNodeRef child( Object childId, @Nullable Object childValue, int index ) {
+<span class="fc" id="L56">        Object[] childPath = Arrays.copyOf(_idPath, _idPath.length + 1);</span>
+<span class="fc" id="L57">        childPath[_idPath.length] = childId;</span>
+<span class="fc" id="L58">        return new TreeNodeRef(childPath, this, childValue, index);</span>
+    }
+
+    @Nullable Object value() {
+<span class="fc" id="L62">        return _value;</span>
+    }
+
+    void updateValue( @Nullable Object value ) {
+<span class="fc" id="L66">        _value = value;</span>
+<span class="fc" id="L67">    }</span>
+
+    @Nullable TreeNodeRef parent() {
+<span class="fc" id="L70">        return _parent;</span>
+    }
+
+    int index() {
+<span class="fc" id="L74">        return _index;</span>
+    }
+
+    void updateIndex( int index ) {
+<span class="fc" id="L78">        _index = index;</span>
+<span class="fc" id="L79">    }</span>
+
+    /** Shared by reference with every caller, so it must never be mutated. */
+    Object[] idPath() {
+<span class="fc" id="L83">        return _idPath;</span>
+    }
+
+    /**
+     *  Walked along the parent chain rather than sized from the id path, because a forest
+     *  handle contributes a component to every path below it without contributing an id.
+     */
+    TreePath path() {
+<span class="fc" id="L91">        Object[] chain = new Object[_depth + 1];</span>
+<span class="fc" id="L92">        TreeNodeRef current = this;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        for ( int i = _depth; i &gt;= 0; i-- ) {</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">            if ( current == null )</span>
+<span class="nc" id="L95">                throw new IllegalStateException();</span>
+<span class="fc" id="L96">            chain[i] = current;</span>
+<span class="fc" id="L97">            current = current._parent;</span>
+        }
+<span class="fc" id="L99">        return new TreePath(chain);</span>
+    }
+
+    @Override
+    public boolean equals( @Nullable Object other ) {
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        if ( other == this )</span>
+<span class="fc" id="L105">            return true;</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if ( !(other instanceof TreeNodeRef) )</span>
+<span class="nc" id="L107">            return false;</span>
+<span class="fc" id="L108">        TreeNodeRef that = (TreeNodeRef) other;</span>
+<span class="pc bpc" id="L109" title="1 of 4 branches missed.">        return this._hash == that._hash &amp;&amp; Arrays.equals(this._idPath, that._idPath);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L114">        return _hash;</span>
+    }
+
+    /**
+     *  Forwards to the node, because
+     *  {@link javax.swing.JTree#convertValueToText(Object, boolean, boolean, boolean, int, boolean)}
+     *  falls back to this when no renderer has anything better to say.
+     */
+    @Override
+    public String toString() {
+<span class="fc" id="L124">        return String.valueOf(_value);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

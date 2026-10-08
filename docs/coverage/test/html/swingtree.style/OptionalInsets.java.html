@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OptionalInsets.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">OptionalInsets.java</span></div><h1>OptionalInsets.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import org.jspecify.annotations.Nullable;
+
+import java.awt.Insets;
+import java.util.Optional;
+import java.util.function.Function;
+
+/**
+ *  OptionalInsets is an immutable value object holding four inset thicknesses, one for each
+ *  side of a UI component, where any side may also be left unspecified. Unlike
+ *  {@link java.awt.Insets}, a side is a {@code float} and does not have to have a value.
+ *  &lt;p&gt;
+ *  A side is optional in order to tell &quot;the styling API asked for this thickness&quot; apart from
+ *  &quot;the styling API said nothing about this side&quot;, so that a component's own defaults - the
+ *  insets a layout manager wants, for example - survive being styled.
+ *  &lt;p&gt;
+ *  &lt;b&gt;A side is stored as a primitive float, and {@link Float#NaN} is what &quot;unspecified&quot;
+ *  means.&lt;/b&gt; The obvious spelling of an optional side is a boxed {@code Float}, and it is the
+ *  wrong one here: a box model holds four of these objects - margin, padding, border widths
+ *  and the insets a former border leaves behind - and they are built for every layer of every
+ *  style gathered on every paint of every component, and {@code Float.valueOf} has no cache,
+ *  so each side used to be a heap allocation in a former version of this class. Sides are
+ *  compared by their bit patterns rather than with {@code ==}, which keeps every distinction
+ *  {@code Float.equals} used to make - {@code 0.0} apart from {@code -0.0}, and one unspecified
+ *  side equal to another. The one consequence is that a side which really is {@code NaN} now
+ *  reads as unspecified instead of propagating a {@code NaN} into a layout.
+ */
+@Immutable
+final class OptionalInsets
+{
+    /** What a side holds when the styling API said nothing about it. */
+    private static final float UNSPECIFIED = Float.NaN;
+
+<span class="fc" id="L36">    private static final OptionalInsets _NONE = new OptionalInsets(UNSPECIFIED, UNSPECIFIED, UNSPECIFIED, UNSPECIFIED);</span>
+
+<span class="fc" id="L38">    static OptionalInsets none() { return _NONE; }</span>
+
+    static OptionalInsets of( float top, float right, float bottom, float left ) {
+<span class="fc" id="L41">        return new OptionalInsets(top, right, bottom, left);</span>
+    }
+
+    static OptionalInsets of( float topAndBottom, float rightAndLeft ) {
+<span class="fc" id="L45">        return new OptionalInsets(topAndBottom, rightAndLeft, topAndBottom, rightAndLeft);</span>
+    }
+
+    static OptionalInsets of( double top, double right, double bottom, double left ) {
+<span class="fc" id="L49">        return new OptionalInsets((float) top, (float) right, (float) bottom, (float) left);</span>
+    }
+
+    static OptionalInsets of( float allSides ) {
+<span class="fc" id="L53">        return new OptionalInsets(allSides, allSides, allSides, allSides);</span>
+    }
+
+    static OptionalInsets of( Insets insets ) {
+<span class="fc" id="L57">        return of(insets.top, insets.right, insets.bottom, insets.left);</span>
+    }
+
+
+    private final float top;
+    private final float right;
+    private final float bottom;
+    private final float left;
+
+
+    private static OptionalInsets _of( float top, float right, float bottom, float left ) {
+<span class="fc bfc" id="L68" title="All 8 branches covered.">        if ( _isUnset(top) &amp;&amp; _isUnset(right) &amp;&amp; _isUnset(bottom) &amp;&amp; _isUnset(left) )</span>
+<span class="fc" id="L69">            return _NONE;</span>
+
+<span class="fc" id="L71">        return new OptionalInsets(top, right, bottom, left);</span>
+    }
+
+    private static OptionalInsets _ofNullable( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
+<span class="fc" id="L75">        return _of(_unbox(top), _unbox(right), _unbox(bottom), _unbox(left));</span>
+    }
+
+    private static float _unbox( @Nullable Float value ) {
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        return value == null ? UNSPECIFIED : value;</span>
+    }
+
+    private static boolean _isUnset( float value ) {
+<span class="fc" id="L83">        return Float.isNaN(value);</span>
+    }
+
+    /**
+     *  Whether two sides are the same side, which for an unspecified one means both are
+     *  unspecified. Comparing the bit patterns rather than the numbers is what keeps
+     *  {@code 0.0} and {@code -0.0} distinct, exactly as boxed {@code Float} equality did.
+     *
+     * @param a one side
+     * @param b the other side
+     * @return true when the two sides carry the same value, or are both unspecified
+     */
+    private static boolean _same( float a, float b ) {
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        return Float.floatToIntBits(a) == Float.floatToIntBits(b);</span>
+    }
+
+<span class="fc" id="L99">    private OptionalInsets( float top, float right, float bottom, float left ) {</span>
+<span class="fc" id="L100">        this.top    = top;</span>
+<span class="fc" id="L101">        this.right  = right;</span>
+<span class="fc" id="L102">        this.bottom = bottom;</span>
+<span class="fc" id="L103">        this.left   = left;</span>
+<span class="fc" id="L104">    }</span>
+
+    /**
+     *  The top inset in the form of an {@link Optional}, where {@link Optional#empty()}
+     *  means that the top inset was not specified.
+     *
+     * @return An {@link Optional} containing the top inset if it was specified,
+     *        {@link Optional#empty()} otherwise.
+     */
+<span class="fc bfc" id="L113" title="All 2 branches covered.">    Optional&lt;Float&gt; top() { return _isUnset(top) ? Optional.empty() : Optional.of(top); }</span>
+
+    /**
+     *  An optional value for the right inset.
+     *
+     * @return An {@link Optional} containing the right inset if it was specified,
+     *        {@link Optional#empty()} otherwise.
+     */
+<span class="fc bfc" id="L121" title="All 2 branches covered.">    Optional&lt;Float&gt; right() { return _isUnset(right) ? Optional.empty() : Optional.of(right); }</span>
+
+    /**
+     *  The bottom inset in the form of an {@link Optional}, where {@link Optional#empty()}
+     *  means that the bottom inset was not specified.
+     *
+     * @return An {@link Optional} containing the bottom inset if it was specified,
+     *        {@link Optional#empty()} otherwise.
+     */
+<span class="fc bfc" id="L130" title="All 2 branches covered.">    Optional&lt;Float&gt; bottom() { return _isUnset(bottom) ? Optional.empty() : Optional.of(bottom); }</span>
+
+    /**
+     *  Returns an optional value for the left inset where {@link Optional#empty()}
+     *  means that the left inset was not specified.
+     *
+     * @return An {@link Optional} containing the left inset if it was specified,
+     *        {@link Optional#empty()} otherwise.
+     */
+<span class="fc bfc" id="L139" title="All 2 branches covered.">    Optional&lt;Float&gt; left() { return _isUnset(left) ? Optional.empty() : Optional.of(left); }</span>
+
+    /**
+     *  Creates an updated {@link OptionalInsets} with the specified {@code top} inset.
+     *
+     * @param top The top inset.
+     * @return A new {@link OptionalInsets} with the specified top inset.
+     */
+<span class="fc" id="L147">    OptionalInsets withTop( float top ) { return _of(top, right, bottom, left); }</span>
+
+    /**
+     *  Creates an updated {@link OptionalInsets} with the specified {@code right} inset.
+     *
+     * @param right The right inset.
+     * @return A new {@link OptionalInsets} with the specified right inset.
+     */
+<span class="fc" id="L155">    OptionalInsets withRight( float right ) { return _of(top, right, bottom, left); }</span>
+
+    /**
+     *  Creates an updated {@link OptionalInsets} with the specified {@code bottom} inset.
+     *
+     * @param bottom The bottom inset.
+     * @return A new {@link OptionalInsets} with the specified bottom inset.
+     */
+<span class="fc" id="L163">    OptionalInsets withBottom( float bottom ) { return _of(top, right, bottom, left); }</span>
+
+    /**
+     *  Creates an updated {@link OptionalInsets} with the specified {@code left} inset.
+     * @param left The left inset.
+     * @return A new {@link OptionalInsets} with the specified left inset.
+     */
+<span class="fc" id="L170">    OptionalInsets withLeft( float left ) { return _of(top, right, bottom, left); }</span>
+
+    OptionalInsets minus( OptionalInsets other ) {
+<span class="nc" id="L173">        return _of(</span>
+<span class="nc" id="L174">                    _minus(top,    other.top   ),</span>
+<span class="nc" id="L175">                    _minus(right,  other.right ),</span>
+<span class="nc" id="L176">                    _minus(bottom, other.bottom),</span>
+<span class="nc" id="L177">                    _minus(left,   other.left  )</span>
+                );
+    }
+
+    private static float _minus( float a, float b ) {
+<span class="nc bnc" id="L182" title="All 2 branches missed.">        if ( _isUnset(a) )</span>
+<span class="nc" id="L183">            return UNSPECIFIED;</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">        return _isUnset(b) ? a : a - b;</span>
+    }
+
+    /**
+     *  An {@link OptionalInsets} may be scaled by a factor to increase or decrease the thickness of every side.
+     *  If any of the sides was not specified, it will remain unspecified.
+     *
+     * @param scale The scale factor.
+     * @return A new {@link OptionalInsets} with the insets scaled by the specified factor.
+     */
+    OptionalInsets scale( double scale ) {
+<span class="fc" id="L195">        return _of(</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">                    _isUnset(top)    ? UNSPECIFIED : (float) ( top    * scale ),</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">                    _isUnset(right)  ? UNSPECIFIED : (float) ( right  * scale ),</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">                    _isUnset(bottom) ? UNSPECIFIED : (float) ( bottom * scale ),</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">                    _isUnset(left)   ? UNSPECIFIED : (float) ( left   * scale )</span>
+                );
+    }
+
+    OptionalInsets simplified() {
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L205">            return _NONE;</span>
+
+<span class="fc" id="L207">        return _of(</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">                    _same(this.top   , 0f) ? UNSPECIFIED : this.top,</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">                    _same(this.right , 0f) ? UNSPECIFIED : this.right,</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">                    _same(this.bottom, 0f) ? UNSPECIFIED : this.bottom,</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">                    _same(this.left  , 0f) ? UNSPECIFIED : this.left</span>
+                );
+    }
+
+    /**
+     *  Determines if any of the sides is specified and positive,
+     *  which means that these insets take up room in the component's
+     *  appearance or layout.
+     *
+     * @return {@code true} if any of the sides is specified and positive,
+     *         {@code false} otherwise.
+     */
+    public boolean isPositive() {
+        // An unspecified side is NaN, and no comparison against NaN is ever true:
+<span class="fc bfc" id="L225" title="All 8 branches covered.">        return top &gt; 0 || right &gt; 0 || bottom &gt; 0 || left &gt; 0;</span>
+    }
+
+    private static float _plus( float a, float b ) {
+<span class="fc bfc" id="L229" title="All 2 branches covered.">        if ( _isUnset(a) )</span>
+<span class="fc" id="L230">            return b;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        return _isUnset(b) ? a : a + b;</span>
+    }
+
+    /**
+     *  Adds the sides of this {@link OptionalInsets} to the sides of the specified {@code other} {@link OptionalInsets}.
+     *
+     * @param other The other {@link OptionalInsets} to merge with.
+     * @return A new {@link OptionalInsets} with the summed insets.
+     */
+    public OptionalInsets plus( OptionalInsets other ) {
+<span class="fc bfc" id="L241" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L242">            return other;</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">        if ( other.equals(_NONE) )</span>
+<span class="fc" id="L244">            return this;</span>
+
+<span class="fc" id="L246">        return _of(</span>
+<span class="fc" id="L247">                    _plus(top,    other.top   ),</span>
+<span class="fc" id="L248">                    _plus(right,  other.right ),</span>
+<span class="fc" id="L249">                    _plus(bottom, other.bottom),</span>
+<span class="fc" id="L250">                    _plus(left,   other.left  )</span>
+                );
+    }
+
+    static OptionalInsets roundingCorrectionOf( OptionalInsets first, OptionalInsets second, OptionalInsets third ) {
+<span class="fc" id="L255">        return _of(</span>
+<span class="fc" id="L256">                    _roundingCorrectionOf(_plus(_plus(first.top,    second.top   ), third.top   )),</span>
+<span class="fc" id="L257">                    _roundingCorrectionOf(_plus(_plus(first.right,  second.right ), third.right )),</span>
+<span class="fc" id="L258">                    _roundingCorrectionOf(_plus(_plus(first.bottom, second.bottom), third.bottom)),</span>
+<span class="fc" id="L259">                    _roundingCorrectionOf(_plus(_plus(first.left,   second.left  ), third.left  ))</span>
+                );
+    }
+
+    private static float _roundingCorrectionOf( float sum ) {
+<span class="fc bfc" id="L264" title="All 2 branches covered.">        if ( !(sum &gt; 0f) )</span>
+<span class="fc" id="L265">            return UNSPECIFIED;</span>
+<span class="fc" id="L266">        float fraction = sum - (float) Math.floor(sum);</span>
+<span class="fc bfc" id="L267" title="All 2 branches covered.">        return fraction &gt; 0f ? 1f - fraction : UNSPECIFIED;</span>
+    }
+
+    public OptionalInsets or( OptionalInsets other ) {
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L272">            return other;</span>
+<span class="fc bfc" id="L273" title="All 2 branches covered.">        if ( other.equals(_NONE) )</span>
+<span class="fc" id="L274">            return this;</span>
+
+<span class="fc" id="L276">        return _of(</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">                    _isUnset(top)    ? other.top    : top,</span>
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">                    _isUnset(right)  ? other.right  : right,</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">                    _isUnset(bottom) ? other.bottom : bottom,</span>
+<span class="fc bfc" id="L280" title="All 2 branches covered.">                    _isUnset(left)   ? other.left   : left</span>
+                );
+    }
+
+    /**
+     *  Maps the specified sides of this {@link OptionalInsets} using the specified {@code mapper} function.
+     *
+     * @param mapper The mapper function.
+     * @return A new {@link OptionalInsets} with the mapped insets.
+     */
+    public OptionalInsets map( Function&lt;Float, @Nullable Float&gt; mapper ) {
+<span class="fc" id="L291">        return _ofNullable(</span>
+<span class="fc bfc" id="L292" title="All 2 branches covered.">                    _isUnset(top)    ? null : mapper.apply(top),</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">                    _isUnset(right)  ? null : mapper.apply(right),</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">                    _isUnset(bottom) ? null : mapper.apply(bottom),</span>
+<span class="fc bfc" id="L295" title="All 2 branches covered.">                    _isUnset(left)   ? null : mapper.apply(left)</span>
+                );
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L301">        int hash = 7;</span>
+<span class="fc" id="L302">        hash = 97 * hash + Float.floatToIntBits(this.top);</span>
+<span class="fc" id="L303">        hash = 97 * hash + Float.floatToIntBits(this.right);</span>
+<span class="fc" id="L304">        hash = 97 * hash + Float.floatToIntBits(this.bottom);</span>
+<span class="fc" id="L305">        hash = 97 * hash + Float.floatToIntBits(this.left);</span>
+<span class="fc" id="L306">        return hash;</span>
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="pc bpc" id="L311" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L314">        OptionalInsets rhs = (OptionalInsets) obj;</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">        return _same(top,    rhs.top   ) &amp;&amp;</span>
+<span class="fc bfc" id="L316" title="All 2 branches covered.">               _same(right,  rhs.right ) &amp;&amp;</span>
+<span class="fc bfc" id="L317" title="All 2 branches covered.">               _same(bottom, rhs.bottom) &amp;&amp;</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">               _same(left,   rhs.left  );</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L323">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc" id="L324">                    &quot;top=&quot;    + _toString( top    ) + &quot;, &quot; +</span>
+<span class="fc" id="L325">                    &quot;right=&quot;  + _toString( right  ) + &quot;, &quot; +</span>
+<span class="fc" id="L326">                    &quot;bottom=&quot; + _toString( bottom ) + &quot;, &quot; +</span>
+<span class="fc" id="L327">                    &quot;left=&quot;   + _toString( left   ) +</span>
+                &quot;]&quot;;
+    }
+
+    private static String _toString( float value ) {
+<span class="fc bfc" id="L332" title="All 2 branches covered.">        return _isUnset(value) ? &quot;?&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,379 @@
+{
+  "className":"swingtree.UI_Enum_Spec",
+  "title":"The Vocabulary Enums",
+  "narrative":"Raw Swing describes geometry with loose integer constants:\n    `JSlider.HORIZONTAL` is `0`, `SwingConstants.TOP` is `1`, and nothing\n    stops you from handing one to a method which wanted the other.\n    SwingTree replaces all of them with a small set of enums, and this\n    specification is about those enums themselves rather than about any\n    one component.\n\n    There are only a handful of them and they turn up everywhere:\n    `UI.Axis` says which way a thing runs, `UI.Placement` names one point\n    of a rectangle, `UI.Side` and `UI.Corner` name an edge and a corner,\n    `UI.Span` names the direction a gradient travels, and `UI.ComponentArea`\n    together with `UI.ComponentBoundary` names the regions of the box model\n    and the lines dividing them.\n\n    Each of them carries a few small methods, so that an application can ask\n    the enum a question instead of writing a switch over its constants.\n    Every scenario in this specification takes one of those methods and\n    checks the promise it makes.",
+  "subjects":["swingtree.UI"],
+  "statistics":{
+    "runs":"15",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A slider built with `UI.Axis.LINE` is horizontal, while a box layout built with it keeps the reading direction.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.Axis` has four constants. `HORIZONTAL` and `VERTICAL` say which way a\n            thing runs outright. `LINE` says \"the way a line of text runs\" and `PAGE`\n            says \"the way lines follow each other down a page\", and both of those are\n            decided by the reading direction of the container they are used in.\n\n            SwingTree promises two things about that. A component which has no reading\n            direction to honour reads `LINE` as `HORIZONTAL` and `PAGE` as `VERTICAL`,\n            which is the answer `UI.Axis.resolve()` gives. A `BoxLayout` keeps all four\n            constants apart, because it is the one place SwingTree hands a `UI.Axis` to\n            which can place its children from right to left.\n\n            This scenario builds a `JSlider` through `UI.slider(UI.Axis.LINE)` and a\n            panel through `UI.panel().withBoxLayout(UI.Axis.LINE)`, both from that very\n            same constant. The slider has to report `SwingConstants.HORIZONTAL`, and the\n            panel has to carry a `BoxLayout` whose axis is `BoxLayout.LINE_AXIS` rather\n            than `BoxLayout.X_AXIS`.\n\n            **Why this is fragile:** `UI.Axis.LINE` reaches a slider through\n            `UI.Axis.forSlider()` and a box layout through `UI.Axis.forBoxLayout()`, and\n            those two have to disagree on purpose. Making them agree breaks something\n            either way. If the slider stopped resolving `LINE`, then\n            `UI.slider(UI.Axis.LINE)` would have to throw or guess, and a view model\n            holding its axis as `LINE` could no longer feed a slider and a box layout\n            from one property. If the box layout started resolving it, then a panel in an\n            Arabic or Hebrew user interface would lay its children out from left to\n            right, and the window would read backwards.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A slider and a panel, both declared with the very same axis constant, `UI.Axis.LINE`.","code":["var slider = UI.slider(UI.Axis.LINE).get(JSlider)","var panel  = UI.panel().withBoxLayout(UI.Axis.LINE).get(javax.swing.JPanel)"]},
+
+        {"kind":"expect","text":"The slider is horizontal, because a slider has no reading direction to honour.","code":["slider.orientation == SwingConstants.HORIZONTAL"]},
+
+        {"kind":"and","text":"The panel carries a box layout on the line axis, which is where the reading direction survives.","code":["panel.layout instanceof BoxLayout","((BoxLayout) panel.layout).axis == BoxLayout.LINE_AXIS"]},
+
+        {"kind":"and","text":"Asking the enum itself gives the answer the slider arrived at: the line axis is the horizontal one.","code":["UI.Axis.LINE.resolve() == UI.Axis.HORIZONTAL","UI.Axis.PAGE.resolve() == UI.Axis.VERTICAL","UI.Axis.LINE.isHorizontal()","!UI.Axis.PAGE.isHorizontal()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.Axis.perpendicular()` names the axis at a right angle, which is the axis of a divider across a split.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `JSplitPane` laid out along `UI.Axis.HORIZONTAL` puts its two components\n            side by side, which makes the divider between them a vertical bar. The axis a\n            split runs along and the axis of the bar across it are always at right\n            angles, and `UI.Axis.perpendicular()` is how a caller says \"the other one\"\n            without naming both constants.\n\n            This matters where the axis is not a literal in the source but a value which\n            was handed in. A view model holding the split direction is the usual case: to\n            draw a separator lying across the split, the other axis is needed, and\n            writing `axis == HORIZONTAL ? VERTICAL : HORIZONTAL` at every such place is\n            the switch this method removes.\n\n            This scenario holds `UI.Axis.HORIZONTAL` in a variable, as it would arrive\n            from a view model, builds a split pane along it and a separator along\n            `perpendicular()` of it. The split pane has to report\n            `JSplitPane.HORIZONTAL_SPLIT` and the separator `SwingConstants.VERTICAL`.\n            Going across twice has to return the axis it started from.\n\n            **Why this is fragile:** `perpendicular()` is the single expression\n            `isHorizontal() ? VERTICAL : HORIZONTAL`, and writing it the other way round\n            compiles and type checks, because both answers are the same type. Every\n            separator, divider and label meant to lie across an axis would then be drawn\n            along it: a separator meant to cut a horizontal split in two would run\n            parallel to the seam and disappear into it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The axis a split pane is laid out along, as it would arrive from a view model.","code":["var splitAxis = UI.Axis.HORIZONTAL"]},
+
+        {"kind":"and","text":"A split pane along that axis, and a separator along the axis across it.","code":["var splitPane = UI.splitPane(splitAxis).get(JSplitPane)","var separator = UI.separator(splitAxis.perpendicular()).get(javax.swing.JSeparator)"]},
+
+        {"kind":"expect","text":"The split places its two components left and right of each other.","code":["splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT"]},
+
+        {"kind":"and","text":"The separator, lying across that split, runs vertically.","code":["separator.orientation == SwingConstants.VERTICAL"]},
+
+        {"kind":"and","text":"Going across twice returns the horizontal axis it started from.","code":["splitAxis.perpendicular().perpendicular() == splitAxis"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UI.Side` names the axis its edge runs along and the edge facing it across the component.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.Side` names one of the four edges of a component, and it is how a\n            `JTabbedPane` is told where to keep its tabs.\n\n            An edge is a line, so it runs along an axis of its own, and that is easy to\n            get backwards. The top edge is a horizontal line, so a tab strip docked to\n            the top is laid out in a row. The left edge is a vertical line, so tabs\n            docked to the left stack downwards. `UI.Side.axis()` answers that question,\n            and `UI.Side.opposite()` returns the edge facing this one across the\n            component, which is what a \"move it to the other side\" command needs.\n\n            This scenario docks the tabs of one `JTabbedPane` to `UI.Side.LEFT` and the\n            tabs of a second one to `UI.Side.LEFT.opposite()`. The first has to report\n            `JTabbedPane.LEFT` and the second `JTabbedPane.RIGHT`. The left edge has to\n            report a vertical axis, the top and bottom edges a horizontal one, and facing\n            twice has to return every side to itself.\n\n            **Why this is fragile:** `axis()` answers `UI.Axis.HORIZONTAL` for the top\n            and the bottom, which reads as the wrong way round at a glance, because the\n            top of a component is above its middle rather than beside it. Swapping the\n            two answers compiles, and anything asking a docked strip for its axis would\n            then lay that strip out at a right angle to the edge it is docked against:\n            tabs along the top would be stacked into a column one tab wide, running off\n            the bottom of the window.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tabbed pane with its tabs docked to the left edge.","code":["var docked = UI.Side.LEFT","var tabs = UI.tabbedPane(docked).get(JTabbedPane)"]},
+
+        {"kind":"and","text":"A second one docked to the edge facing it, as a \"move to the other side\" action would build.","code":["var movedTabs = UI.tabbedPane(docked.opposite()).get(JTabbedPane)"]},
+
+        {"kind":"expect","text":"The first pane keeps its tabs on the left, and the second on the right.","code":["tabs.tabPlacement == JTabbedPane.LEFT","movedTabs.tabPlacement == JTabbedPane.RIGHT"]},
+
+        {"kind":"and","text":"The left edge is a vertical line, so the tabs docked there stack downwards.","code":["docked.axis() == UI.Axis.VERTICAL"]},
+
+        {"kind":"and","text":"The top and bottom edges are horizontal lines, so tabs docked there sit in a row.","code":["UI.Side.TOP.axis() == UI.Axis.HORIZONTAL","UI.Side.BOTTOM.axis() == UI.Axis.HORIZONTAL"]},
+
+        {"kind":"and","text":"Every side faces the one across from it, and facing twice returns to the start.","code":["UI.Side.TOP.opposite() == UI.Side.BOTTOM","UI.Side.RIGHT.opposite() == UI.Side.LEFT","UI.Side.values().every { it.opposite().opposite() == it }"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UI.Placement` names both coordinates of a point, so `UI.Placement.TOP` centres a label horizontally too.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.Placement` names a single point of a rectangular component: one of the\n            four corners, the middle of one of the four sides, or the centre. A `JLabel`\n            built through `UI.label(text, placement)` takes one to decide where its text\n            and icon sit.\n\n            The trap worth knowing is that a placement always answers for **both** axes,\n            because a point has two coordinates. `UI.Placement.TOP` does not mean \"at the\n            top and leave the rest alone\": it is the middle of the top edge, so a label\n            aligned with it is centred horizontally as well. Naming the corner\n            `UI.Placement.TOP_LEFT` is how both axes are pinned, and\n            `withHorizontalAlignment(..)` or `withVerticalAlignment(..)` are how one axis\n            is moved and the other left where it is.\n\n            This scenario builds one label with `UI.Placement.TOP` and one with\n            `UI.Placement.TOP_LEFT`. Both have to report `SwingConstants.TOP` vertically.\n            The first has to report `SwingConstants.CENTER` horizontally and the second\n            `SwingConstants.LEFT`. Reading the two halves back out through `vertical()`\n            and `horizontal()` has to say the same thing, and every one of the ten\n            constants has to be rebuildable from the two halves it reports, through\n            `UI.Placement.of(vertical, horizontal)`.\n\n            **Why this is fragile:** `horizontal()` and `vertical()` are two switches over\n            ten constants, and `UIForLabel.withAlignment(..)` applies both of their\n            answers to the component, skipping the ones which report\n            `UI.HorizontalAlignment.UNDEFINED`. A constant answering `UNDEFINED` where\n            `CENTER` was meant would therefore leave the horizontal alignment of the label\n            at whatever it happened to be. `UI.Placement.TOP` would silently mean \"at the\n            top, and keep the old side\", so the same title would sit top left in one label\n            and top centre in the next.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two labels, one placed at the top and one at the top left corner.","code":["var top     = UI.label(\"Title\", UI.Placement.TOP).get(JLabel)","var topLeft = UI.label(\"Title\", UI.Placement.TOP_LEFT).get(JLabel)"]},
+
+        {"kind":"expect","text":"Both labels put their content at the top, as their names promise.","code":["top.verticalAlignment     == SwingConstants.TOP","topLeft.verticalAlignment == SwingConstants.TOP"]},
+
+        {"kind":"and","text":"But `TOP` also centres the content horizontally, because it names the middle of that edge.","code":["top.horizontalAlignment == SwingConstants.CENTER"]},
+
+        {"kind":"and","text":"Only the corner constant pins the horizontal axis to the left.","code":["topLeft.horizontalAlignment == SwingConstants.LEFT"]},
+
+        {"kind":"and","text":"Reading the two coordinates back out of the point says the same thing.","code":["UI.Placement.TOP.vertical()   == UI.VerticalAlignment.TOP","UI.Placement.TOP.horizontal() == UI.HorizontalAlignment.CENTER"]},
+
+        {"kind":"and","text":"Every point can be rebuilt from the two coordinates it reports.","code":["UI.Placement.values().every {","    UI.Placement.of(it.vertical(), it.horizontal()) == it","}"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.Placement.of(..)` turns a leading alignment into a left or a right using the reading direction given to it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.HorizontalAlignment` has two constants which are not sides at all:\n            `LEADING` and `TRAILING`. They mean \"wherever a line of text begins\" and\n            \"wherever it ends\", which is the left and the right in English, and the right\n            and the left in Arabic or Hebrew.\n\n            A `UI.Placement` cannot hold either of them, because a placement is a point\n            which has already been chosen and those two are still a question. So the\n            question is answered exactly once, when the point is built:\n            `UI.Placement.of(vertical, horizontal, orientation)` reads the orientation and\n            hands back a real point.\n\n            This scenario resolves `UI.VerticalAlignment.TOP` together with\n            `UI.HorizontalAlignment.LEADING` three times. Against\n            `UI.ComponentOrientation.LEFT_TO_RIGHT` the answer has to be\n            `UI.Placement.TOP_LEFT`. Against `UI.ComponentOrientation.RIGHT_TO_LEFT` it\n            has to be `UI.Placement.TOP_RIGHT`. Against\n            `UI.ComponentOrientation.UNKNOWN` it has to be `UI.Placement.TOP_LEFT` once\n            more, which is the choice `java.awt.ComponentOrientation.UNKNOWN` makes too,\n            and it is why a component whose orientation was never set behaves like an\n            English one. The two argument overload has to agree with the unknown one, and\n            neither resolved point may report `LEADING` or `TRAILING` back from\n            `horizontal()`.\n\n            **Why this is fragile:** the reading direction is consulted in this one place,\n            so getting it backwards is a single swapped pair. Nothing in an English user\n            interface would look wrong, because `LEADING` and `LEFT` land on the same side\n            there. In an Arabic or Hebrew user interface every heading, icon and caption\n            would sit on the side opposite the one its text starts at, and only a reader\n            of that language would see it. SwingTree reaches this method itself: styled\n            text with no placement of its own is placed by\n            `UI.Placement.of(verticalAlignment, horizontalAlignment)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A heading which should sit at the top, where the text of the label begins.","code":["var vertical = UI.VerticalAlignment.TOP","var atTextStart = UI.HorizontalAlignment.LEADING"]},
+
+        {"kind":"when","text":"The component reads from left to right, as an English one does...","code":["var english = UI.Placement.of(vertical, atTextStart, UI.ComponentOrientation.LEFT_TO_RIGHT)"]},
+
+        {"kind":"then","text":"...the heading belongs in the top left corner.","code":["english == UI.Placement.TOP_LEFT"]},
+
+        {"kind":"when","text":"The very same declaration is resolved for a right to left reading direction...","code":["var arabic = UI.Placement.of(vertical, atTextStart, UI.ComponentOrientation.RIGHT_TO_LEFT)"]},
+
+        {"kind":"then","text":"...the heading belongs in the top right corner instead.","code":["arabic == UI.Placement.TOP_RIGHT"]},
+
+        {"kind":"and","text":"An unknown reading direction is read as left to right, which is what AWT does.","code":["UI.Placement.of(vertical, atTextStart, UI.ComponentOrientation.UNKNOWN) == UI.Placement.TOP_LEFT","UI.Placement.of(vertical, atTextStart) == UI.Placement.TOP_LEFT","UI.ComponentOrientation.UNKNOWN.isLeftToRightOrUnknown()"]},
+
+        {"kind":"and","text":"A resolved placement never reports leading or trailing back to you, only real sides.","code":["english.horizontal() == UI.HorizontalAlignment.LEFT","arabic.horizontal()  == UI.HorizontalAlignment.RIGHT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.Placement.opposite()` returns the point reached through the middle of the component and out the other side.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When something has been placed at a point of a component and a second thing\n            should sit across from it, the point wanted is the one reached by going\n            through the middle and out the other side. That is what\n            `UI.Placement.opposite()` returns.\n\n            This scenario starts from `UI.Placement.TOP_LEFT`, as the placement of an\n            image would arrive, and requires its opposite to be\n            `UI.Placement.BOTTOM_RIGHT`. The middle of the top edge has to face the middle\n            of the bottom edge, and crossing the component twice has to return every one\n            of the ten constants to itself. `UI.Placement.CENTER` and\n            `UI.Placement.UNDEFINED` have to return themselves, because neither of them\n            names a side to be on the far side of. Only the four corner constants may\n            report `isCorner()`.\n\n            **Why this is fragile:** `opposite()` is a switch over ten constants which\n            reflects a point through the centre, and every answer it can give is another\n            valid point, so a transposed pair throws nothing and puts a caption in the\n            wrong corner. `isCorner()` carries further than that:\n            `UI.Span.isDiagonal()` is defined as `from().isCorner()`, and SwingTree\n            chooses between its diagonal and its straight gradient painter from that\n            answer. A corner which stopped reporting itself as a corner would therefore\n            have a corner to corner gradient painted by the painter meant for side to\n            side ones.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A corner an image was placed at.","code":["var imageCorner = UI.Placement.TOP_LEFT"]},
+
+        {"kind":"expect","text":"The caption belongs at the corner reached through the middle of the component.","code":["imageCorner.opposite() == UI.Placement.BOTTOM_RIGHT"]},
+
+        {"kind":"and","text":"The same holds for the middle of an edge.","code":["UI.Placement.TOP.opposite() == UI.Placement.BOTTOM","UI.Placement.LEFT.opposite() == UI.Placement.RIGHT"]},
+
+        {"kind":"and","text":"Crossing the component twice brings you back to where you started.","code":["UI.Placement.values().every { it.opposite().opposite() == it }"]},
+
+        {"kind":"and","text":"The centre and the undefined point have no far side, so they answer with themselves.","code":["UI.Placement.CENTER.opposite() == UI.Placement.CENTER","UI.Placement.UNDEFINED.opposite() == UI.Placement.UNDEFINED"]},
+
+        {"kind":"and","text":"Only the four corners report themselves as corners.","code":["UI.Placement.values().findAll { it.isCorner() } as Set == [","    UI.Placement.TOP_LEFT,    UI.Placement.TOP_RIGHT,","    UI.Placement.BOTTOM_LEFT, UI.Placement.BOTTOM_RIGHT","] as Set"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.Corner.opposite()` names the corner across the diagonal, so one value can round both of them.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.Corner` names one corner of a component, and the style API takes one in\n            `borderRadiusAt(..)` to round that corner by itself.\n\n            A very common shape rounds two corners lying across the diagonal from each\n            other, which gives a panel a leaning, ticket-like silhouette.\n            `UI.Corner.opposite()` lets a caller name the first corner and derive the\n            second, so a single value can drive the whole shape.\n\n            This scenario paints two boxes of 120 by 80 pixels, both filled with the\n            colour (70, 130, 180) and both rounded by 30 pixels at two corners. The first\n            box rounds `UI.Corner.TOP_LEFT` and `UI.Corner.TOP_LEFT.opposite()`. The\n            second spells out `UI.Corner.TOP_LEFT` and `UI.Corner.BOTTOM_RIGHT`. The two\n            renderings may not differ in a single colour channel of a single pixel.\n\n            **Why this is fragile:** `opposite()` is a switch over five constants, and a\n            corner rounded in the wrong place is still a rounded corner, so a wrong answer\n            throws nothing and passes any test which only counts rounded corners. Were\n            `TOP_RIGHT` returned for `TOP_LEFT`, the first box would lean the other way\n            and the comparison here would fail. `UI.Corner.EVERY` names all four corners\n            at once, so no single corner lies across from it, and it answers with itself.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A corner to round, as a theme or a view model might supply it.","code":["var corner = UI.Corner.TOP_LEFT"]},
+
+        {"kind":"and","text":"A box of 120 by 80 pixels which rounds that corner and the one derived from it, both by 30 pixels.","code":["var derived =","        UI.box().withStyle( it -> it","            .size(120, 80)","            .backgroundColor(new Color(70, 130, 180))","            .borderRadiusAt(corner, 30)","            .borderRadiusAt(corner.opposite(), 30)","        )","        .get(JBox)"]},
+
+        {"kind":"and","text":"A second box of the same size and colour which spells both corners out literally.","code":["var literal =","        UI.box().withStyle( it -> it","            .size(120, 80)","            .backgroundColor(new Color(70, 130, 180))","            .borderRadiusAt(UI.Corner.TOP_LEFT, 30)","            .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 30)","        )","        .get(JBox)"]},
+
+        {"kind":"when","text":"Both boxes are painted into images of their own.","code":["var derivedImage = Utility.renderSingleComponent(derived)","var literalImage = Utility.renderSingleComponent(literal)"]},
+
+        {"kind":"then","text":"Not a single colour channel of a single pixel differs between the two pictures.","code":["Utility.worstChannelDelta(derivedImage, literalImage) == 0"]},
+
+        {"kind":"and","text":"The corner reached diagonally is the one the drawing used.","code":["corner.opposite() == UI.Corner.BOTTOM_RIGHT","UI.Corner.TOP_RIGHT.opposite() == UI.Corner.BOTTOM_LEFT"]},
+
+        {"kind":"and","text":"`EVERY` names no single corner, so it has no diagonal partner and answers with itself.","code":["UI.Corner.EVERY.opposite() == UI.Corner.EVERY"]},
+
+        {"kind":"and","text":"A corner hands itself to the placement based parts of the API as the matching point.","code":["UI.Corner.TOP_LEFT.toPlacement() == UI.Placement.TOP_LEFT","UI.Corner.EVERY.toPlacement() == UI.Placement.UNDEFINED","UI.Side.LEFT.toPlacement() == UI.Placement.LEFT"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Reversing a `UI.Span` paints the picture that handing the two gradient colours over in the other order paints.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `UI.Span` says where a gradient starts and where it ends, either from the\n            middle of one side to the middle of the facing side, or from one corner to the\n            facing corner. `UI.Span.reversed()` returns the span running the other way.\n\n            There are two ways to make a gradient point the other direction: keep the\n            colours and reverse the span, or keep the span and hand the colours over in\n            the other order. Both have to produce the very same picture.\n\n            This scenario paints two boxes of 140 by 90 pixels. The first is given the\n            colours (220, 60, 60) and (60, 90, 200), in that order, across\n            `UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT.reversed()`. The second is given the two\n            colours in the other order across `UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT` itself.\n            The two renderings may not differ in a single colour channel of a single\n            pixel, and reversing any of the eight spans twice has to return it.\n\n            **Why this is fragile:** `reversed()` is a switch pairing up eight constants,\n            and every answer it can give is another valid `UI.Span`, so a transposed pair\n            compiles and paints. A reviewer reading\n            `case TOP_RIGHT_TO_BOTTOM_LEFT: return BOTTOM_LEFT_TO_TOP_RIGHT;` has to hold\n            four corner names in mind to judge it. On screen the mistake is plain: the\n            gradient runs along the wrong diagonal.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two colours and the span a gradient was declared with.","code":["var first  = new Color(220, 60, 60)","var second = new Color(60, 90, 200)","var span   = UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT"]},
+
+        {"kind":"and","text":"A box of 140 by 90 pixels which reverses the span and keeps the colours in their order.","code":["var reversedSpan =","        UI.box().withStyle( it -> it","            .size(140, 90)","            .gradient( grad -> grad.colors(first, second).span(span.reversed()) )","        )","        .get(JBox)"]},
+
+        {"kind":"and","text":"A box of the same size which keeps the span and swaps the two colours instead.","code":["var swappedColours =","        UI.box().withStyle( it -> it","            .size(140, 90)","            .gradient( grad -> grad.colors(second, first).span(span) )","        )","        .get(JBox)"]},
+
+        {"kind":"when","text":"Both boxes are painted.","code":["var reversedImage = Utility.renderSingleComponent(reversedSpan)","var swappedImage  = Utility.renderSingleComponent(swappedColours)"]},
+
+        {"kind":"then","text":"The two pictures are identical, down to the last colour channel.","code":["Utility.worstChannelDelta(reversedImage, swappedImage) == 0"]},
+
+        {"kind":"and","text":"Reversing a span twice gives the original span back.","code":["UI.Span.values().every { it.reversed().reversed() == it }"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `UI.Span` reports the two points it runs between, and it ends at the point facing the one it starts at.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Every span is defined by the point it starts at and the point it ends at, and\n            `UI.Span.from()` and `UI.Span.to()` hand those out as `UI.Placement` values.\n            The first colour given to `colors(..)` sits at `from()`, and the last one at\n            `to()`.\n\n            Because the endpoints are points of the component, everything else follows\n            from them, with no second list of constants to keep in step. A span is\n            diagonal exactly when it starts at a corner, and a span which is not diagonal\n            runs along an axis which can be named. A diagonal span runs along no single\n            axis, which is why `UI.Span.axis()` hands back an empty `Optional` rather than\n            picking one of the two.\n\n            This scenario requires `UI.Span.LEFT_TO_RIGHT` to run from `UI.Placement.LEFT`\n            to `UI.Placement.RIGHT`, `UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT` to run from\n            `UI.Placement.TOP_LEFT` to `UI.Placement.BOTTOM_RIGHT`, and each of the eight\n            spans to end at the `opposite()` of the point it starts at. Exactly the four\n            corner to corner spans have to report `isDiagonal()`, the two side to side\n            spans across the component have to name `UI.Axis.HORIZONTAL`, the one down\n            the component `UI.Axis.VERTICAL`, and a diagonal span has to name none.\n\n            **Why this is fragile:** the two endpoints are written out by hand next to\n            each constant, and nothing in the compiler checks that\n            `BOTTOM_LEFT_TO_TOP_RIGHT` was given `UI.Placement.BOTTOM_LEFT` rather than\n            `UI.Placement.BOTTOM_RIGHT`. The requirement that a span end at the opposite\n            of its start is what catches such a slip, because a mismatched pair breaks it.\n            The consequence of one reaches the screen: `isDiagonal()` is defined as\n            `from().isCorner()`, and SwingTree chooses between its diagonal and its\n            straight gradient painter from that answer, so a straight span given a corner\n            as its start would be painted corner to corner.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"A side to side span starts and ends at the middle of two facing edges.","code":["UI.Span.LEFT_TO_RIGHT.from() == UI.Placement.LEFT","UI.Span.LEFT_TO_RIGHT.to()   == UI.Placement.RIGHT"]},
+
+        {"kind":"and","text":"A corner to corner span starts and ends at two facing corners.","code":["UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT.from() == UI.Placement.TOP_LEFT","UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT.to()   == UI.Placement.BOTTOM_RIGHT"]},
+
+        {"kind":"and","text":"A span always ends at the point facing the one it starts at.","code":["UI.Span.values().every { it.to() == it.from().opposite() }"]},
+
+        {"kind":"and","text":"Exactly the four corner to corner spans call themselves diagonal.","code":["UI.Span.values().findAll { it.isDiagonal() } as Set == [","    UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT, UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT,","    UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT, UI.Span.BOTTOM_RIGHT_TO_TOP_LEFT","] as Set"]},
+
+        {"kind":"and","text":"A straight span names the axis it travels along.","code":["UI.Span.LEFT_TO_RIGHT.axis().get() == UI.Axis.HORIZONTAL","UI.Span.RIGHT_TO_LEFT.axis().get() == UI.Axis.HORIZONTAL","UI.Span.TOP_TO_BOTTOM.axis().get() == UI.Axis.VERTICAL"]},
+
+        {"kind":"and","text":"A diagonal span travels along no single axis, so it names none.","code":["!UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT.axis().isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.Cursor.resizeAt(..)` returns the arrow belonging on a resize handle sitting at a given side or corner.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A window or a panel which the user can resize usually carries invisible\n            handles along its edges and in its corners, and each handle should show the\n            arrow pointing the way that handle moves.\n\n            The handle already knows which `UI.Side` or `UI.Corner` it sits on, so it\n            should not have to name the cursor a second time.\n            `UI.Cursor.resizeAt(..)` performs that lookup, which lets a loop over the four\n            sides build all four handles.\n\n            This scenario puts `UI.Cursor.resizeAt(UI.Side.BOTTOM)` on one button and\n            `UI.Cursor.resizeAt(UI.Corner.BOTTOM_LEFT)` on a second one, and requires the\n            first to carry `java.awt.Cursor.S_RESIZE_CURSOR` and the second\n            `java.awt.Cursor.SW_RESIZE_CURSOR`. It then pins each of the eight resize\n            constants to the AWT cursor it stands for, and requires\n            `UI.Cursor.resizeAt(UI.Corner.EVERY)` to be `UI.Cursor.DEFAULT`, because\n            `EVERY` names all four corners at once and so has no one arrow. Finally,\n            asking for a cursor has to hand out the instance AWT already keeps rather than\n            building a new one.\n\n            **Why this is fragile:** SwingTree names these constants after the side or the\n            corner a drag would move, while AWT names its own after compass points, so\n            `UI.Cursor.RESIZE_BOTTOM_LEFT` has to be built from\n            `java.awt.Cursor.SW_RESIZE_CURSOR`. South is down and west is left, and\n            getting one of those eight pairings wrong compiles, throws nothing, and shows\n            up nowhere except under the mouse of the user, whose corner handle then offers\n            to resize along the wrong diagonal.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A handle sitting on the bottom edge of a resizable panel.","code":["var handle = UI.button().withCursor(UI.Cursor.resizeAt(UI.Side.BOTTOM)).get(javax.swing.JButton)"]},
+
+        {"kind":"and","text":"A handle sitting in the corner next to it.","code":["var cornerHandle = UI.button().withCursor(UI.Cursor.resizeAt(UI.Corner.BOTTOM_LEFT)).get(javax.swing.JButton)"]},
+
+        {"kind":"expect","text":"The edge handle shows the arrow that resizes downwards.","code":["handle.cursor.type == java.awt.Cursor.S_RESIZE_CURSOR"]},
+
+        {"kind":"and","text":"The corner handle shows the diagonal arrow of that corner.","code":["cornerHandle.cursor.type == java.awt.Cursor.SW_RESIZE_CURSOR"]},
+
+        {"kind":"and","text":"Every side maps to the arrow that points away from the middle of the component.","code":["UI.Cursor.resizeAt(UI.Side.TOP).toAWTCursor().type    == java.awt.Cursor.N_RESIZE_CURSOR","UI.Cursor.resizeAt(UI.Side.LEFT).toAWTCursor().type   == java.awt.Cursor.W_RESIZE_CURSOR","UI.Cursor.resizeAt(UI.Side.RIGHT).toAWTCursor().type  == java.awt.Cursor.E_RESIZE_CURSOR"]},
+
+        {"kind":"and","text":"And every corner maps to its own diagonal arrow.","code":["UI.Cursor.resizeAt(UI.Corner.TOP_LEFT).toAWTCursor().type     == java.awt.Cursor.NW_RESIZE_CURSOR","UI.Cursor.resizeAt(UI.Corner.TOP_RIGHT).toAWTCursor().type    == java.awt.Cursor.NE_RESIZE_CURSOR","UI.Cursor.resizeAt(UI.Corner.BOTTOM_RIGHT).toAWTCursor().type == java.awt.Cursor.SE_RESIZE_CURSOR"]},
+
+        {"kind":"and","text":"`EVERY` names no single corner, so there is no one arrow for it and you get the plain pointer.","code":["UI.Cursor.resizeAt(UI.Corner.EVERY) == UI.Cursor.DEFAULT"]},
+
+        {"kind":"and","text":"Assigning a cursor hands out the instance AWT already keeps, rather than building a new one.","code":["UI.Cursor.HAND.toAWTCursor().is(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR))"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.FontStyle.withBold(..)` turns boldness on without throwing away the slant of the font.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.FontStyle` has four constants, because boldness and slant are two\n            independent switches. A toolbar with a **B** button and an *I* button has to\n            move between those four, and each button has to change only its own half of\n            the answer.\n\n            Written by hand that is a four case switch per button, and the mistake it\n            invites is losing the other half: pressing **B** while the text is italic\n            should give bold italic, not plain bold. `withBold(..)` and `withItalic(..)`\n            do that arithmetic, and `isBold()` and `isItalic()` read the two halves back\n            out, which is how the two buttons show whether they are pressed.\n\n            This scenario starts from `UI.FontStyle.ITALIC` and wears it on a label\n            through `UI.Font.of(\"Dialog\", style, 12)`. Turning boldness on has to give\n            `UI.FontStyle.BOLD_ITALIC`, and a label wearing it has to report a font which\n            is both bold and italic. Turning the slant back off has to give\n            `UI.FontStyle.BOLD` rather than `UI.FontStyle.PLAIN`. Setting either half to\n            the value it already holds has to return the constant unchanged.\n\n            **Why this is fragile:** all four constants are valid answers, so a wrong one\n            neither throws nor fails to render. Returning `BOLD` where `BOLD_ITALIC` was\n            meant drops the slant, so a user who italicises a word and then emphasises it\n            watches the slant vanish under their hands, with no error shown anywhere.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Text which is currently italic, and a label wearing a font of that style.","code":["var style = UI.FontStyle.ITALIC","var label = UI.label(\"Slanted\").withFont(UI.Font.of(\"Dialog\", style, 12)).get(JLabel)"]},
+
+        {"kind":"expect","text":"The label is slanted but not thickened, and the two buttons would show that.","code":["label.font.italic","!label.font.bold"]},
+
+        {"kind":"and","text":"The style itself reports the same two halves.","code":["style.isItalic()","!style.isBold()"]},
+
+        {"kind":"when","text":"The user presses the bold button, which turns boldness on and leaves the slant alone.","code":["style = style.withBold(true)","var bolder = UI.label(\"Slanted\").withFont(UI.Font.of(\"Dialog\", style, 12)).get(JLabel)"]},
+
+        {"kind":"then","text":"The style is now both, rather than having traded one for the other.","code":["style == UI.FontStyle.BOLD_ITALIC"]},
+
+        {"kind":"and","text":"And the label wearing it is thickened as well as slanted.","code":["bolder.font.bold","bolder.font.italic"]},
+
+        {"kind":"when","text":"The user presses the italic button, which turns the slant back off.","code":["style = style.withItalic(false)","var upright = UI.label(\"Upright\").withFont(UI.Font.of(\"Dialog\", style, 12)).get(JLabel)"]},
+
+        {"kind":"then","text":"Only the boldness survives, which is what the two button presses asked for.","code":["style == UI.FontStyle.BOLD","!style.isItalic()","style.isBold()"]},
+
+        {"kind":"and","text":"The label is thickened but no longer slanted.","code":["upright.font.bold","!upright.font.italic"]},
+
+        {"kind":"and","text":"Setting a half to the value it already has changes nothing.","code":["UI.FontStyle.values().every { it.withBold(it.isBold()) == it }","UI.FontStyle.values().every { it.withItalic(it.isItalic()) == it }"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.Active.decide(..)` lets only `AS_NEEDED` consult the situation, so a condition cannot overrule the user.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.Active` is the enum behind a scroll bar policy: show it never, show it\n            always, or show it only when it is needed. Nothing about it is specific to\n            scroll bars, so it fits any setting with those same three answers, such as\n            whether to show a strip of warnings.\n\n            `UI.Active.decide(..)` takes one boolean saying whether the situation calls\n            for the thing, and only one of the three constants looks at it. `NEVER` and\n            `ALWAYS` are answers the user of the program already gave, and a condition\n            evaluated at runtime must not overrule them.\n\n            This scenario asks all three constants twice, once with a situation which\n            calls for the thing (there are warnings to show) and once with one which does\n            not (all is well). `AS_NEEDED` has to follow the situation both times, `NEVER`\n            has to answer false both times, and `ALWAYS` has to answer true both times.\n\n            **Why this is fragile:** the tempting hand written form is\n            `policy == ALWAYS || thereAreWarnings`. It agrees with `decide(..)` on\n            `ALWAYS` and on `AS_NEEDED`, and it is wrong on exactly one of the six\n            answers here: a user who asked never to see the warning strip is shown it the\n            moment a warning turns up, which is the one case they asked against.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A situation which does call for the thing: there are warnings to show.","code":["var thereAreWarnings = true"]},
+
+        {"kind":"and","text":"And one which does not.","code":["var allIsWell = false"]},
+
+        {"kind":"expect","text":"The automatic policy follows the situation, showing the strip only when there is something to say.","code":["UI.Active.AS_NEEDED.decide(thereAreWarnings)","!UI.Active.AS_NEEDED.decide(allIsWell)"]},
+
+        {"kind":"and","text":"A user who asked to never see the strip does not get it, warnings or not.","code":["!UI.Active.NEVER.decide(thereAreWarnings)","!UI.Active.NEVER.decide(allIsWell)"]},
+
+        {"kind":"and","text":"And a user who asked to always see it keeps it even when there is nothing to report.","code":["UI.Active.ALWAYS.decide(thereAreWarnings)","UI.Active.ALWAYS.decide(allIsWell)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.DragAction.includes(..)` answers whether one action permits every transfer another one permits.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.DragAction` mirrors the transfer actions of drag and drop: copying,\n            moving, linking, both copying and moving, or nothing at all.\n\n            `COPY_OR_MOVE` is the constant which makes this more than an equality check,\n            because it permits two transfers at once. A drop target which accepts\n            `COPY_OR_MOVE` accepts a source which only wants to copy, while a target which\n            only accepts `COPY` has to refuse a source insisting on being allowed to move\n            as well. `includes(..)` asks that question the right way round: does this\n            action permit everything the other one permits?\n\n            This scenario asks `UI.DragAction.COPY_OR_MOVE` about `COPY`, `MOVE` and\n            `LINK`, requiring it to permit the first two and refuse the third. It asks the\n            question the other way round as well, requiring `COPY` not to permit\n            `COPY_OR_MOVE`, and requires copying and moving not to permit each other.\n            Finally every one of the five constants has to permit itself, and to permit\n            `NONE`, which permits nothing.\n\n            **Why this is fragile:** the natural first attempt is `this == action`, and it\n            gives the right answer for every pair except the ones involving\n            `COPY_OR_MOVE`, which is the only reason the method exists. What the user sees\n            is a drop target refusing a drag it was configured to accept: they drag\n            something onto a panel and the panel declines it, with nothing on screen to\n            say why.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A drop target which lets the user either copy or move onto it.","code":["var target = UI.DragAction.COPY_OR_MOVE"]},
+
+        {"kind":"expect","text":"It accepts a source that only wants to copy, and one that only wants to move.","code":["target.includes(UI.DragAction.COPY)","target.includes(UI.DragAction.MOVE)"]},
+
+        {"kind":"and","text":"It does not accept a source that wants to create a link, which is a different transfer.","code":["!target.includes(UI.DragAction.LINK)"]},
+
+        {"kind":"and","text":"A target that only copies cannot promise the freedom that copy-or-move promises.","code":["!UI.DragAction.COPY.includes(target)"]},
+
+        {"kind":"and","text":"Neither copying nor moving covers the other.","code":["!UI.DragAction.COPY.includes(UI.DragAction.MOVE)","!UI.DragAction.MOVE.includes(UI.DragAction.COPY)"]},
+
+        {"kind":"and","text":"Every action permits everything it permits, and everything the empty action permits.","code":["UI.DragAction.values().every { it.includes(it) }","UI.DragAction.values().every { it.includes(UI.DragAction.NONE) }"]},
+
+        {"kind":"and","text":"Each constant reports the transfers it stands for.","code":["UI.DragAction.COPY_OR_MOVE.isCopy()","UI.DragAction.COPY_OR_MOVE.isMove()","!UI.DragAction.COPY_OR_MOVE.isLink()","UI.DragAction.LINK.isLink()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The regions of the box model report which others they cover and which boundary line each of them begins at.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A styled component is built from nested regions: the margin around it, then\n            the border, then the padding, then the content. `UI.ComponentArea` names those\n            regions and `UI.ComponentBoundary` names the infinitely thin lines between\n            them. Clipping an image takes an area, while a gradient can be anchored to a\n            boundary.\n\n            Two of the five areas are unions of the others: `ALL` is the whole component,\n            and `BODY` is the border together with the interior, which is the component\n            with its margin removed. `UI.ComponentArea.contains(..)` spells that algebra\n            out, so that code deciding whether one clip already covers another does not\n            have to rediscover it.\n\n            The two enums are linked, but they are not mirror images.\n            `UI.ComponentArea.outerBoundary()` returns the line an area begins at, and\n            `UI.ComponentBoundary.wrappedArea()` goes back the other way. The round trip\n            holds only for the three areas which own a boundary outright: `ALL` and\n            `EXTERIOR` both begin at the outer edge of the component, so that one line\n            cannot name them both, and it names `ALL`.\n\n            This scenario requires `ALL` to cover all five areas, `BODY` to cover `BORDER`,\n            `INTERIOR` and itself but neither `EXTERIOR` nor `ALL`, and `EXTERIOR`,\n            `BORDER` and `INTERIOR` to cover nothing but themselves. It then pins the\n            boundary each of the five areas begins at, walks the three round trips, and\n            requires `INTERIOR_TO_CONTENT` and `CENTER_TO_CONTENT` to wrap no area at all,\n            because both of them lie inside the interior.\n\n            **Why this is fragile:** the two enums are written out separately, each with\n            its own switch, so nothing but a scenario keeps them in step. `contains(..)`\n            is what an application asks before skipping a clip it believes is already\n            covered, so an area claiming to cover more than it does lets a painter skip a\n            clip it needed, and the paint spills out over the margin of the component.\n            The round trip is asymmetric for the same reason: `OUTER_TO_EXTERIOR` is\n            where both `ALL` and `EXTERIOR` begin, and it has to answer `ALL`. Answering\n            `EXTERIOR` would hand back the ring the margin leaves, a thin frame, where\n            the whole component was meant, so an application clipping to the area a\n            boundary wraps would paint inside that frame and leave the middle of the\n            component blank.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"The whole component covers every region, itself included.","code":["UI.ComponentArea.values().every { UI.ComponentArea.ALL.contains(it) }"]},
+
+        {"kind":"and","text":"The body is the border plus the interior, so it covers both and itself.","code":["UI.ComponentArea.BODY.contains(UI.ComponentArea.BORDER)","UI.ComponentArea.BODY.contains(UI.ComponentArea.INTERIOR)","UI.ComponentArea.BODY.contains(UI.ComponentArea.BODY)"]},
+
+        {"kind":"and","text":"But the body stops where the margin begins, so it does not cover the exterior or the whole.","code":["!UI.ComponentArea.BODY.contains(UI.ComponentArea.EXTERIOR)","!UI.ComponentArea.BODY.contains(UI.ComponentArea.ALL)"]},
+
+        {"kind":"and","text":"The three regions that do not overlap cover nothing but themselves.","code":["[UI.ComponentArea.EXTERIOR, UI.ComponentArea.BORDER, UI.ComponentArea.INTERIOR].every { area ->","    UI.ComponentArea.values().every { other -> area.contains(other) == (area == other) }","}"]},
+
+        {"kind":"and","text":"Each area begins at a boundary, and areas sharing an edge share that boundary.","code":["UI.ComponentArea.ALL.outerBoundary()      == UI.ComponentBoundary.OUTER_TO_EXTERIOR","UI.ComponentArea.EXTERIOR.outerBoundary() == UI.ComponentBoundary.OUTER_TO_EXTERIOR","UI.ComponentArea.BODY.outerBoundary()     == UI.ComponentBoundary.EXTERIOR_TO_BORDER","UI.ComponentArea.BORDER.outerBoundary()   == UI.ComponentBoundary.EXTERIOR_TO_BORDER","UI.ComponentArea.INTERIOR.outerBoundary() == UI.ComponentBoundary.BORDER_TO_INTERIOR"]},
+
+        {"kind":"and","text":"Going back from a boundary names the area it wraps, for the three that own one.","code":["UI.ComponentBoundary.OUTER_TO_EXTERIOR.wrappedArea().get()  == UI.ComponentArea.ALL","UI.ComponentBoundary.EXTERIOR_TO_BORDER.wrappedArea().get() == UI.ComponentArea.BODY","UI.ComponentBoundary.BORDER_TO_INTERIOR.wrappedArea().get() == UI.ComponentArea.INTERIOR"]},
+
+        {"kind":"and","text":"Those three round trip, because each of them begins at the boundary that names it.","code":["[UI.ComponentArea.ALL, UI.ComponentArea.BODY, UI.ComponentArea.INTERIOR].every {","    it.outerBoundary().wrappedArea().get() == it","}"]},
+
+        {"kind":"and","text":"The last two boundaries lie inside the interior, so they wrap no named area at all.","code":["!UI.ComponentBoundary.INTERIOR_TO_CONTENT.wrappedArea().isPresent()","!UI.ComponentBoundary.CENTER_TO_CONTENT.wrappedArea().isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"`UI.Editability.of(..)` turns the boolean a view model already holds into the constant a table takes.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Whether a table may be edited is modelled by `UI.Editability` rather than a\n            boolean, so that a call reads as `withEditability(UI.Editability.READ_ONLY)`\n            instead of `setEditable(false)`.\n\n            View models rarely store it that way though. Far more often there is already a\n            flag, perhaps derived from a permission or from whether a record is locked.\n            `UI.Editability.of(..)` is the bridge, so that the flag becomes the constant at\n            the one place it enters the user interface.\n\n            This scenario builds a `TableData` of one row, \"Alice\" and 30, under the column\n            names \"Name\" and \"Age\", and gives it the editability derived from a flag which\n            is false. The `JTable` bound to that data has to refuse to let the user type\n            into the cell at row 0 and column 0. The scenario then sets the flag to true,\n            rebuilds the table data from it, and requires the new table to accept editing\n            of that same cell.\n\n            **Why this is fragile:** `of(..)` is one conditional, and inverting it compiles\n            and type checks, because both answers are `UI.Editability` constants. A table\n            which came out read only where it should be editable shows the user no error\n            and no explanation: they click a cell, nothing happens, and there is nothing on\n            screen to say why.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A flag from a view model saying whether the current user may edit the records.","code":["var userMayEdit = false"]},
+
+        {"kind":"and","text":"A table whose editability is derived from exactly that flag.","code":["var data = TableData.of(UI.CellOrder.ROW_MAJOR, \"Name\", \"Age\")","                    .addRow(\"Alice\", 30)","                    .withEditability(UI.Editability.of(userMayEdit))","var table = UI.table(Var.of(data)).get(JTable)"]},
+
+        {"kind":"expect","text":"The table refuses to let the user type into the cell at row 0 and column 0.","code":["!table.isCellEditable(0, 0)"]},
+
+        {"kind":"when","text":"The user is given permission and the table is rebuilt from the new flag.","code":["userMayEdit = true","var editableData = data.withEditability(UI.Editability.of(userMayEdit))","var editableTable = UI.table(Var.of(editableData)).get(JTable)"]},
+
+        {"kind":"then","text":"That same cell now accepts editing.","code":["editableTable.isCellEditable(0, 0)"]},
+
+        {"kind":"and","text":"The two constants say the same thing the flag did.","code":["UI.Editability.of(true)  == UI.Editability.EDITABLE","UI.Editability.of(false) == UI.Editability.READ_ONLY"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

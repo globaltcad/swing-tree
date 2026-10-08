@@ -1,0 +1,450 @@
+{
+  "className":"swingtree.style.Styled_Text_Obstacles_Spec",
+  "title":"Styled Text Layout Around Obstacles",
+  "narrative":"SwingTree's styled text layout engine supports the notion of *obstacles*:\n    shapes (given in component coordinates) that the text must flow around\n    and may never be rendered on top of.  The practical motivation is that\n    a styled component can contain child components — buttons, icons, or\n    small widgets — that live in the same visual area as the text, and the\n    text should politely step aside rather than collide with them.\n\n    An obstacle shape is registered through the `TextConf#obstacles(Shape...)`\n    or `TextConf#obstacles(Tuple<Shape>)` method.  During layout, each text\n    line queries the obstacle-free horizontal intervals at its vertical position\n    and fits the text into those intervals.  Obstacles that do not intersect\n    a given line have no effect on that line at all.\n\n    The two most important emergent properties of this design are:\n\n     1.  *An obstacle only matters when a text line reaches it.*\n         If a line wraps naturally before hitting an obstacle's left edge, the\n         obstacle is completely invisible to the layout engine for that line.\n         The preferred height therefore stays identical to the obstacle-free case.\n\n     2.  *An obstacle that does intersect a line narrows the available width.*\n         Narrower width means earlier wrapping, which means more lines, which\n         means a taller preferred height.  The effect is proportional to the\n         width of the obstacle: a wider obstacle steals more horizontal space,\n         forcing more lines and producing a taller component.\n\n    This specification explores both properties, as well as the compounding\n    effect of multiple obstacles, the geometric precision with which curved\n    (elliptical) obstacles are handled, and the way obstacle position interacts\n    with line length to determine when a height increase becomes observable.",
+  "subjects":["swingtree.style.TextConf","swingtree.style.StyledString"],
+  "statistics":{
+    "runs":"16",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"An obstacle at the right edge of a component does not affect preferred height when lines break before reaching it",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Consider a component that displays many short, newline-separated\n            phrases — the kind of content you might find in a sidebar, a tag\n            cloud, or a list of key-value labels.  Each line is only a fraction\n            of the component's total width, so the text never reaches the right\n            edge.\n\n            If a right-edge obstacle is added to such a component — say, to\n            reserve room for a scroll indicator or a small icon that lives at\n            the far right — the layout engine will compute an obstacle-free\n            interval that stretches from the left edge up to the obstacle's\n            left edge.  Because every text line is short enough to fit inside\n            that interval, the line breaks occur at exactly the same positions\n            as they would without any obstacle.  The preferred height is\n            therefore identical in both cases.\n\n            This \"invisible obstacle\" behaviour is deliberate: obstacles should\n            only affect the layout when they actually get in the way.  When they\n            don't, the performance cost of their presence is negligible (one\n            bounding-box check per line) and the visual result is unchanged.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We initialize SwingTree with a fixed UI scale so font metrics stay deterministic:","code":[]},
+
+        {"kind":"and","text":"A column of short, newline-separated phrases — each well below the 300 px mark:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px with the supplied obstacles:","code":[]},
+
+        {"kind":"when","text":"We measure the preferred height without any obstacle:","code":[]},
+
+        {"kind":"and","text":"\n            We add a right-edge obstacle that fills the last 100 px of the component\n            from top to bottom (tall enough to overlap every text line):\n        ","code":[]},
+
+        {"kind":"then","text":"The preferred height is exactly the same — the obstacle is invisible to the short lines:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An obstacle inside the text flow area forces additional wrapping and increases the preferred height",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a text line is wide enough to reach an obstacle, the layout\n            engine must wrap the text earlier — it cannot render on top of the\n            obstacle.  Each line that previously spanned the obstacle's\n            horizontal range is now split at (or before) the obstacle's left\n            edge, and the remaining characters must move to the next line.\n            More lines means more total height, so the preferred height grows.\n\n            This test uses a long, prose-style sentence that, when laid out at\n            400 px, comfortably fills a substantial portion of each line.  A\n            right-edge obstacle that starts at x=200 forces every such line to\n            wrap within the obstacle-free 200 px interval, roughly doubling the\n            number of lines and therefore roughly doubling the preferred height.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A long sentence that fills most of the line width when laid out at 400 px:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px with the supplied obstacles:","code":[]},
+
+        {"kind":"when","text":"We measure the baseline preferred height with no obstacles:","code":[]},
+
+        {"kind":"and","text":"We add a large right-side obstacle that takes up the right half of the component:","code":[]},
+
+        {"kind":"then","text":"The obstacle forces more wrapping — preferred height must be strictly greater:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The wider the obstacle, the narrower the text area and the taller the preferred height",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An obstacle occupies horizontal space that text cannot use.\n            The more horizontal space it occupies, the earlier text must\n            wrap on each affected line, and the more total lines are\n            produced.\n\n            This test places three right-side obstacles of increasing widths\n            at the same right-hand position and confirms that the preferred\n            height grows monotonically: a narrow obstacle causes a modest\n            increase, and a wide obstacle causes a much larger increase.\n\n            This is directly analogous to reducing the available line width\n            via horizontal padding — except that the narrowing comes from an\n            obstacle shape rather than from the component's box-model insets.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A long paragraph that will wrap repeatedly as the available width shrinks:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px for a right-edge obstacle of a given width:","code":[]},
+
+        {"kind":"when","text":"We measure preferred height for obstacles of widths 0, 50, 150, and 250 px:","code":[]},
+
+        {"kind":"then","text":"Each step up in obstacle width produces a strictly greater preferred height:","code":[]},
+
+        {"kind":"and","text":"The most severe obstacle (leaving only 150 px) produces a substantially taller layout:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Two separate obstacles placed in different parts of the line combine their effects on preferred height",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When two obstacles occupy non-overlapping horizontal ranges on the\n            same line, each independently reduces the free horizontal space\n            available to the text.  Together they have a greater impact than\n            either one alone.\n\n            A concrete mental model: imagine a 400 px component with a 50 px\n            label widget anchored to the left edge and a 50 px icon anchored\n            to the right edge.  Neither widget alone would force a dramatic\n            increase in height, but together they reduce the usable width from\n            400 px to 300 px, which — for long text — is enough to cause\n            several extra line-breaks.\n\n            This test verifies that three obstacle configurations produce a\n            clear, monotonically increasing sequence of preferred heights:\n            no obstacles < one side obstacle < both side obstacles.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A long text that will wrap when horizontal space is reduced from either side:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px for the given obstacles:","code":[]},
+
+        {"kind":"and","text":"The two obstacles, each 80 px wide, anchored to opposite edges:","code":[]},
+
+        {"kind":"when","text":"We measure preferred height for the three configurations:","code":[]},
+
+        {"kind":"then","text":"No obstacles produces the smallest height (most horizontal space available):","code":[]},
+
+        {"kind":"and","text":"A single 80 px obstacle on either side has the same effect (symmetric geometry):","code":[]},
+
+        {"kind":"and","text":"A single obstacle increases height compared to no obstacles:","code":[]},
+
+        {"kind":"and","text":"Both obstacles together (leaving only 240 px free) produce a strictly greater height than either alone:","code":[]},
+
+        {"kind":"and","text":"The combined height is strictly greater than the no-obstacle baseline:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An elliptical obstacle narrows the available text width less than a same-size rectangle does",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The text layout engine uses exact geometric intersection, not\n            bounding-box approximation, when computing obstacle-free intervals.\n            For a convex curved shape like an ellipse, this means that the\n            text lines near the top and bottom of the ellipse's vertical span\n            see a narrower blocked region than they would if the obstacle were\n            a rectangle with the same bounding box.\n\n            Concretely: at the very top and bottom of an ellipse only a\n            sliver of the line is blocked (the chord is short), whereas a\n            rectangle blocks its full width regardless of vertical position.\n            Lines that pass through the narrow \"tips\" of the ellipse are\n            therefore wider when the obstacle is an ellipse than they would\n            be with a rectangle, leading to fewer line-breaks and a shorter\n            preferred height.\n\n            This property is what allows the layout engine to produce natural,\n            arced text-flow around circular child components — the kind of\n            layout you would see in a magazine running text around a round\n            portrait photograph.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A long text that will wrap repeatedly around the obstacle area:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px for the given obstacle:","code":[]},
+
+        {"kind":"and","text":"A rectangle and an ellipse sharing the exact same bounding box (right-centre area):","code":[]},
+
+        {"kind":"when","text":"We measure the preferred height for each shape:","code":[]},
+
+        {"kind":"then","text":"Both obstacles increase the preferred height compared to an unconstrained layout:","code":[]},
+
+        {"kind":"and","text":"\n            The rectangle always blocks its full 150 px of width, regardless of y-position,\n            while the ellipse tapers to zero width at the top and bottom.\n            The ellipse therefore causes less additional wrapping than the rectangle:\n        ","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Moving an obstacle progressively from the far right toward the centre increases preferred height",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An obstacle placed far to the right of where the text naturally ends\n            has no effect on the layout.  As the obstacle moves leftward into\n            the text's territory, it begins to clip lines, forcing earlier\n            wrapping.  The further left it moves, the more lines are clipped\n            and the greater the increase in preferred height.\n\n            This test documents that progression by measuring preferred height\n            for an obstacle at four horizontal positions:\n\n              — x = 380 px (obstacle in the last 20 px, text likely doesn't reach it)\n              — x = 300 px (obstacle in the right quarter)\n              — x = 200 px (obstacle in the right half)\n              — x = 100 px (obstacle in the left half — severely constrains width)\n\n            All four obstacles have the same width (300 px) and span the full\n            component height, so the only variable is their horizontal position.\n            The expected outcome is a non-decreasing sequence of preferred heights,\n            with the leftmost obstacle producing the tallest layout by a clear margin.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A generous amount of text that fills lines at 400 px and wraps significantly at 200 px:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px for a 80-px-wide obstacle at the given x:","code":[]},
+
+        {"kind":"when","text":"We measure preferred height as the obstacle slides from x=380 down to x=100:","code":[]},
+
+        {"kind":"then","text":"Each leftward step produces a preferred height that is at least as large as the previous:","code":[]},
+
+        {"kind":"and","text":"The obstacle at x=100 forces substantially more wrapping than the one at x=380:","code":[]},
+
+        {"kind":"when","text":"We repeat the previous measurements without line wrapping...","code":[]},
+
+        {"kind":"then","text":"Each leftward step does not affect the preferred height because the text will always flow to the right of the obstacle!","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A right-edge obstacle and a left-edge obstacle of equal size produce the same preferred height",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The text layout engine computes obstacle-free intervals symmetrically:\n            it subtracts each obstacle's horizontal footprint from the full\n            available width and works with whatever contiguous intervals remain.\n            Whether a 60 px obstacle sits on the left edge (blocking x = 0..60)\n            or on the right edge (blocking x = 340..400) makes no difference to\n            the total free width available to the text on each line.  Both leave\n            a single 340 px interval, and a 340 px interval produces exactly the\n            same line-break positions regardless of where it starts.\n\n            This symmetry property is worth documenting explicitly: users who add\n            a component to the right corner of a text panel should expect the same\n            height penalty as users who add an equal-sized component to the left\n            corner.  Neither side is \"cheaper\" than the other.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A long text that spans most of the line width when laid out at 400 px:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height for the given obstacle:","code":[]},
+
+        {"kind":"and","text":"A left-edge and a right-edge obstacle, each 60 px wide:","code":[]},
+
+        {"kind":"when","text":"We measure the preferred height for each obstacle:","code":[]},
+
+        {"kind":"then","text":"Both obstacles produce exactly the same preferred height:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A narrow text obstacle at the right edge is invisible to short-line text but visible to long-line text",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The most important mental model for obstacles is that they only\n            interact with text when a line actually reaches them.  This test\n            puts that mental model to the test by combining two observations\n            in a single scenario:\n\n             — When the text consists of short, early-breaking lines (each line\n               is well within the left boundary of the obstacle), the obstacle\n               is completely invisible to the layout engine and the preferred\n               height is unaffected.\n\n             — When the very same obstacle is present but the text is a long,\n               continuous paragraph whose lines span the full component width,\n               the obstacle clips those lines and forces additional wrapping,\n               increasing the preferred height.\n\n            The layout engine therefore obeys a simple rule: an obstacle costs\n            height only when it gets in the way.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A narrow right-edge obstacle that blocks only the last 80 px of the 400 px component:","code":[]},
+
+        {"kind":"and","text":"Short-line content: many brief phrases that wrap at roughly 60–80 px each:","code":[]},
+
+        {"kind":"and","text":"Long-line content: a paragraph whose lines naturally span most of the 320 px gap:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px for the given content and obstacles:","code":[]},
+
+        {"kind":"when","text":"We measure both contents with and without the right-edge obstacle:","code":[]},
+
+        {"kind":"then","text":"All measurements are positive (the text is non-empty):","code":[]},
+
+        {"kind":"and","text":"Short lines are unaffected by the right-edge obstacle — it never enters the picture:","code":[]},
+
+        {"kind":"and","text":"Long lines are affected — the obstacle clips them and forces more wrapping:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Text placement (alignment) does not affect preferred height, even when text obstacles are present",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `placement` property of a `TextConf` — LEFT, CENTER, RIGHT,\n            TOP_LEFT, and so on — controls where inside the available bounds\n            the rendered text is *positioned* at paint time.  It is a purely\n            visual offset that the renderer applies after the layout engine has\n            already determined how many lines are needed and how tall they are.\n\n            As a consequence, switching from LEFT to CENTER or RIGHT placement\n            cannot change the number of lines, and therefore cannot change the\n            preferred height — even when obstacles are present.  The layout\n            engine always computes obstacle-free intervals over the full\n            available bounds width; the renderer then draws each line within\n            its interval according to the requested alignment.\n\n            This is an important non-intuition to document: users who expect\n            that centering text \"toward an obstacle\" will incur a height penalty\n            will be surprised to learn that it does not.  The layout stage is\n            alignment-agnostic.  If you need text to avoid an obstacle region,\n            register the obstacle via `TextConf#obstacles(Shape...)` — do not\n            rely on alignment to steer text away from it, because the layout\n            engine does not use the alignment for its interval computations.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A moderately long paragraph and a right-edge obstacle that narrows the available width:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px for a given placement and obstacle list:","code":[]},
+
+        {"kind":"when","text":"We measure preferred height for each placement, all with the same right-edge obstacle:","code":[]},
+
+        {"kind":"then","text":"Every placement produces a positive preferred height:","code":[]},
+
+        {"kind":"and","text":"\n            In an ideal world, all of these heights should be equal.\n            But the layout engine, only supports text obstacle avoidance for top-anchored placements \n            (TOP, TOP_LEFT, TOP_RIGHT) — for all other placements it silently ignores \n            the obstacles and produces the same layout as if no obstacles were present.\n            Therefore, all of the top level placement derived heights have the same height,\n            and the rest of the placements (CENTER, LEFT, RIGHT, BOTTOM, BOTTOM_LEFT) also share the same height.\n            But all together, they have different heights!\n        ","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A right-edge text obstacle leaves short lines unchanged but increases height for a mix of short and long lines",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Real-world text is rarely uniform: a document might have a mix of\n            short headings and long body paragraphs.  When a right-edge obstacle\n            is present, only the body paragraphs are affected — the short headings\n            comfortably fit within the obstacle-free region and contribute the\n            same height they would without the obstacle.\n\n            The overall preferred height of such a mixed layout is therefore\n            the sum of: the unchanged heading heights plus the increased body\n            heights.  It is strictly greater than the no-obstacle case (because\n            the body lines are longer), but the increase is proportionally\n            smaller than it would be if the entire content were long prose\n            (because the headings are unaffected).\n\n            This test demonstrates that nuance by measuring three layouts:\n              1. Mixed content with no obstacle.\n              2. Mixed content with a right-edge obstacle.\n              3. Long-only content with the same right-edge obstacle.\n\n            The expected height ordering is:\n              mixed(no obstacle) < mixed(with obstacle), and long(with obstacle) ≤ mixed(with obstacle)\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"Short headings that will comfortably fit within the obstacle-free 200 px region:","code":[]},
+
+        {"kind":"and","text":"A long body that will be clipped by the right-edge obstacle:","code":[]},
+
+        {"kind":"and","text":"Content tuples for the two scenarios:","code":[]},
+
+        {"kind":"and","text":"A substantial right-edge obstacle that blocks the rightmost 200 px, leaving only 200 px free:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px:","code":[]},
+
+        {"kind":"when","text":"We measure the three configurations:","code":[]},
+
+        {"kind":"then","text":"All heights are positive:","code":[]},
+
+        {"kind":"and","text":"Adding the obstacle increases the mixed height because the body paragraph is clipped:","code":[]},
+
+        {"kind":"and","text":"The long-only layout (which has no short lines to buffer the obstacle's impact) is at least as tall:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Obstacle avoidance is only active for top-anchored placements; all other placements ignore obstacles",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The obstacle-avoidance algorithm works by flowing text downward from the top of\n            the available bounds, querying the free horizontal intervals at each successive\n            line's y-coordinate.  This mapping is only geometrically correct when the text\n            block is anchored to the top of the bounds — i.e. when placement is TOP, TOP_LEFT,\n            or TOP_RIGHT.\n\n            For *bottom-anchored* placements (BOTTOM, BOTTOM_LEFT, BOTTOM_RIGHT) the algorithm\n            would have to run in reverse — flowing upward — which would require a completely\n            separate implementation and roughly double the complexity.\n\n            For *vertically-centred* placements (CENTER, LEFT, RIGHT) the problem is even more\n            fundamental: the vertical position at which a line is rendered depends on the total\n            height of the text block, but the total height depends on which obstacles each line\n            hits, which in turn depends on the vertical position of each line.  This circular\n            dependency has no clean closed-form solution; resolving it correctly would require\n            iterative convergence similar to a fluid-dynamics solver — far beyond the scope of\n            a UI layout engine.\n\n            Therefore, obstacle avoidance is intentionally disabled for every non-top placement.\n            When an obstacle is registered but an incompatible placement is in use, the layout\n            engine silently ignores the obstacle and renders the text as if none were present.\n            The preferred height is consequently identical to the obstacle-free case.\n\n            This test verifies both sides of that contract:\n             — TOP, TOP_LEFT, and TOP_RIGHT DO apply obstacle avoidance (height increases).\n             — CENTER, LEFT, RIGHT, BOTTOM, BOTTOM_LEFT, and BOTTOM_RIGHT do NOT (height unchanged).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A long paragraph whose lines span the full component width at 400 px:","code":[]},
+
+        {"kind":"and","text":"A large central obstacle that blocks the right half of every line:","code":[]},
+
+        {"kind":"and","text":"A helper that measures preferred height at 400 px for a given placement and obstacle list:","code":[]},
+
+        {"kind":"when","text":"We measure the baseline height (no obstacle) for a top-anchored placement:","code":[]},
+
+        {"kind":"then","text":"The baseline is positive:","code":[]},
+
+        {"kind":"when","text":"We measure height WITH the central obstacle for each top-anchored placement:","code":[]},
+
+        {"kind":"then","text":"All three top-anchored placements honour the obstacle — height increases:","code":[]},
+
+        {"kind":"when","text":"We measure height WITH the same obstacle for every non-top placement:","code":[]},
+
+        {"kind":"then","text":"Non-top placements ignore the obstacle entirely — height is the same as the baseline:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Child components of a styled container are automatically registered as text-layout obstacles",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The most natural way to encounter text obstacles in a real application is\n            through child components.  Consider a panel that renders introductory text\n            with a thumbnail image widget anchored to the right: the text should flow\n            to the left of the image rather than disappearing behind it.\n\n            SwingTree handles this automatically.  When the style engine evaluates a\n            component's text configuration it inspects `owner.getComponents()` and adds\n            every child's `getBounds()` rectangle to the text obstacles.  This happens\n            transparently, without any explicit `TextConf#obstacles(...)` call from\n            application code.\n\n            Because the obstacle shapes come directly from `Component.getBounds()`, which\n            returns the rectangle of each child in the *parent's* coordinate system, the\n            positions used by the layout engine are exactly those that the Swing paint\n            system uses — there is no coordinate-space mismatch.\n\n            This test uses a null layout manager so that child bounds can be set precisely\n            via `JComponent.setBounds(x, y, width, height)`.  That makes the relationship\n            between the child's on-screen position and the text-layout effect completely\n            transparent and easy to reason about.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A long text that will wrap clearly whenever the available width is halved:","code":[]},
+
+        {"kind":"and","text":"\n            A helper that builds a 400-px-wide JBox with the text above, optionally\n            adds a single child at x=200 with width=200, paints the parent, and returns\n            both the preferred height and the full style-conf string so that we can\n            inspect the auto-derived obstacles:\n        ","code":[]},
+
+        {"kind":"when","text":"We paint the box with no children (plain text, no obstacles):","code":[]},
+
+        {"kind":"and","text":"We paint the box with a child occupying the right half (x=200, w=200):","code":[]},
+
+        {"kind":"then","text":"Without a child, the preferred height is positive but small (full 400 px available):","code":[]},
+
+        {"kind":"and","text":"\n            With the child present, the layout engine has only 200 px of free horizontal\n            space per line — the child's bounding rectangle blocks the right half.\n            This forces more line-breaks and produces a strictly taller preferred height:\n        ","code":[]},
+
+        {"kind":"and","text":"\n            The style conf recorded after paint with the child present must include\n            the child's exact AWT bounds rectangle among the text obstacles.\n            This confirms that SwingTree used `Component.getBounds()` of the child —\n            java.awt.Rectangle[x=200,y=0,width=200,height=500] — as the obstacle shape:\n        ","code":[]},
+
+        {"kind":"and","text":"Without a child, no Rectangle obstacle shapes appear in the style conf at all:","code":[]},
+
+        {"kind":"when","text":"\n            We also verify that moving the child to the left half of the component (x=0, w=200)\n            produces an equally tall preferred height — confirming the symmetric obstacle behaviour\n            that was demonstrated in an earlier test: left and right obstacles of the same size\n            have identical impact on line-wrapping.\n        ","code":[]},
+
+        {"kind":"then","text":"A left-half child produces the same preferred height as a right-half child (symmetric):","code":[]},
+
+        {"kind":"and","text":"The style conf with a left-half child shows its Rectangle obstacle at x=0:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Disabling automatic child-derived obstacles via obstaclesFromChildrenEnabled(false) makes child components invisible to the text layout",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            By default, SwingTree registers every child of a styled container as a\n            text-layout obstacle so that text flows politely around the children.\n            This is usually the desired behaviour — but there are legitimate cases\n            where you want text and child components to share the same visual area:\n            a transparent overlay badge, a purely decorative widget, a glass-pane\n            effect, or a child component that is positioned far off-screen and would\n            otherwise skew the layout needlessly.\n\n            For those cases the `TextConf#obstaclesFromChildrenEnabled(boolean)` switch\n            lets you turn the automatic child-obstacle registration off entirely.\n            When it is set to `false`, child components are completely ignored by the\n            obstacle-collection pass — the layout engine behaves as if the container\n            had no children at all, regardless of the current\n            `obstaclesFromChildren(UI.ComponentBoundary)` setting.\n\n            This test pins down that contract by measuring three configurations of\n            the same 400 × N box with a 200 × 500 child occupying the right half:\n\n              1. default (enabled, so the child narrows the text area)\n              2. enabled=false (so the child is ignored and the text uses the full width)\n              3. no child at all (as a control baseline)\n\n            The expected outcome is that (2) and (3) produce the exact same preferred\n            height — proving that `obstaclesFromChildrenEnabled(false)` suppresses\n            child-derived obstacles completely — while (1) is strictly taller than both,\n            confirming that the child does interact with the layout when the switch is on.\n\n            We additionally inspect the rendered style-conf string to verify that the\n            disabled case does not leak a child `Rectangle` into the obstacle tuple\n            and that the chosen flag value is faithfully recorded.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale so that font metrics stay deterministic:","code":[]},
+
+        {"kind":"and","text":"A long text that will wrap noticeably whenever the available width is reduced:","code":[]},
+
+        {"kind":"and","text":"A helper that builds a 400 px box, optionally adds a right-half child, and captures height + style string:","code":[]},
+
+        {"kind":"when","text":"We measure the three configurations — child+enabled (default), child+disabled, no child:","code":[]},
+
+        {"kind":"then","text":"The default (enabled) configuration produces a strictly taller layout than the baseline:","code":[]},
+
+        {"kind":"and","text":"Disabling the flag recovers the baseline height exactly — the child is invisible to the layout:","code":[]},
+
+        {"kind":"and","text":"With the flag enabled, the child Rectangle appears in the obstacle tuple of the style conf:","code":[]},
+
+        {"kind":"and","text":"With the flag disabled, no child Rectangle appears in the style conf at all:","code":[]},
+
+        {"kind":"and","text":"The style conf faithfully records the chosen obstaclesFromChildrenEnabled flag value:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The obstaclesFromChildren(ComponentBoundary) setting peels the child's obstacle inward through the box-model layers",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When child components are automatically registered as text obstacles, you\n            can choose *how much* of each child counts as \"in the way\" of the text\n            by picking a `UI.ComponentBoundary`.  Think of it as peeling an onion\n            inward through the child's box model:\n\n              — `OUTER_TO_EXTERIOR` (the default) uses the child's full bounding\n                rectangle, including any styled margin.  This is the largest possible\n                obstacle — the text must give the entire child a wide berth.\n\n              — `EXTERIOR_TO_BORDER` excludes the margin, so the text is allowed to\n                flow *into* the child's margin area, but then stop at the *body*.  \n                The obstacle shrinks inward on every side by the margin size.\n\n              — `BORDER_TO_INTERIOR` additionally excludes the border, so text may\n                flow through both margin and border areas.  The obstacle shrinks\n                further.\n\n              — `INTERIOR_TO_CONTENT` excludes margin, border *and* padding — only\n                the innermost content rectangle remains as an obstacle.  This is the\n                smallest obstacle the switch can produce.\n\n            A smaller obstacle takes up less horizontal space on each line, leaves\n            more room for text, forces fewer line-breaks, and therefore produces a\n            *shorter* preferred layout height.  The net effect is a monotonically\n            decreasing sequence of preferred heights as we peel the boundary inward:\n\n              height(OUTER_TO_EXTERIOR) ≥ height(EXTERIOR_TO_BORDER)\n                                        ≥ height(BORDER_TO_INTERIOR)\n                                        ≥ height(INTERIOR_TO_CONTENT)\n\n            This property is the mental model users should carry: \"closer to the\n            child's centre means less space consumed by the child's obstacle\".\n            The extremes (outermost vs innermost) must differ strictly for a child\n            that has meaningful styled insets, because the innermost boundary sees\n            a substantially smaller rectangle than the outermost one.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale so that font metrics stay deterministic:","code":[]},
+
+        {"kind":"and","text":"A long paragraph whose line-breaks are sensitive to horizontal width changes:","code":[]},
+
+        {"kind":"and","text":"A helper that builds a 400 px parent with a right-side child that carries generous margin, border, and padding:","code":[]},
+
+        {"kind":"when","text":"We measure preferred height for each of the four box-model boundaries:","code":[]},
+
+        {"kind":"then","text":"All four heights are positive (the text is non-empty):","code":[]},
+
+        {"kind":"and","text":"\n            Peeling the boundary inward never grows the height — each inner boundary\n            produces an obstacle that is a subset of the previous one, and a smaller\n            obstacle cannot force more wrapping:\n        ","code":[]},
+
+        {"kind":"and","text":"\n            The extremes differ strictly: the innermost boundary (INTERIOR_TO_CONTENT)\n            sees a rectangle shrunk inward on every side by margin+border+padding,\n            leaving meaningfully more horizontal space for the text and therefore a\n            strictly shorter preferred height than the outermost boundary:\n        ","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A child component without a SwingTree style always falls back to its full bounds regardless of the chosen boundary",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `obstaclesFromChildren(UI.ComponentBoundary)` setting only has a visible\n            effect when the child has a SwingTree style that defines margin, border and\n            padding — those are the insets that the engine peels off when computing the\n            inner boundaries.  For a plain Swing component (or a SwingTree component\n            without any box-model styling) there is *nothing* to peel off, so all four\n            boundary values collapse to the child's full bounding rectangle.\n\n            This fallback is important to document because it explains why the switch\n            appears to \"do nothing\" in the common case of using vanilla Swing children:\n            there is no styled margin, border or padding to remove, so every boundary\n            value yields the same shape.  Users who want the boundary switch to take\n            effect must style their child components with non-zero margin/border/padding.\n\n            This test verifies the fallback by building four parent boxes with the\n            same unstyled (plain) child and one each of the four boundary values, and\n            confirming that they all produce the same preferred height.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree with a fixed UI scale:","code":[]},
+
+        {"kind":"and","text":"A long text so that any change in obstacle size would visibly affect the preferred height:","code":[]},
+
+        {"kind":"and","text":"A helper that builds a 400 px parent with a plain (unstyled) right-half child and the given boundary:","code":[]},
+
+        {"kind":"when","text":"We measure preferred height for each of the four boundary values:","code":[]},
+
+        {"kind":"then","text":"All four measurements are positive:","code":[]},
+
+        {"kind":"and","text":"The plain child falls back to the full bounding rectangle — all boundaries produce the same height:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The obstaclesFromChildrenEnabled and obstaclesFromChildren settings are faithfully recorded in the TextConf data representation",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `TextConf` class is an immutable, value-based configuration type, and\n            its `toString()` serialisation is part of how the style layer communicates\n            *what it was told* to render.  It is also a handy observation window that\n            SwingTree's own tests (and users debugging their own code) rely on to\n            verify that values flowed through the fluent API unchanged.\n\n            This test configures a `TextConf` through the public builder API and then\n            reads the resulting object back through three lenses:\n\n              — the object's fluent getters (`obstaclesFromChildren()` and the package-\n                private `obstaclesFromChildrenEnabled()`), which are the canonical source\n                of truth,\n              — the `equals`/`hashCode` contract (by building an identical second instance\n                and comparing),\n              — the `toString()` serialisation, which must expose both flags so that\n                debug output and logs remain informative.\n\n            The test also verifies that the two switches are *independent*: changing\n            one does not implicitly change the other.  Finally, it pins down the\n            documented default values — enabled = `true`,\n            boundary = `OUTER_TO_EXTERIOR` — so that regressions in the defaults are\n            caught by this spec rather than silently drifting into user code.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The default TextConf#Error:none() serves as the starting point for the data checks:","code":[]},
+
+        {"kind":"expect","text":"The documented defaults: enabled = true, boundary = OUTER_TO_EXTERIOR","code":[]},
+
+        {"kind":"when","text":"We disable the switch and select the innermost boundary on the default instance:","code":[]},
+
+        {"kind":"then","text":"Both values round-trip through the fluent API unchanged:","code":[]},
+
+        {"kind":"and","text":"The original default instance remains unchanged — TextConf is immutable:","code":[]},
+
+        {"kind":"and","text":"Both switches are independent — toggling one does not implicitly change the other:","code":[]},
+
+        {"kind":"when","text":"We build a second identical instance via the same builder calls:","code":[]},
+
+        {"kind":"then","text":"Value equality and hashCode agree — the two instances are interchangeable:","code":[]},
+
+        {"kind":"and","text":"\n            The textual serialisation of the configuration (`toString()`) exposes both\n            flags so that debug output and logs show exactly what was configured.\n            This is what users see when they inspect the style conf after painting,\n            and what the living-documentation examples above rely on to verify\n            child-obstacle behaviour:\n        ","code":[]},
+
+        {"kind":"and","text":"The default instance serialises to a compact NONE marker — defaults never leak into the string:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

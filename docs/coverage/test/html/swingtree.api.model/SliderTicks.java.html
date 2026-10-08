@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SliderTicks.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api.model</a> &gt; <span class="el_source">SliderTicks.java</span></div><h1>SliderTicks.java</h1><pre class="source lang-java linenums">package swingtree.api.model;
+
+import org.jspecify.annotations.Nullable;
+import sprouts.Association;
+import sprouts.Pair;
+import sprouts.Tuple;
+import swingtree.api.IconDeclaration;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+
+/**
+ *  An immutable value describing the tick marks and the labels along a slider:
+ *  where the major and minor tick marks are, whether they are drawn, whether the
+ *  knob snaps to them, and which labels are shown at which numbers.
+ *  Hand one of these to a slider through
+ *  {@link swingtree.UIForSlider#withTicks(SliderTicks)}, or bind a property holding one through
+ *  {@link swingtree.UIForSlider#withTicks(sprouts.Val)}:
+ *  &lt;pre&gt;{@code
+ *  UI.slider(UI.Axis.HORIZONTAL, 0, 100, volume)
+ *  .withTicks(
+ *      SliderTicks.of(Integer.class)
+ *      .withMajorSpacing(25)
+ *      .withMinorTicksBetween(4)
+ *      .withLabelsAtMajorTicks( v -&gt; v + &quot;%&quot; )
+ *  );
+ *  }&lt;/pre&gt;
+ *  This slider draws a major tick mark at 0, 25, 50, 75 and 100, labelled
+ *  &quot;0%&quot;, &quot;25%&quot;, &quot;50%&quot;, &quot;75%&quot; and &quot;100%&quot;, and four minor tick marks between each
+ *  pair of major tick marks, which puts a minor tick mark at every multiple of 5.
+ *
+ *  &lt;h2&gt;Numbers in the slider's own type&lt;/h2&gt;
+ *
+ *  Every spacing and every label position is a number of the same type as the
+ *  value of the slider, which is the {@code N} of this class. A slider for
+ *  a {@code Double} property therefore has its tick marks declared in {@code Double}s:
+ *  &lt;pre&gt;{@code
+ *  UI.slider(UI.Axis.HORIZONTAL, 0.0, 1.0, opacity)
+ *  .withTicks(
+ *      SliderTicks.of(Double.class)
+ *      .withMajorSpacing(0.25)
+ *      .withTickMarksVisible(false)
+ *      .withLabelsAtMajorTicks( v -&gt; Math.round(v * 100) + &quot;%&quot; )
+ *  );
+ *  }&lt;/pre&gt;
+ *  A plain {@link javax.swing.JSlider} only knows whole numbers, so SwingTree
+ *  maps fractional numbers onto a range of whole numbers behind the scenes. It
+ *  chooses that range so that every tick mark lands exactly on one of its whole numbers.
+ *
+ *  &lt;h2&gt;Counting starts at the minimum&lt;/h2&gt;
+ *
+ *  Tick marks, and the labels at the major tick marks, count from the minimum of
+ *  the slider. On a slider running from 3 to 97 with a major spacing of 25, the major
+ *  tick marks sit at 3, 28, 53 and 78. This is how {@link javax.swing.plaf.basic.BasicSliderUI},
+ *  which the look and feels of Swing build on, draws tick marks, and a label is only useful
+ *  where its tick mark is. A label which has to sit
+ *  somewhere else can be placed at any number through {@link #withLabelAt(Number, String)}.
+ *
+ *  &lt;h2&gt;It is a value&lt;/h2&gt;
+ *
+ *  Every method which sounds like it changes something returns a new {@link SliderTicks},
+ *  leaving the one you called it on untouched. Two instances describing the same tick
+ *  marks and labels are {@link #equals(Object)} to each other, which is how a slider bound
+ *  to a property holding a {@link SliderTicks} knows whether anything actually changed.
+ *  A label text function is compared by identity, so a method reference or a lambda
+ *  which captures nothing is equal to itself every time it is evaluated.
+ *  &lt;p&gt;
+ *  Since this value holds no Swing component, it is safe to keep in a view model and
+ *  to hand from the application thread to the UI thread.
+ *  To declare a property of it, use {@link #classTyped(Class)}:
+ *  &lt;pre&gt;{@code
+ *  Val&lt;SliderTicks&lt;Integer&gt;&gt; ticks = showTicks.viewAs(
+ *      SliderTicks.classTyped(Integer.class),
+ *      show -&gt; show ? SliderTicks.of(Integer.class).withMajorSpacing(10) : SliderTicks.of(Integer.class)
+ *  );
+ *  }&lt;/pre&gt;
+ *
+ * @param &lt;N&gt; The number type of the slider, which is also the type of every spacing and label position.
+ */
+public final class SliderTicks&lt;N extends Number&gt;
+{
+<span class="fc" id="L86">    private static final Association&lt;Number, Label&gt; NO_LABELS = Association.betweenLinked(Number.class, Label.class);</span>
+
+    private final Class&lt;N&gt;                   _numberType;
+    private final @Nullable N                _majorSpacing;
+    private final int                        _minorTicksBetween;
+    private final boolean                    _tickMarksVisible;
+    private final boolean                    _snapsToTicks;
+    private final boolean                    _labelsAtMajorTicks;
+    private final @Nullable Function&lt;N, String&gt; _majorTickLabelText;
+    private final Locale                     _labelLocale;
+    private final Association&lt;Number, Label&gt; _labels;
+
+    /**
+     *  Creates a description of no tick marks and no labels for a slider whose value is
+     *  of the given number type. This is where every {@link SliderTicks} starts out:
+     *  &lt;pre&gt;{@code
+     *  SliderTicks.of(Integer.class).withMajorSpacing(10)
+     *  }&lt;/pre&gt;
+     *  The supported number types are {@link Integer}, {@link Long}, {@link Short},
+     *  {@link Byte}, {@link Float} and {@link Double}, which are also the number types
+     *  a slider can be bound to.
+     *
+     * @param numberType The type of the value of the slider, and therefore of every spacing and label position.
+     * @param &lt;N&gt; The number type of the slider.
+     * @return A {@link SliderTicks} with no tick marks and no labels.
+     * @throws NullPointerException If {@code numberType} is {@code null}.
+     * @throws IllegalArgumentException If {@code numberType} is not one of the supported number types.
+     */
+    public static &lt;N extends Number&gt; SliderTicks&lt;N&gt; of( Class&lt;N&gt; numberType ) {
+<span class="fc" id="L115">        Objects.requireNonNull(numberType, &quot;numberType&quot;);</span>
+<span class="fc" id="L116">        Class&lt;N&gt; wrapperType = _wrapperOf(numberType);</span>
+<span class="fc" id="L117">        return new SliderTicks&lt;&gt;(wrapperType, null, 0, true, false, false, null, Locale.ROOT, NO_LABELS);</span>
+    }
+
+    /**
+     *  An alternative to {@code SliderTicks.class} which keeps the number type in
+     *  the type signature, so that you can declare a property holding a
+     *  {@link SliderTicks} without casting:
+     *  &lt;pre&gt;{@code
+     *  Var&lt;SliderTicks&lt;Double&gt;&gt; ticks = Var.of(SliderTicks.classTyped(Double.class), SliderTicks.of(Double.class));
+     *  }&lt;/pre&gt;
+     *
+     * @param numberType The number type {@code N} in the returned {@code Class&lt;SliderTicks&lt;N&gt;&gt;}.
+     * @param &lt;N&gt; The number type of the slider.
+     * @return The {@code SliderTicks.class}, typed as {@code Class&lt;SliderTicks&lt;N&gt;&gt;}.
+     * @throws NullPointerException If {@code numberType} is {@code null}.
+     */
+    @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
+    public static &lt;N extends Number&gt; Class&lt;SliderTicks&lt;N&gt;&gt; classTyped( Class&lt;N&gt; numberType ) {
+<span class="fc" id="L135">        Objects.requireNonNull(numberType, &quot;numberType&quot;);</span>
+<span class="fc" id="L136">        return (Class) SliderTicks.class;</span>
+    }
+
+    private SliderTicks(
+        Class&lt;N&gt;                      numberType,
+        @Nullable N                   majorSpacing,
+        int                           minorTicksBetween,
+        boolean                       tickMarksVisible,
+        boolean                       snapsToTicks,
+        boolean                       labelsAtMajorTicks,
+        @Nullable Function&lt;N, String&gt; majorTickLabelText,
+        Locale                        labelLocale,
+        Association&lt;Number, Label&gt;    labels
+<span class="fc" id="L149">    ) {</span>
+<span class="fc" id="L150">        _numberType         = numberType;</span>
+<span class="fc" id="L151">        _majorSpacing       = majorSpacing;</span>
+<span class="fc" id="L152">        _minorTicksBetween  = minorTicksBetween;</span>
+<span class="fc" id="L153">        _tickMarksVisible   = tickMarksVisible;</span>
+<span class="fc" id="L154">        _snapsToTicks       = snapsToTicks;</span>
+<span class="fc" id="L155">        _labelsAtMajorTicks = labelsAtMajorTicks;</span>
+<span class="fc" id="L156">        _majorTickLabelText = majorTickLabelText;</span>
+<span class="fc" id="L157">        _labelLocale        = labelLocale;</span>
+<span class="fc" id="L158">        _labels             = labels;</span>
+<span class="fc" id="L159">    }</span>
+
+    /**
+     *  Returns the type of the value of the slider, which is also the type of every spacing and label position.
+     *
+     * @return The number type of the slider.
+     */
+    public Class&lt;N&gt; numberType() {
+<span class="fc" id="L167">        return _numberType;</span>
+    }
+
+    /**
+     *  Returns a copy with major tick marks at the given spacing, counted from the minimum
+     *  of the slider. A spacing of 10 on a slider running from 0 to 100 puts a major tick
+     *  mark at 0, 10, 20 and so on up to 100.
+     *  The major spacing is also how far the knob moves when the user clicks into the
+     *  track beside it, or presses page up or page down, unless there are minor tick
+     *  marks, whose spacing is used instead.
+     *  &lt;p&gt;
+     *  A spacing of zero removes the tick marks, and with them the labels at the major tick marks.
+     *
+     * @param spacing The distance between two neighbouring major tick marks, in the numbers of the slider.
+     * @return A new {@link SliderTicks} with the given major spacing.
+     * @throws NullPointerException If {@code spacing} is {@code null}.
+     * @throws IllegalArgumentException If {@code spacing} is negative, not a number or infinite.
+     */
+    public SliderTicks&lt;N&gt; withMajorSpacing( N spacing ) {
+<span class="fc" id="L186">        Objects.requireNonNull(spacing, &quot;spacing&quot;);</span>
+<span class="fc" id="L187">        double asDouble = spacing.doubleValue();</span>
+<span class="pc bpc" id="L188" title="1 of 4 branches missed.">        if ( Double.isNaN(asDouble) || Double.isInfinite(asDouble) )</span>
+<span class="fc" id="L189">            throw new IllegalArgumentException(&quot;The major spacing of slider ticks must be a finite number, but was &quot; + spacing + &quot;.&quot;);</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if ( asDouble &lt; 0 )</span>
+<span class="fc" id="L191">            throw new IllegalArgumentException(&quot;The major spacing of slider ticks must not be negative, but was &quot; + spacing + &quot;.&quot;);</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        @Nullable N majorSpacing = asDouble == 0 ? null : spacing;</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if ( Objects.equals(majorSpacing, _majorSpacing) )</span>
+<span class="nc" id="L194">            return this;</span>
+<span class="fc" id="L195">        return new SliderTicks&lt;&gt;(_numberType, majorSpacing, _minorTicksBetween, _tickMarksVisible, _snapsToTicks, _labelsAtMajorTicks, _majorTickLabelText, _labelLocale, _labels);</span>
+    }
+
+    /**
+     *  Returns the distance between two neighbouring major tick marks, if there are tick marks.
+     *
+     * @return The major spacing, or an empty {@link Optional} if there are no tick marks.
+     */
+    public Optional&lt;N&gt; majorSpacing() {
+<span class="fc" id="L204">        return Optional.ofNullable(_majorSpacing);</span>
+    }
+
+    /**
+     *  Returns a copy with the given number of minor tick marks between each pair of
+     *  neighbouring major tick marks. Four minor tick marks between major tick marks
+     *  which are 25 apart divide that distance into five equal parts, so a minor tick
+     *  mark sits at every multiple of 5. Zero means that there are no minor tick marks.
+     *  &lt;p&gt;
+     *  Counting the tick marks between the major ones, instead of declaring a second
+     *  spacing, makes it impossible to declare minor tick marks which miss the major ones.
+     *  On a slider for whole numbers the major spacing must still be divisible into
+     *  that many equal whole number parts: a major spacing of 25 with 3 minor tick marks
+     *  between them would need a minor tick mark every 6.25, so SwingTree logs a warning
+     *  and draws no minor tick marks.
+     *
+     * @param count The number of minor tick marks between two neighbouring major tick marks.
+     * @return A new {@link SliderTicks} with the given number of minor tick marks.
+     * @throws IllegalArgumentException If {@code count} is negative.
+     */
+    public SliderTicks&lt;N&gt; withMinorTicksBetween( int count ) {
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        if ( count &lt; 0 )</span>
+<span class="fc" id="L226">            throw new IllegalArgumentException(&quot;The number of minor tick marks between major tick marks must not be negative, but was &quot; + count + &quot;.&quot;);</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        if ( count == _minorTicksBetween )</span>
+<span class="fc" id="L228">            return this;</span>
+<span class="fc" id="L229">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, count, _tickMarksVisible, _snapsToTicks, _labelsAtMajorTicks, _majorTickLabelText, _labelLocale, _labels);</span>
+    }
+
+    /**
+     *  Returns how many minor tick marks sit between two neighbouring major tick marks.
+     *
+     * @return The number of minor tick marks between two neighbouring major tick marks.
+     */
+    public int minorTicksBetween() {
+<span class="fc" id="L238">        return _minorTicksBetween;</span>
+    }
+
+    /**
+     *  Returns a copy whose tick marks are drawn or not drawn, depending on the given flag.
+     *  Tick marks are drawn by default.
+     *  &lt;p&gt;
+     *  Tick marks which are not drawn still exist: the labels at the major tick marks are
+     *  still shown, and the knob still snaps to them if {@link #withSnapToTicks(boolean)}
+     *  says so. This is how you build a slider with labels at 0, 25, 50, 75 and 100
+     *  but without any marks on its track.
+     *
+     * @param visible {@code true} to draw the tick marks, {@code false} to only use their positions.
+     * @return A new {@link SliderTicks} with the given visibility of its tick marks.
+     */
+    public SliderTicks&lt;N&gt; withTickMarksVisible( boolean visible ) {
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">        if ( visible == _tickMarksVisible )</span>
+<span class="nc" id="L255">            return this;</span>
+<span class="fc" id="L256">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, _minorTicksBetween, visible, _snapsToTicks, _labelsAtMajorTicks, _majorTickLabelText, _labelLocale, _labels);</span>
+    }
+
+    /**
+     *  Tells whether the tick marks are drawn, or whether only their positions are used.
+     *
+     * @return {@code true} if the tick marks are drawn, {@code false} if only their positions are used.
+     */
+    public boolean hasVisibleTickMarks() {
+<span class="fc" id="L265">        return _tickMarksVisible;</span>
+    }
+
+    /**
+     *  Returns a copy whose tick marks the knob snaps to when the user moves it, or not,
+     *  depending on the given flag. The knob snaps to the minor tick marks if there are
+     *  any, and to the major tick marks otherwise. Without a major spacing there is nothing
+     *  to snap to, and the flag has no effect.
+     *  &lt;p&gt;
+     *  While the user drags the knob, the value of the slider is the number at the nearest
+     *  tick mark, and when the user lets go of the knob, it moves onto that tick mark.
+     *  An arrow key moves the knob to the next tick mark in the direction of the key.
+     *  &lt;p&gt;
+     *  Snapping only ever applies to what the user does. When your application sets the
+     *  value of the slider to a number between two tick marks, the knob sits between those
+     *  tick marks, and the value is not changed behind your back.
+     *
+     * @param snap {@code true} to let the knob snap to the tick marks, {@code false} to let it move freely.
+     * @return A new {@link SliderTicks} with the given snapping behaviour.
+     */
+    public SliderTicks&lt;N&gt; withSnapToTicks( boolean snap ) {
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">        if ( snap == _snapsToTicks )</span>
+<span class="nc" id="L287">            return this;</span>
+<span class="fc" id="L288">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, _minorTicksBetween, _tickMarksVisible, snap, _labelsAtMajorTicks, _majorTickLabelText, _labelLocale, _labels);</span>
+    }
+
+    /**
+     *  Tells whether the knob snaps to the tick marks when the user moves it.
+     *
+     * @return {@code true} if the knob snaps to the tick marks when the user moves it.
+     */
+    public boolean isSnappingToTicks() {
+<span class="fc" id="L297">        return _snapsToTicks;</span>
+    }
+
+    /**
+     *  Returns a copy with a label at every major tick mark, showing the number at that
+     *  tick mark. All labels show their numbers with the same count of decimal places,
+     *  namely the fewest which write every one of them exactly: labels at 0, 0.25, 0.5,
+     *  0.75 and 1 read &quot;0.00&quot;, &quot;0.25&quot;, &quot;0.50&quot;, &quot;0.75&quot; and &quot;1.00&quot;.
+     *  &lt;p&gt;
+     *  The numbers are written independently of the locale of the machine, with a dot as
+     *  decimal separator and without grouping, so &quot;1234.5&quot; reads the same everywhere.
+     *  To write them the way a particular locale does, use {@link #withLabelLocale(Locale)}.
+     *  &lt;p&gt;
+     *  The labels only exist while there is a major spacing, see {@link #withMajorSpacing(Number)}.
+     *
+     * @return A new {@link SliderTicks} with a number label at every major tick mark.
+     */
+    public SliderTicks&lt;N&gt; withLabelsAtMajorTicks() {
+<span class="pc bpc" id="L315" title="3 of 4 branches missed.">        if ( _labelsAtMajorTicks &amp;&amp; _majorTickLabelText == null )</span>
+<span class="nc" id="L316">            return this;</span>
+<span class="fc" id="L317">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, _minorTicksBetween, _tickMarksVisible, _snapsToTicks, true, null, _labelLocale, _labels);</span>
+    }
+
+    /**
+     *  Returns a copy with a label at every major tick mark, whose text is computed from
+     *  the number at that tick mark by the given function:
+     *  &lt;pre&gt;{@code
+     *  SliderTicks.of(Integer.class).withMajorSpacing(25).withLabelsAtMajorTicks( v -&gt; v + &quot;%&quot; )
+     *  }&lt;/pre&gt;
+     *  The function receives the exact number at the tick mark, computed as the minimum of
+     *  the slider plus a whole multiple of the major spacing, so a slider from 0.0 with a
+     *  major spacing of 0.1 hands 0.3 to the function, and never 0.30000000000000004.
+     *  &lt;p&gt;
+     *  The labels only exist while there is a major spacing, see {@link #withMajorSpacing(Number)}.
+     *
+     * @param text The function computing the text of a label from the number at its tick mark.
+     * @return A new {@link SliderTicks} with a label at every major tick mark.
+     * @throws NullPointerException If {@code text} is {@code null}.
+     */
+    public SliderTicks&lt;N&gt; withLabelsAtMajorTicks( Function&lt;N, String&gt; text ) {
+<span class="fc" id="L337">        Objects.requireNonNull(text, &quot;text&quot;);</span>
+<span class="pc bpc" id="L338" title="3 of 4 branches missed.">        if ( _labelsAtMajorTicks &amp;&amp; _majorTickLabelText == text )</span>
+<span class="nc" id="L339">            return this;</span>
+<span class="fc" id="L340">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, _minorTicksBetween, _tickMarksVisible, _snapsToTicks, true, text, _labelLocale, _labels);</span>
+    }
+
+    /**
+     *  Returns a copy without labels at the major tick marks. The labels placed at
+     *  particular numbers through {@link #withLabelAt(Number, String)} are kept.
+     *
+     * @return A new {@link SliderTicks} without labels at the major tick marks.
+     */
+    public SliderTicks&lt;N&gt; withoutLabelsAtMajorTicks() {
+<span class="nc bnc" id="L350" title="All 2 branches missed.">        if ( !_labelsAtMajorTicks )</span>
+<span class="nc" id="L351">            return this;</span>
+<span class="nc" id="L352">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, _minorTicksBetween, _tickMarksVisible, _snapsToTicks, false, null, _labelLocale, _labels);</span>
+    }
+
+    /**
+     *  Tells whether there is a label at every major tick mark.
+     *
+     * @return {@code true} if there is a label at every major tick mark.
+     */
+    public boolean hasLabelsAtMajorTicks() {
+<span class="fc" id="L361">        return _labelsAtMajorTicks;</span>
+    }
+
+    /**
+     *  Returns the function computing the text of the labels at the major tick marks,
+     *  if one was supplied through {@link #withLabelsAtMajorTicks(Function)}.
+     *
+     * @return The label text function, or an empty {@link Optional} if the labels at the major
+     *         tick marks show their numbers, or if there are no labels at the major tick marks.
+     */
+    public Optional&lt;Function&lt;N, String&gt;&gt; majorTickLabelText() {
+<span class="fc" id="L372">        return Optional.ofNullable(_majorTickLabelText);</span>
+    }
+
+    /**
+     *  Returns a copy whose labels at the major tick marks write their numbers the way the
+     *  given locale does. With {@link Locale#GERMANY} a label at 1234.5 reads &quot;1.234,5&quot;,
+     *  whereas with {@link Locale#US} it reads &quot;1,234.5&quot;.
+     *  &lt;p&gt;
+     *  The default is {@link Locale#ROOT}, which writes numbers independently of any locale:
+     *  with a dot as decimal separator and without grouping, so the same label reads &quot;1234.5&quot;.
+     *  Pass {@code Locale.getDefault()} to follow the locale of the machine.
+     *  &lt;p&gt;
+     *  The locale only affects labels showing numbers through {@link #withLabelsAtMajorTicks()}.
+     *  A text function passed to {@link #withLabelsAtMajorTicks(Function)} does its own formatting.
+     *
+     * @param locale The locale whose conventions the number labels follow.
+     * @return A new {@link SliderTicks} with the given label locale.
+     * @throws NullPointerException If {@code locale} is {@code null}.
+     */
+    public SliderTicks&lt;N&gt; withLabelLocale( Locale locale ) {
+<span class="fc" id="L392">        Objects.requireNonNull(locale, &quot;locale&quot;);</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">        if ( locale.equals(_labelLocale) )</span>
+<span class="fc" id="L394">            return this;</span>
+<span class="fc" id="L395">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, _minorTicksBetween, _tickMarksVisible, _snapsToTicks, _labelsAtMajorTicks, _majorTickLabelText, locale, _labels);</span>
+    }
+
+    /**
+     *  Returns the locale whose conventions the number labels at the major tick marks follow.
+     *
+     * @return The label locale, which is {@link Locale#ROOT} unless {@link #withLabelLocale(Locale)} says otherwise.
+     */
+    public Locale labelLocale() {
+<span class="fc" id="L404">        return _labelLocale;</span>
+    }
+
+    /**
+     *  Returns a copy with a text label at the given number, replacing any label which was
+     *  at that number before. The number does not need to be at a tick mark:
+     *  &lt;pre&gt;{@code
+     *  SliderTicks.of(Integer.class)
+     *  .withLabelAt(0, &quot;Cold&quot;)
+     *  .withLabelAt(50, &quot;Warm&quot;)
+     *  .withLabelAt(100, &quot;Hot&quot;)
+     *  }&lt;/pre&gt;
+     *  A label at a number outside the range of the slider is not shown.
+     *  When a label at a particular number and a label at a major tick mark fall onto the
+     *  same position, the label at the particular number is shown.
+     *
+     * @param value The number at which the label is shown.
+     * @param text The text of the label.
+     * @return A new {@link SliderTicks} with the given label.
+     * @throws NullPointerException If {@code value} or {@code text} is {@code null}.
+     */
+    public SliderTicks&lt;N&gt; withLabelAt( N value, String text ) {
+<span class="fc" id="L426">        Objects.requireNonNull(value, &quot;value&quot;);</span>
+<span class="fc" id="L427">        Objects.requireNonNull(text, &quot;text&quot;);</span>
+<span class="fc" id="L428">        return _withLabel(value, new Label(text, null));</span>
+    }
+
+    /**
+     *  Returns a copy with an icon label at the given number, replacing any label which was
+     *  at that number before. This is how a volume slider shows a muted speaker at its start
+     *  and a loud speaker at its end:
+     *  &lt;pre&gt;{@code
+     *  SliderTicks.of(Integer.class)
+     *  .withLabelAt(0, Icons.MUTED)
+     *  .withLabelAt(100, Icons.LOUD)
+     *  }&lt;/pre&gt;
+     *  A label at a number outside the range of the slider is not shown.
+     *  When a label at a particular number and a label at a major tick mark fall onto the
+     *  same position, the label at the particular number is shown.
+     *
+     * @param value The number at which the label is shown.
+     * @param icon The icon of the label.
+     * @return A new {@link SliderTicks} with the given label.
+     * @throws NullPointerException If {@code value} or {@code icon} is {@code null}.
+     */
+    public SliderTicks&lt;N&gt; withLabelAt( N value, IconDeclaration icon ) {
+<span class="fc" id="L450">        Objects.requireNonNull(value, &quot;value&quot;);</span>
+<span class="fc" id="L451">        Objects.requireNonNull(icon, &quot;icon&quot;);</span>
+<span class="fc" id="L452">        return _withLabel(value, new Label(null, icon));</span>
+    }
+
+    /**
+     *  Returns a copy without the label at the given number, if there is one.
+     *  The labels at the major tick marks are not affected.
+     *
+     * @param value The number of the label to remove.
+     * @return A new {@link SliderTicks} without a label at the given number.
+     * @throws NullPointerException If {@code value} is {@code null}.
+     */
+    public SliderTicks&lt;N&gt; withoutLabelAt( N value ) {
+<span class="nc" id="L464">        Objects.requireNonNull(value, &quot;value&quot;);</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">        if ( !_labels.containsKey(value) )</span>
+<span class="nc" id="L466">            return this;</span>
+<span class="nc" id="L467">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, _minorTicksBetween, _tickMarksVisible, _snapsToTicks, _labelsAtMajorTicks, _majorTickLabelText, _labelLocale, _labels.remove(value));</span>
+    }
+
+    /**
+     *  Returns the numbers at which a label was placed through {@link #withLabelAt(Number, String)}
+     *  or {@link #withLabelAt(Number, IconDeclaration)}, in the order they were placed.
+     *
+     * @return The positions of the labels placed at particular numbers.
+     */
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public Tuple&lt;N&gt; labelPositions() {
+<span class="fc" id="L478">        List&lt;N&gt; positions = new ArrayList&lt;&gt;(_labels.size());</span>
+<span class="fc bfc" id="L479" title="All 2 branches covered.">        for ( Pair&lt;Number, Label&gt; entry : _labels )</span>
+<span class="fc" id="L480">            positions.add((N) entry.first());</span>
+<span class="fc" id="L481">        return Tuple.of(_numberType, positions);</span>
+    }
+
+    /**
+     *  Returns the text of the label placed at the given number, if it is a text label.
+     *
+     * @param value The number of the label.
+     * @return The text of the label at the given number, or an empty {@link Optional}
+     *         if there is no label at that number, or if it is an icon label.
+     */
+    public Optional&lt;String&gt; labelTextAt( N value ) {
+<span class="fc" id="L492">        Objects.requireNonNull(value, &quot;value&quot;);</span>
+<span class="fc" id="L493">        return _labels.get(value).map( label -&gt; label.text );</span>
+    }
+
+    /**
+     *  Returns the icon of the label placed at the given number, if it is an icon label.
+     *
+     * @param value The number of the label.
+     * @return The icon of the label at the given number, or an empty {@link Optional}
+     *         if there is no label at that number, or if it is a text label.
+     */
+    public Optional&lt;IconDeclaration&gt; labelIconAt( N value ) {
+<span class="fc" id="L504">        Objects.requireNonNull(value, &quot;value&quot;);</span>
+<span class="fc" id="L505">        return _labels.get(value).map( label -&gt; label.icon );</span>
+    }
+
+    private SliderTicks&lt;N&gt; _withLabel( N value, Label label ) {
+<span class="pc bpc" id="L509" title="1 of 2 branches missed.">        if ( _labels.get(value).map(label::equals).orElse(false) )</span>
+<span class="nc" id="L510">            return this;</span>
+<span class="fc" id="L511">        return new SliderTicks&lt;&gt;(_numberType, _majorSpacing, _minorTicksBetween, _tickMarksVisible, _snapsToTicks, _labelsAtMajorTicks, _majorTickLabelText, _labelLocale, _labels.put(value, label));</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static &lt;N extends Number&gt; Class&lt;N&gt; _wrapperOf( Class&lt;N&gt; numberType ) {
+<span class="pc bpc" id="L516" title="1 of 4 branches missed.">        if ( numberType == int.class    || numberType == Integer.class ) return (Class&lt;N&gt;) Integer.class;</span>
+<span class="pc bpc" id="L517" title="2 of 4 branches missed.">        if ( numberType == long.class   || numberType == Long.class    ) return (Class&lt;N&gt;) Long.class;</span>
+<span class="pc bpc" id="L518" title="2 of 4 branches missed.">        if ( numberType == short.class  || numberType == Short.class   ) return (Class&lt;N&gt;) Short.class;</span>
+<span class="pc bpc" id="L519" title="2 of 4 branches missed.">        if ( numberType == byte.class   || numberType == Byte.class    ) return (Class&lt;N&gt;) Byte.class;</span>
+<span class="pc bpc" id="L520" title="2 of 4 branches missed.">        if ( numberType == float.class  || numberType == Float.class   ) return (Class&lt;N&gt;) Float.class;</span>
+<span class="pc bpc" id="L521" title="1 of 4 branches missed.">        if ( numberType == double.class || numberType == Double.class  ) return (Class&lt;N&gt;) Double.class;</span>
+<span class="fc" id="L522">        throw new IllegalArgumentException(</span>
+<span class="fc" id="L523">                &quot;A slider supports the number types Integer, Long, Short, Byte, Float and Double, but not &quot; + numberType.getName() + &quot;.&quot;</span>
+            );
+    }
+
+    @Override
+    public boolean equals( @Nullable Object obj ) {
+<span class="pc bpc" id="L529" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="fc bfc" id="L530" title="All 2 branches covered.">        if ( !(obj instanceof SliderTicks) ) return false;</span>
+<span class="fc" id="L531">        SliderTicks&lt;?&gt; other = (SliderTicks&lt;?&gt;) obj;</span>
+<span class="pc bpc" id="L532" title="5 of 12 branches missed.">        return _numberType         == other._numberType</span>
+            &amp;&amp; _minorTicksBetween  == other._minorTicksBetween
+            &amp;&amp; _tickMarksVisible   == other._tickMarksVisible
+            &amp;&amp; _snapsToTicks       == other._snapsToTicks
+            &amp;&amp; _labelsAtMajorTicks == other._labelsAtMajorTicks
+            &amp;&amp; _majorTickLabelText == other._majorTickLabelText
+<span class="fc bfc" id="L538" title="All 2 branches covered.">            &amp;&amp; Objects.equals(_majorSpacing, other._majorSpacing)</span>
+<span class="pc bpc" id="L539" title="1 of 2 branches missed.">            &amp;&amp; _labelLocale.equals(other._labelLocale)</span>
+<span class="pc bpc" id="L540" title="1 of 2 branches missed.">            &amp;&amp; _labels.equals(other._labels);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L545">        return Objects.hash(</span>
+<span class="fc" id="L546">                    _numberType, _majorSpacing, _minorTicksBetween, _tickMarksVisible, _snapsToTicks,</span>
+<span class="fc" id="L547">                    _labelsAtMajorTicks, System.identityHashCode(_majorTickLabelText), _labelLocale, _labels</span>
+                );
+    }
+
+    @Override
+    public String toString() {
+<span class="nc bnc" id="L553" title="All 4 branches missed.">        String majorTickLabels = !_labelsAtMajorTicks ? &quot;none&quot; : ( _majorTickLabelText == null ? &quot;numbers&quot; : &quot;text&quot; );</span>
+<span class="nc bnc" id="L554" title="All 2 branches missed.">        String locale = _labelLocale.equals(Locale.ROOT) ? &quot;ROOT&quot; : _labelLocale.toLanguageTag();</span>
+<span class="nc" id="L555">        return getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L556">                    &quot;numberType=&quot;         + _numberType.getSimpleName() + &quot;, &quot; +</span>
+                    &quot;majorSpacing=&quot;       + _majorSpacing               + &quot;, &quot; +
+                    &quot;minorTicksBetween=&quot;  + _minorTicksBetween          + &quot;, &quot; +
+                    &quot;tickMarksVisible=&quot;   + _tickMarksVisible           + &quot;, &quot; +
+                    &quot;snapToTicks=&quot;        + _snapsToTicks               + &quot;, &quot; +
+                    &quot;majorTickLabels=&quot;    + majorTickLabels             + &quot;, &quot; +
+                    &quot;labelLocale=&quot;        + locale                      + &quot;, &quot; +
+                    &quot;labels=&quot;             + _labels                     +
+                &quot;]&quot;;
+    }
+
+    private static final class Label
+    {
+        final @Nullable String          text;
+        final @Nullable IconDeclaration icon;
+
+<span class="fc" id="L572">        Label( @Nullable String text, @Nullable IconDeclaration icon ) {</span>
+<span class="fc" id="L573">            this.text = text;</span>
+<span class="fc" id="L574">            this.icon = icon;</span>
+<span class="fc" id="L575">        }</span>
+
+        @Override
+        public boolean equals( @Nullable Object obj ) {
+<span class="pc bpc" id="L579" title="1 of 2 branches missed.">            if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L580" title="1 of 2 branches missed.">            if ( !(obj instanceof Label) ) return false;</span>
+<span class="fc" id="L581">            Label other = (Label) obj;</span>
+<span class="pc bpc" id="L582" title="2 of 4 branches missed.">            return Objects.equals(text, other.text) &amp;&amp; Objects.equals(icon, other.icon);</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="fc" id="L587">            return Objects.hash(text, icon);</span>
+        }
+
+        @Override
+        public String toString() {
+<span class="nc bnc" id="L592" title="All 2 branches missed.">            return text != null ? &quot;\&quot;&quot; + text + &quot;\&quot;&quot; : String.valueOf(icon);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

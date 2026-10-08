@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>IconDeclaration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">IconDeclaration.java</span></div><h1>IconDeclaration.java</h1><pre class="source lang-java linenums">package swingtree.api;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.UI;
+import swingtree.layout.Size;
+import swingtree.style.SvgIcon;
+
+import javax.swing.*;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *  Primarily designed to be implemented by an {@link Enum} type
+ *  that declares a set of icon paths so that the enum instances
+ *  can be used to identify and load
+ *  (cached) icons across your application.
+ *  &lt;p&gt;
+ *  Here an example of how to use this interface:
+ *  &lt;pre&gt;{@code
+ * public enum Icons implements IconDeclaration
+ * {
+ *     ADD(&quot;icons/add.png&quot;),
+ *     REMOVE(&quot;icons/remove.png&quot;),
+ *     EDIT(&quot;icons/edit.png&quot;),
+ *     SAVE(&quot;icons/save.png&quot;),
+ *     CANCEL(&quot;icons/cancel.png&quot;),
+ *     REFRESH(&quot;icons/refresh.png&quot;);
+ *     // ...
+ *
+ *     private final String path;
+ *
+ *     Icons(String path) { this.path = path; }
+ *
+ *     {@literal @}Override public String source() {
+ *         return path;
+ *     }
+ * }
+ * }&lt;/pre&gt;
+ *
+ *  You may then use the enum instances
+ *  in the SwingTree API just like you would use the {@link ImageIcon} class:
+ *  &lt;pre&gt;{@code
+ *  UI.button(Icons.ADD)
+ *  .onClick( it -&gt; vm.add() )
+ *  }&lt;/pre&gt;
+ *
+ *  The reason why enums should be used instead of Strings is
+ *  so that you have some more compile time safety in your application!
+ *  When it comes to resource loading Strings are brittle because they
+ *  are susceptible to typos and refactoring mistakes.
+ *  &lt;p&gt;
+ *  Instances of this class are intended to be used as part of a view model
+ *  instead of using the {@link Icon} or {@link ImageIcon} classes directly.
+ *  &lt;p&gt;
+ *  The reason for this is the fact that traditional Swing icons
+ *  are often heavyweight objects whose loading may or may not succeed, and so they are
+ *  not suitable for direct use in a property as part of your view-model.
+ *  Instead, you should use this {@link IconDeclaration} interface, which is a
+ *  lightweight value object that merely models the resource location of the icon
+ *  even if it is not yet loaded or even does not exist at all.
+ *  &lt;p&gt;
+ *  Not only does this make your view model more robust, but it also allows you
+ *  to write unit tests much more easily. You can create icon declarations
+ *  even if the targeted icon may not be available at all, yet you can still test the
+ *  behavior of your view-model.
+ *  &lt;p&gt;
+ *  &lt;strong&gt;SVG Support:&lt;/strong&gt;
+ *  In addition to traditional image files, {@code IconDeclaration} supports
+ *  programmatically defined SVG icons through the {@link #ofAutoScaledSvg(String)} factory method.
+ *  This enables creation of resolution-independent vector icons directly in code:
+ *  &lt;pre&gt;{@code
+ *  // Create a custom SVG icon declaration
+ *  IconDeclaration playButton = IconDeclaration.ofSvg(
+ *      &quot;&lt;svg width='24' height='24' viewBox='0 0 24 24'&gt;&quot; +
+ *      &quot;  &lt;path d='M8 5v14l11-7z' fill='currentColor'/&gt;&quot; +
+ *      &quot;&lt;/svg&gt;&quot;
+ *  );
+ *
+ *  // Use it in UI declarations
+ *  UI.button(playButton)
+ *    .onClick(it -&gt; mediaPlayer.play())
+ *  }&lt;/pre&gt;
+ *
+ *  SVG icons automatically scale to match DPI settings and maintain crisp edges
+ *  at any resolution. They can be sized dynamically or set to a fixed size
+ *  using {@link #withSize(Size)}.
+ */
+@Immutable
+public interface IconDeclaration
+{
+    /**
+     * Defines the format of the source string returned by {@link #source()}.
+     * This enum determines how the source string should be interpreted
+     * when loading or creating an icon.
+     * &lt;p&gt;
+     * For example, a source string could be a file path pointing to a
+     * PNG or JPEG image file, or it could be a complete SVG document
+     * in XML text form.
+     */
+<span class="fc" id="L100">    enum SourceFormat {</span>
+        /**
+         * The source string is a path to an icon file.
+         * This path can be either:
+         * &lt;ul&gt;
+         *     &lt;li&gt;A relative path resolved against the classpath&lt;/li&gt;
+         *     &lt;li&gt;An absolute file system path&lt;/li&gt;
+         * &lt;/ul&gt;
+         * The file format can be any image format supported by Java's
+         * {@link ImageIcon} class (PNG, JPEG, etc.).
+         */
+<span class="fc" id="L111">        PATH_TO_ICON,</span>
+
+        /**
+         * The source string is a complete SVG document in XML text form.
+         * This allows for programmatic creation of vector icons without
+         * needing external files.
+         * &lt;p&gt;
+         * Example:
+         * &lt;pre&gt;{@code
+         * String svg = &quot;&lt;svg width='16' height='16'&gt;&lt;circle cx='8' cy='8' r='6' fill='red'/&gt;&lt;/svg&gt;&quot;;
+         * IconDeclaration.ofSvg(svg);
+         * }&lt;/pre&gt;
+         */
+<span class="fc" id="L124">        SVG_STRING</span>
+    }
+
+    /**
+     *  This method supplies a String which is a &quot;source&quot; for producing {@link ImageIcon},
+     *  &lt;b&gt;this is typically a path to a file&lt;/b&gt;, but may also be a full-blown SVG document in text form.&lt;br&gt;
+     *  The exact meaning of the source String is defined by the {@link SourceFormat}
+     *  returned by {@link #sourceFormat()} method. Together, these two properties form
+     *  the most important part an icon declaration, since they constitute the minimum
+     *  amount of information needed to resolve an actual icon...&lt;br&gt;
+     *  Note that in case of the source String being a {@link SourceFormat#PATH_TO_ICON},
+     *  it may either be a path relative to the classpath or may be an absolute path.
+     *
+     * @return The &quot;source String&quot; which is used together with the {@link #sourceFormat()}
+     *          to resolve an icon. It is typically a path to the icon resource,
+     *          which is relative to the classpath or may be an absolute path.
+     */
+    String source();
+
+    /**
+     * Returns the format of the source string returned by {@link #source()}.
+     * This determines how the source string should be interpreted when
+     * loading or creating the icon.
+     * &lt;p&gt;
+     * By default, this method returns {@link SourceFormat#PATH_TO_ICON},
+     * meaning the source string is treated as a file path. Implementations
+     * can override this method to return {@link SourceFormat#SVG_STRING}
+     * if they provide SVG content directly.
+     *
+     * @return The format of the source string, never {@code null}.
+     */
+    default SourceFormat sourceFormat() {
+<span class="fc" id="L156">        return SourceFormat.PATH_TO_ICON;</span>
+    }
+
+    /**
+     *  The preferred size of the icon, which is not necessarily the actual size
+     *  of the icon that is being loaded but rather the size that the icon should
+     *  be scaled to when it is being loaded.&lt;br&gt;
+     *  If this method returns {@link Optional#empty()}, then the loaded icon will have
+     *  the exact same size found at the image file found at {@link #source()}.
+     *  A non-empty optional with a {@link Size#unknown()}, specifically indicates to
+     *  {@link swingtree.style.SvgIcon}s that their size should be context dependent,
+     *  meaning that their {@link SvgIcon#getIconWidth()} and {@link SvgIcon#getIconHeight()}
+     *  are both returning {@code -1} to indicate flexible scaling.&lt;br&gt;
+     *  In case of a regular png or jpeg on the other hand, a {@link Size#unknown()} will
+     *  also cause the resulting {@link ImageIcon} to have the same dimensions found in the file.
+     *
+     * @return The preferred size of the icon or {@link Optional#empty()} if the size is unspecified,
+     *          which means that the icon should be loaded in its original size.
+     *          A non-empty optional with a {@link Size#unknown()}, specifically indicates to
+     *          {@link swingtree.style.SvgIcon}s that their size should be context dependent.
+     */
+    default Optional&lt;Size&gt; size() {
+<span class="fc" id="L178">        return Optional.of(Size.unknown());</span>
+    }
+
+    /**
+     *  This method is used to find the icon resource
+     *  and load it as an {@link ImageIcon} instance
+     *  wrapped in an {@link Optional},
+     *  or return an empty {@link Optional} if the icon resource
+     *  could not be found.
+     *
+     * @return An {@link Optional} that contains the {@link ImageIcon}
+     *         if the icon resource was found, otherwise an empty {@link Optional}.
+     */
+    default Optional&lt;ImageIcon&gt; find() {
+<span class="fc" id="L192">        return UI.findIcon(this);</span>
+    }
+
+    /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with a new preferred size for the icon.
+     *
+     * @param size The preferred size of the icon in the form of a {@link Size} instance.
+     * @return A new {@link IconDeclaration} instance with the same path
+     *        but with the given size.
+     */
+    default IconDeclaration withSize( Size size ) {
+<span class="nc" id="L204">        return IconDeclaration.of(size, sourceFormat(), source());</span>
+    }
+
+    /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with a new preferred width and height for the icon.
+     *
+     * @param width The preferred width of the icon.
+     * @param height The preferred height of the icon.
+     * @return A new {@link IconDeclaration} instance with the same path
+     *        but with the specified width and height as preferred size.
+     */
+    default IconDeclaration withSize( int width, int height ) {
+<span class="fc" id="L217">        return IconDeclaration.of(Size.of(width, height), sourceFormat(), source());</span>
+    }
+
+    /**
+     *  Creates and returns an updated {@link IconDeclaration} instance
+     *  with a new preferred width for the icon.
+     *
+     * @param width The preferred width of the icon.
+     * @return A new {@link IconDeclaration} instance with the same path
+     *        but with the specified width as preferred width.
+     */
+    default IconDeclaration withWidth( int width ) {
+<span class="nc" id="L229">        return IconDeclaration.of(</span>
+<span class="nc" id="L230">                size().map(it-&gt;it.withWidth(width)).orElse(Size.of(width, -1)),</span>
+<span class="nc" id="L231">                sourceFormat(),</span>
+<span class="nc" id="L232">                source()</span>
+            );
+    }
+
+    /**
+     *  Allows you to create an updated {@link IconDeclaration} instance
+     *  with a new preferred height for the icon.
+     *
+     * @param height The preferred height of the icon.
+     * @return A new {@link IconDeclaration} instance with the same path
+     *        but with the specified height as preferred height.
+     */
+    default IconDeclaration withHeight( int height ) {
+<span class="nc" id="L245">        return IconDeclaration.of(</span>
+<span class="nc" id="L246">                size().map(it-&gt;it.withHeight(height)).orElse(Size.of(-1, height)),</span>
+<span class="nc" id="L247">                sourceFormat(),</span>
+<span class="nc" id="L248">                source()</span>
+            );
+    }
+
+    /**
+     *  This method is used to find an {@link ImageIcon} of a specific type
+     *  and load and return it wrapped in an {@link Optional},
+     *  or return an empty {@link Optional} if the icon resource could not be found.
+     *
+     * @param type The type of icon to find.
+     * @return An {@link Optional} that contains the {@link ImageIcon} of the given type.
+     * @param &lt;T&gt; The type of icon to find.
+     */
+    default &lt;T extends ImageIcon&gt; Optional&lt;T&gt; find( Class&lt;T&gt; type ) {
+<span class="fc" id="L262">        return UI.findIcon(this).map(type::cast);</span>
+    }
+
+    /**
+     *  A factory method for creating an {@link IconDeclaration} instance
+     *  from the provided path to the icon resource.
+     *
+     * @param path The path to the icon resource, which may be relative
+     *             to the classpath or may be an absolute path.
+     * @return A new {@link IconDeclaration} instance
+     *        that represents the given icon resource as a constant.
+     */
+    static IconDeclaration of( String path ) {
+<span class="fc" id="L275">        Objects.requireNonNull(path);</span>
+<span class="fc" id="L276">        return IconDeclaration.of(Size.unknown(), SourceFormat.PATH_TO_ICON, path);</span>
+    }
+
+    /**
+     *  A factory method for creating an {@link IconDeclaration} instance
+     *  from the provided path to the icon resource and the preferred size.
+     *
+     * @param size The preferred size of the icon.
+     * @param path The path to the icon resource, which may be relative
+     *             to the classpath or may be an absolute path.
+     * @return A new {@link IconDeclaration} instance
+     *        that represents the given icon resource as a constant.
+     */
+    static IconDeclaration of( Size size, String path ) {
+<span class="fc" id="L290">        Objects.requireNonNull(size);</span>
+<span class="fc" id="L291">        Objects.requireNonNull(path);</span>
+<span class="fc" id="L292">        return IconDeclaration.of(size, SourceFormat.PATH_TO_ICON, path);</span>
+    }
+
+    /**
+     * Creates an {@link IconDeclaration} instance from an SVG document string,
+     * &lt;b&gt;which will be resolved to an {@link SvgIcon} with an unknown size,
+     * effectively making it scale depending on its usage context.&lt;/b&gt;
+     * This factory method is specifically designed for creating vector-based
+     * icons programmatically without requiring external files.
+     * &lt;p&gt;
+     * The provided SVG string must be a complete, well-formed SVG XML document.
+     * The resulting icon declaration will have its {@link #sourceFormat()}
+     * set to {@link SourceFormat#SVG_STRING}.
+     * &lt;p&gt;
+     * Icon declarations produced by this method will resolve to
+     * {@link swingtree.style.SvgIcon} instances, which support dynamic
+     * scaling while maintaining crisp edges at any scale.
+     * &lt;p&gt;
+     * Example:
+     * &lt;pre&gt;{@code
+     * String checkmarkSvg = &quot;&lt;svg width='16' height='16'&gt;&quot; +
+     *                       &quot;&lt;path d='M2 8l4 4l8-8' stroke='green' stroke-width='2' fill='none'/&gt;&quot; +
+     *                       &quot;&lt;/svg&gt;&quot;;
+     * IconDeclaration checkmark = IconDeclaration.ofAutoScaledSvg(checkmarkSvg)
+     *                                            .withSize(24, 24);
+     * }&lt;/pre&gt;
+     * In the above example, an {@link SvgIcon} loaded using this declaration will report {@code -1}
+     * for both {@link SvgIcon#getIconWidth()} and {@link SvgIcon#getIconHeight()} instead of 16!
+     * This is to ensure that the svg is scalable when used as component icons...
+     *
+     * @param svg The complete SVG document as a string.
+     *           Must not be {@code null}.
+     * @return A new {@link IconDeclaration} instance representing the SVG icon.
+     * @throws NullPointerException if {@code svg} is {@code null}.
+     */
+    static IconDeclaration ofAutoScaledSvg(String svg) {
+<span class="fc" id="L328">        Objects.requireNonNull(svg);</span>
+<span class="fc" id="L329">        return IconDeclaration.of(Size.unknown(), SourceFormat.SVG_STRING, svg);</span>
+    }
+
+    /**
+     * Creates an {@link IconDeclaration} instance from an SVG document string,
+     * &lt;b&gt;which will be resolved to an {@link SvgIcon} with the same size declared in the SVG text.&lt;/b&gt;
+     * This factory method is specifically designed for creating vector-based
+     * icons programmatically without requiring external files.
+     * &lt;p&gt;
+     * The provided SVG string must be a complete, well-formed SVG XML document.
+     * The resulting icon declaration will have its {@link #sourceFormat()}
+     * set to {@link SourceFormat#SVG_STRING}.
+     * &lt;p&gt;
+     * Icon declarations produced by this method will resolve to
+     * {@link swingtree.style.SvgIcon} instances, which support dynamic
+     * scaling while maintaining crisp edges at any scale.
+     * &lt;p&gt;
+     * Example:
+     * &lt;pre&gt;{@code
+     * String checkmarkSvg = &quot;&lt;svg width='16' height='16'&gt;&quot; +
+     *                       &quot;&lt;path d='M2 8l4 4l8-8' stroke='green' stroke-width='2' fill='none'/&gt;&quot; +
+     *                       &quot;&lt;/svg&gt;&quot;;
+     * IconDeclaration checkmark = IconDeclaration.ofSvg(checkmarkSvg)
+     *                                            .withSize(24, 24);
+     * }&lt;/pre&gt;
+     * In the above example, an {@link SvgIcon} loaded using this declaration will report {@code 16}
+     * for both {@link SvgIcon#getIconWidth()} and {@link SvgIcon#getIconHeight()}.
+     *
+     * @param svg The complete SVG document as a string.
+     *           Must not be {@code null}.
+     * @return A new {@link IconDeclaration} instance representing the SVG icon.
+     * @throws NullPointerException if {@code svg} is {@code null}.
+     */
+    static IconDeclaration ofSvg(String svg) {
+<span class="fc" id="L363">        Objects.requireNonNull(svg);</span>
+<span class="fc" id="L364">        return PooledIconDeclaration.of(null, SourceFormat.SVG_STRING, svg);</span>
+    }
+
+    /**
+     *  Creates an {@link IconDeclaration} instance with full control over all
+     *  declaration properties: size, source format, and source content.
+     *  &lt;p&gt;
+     *  This is the most comprehensive factory method, allowing precise specification
+     *  of how the icon should be interpreted and displayed. It's particularly useful
+     *  when creating icon declarations programmatically or when you need explicit
+     *  control over the source format.
+     *  &lt;p&gt;
+     *  &lt;b&gt;Size Handling:&lt;/b&gt;
+     *  If the provided {@code size} parameter is {@link Size#unknown()}, it will
+     *  indicate to raster based icons that they should use their natural dimensions
+     *  (for raster images), whereas SVG based icons will be loaded without any size
+     *  to make their size effectively context-dependent (automatic scaling).
+     *  &lt;p&gt;
+     *  &lt;b&gt;Example Usage:&lt;/b&gt;
+     *  &lt;pre&gt;{@code
+     *  // Create a PNG icon declaration with specific size
+     *  IconDeclaration icon1 = IconDeclaration.of(
+     *      Size.of(32, 32),
+     *      SourceFormat.PATH_TO_ICON,
+     *      &quot;icons/user.png&quot;
+     *  );
+     *
+     *  // Create an SVG icon declaration with unknown (flexible) size
+     *  IconDeclaration icon2 = IconDeclaration.of(
+     *      Size.unknown(),
+     *      SourceFormat.SVG_STRING,
+     *      &quot;&lt;svg ...&gt;...&lt;/svg&gt;&quot;
+     *  );
+     *  }&lt;/pre&gt;
+     *
+     *  @param size The preferred display size for the icon. Use {@link Size#unknown()}
+     *              to indicate natural/context-dependent sizing. Must not be {@code null}.
+     *  @param sourceFormat The format interpretation of the source string.
+     *              Must not be {@code null}.
+     *  @param source The icon source content (file path or SVG XML).
+     *              Must not be {@code null}.
+     *  @return A new {@link IconDeclaration} instance configured with the specified
+     *          properties.
+     *  @throws NullPointerException if any parameter is {@code null}.
+     *  @see Size#unknown()
+     *  @see SourceFormat
+     */
+    static IconDeclaration of( Size size, SourceFormat sourceFormat, String source ) {
+<span class="fc" id="L412">        Objects.requireNonNull(size);</span>
+<span class="fc" id="L413">        Objects.requireNonNull(sourceFormat);</span>
+<span class="fc" id="L414">        Objects.requireNonNull(source);</span>
+<span class="fc" id="L415">        return PooledIconDeclaration.of( size, sourceFormat, source );</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
