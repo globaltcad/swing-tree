@@ -216,7 +216,7 @@ public class JScrollPanels extends UI.ScrollPane
         Objects.requireNonNull(entryViewModel);
         EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, viewSupplier, _internal.getComponents().length);
         _internal.add(entryPanel);
-        this.validate();
+        this.revalidate();
     }
 
     /**
@@ -257,7 +257,7 @@ public class JScrollPanels extends UI.ScrollPane
         for ( int j = 0; j < entryPanels.size(); j++ ) {
             _internal.add(entryPanels.get(j), index + j);
         }
-        this.validate();
+        this.revalidate();
     }
 
     /**
@@ -318,7 +318,7 @@ public class JScrollPanels extends UI.ScrollPane
             }
         }
         if ( somethingChanged ) {
-            this.validate();
+            this.revalidate();
         }
     }
 
@@ -327,7 +327,7 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public void removeAllEntries() {
         _internal.removeAll();
-        this.validate();
+        this.revalidate();
     }
 
     /**
@@ -336,7 +336,7 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public void removeEntryAt( int index ) {
         _internal.remove(index);
-        this.validate();
+        this.revalidate();
     }
 
     /**
@@ -346,7 +346,7 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public void removeEntriesAt( int index, int count ) {
         IntStream.range(0, count).forEach( i -> _internal.remove(index) );
-        this.validate();
+        this.revalidate();
     }
 
     /**
@@ -362,7 +362,7 @@ public class JScrollPanels extends UI.ScrollPane
         Objects.requireNonNull(entryViewModel);
         EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);
         _internal.add(entryPanel, index);
-        this.validate();
+        this.revalidate();
     }
 
     /**
@@ -412,7 +412,7 @@ public class JScrollPanels extends UI.ScrollPane
         // We have to re-add the entry panel at the same index
         // because the layout manager will otherwise add it at the end.
         _internal.add(newEntryPanel, index);
-        this.validate();
+        this.revalidate();
     }
 
     /**
