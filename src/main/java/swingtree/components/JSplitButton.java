@@ -30,6 +30,7 @@ import swingtree.UI;
 import swingtree.components.action.ButtonClickedActionListener;
 import swingtree.components.action.SplitButtonActionListener;
 import swingtree.components.action.SplitButtonClickedActionListener;
+import swingtree.style.ComponentBackend;
 import swingtree.style.StylableComponent;
 
 import javax.swing.Icon;
@@ -127,6 +128,12 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
     /** {@inheritDoc} */
     @Override public void paintChildren(Graphics g) {
         paintForeground(g, super::paintChildren);
+    }
+
+    /** {@inheritDoc} */
+    @Override public void doLayout() {
+        super.doLayout();
+        ComponentBackend.measureTextHeightAfterLayoutOf(this);
     }
 
     /** {@inheritDoc} */

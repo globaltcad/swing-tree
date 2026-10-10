@@ -38,6 +38,8 @@ final class StyleSource<C extends JComponent>
     private final Expirable<Styler<C>>[] _animationStylers;
 
     private @Nullable ScaledStyle _lastScaledStyle = null;
+    /** The complete result of the last {@link #gatherStyleFor}, used for text measuring during the layout pass.*/
+    private @Nullable StyleConf _lastGatheredStyle = null;
 
 
 
@@ -152,9 +154,11 @@ final class StyleSource<C extends JComponent>
 
         styleConf = styleConf.determineTextConfObstaclesFromChildrenOf(owner);
         styleConf = styleConf.determinePreferredHeightFromTextConfigs(owner);
-
+        _lastGatheredStyle = styleConf;
         return styleConf;
     }
+
+    @Nullable StyleConf lastGatheredStyle() { return _lastGatheredStyle; }
 
     private StyleConf _scaledAndCorrectedForRounding( StyleConf simplified ) {
         final float scale = UI.scale();

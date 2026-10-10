@@ -526,6 +526,14 @@ public final class StyleConf
         return this._withLayers(newLayers);
     }
 
+    boolean hasTextWithAutoPreferredHeight() {
+        return _layers.any((layer, conf) -> conf.texts().any(named -> named.style().autoPreferredHeight()));
+    }
+
+    boolean hasTextWithAutoPreferredHeightAndObstaclesFromChildren() {
+        return _layers.any((layer, conf) -> conf.texts().any(named -> named.style().autoPreferredHeight() && named.style().obstaclesFromChildrenEnabled()));
+    }
+
     StyleConf determinePreferredHeightFromTextConfigs(JComponent owner) {
         boolean hasStyledText = _layers.any((layer, conf) -> conf.texts().any(named -> !named.style().isNone()));
         if ( !hasStyledText )
