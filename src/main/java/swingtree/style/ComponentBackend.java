@@ -11,6 +11,7 @@ import swingtree.animation.AnimationStatus;
 import swingtree.api.Configurator;
 import swingtree.api.Painter;
 import swingtree.api.Styler;
+import swingtree.layout.Bounds;
 import swingtree.layout.Position;
 
 import javax.swing.*;
@@ -119,6 +120,8 @@ public final class ComponentBackend<C extends JComponent>
     private PaintStep _lastPaintStep = PaintStep.UNDEFINED;
     private @Nullable BufferedImage _bufferedImage = null;
     private @Nullable Function<Position, DragAwayComponentConf<C>> _dragAwayConfigurator = null;
+    /** The width of the component when its text height was last measured. */
+    private int _widthOfLastTextMeasurement = 0;
 
 
     private ComponentBackend(C owner ) {
@@ -940,6 +943,7 @@ public final class ComponentBackend<C extends JComponent>
     private void _applyStyleToComponentState( StyleConf newStyle, boolean force )
     {
         Objects.requireNonNull(newStyle);
+        _widthOfLastTextMeasurement = _owner.getWidth();
         _styleEngine = _styleInstaller.applyStyleToComponentState(
                                     _owner,
                                     _styleEngine,
@@ -947,6 +951,82 @@ public final class ComponentBackend<C extends JComponent>
                                     newStyle,
                                     force
                                 );
+    }
+
+    /**
+     *  Measures the text of a component styled with {@link TextConf#autoPreferredHeight(boolean)}
+     *  again when a layout has given it a new width, and sets the preferred height of the component
+     *  to the height of its text at that width. SwingTree's own components call this at the end of
+     *  their {@link Container#doLayout()}, where their new width is known and their children
+     *  are in their new places.
+     *  <p>
+     *  A {@link Component#revalidate()} called now has no effect, because the parent is still being
+     *  laid out, and Swing marks the parent as laid out when its layout finishes. So when the preferred
+     *  height changed, the component is added to the list which a SwingTree scroll pane around it keeps
+     *  in its client property {@code "swingtree.componentsWithNewTextHeight"} while it is being laid out;
+     *  the scroll pane then lays out its content again before its layout finishes.
+     *  Without such a scroll pane, the component calls {@link Component#revalidate()} in a later task.
+     *  <p>
+     *  When the width did not change, this only compares two numbers. When it changed but the
+     *  style of the component has no text with an automatic preferred height, it also looks
+     *  through the text configurations of the style, without computing the style again.
+     *
+     * @param component The component which was just laid out.
+     */
+    public static void measureTextHeightAfterLayoutOf( JComponent component ) {
+        Object backend = component.getClientProperty(ComponentBackend.class);
+        if ( backend instanceof ComponentBackend )
+            ((ComponentBackend<?>) backend)._measureTextHeightAtNewWidth();
+    }
+
+    private void _measureTextHeightAtNewWidth() {
+        final int width = _owner.getWidth();
+        if ( width == _widthOfLastTextMeasurement )
+            return;
+        _widthOfLastTextMeasurement = width;
+        final StyleConf gathered = _styleSource.lastGatheredStyle();
+        if ( gathered == null || !gathered.hasTextWithAutoPreferredHeight() )
+            return;
+
+        final int formerHeight = _owner.getPreferredSize().height;
+        if ( gathered.hasTextWithAutoPreferredHeightAndObstaclesFromChildren() ) {
+            /*
+                The obstacles of such a text are shapes of the children, which the gathered style
+                holds at the places the children had when it was gathered. Only gathering the style
+                again places them where the layout has just put the children.
+            */
+            gatherApplyAndInstallStyle(false);
+        } else {
+            final StyleConf measured = gathered.determinePreferredHeightFromTextConfigs(_owner);
+            final Optional<Integer> newHeight = measured.dimensionality().preferredHeight();
+            final StyleConf installed = getStyle();
+            if ( !newHeight.isPresent() || newHeight.equals(installed.dimensionality().preferredHeight()) )
+                return;
+            /*
+                Only the preferred height changed, so instead of installing the whole style again,
+                we install the new preferred height and update the installed style to match it.
+            */
+            final StyleConf installedWithNewHeight = installed._withDimensionality(installed.dimensionality()._withPreferredHeight(newHeight.get()));
+            _styleInstaller._applyDimensionalityStyleTo(_owner, installedWithNewHeight);
+            _styleEngine = _styleEngine.update(
+                                Bounds.of(_owner.getX(), _owner.getY(), _owner.getWidth(), _owner.getHeight()),
+                                installedWithNewHeight,
+                                StyleInstaller._formerBorderMarginCorrection(_owner)
+                            );
+        }
+        if ( _owner.getPreferredSize().height != formerHeight )
+            _layOutTheParentAgain();
+    }
+
+    private void _layOutTheParentAgain() {
+        for ( Container parent = _owner.getParent(); parent != null; parent = parent.getParent() ) {
+            Object list = parent instanceof JComponent ? ((JComponent) parent).getClientProperty("swingtree.componentsWithNewTextHeight") : null;
+            if ( list instanceof List ) {
+                ((List<JComponent>) list).add(_owner);
+                return;
+            }
+        }
+        SwingUtilities.invokeLater(_owner::revalidate);
     }
 
     private void _doPaintStep(

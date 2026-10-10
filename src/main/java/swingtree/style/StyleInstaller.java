@@ -844,7 +844,7 @@ final class StyleInstaller<C extends JComponent>
             owner.getParent().revalidate();
     }
 
-    private void _applyDimensionalityStyleTo( final C owner, final StyleConf styleConf )
+    void _applyDimensionalityStyleTo( final C owner, final StyleConf styleConf )
     {
         final DimensionalityConf dimensionalityConf = styleConf.dimensionality();
 

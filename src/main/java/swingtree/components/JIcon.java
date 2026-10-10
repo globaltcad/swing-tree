@@ -147,6 +147,12 @@ public class JIcon extends JLabel implements StylableComponent
         paintForeground(g, super::paintChildren);
     }
 
+    /** {@inheritDoc} */
+    @Override public void doLayout() {
+        super.doLayout();
+        ComponentBackend.measureTextHeightAfterLayoutOf(this);
+    }
+
     @Override public void setUISilently( ComponentUI ui ) {
         this.ui = ui;
     }

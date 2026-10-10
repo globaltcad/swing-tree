@@ -2396,6 +2396,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JPanel} which implements {@link StylableComponent}, so that SwingTree
@@ -2406,6 +2407,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JLabel} which implements {@link StylableComponent}, so that SwingTree
@@ -2416,6 +2418,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JTextField} which implements {@link StylableComponent}, so that SwingTree
@@ -2426,6 +2429,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JTextArea} which implements {@link StylableComponent}, so that SwingTree
@@ -2436,6 +2440,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JCheckBox} which implements {@link StylableComponent}, so that SwingTree
@@ -2446,6 +2451,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JButton} which implements {@link StylableComponent}, so that SwingTree
@@ -2456,6 +2462,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JToggleButton} which implements {@link StylableComponent}, so that SwingTree
@@ -2466,6 +2473,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JRadioButton} which implements {@link StylableComponent}, so that SwingTree
@@ -2476,6 +2484,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JComboBox} which implements {@link StylableComponent}, so that SwingTree
@@ -2487,6 +2496,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JList} which implements {@link StylableComponent}, so that SwingTree
@@ -2498,6 +2508,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JTable} which implements {@link StylableComponent}, so that SwingTree
@@ -2508,6 +2519,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JTableHeader} which implements {@link StylableComponent}, so that SwingTree
@@ -2540,6 +2552,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintComponent); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
         @Override public String getToolTipText(MouseEvent e) {
             int col = columnAtPoint(e.getPoint());
             int modelCol = Optional.ofNullable(getTable())
@@ -2565,6 +2578,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JSeparator} which implements {@link StylableComponent}, so that SwingTree
@@ -2575,6 +2589,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JPopupMenu} which implements {@link StylableComponent}, so that SwingTree
@@ -2585,6 +2600,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JMenuItem} which implements {@link StylableComponent}, so that SwingTree
@@ -2595,6 +2611,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JRadioButtonMenuItem} which implements {@link StylableComponent}, so that SwingTree
@@ -2605,6 +2622,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JCheckBoxMenuItem} which implements {@link StylableComponent}, so that SwingTree
@@ -2615,6 +2633,7 @@ public final class UI extends UIFactoryMethods
          @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
          @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
      }
     /**
      *  A {@link JMenu} which implements {@link StylableComponent}, so that SwingTree
@@ -2625,6 +2644,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JMenuBar} which implements {@link StylableComponent}, so that SwingTree
@@ -2635,6 +2655,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JScrollPane} which implements {@link StylableComponent}, so that SwingTree
@@ -2642,15 +2663,18 @@ public final class UI extends UIFactoryMethods
      *  it directly instead of having to install a custom {@code ComponentUI} delegate.
      */
     public static class ScrollPane extends JScrollPane implements StylableComponent {
+        private final ScrollPaneLayoutCorrection _layoutCorrection;
         public ScrollPane() { this(null); }
         public ScrollPane(java.awt.@Nullable Component view) {
             super(view);
             addMouseWheelListener(new NestedJScrollPanelScrollCorrection(this));
-            ScrollPaneParentLayoutCorrection.installOn(this);
+            _layoutCorrection = ScrollPaneLayoutCorrection.installOn(this);
         }
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
+        @Override protected void validateTree() { _layoutCorrection.validateTree(super::validateTree); }
     }
     /**
      *  A {@link JTabbedPane} which implements {@link StylableComponent}, so that SwingTree
@@ -2661,6 +2685,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JToolBar} which implements {@link StylableComponent}, so that SwingTree
@@ -2671,6 +2696,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JToolTip} which implements {@link StylableComponent}, so that SwingTree
@@ -2681,6 +2707,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JTree} which implements {@link StylableComponent}, so that SwingTree
@@ -2691,6 +2718,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JTextPane} which implements {@link StylableComponent}, so that SwingTree
@@ -2701,6 +2729,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JSpinner} which implements {@link StylableComponent}, so that SwingTree
@@ -2711,6 +2740,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JSplitPane} which implements {@link StylableComponent}, so that SwingTree
@@ -2722,6 +2752,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JPasswordField} which implements {@link StylableComponent}, so that SwingTree
@@ -2732,6 +2763,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JProgressBar} which implements {@link StylableComponent}, so that SwingTree
@@ -2742,6 +2774,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JEditorPane} which implements {@link StylableComponent}, so that SwingTree
@@ -2752,6 +2785,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JFormattedTextField} which implements {@link StylableComponent}, so that SwingTree
@@ -2762,6 +2796,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g){ paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public void doLayout() { super.doLayout(); ComponentBackend.measureTextHeightAfterLayoutOf(this); }
     }
     /**
      *  A {@link JBox} under the {@code UI} namespace, so that the other component classes

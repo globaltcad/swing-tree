@@ -347,6 +347,12 @@ public class JGlassPane extends JPanel implements StylableComponent
         }
     }
 
+    /** {@inheritDoc} */
+    @Override public void doLayout() {
+        super.doLayout();
+        ComponentBackend.measureTextHeightAfterLayoutOf(this);
+    }
+
     private void paintActiveDrag(Graphics g) {
         getActiveDrag().paint(g);
         /*

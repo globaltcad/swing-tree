@@ -119,6 +119,8 @@ import java.util.Objects;
  *          <b>It will also take full ownership of the preferred height of the component,
  *          which means that a preferred height specified elsewhere in the style configuration
  *          of the component will be ignored.</b><br>
+ *          SwingTree's own components measure the text whenever a layout gives them a new width,
+ *          and other components when they are painted; see {@link TextConf#autoPreferredHeight(boolean)}.<br>
  *          You can configure it through {@link TextConf#autoPreferredHeight(boolean)}.<br>
  *      </li>
  *      <li><b>Obstacles</b>
@@ -579,6 +581,22 @@ public final class TextConf implements Simplifiable<TextConf>
      * <b>It will also take full ownership of the preferred height of the component,
      * which means that a preferred height specified elsewhere in the style configuration
      * of the component will be ignored.</b><br>
+     * <p>
+     * When the text is measured depends on the component:
+     * <ul>
+     *     <li>The components of SwingTree, which implement {@link StylableComponent}
+     *         (like {@link swingtree.UI.Panel}, {@link swingtree.UI.Label} and {@link swingtree.components.JBox}),
+     *         measure their text whenever a layout gives them a new width, even when they are not visible.
+     *         Inside a {@link swingtree.UI.ScrollPane}, the scroll pane lays out its content again
+     *         before anything is painted, so the component is painted at the height of its text at its new width.
+     *         Elsewhere, the new height is laid out in a later event, so the component can be painted
+     *         once at its former height.</li>
+     *     <li>Other components, like a plain {@link javax.swing.JPanel} styled through SwingTree,
+     *         measure their text only when their style is computed, which happens when they are painted
+     *         and when a property their style is bound to changes. So such a component which is outside
+     *         the visible part of a scroll pane keeps the height of its last measurement
+     *         until it is painted.</li>
+     * </ul>
      *
      * @param autoPreferredHeight If true, then the style engine will compute and set a preferred height
      *                            for the styled component which is based on the text layout produced by this text configuration.
