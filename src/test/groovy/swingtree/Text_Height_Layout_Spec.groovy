@@ -57,8 +57,15 @@ import java.util.concurrent.atomic.AtomicInteger
         `RepaintManager.validateInvalidComponents()`) and then paints. Whatever the layout in
         that task decides is what the user sees in the paint of that task.
       - **The text height of a box**: the preferred height SwingTree computes for the text of
-        the box at the current width of the box. A scenario gets the text height by measuring
-        a separate box with the same text and font at that width, see `textHeightOf`.
+        the box at the current width of the box. Each scenario gets the text height with a
+        closure `textHeightOf`, which builds a separate box with the same text and the font of
+        the box, gives the separate box the width of the box with `setSize`, outside any layout,
+        and paints the separate box once. Painting makes SwingTree measure the text of the
+        separate box at that width. Using that measurement as the reference is not circular:
+        the scenarios do not check when the text is measured, but whether the boxes in the
+        window have the height SwingTree computes for their text at their width. Measuring while
+        painting is correct for a box whose width is known; it fails for the boxes in the window
+        only because those are not painted, or painted only after the layout the scenarios check.
 
     The scenarios check that boxes have their text height:
 
@@ -75,9 +82,6 @@ import java.util.concurrent.atomic.AtomicInteger
 @Subject([TextConf, UI.ScrollPane, JScrollPanels])
 class Text_Height_Layout_Spec extends Specification
 {
-    /** About 480 characters, which wrap into several lines in a box that is a few hundred pixels wide. */
-    private static final String TEXT = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
-
     static record Message(String id, String text) implements HasId<String> {}
 
     def setup() {
@@ -107,9 +111,38 @@ class Text_Height_Layout_Spec extends Specification
             SwingTree measures the text of the ninth box as soon as the layout gives the ninth
             box its width, so the ninth box has its text height without ever being painted.
         """
-        given : 'A window, 400 by 300 pixels, with a scroll pane whose content follows the width of the scroll pane.'
+        given : """
+            About 480 characters of text, a closure which builds a box with 8 pixels of padding on
+            every side that shows a text wrapped into lines from its top left corner, with the
+            height of the wrapped text as the preferred height of the box (`autoPreferredHeight`),
+            and a closure which returns the text height of a box.
+        """
+            var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
+            var newTextBox = { ->
+                UI.box()
+                .withStyle(it -> it
+                    .padding(8)
+                    .text(t -> t
+                        .content(text)
+                        .placement(UI.Placement.TOP_LEFT)
+                        .wrapLines(true)
+                        .autoPreferredHeight(true)
+                    )
+                )
+                .get(JBox)
+            }
+            var textHeightOf = { JBox box ->
+                UI.runAndGet({
+                    JBox twin = newTextBox()
+                    twin.setFont(box.getFont())
+                    twin.setSize(box.getWidth(), 10)
+                    twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                    twin.getPreferredSize().height
+                })
+            }
+        and : 'A window, 400 by 300 pixels, with a scroll pane whose content follows the width of the scroll pane.'
             var column = UI.panel("wrap 1, fillx, ins 0, gap 0", "[grow]").get(JPanel)
-            UI.runNow { 8.times { column.add(wrappedTextBox(), "growx, wmin 0") } }
+            UI.runNow { 8.times { column.add(newTextBox(), "growx, wmin 0") } }
             var frame = new JFrame()
             UI.runNow {
                 frame.setContentPane(UI.scrollPane(conf -> conf.fitWidth(true)).add(column).get(JScrollPane))
@@ -119,14 +152,19 @@ class Text_Height_Layout_Spec extends Specification
 
         when : """
             We add a ninth box at the bottom of the column, call `revalidate()` on the column,
-            and let Swing run the layouts which the `revalidate()` call requested.
+            and let Swing run the layouts which the `revalidate()` call requested. Each of three new tasks on Swing's event thread
+            (`UI.runNow`) first lets Swing run the tasks queued before it, such as a later
+            `revalidate()` call of SwingTree, and then calls `RepaintManager.validateInvalidComponents()`,
+            which lays out what the `revalidate()` calls requested.
         """
-            JBox ninth = UI.runAndGet({ wrappedTextBox() })
+            JBox ninth = UI.runAndGet({ newTextBox() })
             UI.runNow {
                 column.add(ninth, "growx, wmin 0")
                 column.revalidate()
             }
-            runTheRequestedLayouts(column)
+            3.times {
+                UI.runNow { RepaintManager.currentManager(column).validateInvalidComponents() }
+            }
             int height = UI.runAndGet({ ninth.getHeight() })
             int textHeight = textHeightOf(ninth)
         then : 'The ninth box lies outside the visible part of the scroll pane.'
@@ -170,9 +208,38 @@ class Text_Height_Layout_Spec extends Specification
             and reaches the scroll pane through `validateTree()`. SwingTree lays out the content
             of the scroll pane a second time in both routes, so both scenarios are needed.
         """
-        given : 'A panel holding a scroll pane, whose content is a column of eight boxes that follows the width of the scroll pane.'
+        given : """
+            About 480 characters of text, a closure which builds a box with 8 pixels of padding on
+            every side that shows a text wrapped into lines from its top left corner, with the
+            height of the wrapped text as the preferred height of the box (`autoPreferredHeight`),
+            and a closure which returns the text height of a box.
+        """
+            var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
+            var newTextBox = { ->
+                UI.box()
+                .withStyle(it -> it
+                    .padding(8)
+                    .text(t -> t
+                        .content(text)
+                        .placement(UI.Placement.TOP_LEFT)
+                        .wrapLines(true)
+                        .autoPreferredHeight(true)
+                    )
+                )
+                .get(JBox)
+            }
+            var textHeightOf = { JBox box ->
+                UI.runAndGet({
+                    JBox twin = newTextBox()
+                    twin.setFont(box.getFont())
+                    twin.setSize(box.getWidth(), 10)
+                    twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                    twin.getPreferredSize().height
+                })
+            }
+        and : 'A panel holding a scroll pane, whose content is a column of eight boxes that follows the width of the scroll pane.'
             var column = UI.panel("wrap 1, fillx, ins 0, gap 0", "[grow]").get(JPanel)
-            UI.runNow { 8.times { column.add(wrappedTextBox(), "growx, wmin 0") } }
+            UI.runNow { 8.times { column.add(newTextBox(), "growx, wmin 0") } }
             var holder = new JPanel(new BorderLayout())
             var frame = new JFrame()
             UI.runNow {
@@ -230,11 +297,40 @@ class Text_Height_Layout_Spec extends Specification
             before the layout of the scroll pane is finished. So the first layout already gives
             the new box its text height.
         """
-        given : 'A `JScrollPanels` list whose content follows the width of the list, holding one message, in a window of 400 by 300 pixels.'
-            var messages = Var.of(Tuple.of(Message, new Message("1", TEXT)))
+        given : """
+            About 480 characters of text, a closure which builds a box with 8 pixels of padding on
+            every side that shows a text wrapped into lines from its top left corner, with the
+            height of the wrapped text as the preferred height of the box (`autoPreferredHeight`),
+            and a closure which returns the text height of a box.
+        """
+            var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
+            var newTextBox = { String content ->
+                UI.box()
+                .withStyle(it -> it
+                    .padding(8)
+                    .text(t -> t
+                        .content(content)
+                        .placement(UI.Placement.TOP_LEFT)
+                        .wrapLines(true)
+                        .autoPreferredHeight(true)
+                    )
+                )
+                .get(JBox)
+            }
+            var textHeightOf = { JBox box ->
+                UI.runAndGet({
+                    JBox twin = newTextBox(text)
+                    twin.setFont(box.getFont())
+                    twin.setSize(box.getWidth(), 10)
+                    twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                    twin.getPreferredSize().height
+                })
+            }
+        and : 'A `JScrollPanels` list whose content follows the width of the list, holding one message, in a window of 400 by 300 pixels.'
+            var messages = Var.of(Tuple.of(Message, new Message("1", text)))
             JScrollPanels list =
                     UI.scrollPanels(conf -> conf.fitWidth(true))
-                    .addAll(messages, message -> UI.of(wrappedTextBox(message.get().text())))
+                    .addAll(messages, message -> UI.of(newTextBox(message.get().text())))
                     .get(JScrollPanels)
             var frame = new JFrame()
             UI.runNow {
@@ -251,7 +347,7 @@ class Text_Height_Layout_Spec extends Specification
         """
             JBox newBox = null
             Dimension size = UI.runAndGet({
-                messages.update(tuple -> tuple.add(new Message("2", TEXT)))
+                messages.update(tuple -> tuple.add(new Message("2", text)))
                 RepaintManager.currentManager(list).validateInvalidComponents()
                 var entry = list.getContentPanel().getComponent(1) as JScrollPanels.EntryPanel
                 newBox = entry.getLastState() as JBox
@@ -287,9 +383,38 @@ class Text_Height_Layout_Spec extends Specification
             at the scroll pane, by calling `validate()` on the scroll pane. SwingTree lays out the
             content of the scroll pane a second time in both routes, so both scenarios are needed.
         """
-        given : 'A window with a scroll pane whose content is a column of eight boxes that follows the width of the scroll pane.'
+        given : """
+            About 480 characters of text, a closure which builds a box with 8 pixels of padding on
+            every side that shows a text wrapped into lines from its top left corner, with the
+            height of the wrapped text as the preferred height of the box (`autoPreferredHeight`),
+            and a closure which returns the text height of a box.
+        """
+            var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
+            var newTextBox = { ->
+                UI.box()
+                .withStyle(it -> it
+                    .padding(8)
+                    .text(t -> t
+                        .content(text)
+                        .placement(UI.Placement.TOP_LEFT)
+                        .wrapLines(true)
+                        .autoPreferredHeight(true)
+                    )
+                )
+                .get(JBox)
+            }
+            var textHeightOf = { JBox box ->
+                UI.runAndGet({
+                    JBox twin = newTextBox()
+                    twin.setFont(box.getFont())
+                    twin.setSize(box.getWidth(), 10)
+                    twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                    twin.getPreferredSize().height
+                })
+            }
+        and : 'A window with a scroll pane whose content is a column of eight boxes that follows the width of the scroll pane.'
             var column = UI.panel("wrap 1, fillx, ins 0, gap 0", "[grow]").get(JPanel)
-            UI.runNow { 8.times { column.add(wrappedTextBox(), "growx, wmin 0") } }
+            UI.runNow { 8.times { column.add(newTextBox(), "growx, wmin 0") } }
             var frame = new JFrame()
             UI.runNow {
                 frame.setContentPane(UI.scrollPane(conf -> conf.fitWidth(true)).add(column).get(JScrollPane))
@@ -344,9 +469,38 @@ class Text_Height_Layout_Spec extends Specification
             Before SwingTree measured during the layout, Swing also painted the visible boxes
             once at their old height, because only painting measured their text.
         """
-        given : 'A panel holding a column of two boxes, in a window of 400 by 600 pixels.'
+        given : """
+            About 480 characters of text, a closure which builds a box with 8 pixels of padding on
+            every side that shows a text wrapped into lines from its top left corner, with the
+            height of the wrapped text as the preferred height of the box (`autoPreferredHeight`),
+            and a closure which returns the text height of a box.
+        """
+            var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
+            var newTextBox = { ->
+                UI.box()
+                .withStyle(it -> it
+                    .padding(8)
+                    .text(t -> t
+                        .content(text)
+                        .placement(UI.Placement.TOP_LEFT)
+                        .wrapLines(true)
+                        .autoPreferredHeight(true)
+                    )
+                )
+                .get(JBox)
+            }
+            var textHeightOf = { JBox box ->
+                UI.runAndGet({
+                    JBox twin = newTextBox()
+                    twin.setFont(box.getFont())
+                    twin.setSize(box.getWidth(), 10)
+                    twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                    twin.getPreferredSize().height
+                })
+            }
+        and : 'A panel holding a column of two boxes, in a window of 400 by 600 pixels.'
             var column = UI.panel("wrap 1, fillx, ins 0, gap 0", "[grow]").get(JPanel)
-            UI.runNow { 2.times { column.add(wrappedTextBox(), "growx, wmin 0") } }
+            UI.runNow { 2.times { column.add(newTextBox(), "growx, wmin 0") } }
             var holder = new JPanel(new BorderLayout())
             var frame = new JFrame()
             UI.runNow {
@@ -360,13 +514,18 @@ class Text_Height_Layout_Spec extends Specification
         when : """
             We give the panel an empty border of 150 pixels on its right side, call `revalidate()`
             on the panel, and let Swing run the layouts which the `revalidate()` calls requested,
-            including the later `revalidate()` call of SwingTree.
+            including the later `revalidate()` call of SwingTree. Each of three new tasks on Swing's event thread
+            (`UI.runNow`) first lets Swing run the tasks queued before it, such as a later
+            `revalidate()` call of SwingTree, and then calls `RepaintManager.validateInvalidComponents()`,
+            which lays out what the `revalidate()` calls requested.
         """
             UI.runNow {
                 holder.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 150))
                 holder.revalidate()
             }
-            runTheRequestedLayouts(column)
+            3.times {
+                UI.runNow { RepaintManager.currentManager(column).validateInvalidComponents() }
+            }
             List<Dimension> sizes = UI.runAndGet({ column.getComponents().collect { it.getSize() } })
             List<Integer> textHeights = UI.runAndGet({ column.getComponents() }).collect { textHeightOf(it as JBox) }
 
@@ -401,11 +560,40 @@ class Text_Height_Layout_Spec extends Specification
             fourth box only while painting the fourth box, the fourth box would keep 16 pixels.
         """
         given : """
+            About 480 characters of text, a closure which builds a box with 8 pixels of padding on
+            every side that shows a text wrapped into lines from its top left corner, with the
+            height of the wrapped text as the preferred height of the box (`autoPreferredHeight`),
+            and a closure which returns the text height of a box.
+        """
+            var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
+            var newTextBox = { ->
+                UI.box()
+                .withStyle(it -> it
+                    .padding(8)
+                    .text(t -> t
+                        .content(text)
+                        .placement(UI.Placement.TOP_LEFT)
+                        .wrapLines(true)
+                        .autoPreferredHeight(true)
+                    )
+                )
+                .get(JBox)
+            }
+            var textHeightOf = { JBox box ->
+                UI.runAndGet({
+                    JBox twin = newTextBox()
+                    twin.setFont(box.getFont())
+                    twin.setSize(box.getWidth(), 10)
+                    twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                    twin.getPreferredSize().height
+                })
+            }
+        and : """
             A window of 400 by 400 pixels with a SwingTree scroll pane, which holds a plain
             `JScrollPane` of 250 pixels height, which shows a column of three boxes.
         """
             var column = UI.panel("wrap 1, fillx, ins 0, gap 0", "[grow]").get(JPanel)
-            UI.runNow { 3.times { column.add(wrappedTextBox(), "growx, wmin 0") } }
+            UI.runNow { 3.times { column.add(newTextBox(), "growx, wmin 0") } }
             var frame = new JFrame()
             UI.runNow {
                 var plainScrollPane = new JScrollPane(column)
@@ -424,7 +612,7 @@ class Text_Height_Layout_Spec extends Specification
             `RepaintManager.validateInvalidComponents()`, which is the layout Swing runs right
             before it paints, and read the size of the fourth box right after that call.
         """
-            JBox fourth = UI.runAndGet({ wrappedTextBox() })
+            JBox fourth = UI.runAndGet({ newTextBox() })
             Dimension sizeAfterTheFirstLayout = UI.runAndGet({
                 column.add(fourth, "growx, wmin 0")
                 column.revalidate()
@@ -435,8 +623,16 @@ class Text_Height_Layout_Spec extends Specification
             sizeAfterTheFirstLayout.width > 0
             sizeAfterTheFirstLayout.height == 16
 
-        when : 'We let Swing run the layouts which the `revalidate()` calls requested, including the later `revalidate()` call of SwingTree.'
-            runTheRequestedLayouts(column)
+        when : """
+            We let Swing run the layouts which the `revalidate()` calls requested, including the
+            later `revalidate()` call of SwingTree. Each of three new tasks on Swing's event thread
+            (`UI.runNow`) first lets Swing run the tasks queued before it, such as a later
+            `revalidate()` call of SwingTree, and then calls `RepaintManager.validateInvalidComponents()`,
+            which lays out what the `revalidate()` calls requested.
+        """
+            3.times {
+                UI.runNow { RepaintManager.currentManager(column).validateInvalidComponents() }
+            }
             int height = UI.runAndGet({ fourth.getHeight() })
         then : 'The fourth box lies outside the visible part of the plain `JScrollPane`.'
             UI.runAndGet({ fourth.getVisibleRect().isEmpty() })
@@ -446,45 +642,6 @@ class Text_Height_Layout_Spec extends Specification
 
         cleanup :
             UI.runNow { frame.dispose() }
-    }
-
-    private static JBox wrappedTextBox( String text = TEXT ) {
-        return UI.box()
-                .withStyle(it -> it
-                    .padding(8)
-                    .text(t -> t
-                        .content(text)
-                        .placement(UI.Placement.TOP_LEFT)
-                        .wrapLines(true)
-                        .autoPreferredHeight(true)
-                    )
-                )
-                .get(JBox)
-    }
-
-    /**
-     *  Returns the text height of the given box: the preferred height SwingTree computes for the
-     *  text of the box at the current width of the box. This is SwingTree's reference measurement.
-     *  It builds a separate box with the same text and the font of the given box, sets the width
-     *  of the separate box directly with {@code setSize}, outside any layout, and paints the
-     *  separate box once, which makes SwingTree compute its style and measure its text at that width.
-     *  <p>
-     *  Using the measurement while painting as the reference is not circular. The scenarios do not
-     *  check when or how the text is measured, but whether the boxes in the window have the height
-     *  which SwingTree computes for their text at their width. Measuring while painting is the
-     *  computation SwingTree has always done, and it is correct for a box whose width is known.
-     *  The scenarios fail when SwingTree measures the boxes in the window only while painting,
-     *  because those boxes are then either not painted at all or painted only after the layout
-     *  which the scenarios check.
-     */
-    private static int textHeightOf( JBox box ) {
-        return UI.runAndGet({
-            JBox twin = wrappedTextBox()
-            twin.setFont(box.getFont())
-            twin.setSize(box.getWidth(), 10)
-            twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
-            twin.getPreferredSize().height
-        })
     }
 
     private static void showAndWaitUntilTheWindowHasSettled( JFrame frame ) {
@@ -510,21 +667,9 @@ class Text_Height_Layout_Spec extends Specification
             frame.removeComponentListener(countWindowEvents)
             frame.validate()
         }
-        runTheRequestedLayouts(frame.getRootPane())
-        UI.runNow { frame.validate() }
-    }
-
-    /**
-     *  Calls {@code RepaintManager.validateInvalidComponents()} three times, each time in a new task
-     *  on Swing's event thread. Swing first runs every task which was queued before that new task,
-     *  for example a later {@code revalidate()} call of SwingTree, or a paint. Each call then lays out
-     *  every component whose layout a {@code revalidate()} call requested. Three calls are made because
-     *  a layout can request another layout in a later task.
-     *  This method never lays out a component which no {@code revalidate()} call asked to be laid out.
-     */
-    private static void runTheRequestedLayouts( JComponent anyComponentOfTheWindow ) {
         3.times {
-            UI.runNow { RepaintManager.currentManager(anyComponentOfTheWindow).validateInvalidComponents() }
+            UI.runNow { RepaintManager.currentManager(frame).validateInvalidComponents() }
         }
+        UI.runNow { frame.validate() }
     }
 }
