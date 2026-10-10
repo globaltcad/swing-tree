@@ -173,7 +173,7 @@ public final class ComponentBackend<C extends JComponent>
             return font;
 
         int newFontSize = Math.max( Math.round( font.getSize() * factor ), 1 );
-        return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
+        return font.deriveFont( (float) newFontSize );
     }
 
     C getOwner() { return _owner; }

@@ -9,10 +9,12 @@ import sprouts.Val
 import sprouts.Var
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
+import utility.SwingTreeTestConfigurator
 
 import swingtree.style.ComponentBackend
 
 import javax.swing.*
+import javax.swing.text.StyleContext
 import javax.swing.tree.DefaultTreeCellRenderer
 import java.awt.*
 import java.lang.ref.WeakReference
@@ -1438,6 +1440,69 @@ class UI_Scaling_Spec extends Specification
             label.font.size == 30   // 20 * 1.5
             textField.font.size == 27  // 18 * 1.5
             textArea.font.size == 18   // unchanged static size at scale
+    }
+
+    def 'A rescaled font can still draw every character the font you gave it could draw.'()
+    {
+        reportInfo """
+            No font contains a glyph for every character. When you ask Swing's `StyleContext`
+            for a font, it does not hand you that font alone. It hands you a *composite font*:
+            the font you asked for, followed by a list of fallback fonts. When a character is
+            missing from your font, Swing draws it with the first fallback font that has it.
+            Look and feels like FlatLaf create their fonts the same way. This is why symbols
+            such as ▸, ▾ and ✦ show up correctly in a label even though the font you chose
+            has no glyphs for them.
+
+            When the UI scale factor changes, SwingTree replaces the component's font with
+            a larger or smaller one. The new font must keep the fallback fonts of the old one.
+            Only `Font.deriveFont(..)` keeps them. A font built from scratch with
+            `new Font(Map)`, from the attributes of the old one, has the same family, style
+            and size, but no fallback fonts. Its family and size look correct, but every
+            character the family lacks is now drawn as a placeholder box.
+
+            SwingTree once built the rescaled font with `new Font(Map)`. Each symbol
+            in the label looked correct until the first change of the scale factor, and
+            was a box from then on. This scenario pins the fix: a font that could draw
+            a character before the factor changed can still draw it afterwards.
+
+            The scenario uses the Ubuntu font that ships with SwingTree's test resources
+            because it has no glyphs for these three symbols.
+        """
+        given : 'The Ubuntu font is registered with the JVM, and the scale factor is one.'
+            SwingTreeTestConfigurator.get()
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'Three symbols the Ubuntu font has no glyphs for.'
+            var symbols = "▸▾✦"
+            var bareUbuntu = new Font("Ubuntu", Font.PLAIN, 13)
+        and : 'A composite font from the `StyleContext`: Ubuntu, followed by its fallback fonts.'
+            var compositeUbuntu = StyleContext.getDefaultStyleContext().getFont("Ubuntu", Font.PLAIN, 13)
+        and : 'A label that displays the symbols in the composite font.'
+            var label = UI.label(symbols + " Wake").withFont(compositeUbuntu).get(JLabel)
+
+        expect : 'The bare Ubuntu font cannot draw the symbols, so the composite font must use its fallback fonts to draw them.'
+            bareUbuntu.family == "Ubuntu"
+            bareUbuntu.canDisplayUpTo(symbols) == 0
+        and : 'The label has the composite font, which can draw every symbol.'
+            label.font.size == 13
+            label.font.canDisplayUpTo(symbols) == -1
+
+        when : 'The scale factor doubles.'
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The label has a font twice the size, still of the Ubuntu family.'
+            label.font.size == 26
+            label.font.family == "Ubuntu"
+        and : 'And that larger font can still draw every symbol, because it kept the fallback fonts.'
+            label.font.canDisplayUpTo(symbols) == -1
+
+        when : 'The scale factor goes back to one.'
+            SwingTree.get().setUiScaleFactor(1f)
+            UI.sync()
+
+        then : 'The label has the composite font of 13 points that it was given, and it can draw every symbol.'
+            label.font.size == 13
+            label.font.canDisplayUpTo(symbols) == -1
     }
 
     def 'A font the user application sets itself becomes the size every later rescaling starts from.'()
