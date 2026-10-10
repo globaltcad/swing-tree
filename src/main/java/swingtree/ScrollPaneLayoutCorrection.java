@@ -7,6 +7,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ContainerAdapter;
@@ -122,12 +123,19 @@ final class ScrollPaneLayoutCorrection
     void validateTree( Runnable validateTree ) {
         List<JComponent> changed = new ArrayList<>();
         _ownerScrollPane.putClientProperty(COMPONENTS_WITH_NEW_TEXT_HEIGHT, changed);
+        JViewport viewport = _ownerScrollPane.getViewport();
+        @Nullable Point viewPosition = viewport != null ? viewport.getViewPosition() : null;
         try {
             validateTree.run();
             for ( int pass = 0; pass < 3 && !changed.isEmpty(); pass++ ) {
                 List<JComponent> again = new ArrayList<>(changed);
                 changed.clear();
                 again.forEach(Component::invalidate);
+                // The viewport layout may have moved the view position to fit the sizes which the
+                // components had before they measured their text, so the next pass starts again
+                // from the view position before the first pass.
+                if ( viewport != null && viewPosition != null && !viewport.isValid() )
+                    viewport.setViewPosition(viewPosition);
                 validateTree.run();
             }
         } finally {
