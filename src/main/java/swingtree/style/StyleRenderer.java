@@ -1604,7 +1604,7 @@ final class StyleRenderer
         final float        regionWidth,
         final float        baselineY
     ) {
-        final float advance = layout.getAdvance();
+        final float visibleAdvance = layout.getVisibleAdvance();
         final float x;
         switch (placement) {
             case LEFT:
@@ -1615,10 +1615,10 @@ final class StyleRenderer
             case RIGHT:
             case TOP_RIGHT:
             case BOTTOM_RIGHT:
-                x = regionX + regionWidth - advance;
+                x = regionX + regionWidth - visibleAdvance;
                 break;
             default:// UNDEFINED / CENTER / TOP / BOTTOM
-                x = regionX + (regionWidth - advance) / 2f;
+                x = regionX + (regionWidth - visibleAdvance) / 2f;
         }
         layout.draw(g2d, x, baselineY);
     }
