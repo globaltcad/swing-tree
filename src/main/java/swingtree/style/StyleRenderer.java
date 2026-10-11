@@ -1452,7 +1452,7 @@ final class StyleRenderer
         }
     }
 
-    private static UI.Placement _findDesiredPlacementFrom(TextConf text) {
+    static UI.Placement _findDesiredPlacementFrom(TextConf text) {
         UI.Placement chosenPlacement = text.placement();
         if ( chosenPlacement == UI.Placement.UNDEFINED ) {
             chosenPlacement = UI.Placement.of(
