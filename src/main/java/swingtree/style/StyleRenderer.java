@@ -13,7 +13,6 @@ import swingtree.layout.Size;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.awt.geom.*;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -1424,7 +1423,7 @@ final class StyleRenderer
         final UI.Placement         placement         = _findDesiredPlacementFrom(text);
         final boolean              wrapLines         = text.wrapLines();
         // Computing the area available for text rendering after applying the offset and insets:
-        final Bounds textBounds = computeTextBounds(text, boxModel);
+        final Bounds textBounds = TextLayoutEngine.computeTextBounds(text, boxModel);
         try {
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
@@ -1443,27 +1442,14 @@ final class StyleRenderer
             if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
             g2d.clip(newClip);
-            _renderTextInternal(g2d, font, textBounds, placement, lines, totalHeight);
+            for ( TextLayoutEngine.PlacedFragment fragment : TextLayoutEngine.placeVisibleFragments(lines, totalHeight, font, textBounds, placement) )
+                fragment.layout.draw(g2d, fragment.x, fragment.baselineY);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
         } finally {
             g2d.setFont(initialFont);
             g2d.setClip(oldClip);
         }
-    }
-
-    static Bounds computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
-        final UI.ComponentBoundary placementBoundary = text.placementBoundary();
-        final Offset               offset            = text.offset();
-        final OptionalInsets       insets            = boxModel.insetsFor(placementBoundary);
-        // Computing the area available for text rendering after applying the offset and insets:
-        final float insLeft   = insets.left().orElse(0f);
-        final float insTop    = insets.top().orElse(0f);
-        final float leftX = offset.x() + insLeft;
-        final float topY  = offset.y() + insTop;
-        final float localWidth  = Math.max(0, boxModel.size().widthOrElse(0f)  - (insLeft + insets.right().orElse(0f)));
-        final float localHeight = Math.max(0, boxModel.size().heightOrElse(0f) - (insTop  + insets.bottom().orElse(0f)));
-        return Bounds.of(leftX, topY, localWidth, localHeight);
     }
 
     private static UI.Placement _findDesiredPlacementFrom(TextConf text) {
@@ -1475,152 +1461,6 @@ final class StyleRenderer
                                 );
         }
         return chosenPlacement;
-    }
-
-    private static void _renderTextInternal(
-        final Graphics2D       g2d,
-        final Font             font,
-        final Bounds           textBounds,
-        final UI.Placement     placement,
-        final List<TextLayoutEngine.LayoutLine> lines,
-        final float            totalHeight
-    ) {
-        final float boundsY      = textBounds.location().y();
-        final float boundsHeight = textBounds.size().heightOrElse(0f);
-        /*
-            ------------------------------------------------
-            Phase 3 : Determine visible slice (overflow policy)
-            ------------------------------------------------
-         */
-        final List<TextLayoutEngine.LayoutLine> visible = new ArrayList<>();
-        float accumulated = 0;
-        if (
-            placement == UI.Placement.TOP ||
-            placement == UI.Placement.TOP_LEFT ||
-            placement == UI.Placement.TOP_RIGHT
-        ) {
-            for ( TextLayoutEngine.LayoutLine line : lines ) {
-                float h = _lineHeight(line, font);
-                if ( Math.floor(accumulated + h) > boundsHeight )
-                    break;
-                visible.add(line);
-                accumulated += h;
-            }
-        } else if (
-            placement == UI.Placement.BOTTOM ||
-            placement == UI.Placement.BOTTOM_LEFT ||
-            placement == UI.Placement.BOTTOM_RIGHT
-        ) {
-            final ListIterator<TextLayoutEngine.LayoutLine> it = lines.listIterator(lines.size());
-            while ( it.hasPrevious() ) {
-                TextLayoutEngine.LayoutLine line = it.previous();
-                float h = _lineHeight(line, font);
-                if ( Math.floor(accumulated + h) > boundsHeight )
-                    break;
-                visible.add(0, line);
-                accumulated += h;
-            }
-        } else {
-            /*
-                CENTER / LEFT / RIGHT — overflow both directions
-             */
-            final float centerHeight = Math.min(totalHeight, boundsHeight);
-            final float targetTop    = (totalHeight - centerHeight) / 2f;
-            float cursor = 0;
-            for ( TextLayoutEngine.LayoutLine line : lines ) {
-                float h = _lineHeight(line, font);
-                if ( cursor + h < targetTop ) {
-                    cursor += h;
-                    continue;
-                }
-                if ( Math.floor(accumulated + h) > boundsHeight )
-                    break;
-                visible.add(line);
-                accumulated += h;
-                cursor += h;
-            }
-        }
-
-        /*
-            ------------------------------------------------
-            Phase 4 : Vertical anchor
-            ------------------------------------------------
-         */
-        final float visibleHeight = accumulated;
-        float y;
-        if (
-            placement == UI.Placement.TOP ||
-            placement == UI.Placement.TOP_LEFT ||
-            placement == UI.Placement.TOP_RIGHT
-        ) {
-            y = boundsY;
-        } else if (
-            placement == UI.Placement.BOTTOM ||
-            placement == UI.Placement.BOTTOM_LEFT ||
-            placement == UI.Placement.BOTTOM_RIGHT
-        ) {
-            y = boundsY + boundsHeight - visibleHeight;
-        } else {
-            y = boundsY + (boundsHeight - visibleHeight) / 2f;
-        }
-
-        /*
-            ------------------------------------------------
-            Phase 5 : Render lines
-            ------------------------------------------------
-         */
-        for ( TextLayoutEngine.LayoutLine line : visible ) {
-            final TextLayout primary = line.primary().layout;
-            if ( primary == null ) {
-                y += font.getSize2D();
-                continue;
-            }
-            y += primary.getAscent();
-
-            // Draw all fragments at the same baseline; x positioning is relative
-            // to each fragment's own obstacle-free region.
-            for ( TextLayoutEngine.LayoutLine.Segment seg : line.segments ) {
-                if ( seg.layout != null )
-                    _drawLineFragment(g2d, placement, seg.layout, seg.regionX, seg.regionWidth, y);
-            }
-
-            y += primary.getDescent() + primary.getLeading();
-        }
-    }
-
-    private static float _lineHeight( TextLayoutEngine.LayoutLine line, Font font ) {
-        final TextLayout primary = line.primary().layout;
-        return primary == null
-                ? font.getSize2D()
-                : primary.getAscent() + primary.getDescent() + primary.getLeading();
-    }
-
-    /** Draws one text fragment aligned within its obstacle-free region at the given baseline y. */
-    private static void _drawLineFragment(
-        final Graphics2D   g2d,
-        final UI.Placement placement,
-        final TextLayout   layout,
-        final float        regionX,
-        final float        regionWidth,
-        final float        baselineY
-    ) {
-        final float visibleAdvance = layout.getVisibleAdvance();
-        final float x;
-        switch (placement) {
-            case LEFT:
-            case TOP_LEFT:
-            case BOTTOM_LEFT:
-                x = regionX;
-                break;
-            case RIGHT:
-            case TOP_RIGHT:
-            case BOTTOM_RIGHT:
-                x = regionX + regionWidth - visibleAdvance;
-                break;
-            default:// UNDEFINED / CENTER / TOP / BOTTOM
-                x = regionX + (regionWidth - visibleAdvance) / 2f;
-        }
-        layout.draw(g2d, x, baselineY);
     }
 
     private static void _executeUserPainters(

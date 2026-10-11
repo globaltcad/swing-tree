@@ -610,6 +610,148 @@ class Styled_Text_Placement_Spec extends Specification
             rightPart.x + rightPart.width >= 390 - 4
     }
 
+    def 'When the content area is shorter than a single line of text, SwingTree paints no line at all, and with `placement(#placement)` too.'(
+        UI.Placement placement
+    ) {
+        reportInfo """
+            SwingTree never paints part of a line. In the first scenario of this specification,
+            this meant that a content area two and a half lines tall shows two complete lines.
+            Here we look at the extreme case, where not even one complete line fits.
+
+            The component is 35 pixels tall and has a padding of 10 pixels, so its content area
+            is 15 pixels tall. A line of text in a font of size 20 is more than 20 pixels tall,
+            because besides the 20 pixels of the font size it also needs room below the
+            baseline for letters like "g" or "p". So the single line of red text does not fit,
+            and not a single red pixel is painted. This is true for a top, a centred and a
+            bottom placement.
+        """
+        given : 'A component with a content area which is 15 pixels tall and a single line of red text in it:'
+            var box =
+                    UI.box().withStyle( it -> it
+                        .size(400, 35)
+                        .padding(10)
+                        .text( t -> t
+                            .placement(placement)
+                            .font( f -> f.family(Font.DIALOG).size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH gggg" ) )
+                        )
+                    )
+                    .get(JBox)
+
+        when : 'We render the component:'
+            var image = Utility.renderSingleComponent(box)
+
+        then : 'No pixel in the whole image is red:'
+            boundsOfPixelsPaintedIn(image, RED) == null
+
+        where :
+            placement << [UI.Placement.TOP_LEFT, UI.Placement.CENTER, UI.Placement.BOTTOM_RIGHT]
+    }
+
+    def 'A piece of text without any characters changes nothing about where the other pieces of the text are painted.'()
+    {
+        reportInfo """
+            The content of a text is made of one or more `StyledString` pieces, and each piece
+            can have its own style. A piece may also be empty, which happens easily when the
+            pieces come from data, for example a name which was left blank.
+
+            An empty piece adds no characters, so it must not change anything.
+            We paint the red piece `"HHHH"` followed by the blue piece `"HHHH"`
+            twice: once with an empty green piece between them, and once without it.
+            The red and the blue letters end up at exactly the same pixels in both images.
+        """
+        given : 'Two components which differ only in an empty green piece between the red and the blue piece:'
+            var withEmptyPiece =
+                    UI.box().withStyle( it -> it
+                        .size(300, 100)
+                        .padding(10)
+                        .text( t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family(Font.DIALOG).size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHH" ),
+                                StyledString.of( f -> f.color(GREEN), ""     ),
+                                StyledString.of( f -> f.color(BLUE),  "HHHH" )
+                            )
+                        )
+                    )
+                    .get(JBox)
+            var withoutEmptyPiece =
+                    UI.box().withStyle( it -> it
+                        .size(300, 100)
+                        .padding(10)
+                        .text( t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family(Font.DIALOG).size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "HHHH" ),
+                                StyledString.of( f -> f.color(BLUE), "HHHH" )
+                            )
+                        )
+                    )
+                    .get(JBox)
+
+        when : 'We render both components:'
+            var imageWithEmptyPiece    = Utility.renderSingleComponent(withEmptyPiece)
+            var imageWithoutEmptyPiece = Utility.renderSingleComponent(withoutEmptyPiece)
+
+        then : 'Both images have red and blue pixels:'
+            boundsOfPixelsPaintedIn(imageWithEmptyPiece, RED)  != null
+            boundsOfPixelsPaintedIn(imageWithEmptyPiece, BLUE) != null
+        and : 'The rectangle around the red pixels is the same in both images, and so is the rectangle around the blue pixels:'
+            boundsOfPixelsPaintedIn(imageWithEmptyPiece, RED)  == boundsOfPixelsPaintedIn(imageWithoutEmptyPiece, RED)
+            boundsOfPixelsPaintedIn(imageWithEmptyPiece, BLUE) == boundsOfPixelsPaintedIn(imageWithoutEmptyPiece, BLUE)
+    }
+
+    def 'With `wrapLines(false)`, the text continues on the other side of an obstacle instead of starting a new line.'()
+    {
+        reportInfo """
+            An obstacle covers the middle of the first line, from 150 to 250 pixels.
+            The text is much wider than the component, and lines are not wrapped,
+            which is what `wrapLines(false)` means.
+
+            SwingTree fills the free space left of the obstacle with as many words as fit into it,
+            exactly like it does when lines are wrapped. But all the remaining words go into
+            the free space right of the obstacle, even though they do not fit into it.
+            So the words go on past the right edge of the content area at 390 pixels,
+            through the padding, until they are cut off at the right edge of the component
+            at 400 pixels. The text is never continued on a second line.
+        """
+        given : 'A rectangle which covers the middle of the first line:'
+            int obstacleLeft = 150, obstacleRight = 250
+            var obstacle = new Rectangle(obstacleLeft, 0, obstacleRight - obstacleLeft, 40)
+        and : 'A component with a red text which is much wider than the component, and which is not wrapped:'
+            var box =
+                    UI.box().withStyle( it -> it
+                        .size(400, 200)
+                        .padding(10)
+                        .text( t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(false)
+                            .obstacles(obstacle)
+                            .font( f -> f.family(Font.DIALOG).size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HH HH HH HH HH HH HH HH HH HH HH HH HH HH HH HH HH HH HH HH" ) )
+                        )
+                    )
+                    .get(JBox)
+
+        when : 'We render the component and split it into the strip of the first line, which is the top 35 pixels, and everything below that strip:'
+            var image = Utility.renderSingleComponent(box)
+            var firstLine      = new Rectangle(0,  0, 400,  35)
+            var belowFirstLine = new Rectangle(0, 35, 400, 165)
+
+        then : 'No red pixel lies on the obstacle:'
+            boundsOfPixelsPaintedIn(image, RED, obstacle) == null
+        and : 'The first line has red pixels on both sides of the obstacle:'
+            boundsOfPixelsPaintedIn(image, RED, firstLine.intersection(new Rectangle(0, 0, obstacleLeft, 200))) != null
+            boundsOfPixelsPaintedIn(image, RED, firstLine.intersection(new Rectangle(obstacleRight, 0, 400, 200))) != null
+        and : 'The words right of the obstacle go past the right edge of the content area at 390 pixels, into the padding:'
+            var rightPart = boundsOfPixelsPaintedIn(image, RED, firstLine.intersection(new Rectangle(obstacleRight, 0, 400, 200)))
+            rightPart.x + rightPart.width > 390
+        and : 'There is no second line, so below the first line no pixel is red:'
+            boundsOfPixelsPaintedIn(image, RED, belowFirstLine) == null
+    }
+
     static Rectangle boundsOfPixelsPaintedIn( BufferedImage image, Color color ) {
         return boundsOfPixelsPaintedIn(image, color, new Rectangle(0, 0, image.width, image.height))
     }
