@@ -190,13 +190,8 @@ final class TextLayoutEngine {
             ------------------------------------------------
          */
         float totalHeight = 0;
-        for ( LayoutLine line : lines ) {
-            final TextLayout primary = line.primary().layout;
-            if ( primary == null )
-                totalHeight += font.getSize2D();
-            else
-                totalHeight += primary.getAscent() + primary.getDescent() + primary.getLeading();
-        }
+        for ( LayoutLine line : lines )
+            totalHeight += _lineHeight(line, font);
 
         final Pair<Float, List<LayoutLine>> result = Pair.of(totalHeight, Collections.unmodifiableList(lines));
         if ( _maxLayoutCacheSize() > 0 )
@@ -216,7 +211,151 @@ final class TextLayoutEngine {
         // Obstacle avoidance relies on TOP-based vertical placement to track the current line's y-level in component coordinates.
         // When using CENTER or BOTTOM placement, the text block's y-level shifts as lines are added, so obstacle intersection
         // becomes inaccurate and may produce jumbled layouts. For simplicity, we disable obstacles entirely in these modes.
+        return _isTopAnchored(placement);
+    }
+
+    private static boolean _isTopAnchored( UI.Placement placement ) {
         return placement == UI.Placement.TOP_LEFT || placement == UI.Placement.TOP || placement == UI.Placement.TOP_RIGHT;
+    }
+
+    private static boolean _isBottomAnchored( UI.Placement placement ) {
+        return placement == UI.Placement.BOTTOM_LEFT || placement == UI.Placement.BOTTOM || placement == UI.Placement.BOTTOM_RIGHT;
+    }
+
+    static Bounds computeTextBounds( final TextConf text, final BoxModelConf boxModel ) {
+        final UI.ComponentBoundary placementBoundary = text.placementBoundary();
+        final Offset               offset            = text.offset();
+        final OptionalInsets       insets            = boxModel.insetsFor(placementBoundary);
+        final float insLeft   = insets.left().orElse(0f);
+        final float insTop    = insets.top().orElse(0f);
+        final float leftX = offset.x() + insLeft;
+        final float topY  = offset.y() + insTop;
+        final float localWidth  = Math.max(0, boxModel.size().widthOrElse(0f)  - (insLeft + insets.right().orElse(0f)));
+        final float localHeight = Math.max(0, boxModel.size().heightOrElse(0f) - (insTop  + insets.bottom().orElse(0f)));
+        return Bounds.of(leftX, topY, localWidth, localHeight);
+    }
+
+    static List<PlacedFragment> placeVisibleFragments(
+        final List<LayoutLine> lines,
+        final float            totalHeight,
+        final Font             font,
+        final Bounds           textBounds,
+        final UI.Placement     placement
+    ) {
+        final float        boundsY      = textBounds.location().y();
+        final float        boundsHeight = textBounds.size().heightOrElse(0f);
+        final VisibleSlice slice        = _visibleSliceOf(lines, totalHeight, boundsHeight, font, placement);
+        final List<PlacedFragment> fragments = new ArrayList<>(slice.end - slice.start);
+        float y = _topOfVisibleLines(boundsY, boundsHeight, slice.height, placement);
+        for ( int i = slice.start; i < slice.end; i++ ) {
+            final LayoutLine line    = lines.get(i);
+            final TextLayout primary = line.primary().layout;
+            if ( primary == null ) {
+                y += font.getSize2D();
+                continue;
+            }
+            y += primary.getAscent();
+            for ( LayoutLine.Segment segment : line.segments )
+                if ( segment.layout != null )
+                    fragments.add(new PlacedFragment(
+                        segment.layout,
+                        _alignedX(placement, segment.regionX, segment.regionWidth, segment.layout.getVisibleAdvance()),
+                        y
+                    ));
+            y += primary.getDescent() + primary.getLeading();
+        }
+        return fragments;
+    }
+
+    private static VisibleSlice _visibleSliceOf(
+        final List<LayoutLine> lines,
+        final float            totalHeight,
+        final float            boundsHeight,
+        final Font             font,
+        final UI.Placement     placement
+    ) {
+        float accumulated = 0;
+        if ( _isTopAnchored(placement) ) {
+            int end = 0;
+            for ( ; end < lines.size(); end++ ) {
+                final float h = _lineHeight(lines.get(end), font);
+                if ( Math.floor(accumulated + h) > boundsHeight )
+                    break;
+                accumulated += h;
+            }
+            return new VisibleSlice(0, end, accumulated);
+        }
+        if ( _isBottomAnchored(placement) ) {
+            int start = lines.size();
+            for ( ; start > 0; start-- ) {
+                final float h = _lineHeight(lines.get(start - 1), font);
+                if ( Math.floor(accumulated + h) > boundsHeight )
+                    break;
+                accumulated += h;
+            }
+            return new VisibleSlice(start, lines.size(), accumulated);
+        }
+        final float centerHeight = Math.min(totalHeight, boundsHeight);
+        final float targetTop    = (totalHeight - centerHeight) / 2f;
+        float cursor = 0;
+        int start = -1;
+        int end   = lines.size();
+        for ( int i = 0; i < lines.size(); i++ ) {
+            final float h = _lineHeight(lines.get(i), font);
+            if ( cursor + h < targetTop ) {
+                cursor += h;
+                continue;
+            }
+            if ( Math.floor(accumulated + h) > boundsHeight ) {
+                end = i;
+                break;
+            }
+            if ( start < 0 )
+                start = i;
+            accumulated += h;
+            cursor += h;
+        }
+        return start < 0 ? new VisibleSlice(0, 0, 0) : new VisibleSlice(start, end, accumulated);
+    }
+
+    private static float _topOfVisibleLines(
+        final float        boundsY,
+        final float        boundsHeight,
+        final float        visibleHeight,
+        final UI.Placement placement
+    ) {
+        if ( _isTopAnchored(placement) )
+            return boundsY;
+        if ( _isBottomAnchored(placement) )
+            return boundsY + boundsHeight - visibleHeight;
+        return boundsY + (boundsHeight - visibleHeight) / 2f;
+    }
+
+    private static float _alignedX(
+        final UI.Placement placement,
+        final float        regionX,
+        final float        regionWidth,
+        final float        visibleAdvance
+    ) {
+        switch ( placement ) {
+            case LEFT:
+            case TOP_LEFT:
+            case BOTTOM_LEFT:
+                return regionX;
+            case RIGHT:
+            case TOP_RIGHT:
+            case BOTTOM_RIGHT:
+                return regionX + regionWidth - visibleAdvance;
+            default:
+                return regionX + (regionWidth - visibleAdvance) / 2f;
+        }
+    }
+
+    private static float _lineHeight( final LayoutLine line, final Font font ) {
+        final TextLayout primary = line.primary().layout;
+        return primary == null
+                ? font.getSize2D()
+                : primary.getAscent() + primary.getDescent() + primary.getLeading();
     }
 
     /**
@@ -550,6 +689,28 @@ final class TextLayoutEngine {
         Segment primary() { return segments.get(0); }
 
         boolean isBlank() { return primary().layout == null; }
+    }
+
+    static final class PlacedFragment {
+        final TextLayout layout;
+        final float      x;
+        final float      baselineY;
+        PlacedFragment( TextLayout layout, float x, float baselineY ) {
+            this.layout    = layout;
+            this.x         = x;
+            this.baselineY = baselineY;
+        }
+    }
+
+    private static final class VisibleSlice {
+        final int   start;
+        final int   end;
+        final float height;
+        VisibleSlice( int start, int end, float height ) {
+            this.start  = start;
+            this.end    = end;
+            this.height = height;
+        }
     }
 
     private static final class Range {
