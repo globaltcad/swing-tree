@@ -540,7 +540,7 @@ class Styled_Text_Placement_Spec extends Specification
             rightPart.x <= obstacleRight + 4
     }
 
-    def 'With `placement(TOP_RIGHT)`, an obstacle splits a line into two parts, and each part ends one space character before the right edge of the free space it is in.'()
+    def 'With `placement(TOP_RIGHT)`, an obstacle splits a line into two parts, and the last letter of each part ends at the right edge of the free space it is in.'()
     {
         reportInfo """
             With `obstacles(Shape...)` you can tell SwingTree about areas of the component
@@ -556,11 +556,14 @@ class Styled_Text_Placement_Spec extends Specification
             start and end at the same height. Nothing is painted on the obstacle.
 
             With `TOP_RIGHT`, each part is put at the right edge of its own free space.
-            But a part which ends because the next word did not fit still contains the space
-            character which followed its last word. That space character paints no pixels, but
-            SwingTree counts its width when it lines the part up with the right edge. So the last "H" of the left
-            part ends one space width before the obstacle at 150 pixels, and the last "H" of the
-            right part ends one space width before the right edge of the content area at 390 pixels.
+            A part which ends because the next word did not fit still contains the space
+            character which followed its last word. That space character paints no pixels,
+            so SwingTree ignores its width when it lines the part up with the right edge.
+            This matters because the space character may stick out past the right edge
+            of the free space: if SwingTree counted it, the part would be moved left by
+            the width of a space, and its first letter could be painted onto the obstacle.
+            So the last "H" of the left part ends at the obstacle at 150 pixels, and the
+            last "H" of the right part ends at the right edge of the content area at 390 pixels.
             The painted pixels end up to 4 pixels further left than that, because the letter "H"
             does not end with a stroke: in this font it has a few empty pixel columns to the right
             of its last stroke.
@@ -568,8 +571,6 @@ class Styled_Text_Placement_Spec extends Specification
         given : 'A rectangle which covers the middle of the first line:'
             int obstacleLeft = 150, obstacleRight = 250
             var obstacle = new Rectangle(obstacleLeft, 0, obstacleRight - obstacleLeft, 40)
-        and : 'The width of a space character in the font we paint with:'
-            var spaceWidth = new JBox().getFontMetrics(new Font(Font.DIALOG, Font.PLAIN, 20)).charWidth(' ' as char)
         and : 'A component with a red text which is long enough to need more than one line, even without the obstacle:'
             var box =
                     UI.box().withStyle( it -> it
@@ -601,12 +602,12 @@ class Styled_Text_Placement_Spec extends Specification
             leftPart != null && rightPart != null
             leftPart.y == rightPart.y
             leftPart.y + leftPart.height == rightPart.y + rightPart.height
-        and : 'The left part ends one space width before the obstacle at 150 pixels, minus the empty pixels after an "H":'
-            leftPart.x + leftPart.width <= obstacleLeft - spaceWidth
-            leftPart.x + leftPart.width >= obstacleLeft - spaceWidth - 4
-        and : 'The right part ends one space width before the right edge of the content area at 390 pixels, minus the empty pixels after an "H":'
-            rightPart.x + rightPart.width <= 390 - spaceWidth
-            rightPart.x + rightPart.width >= 390 - spaceWidth - 4
+        and : 'The left part ends at the obstacle at 150 pixels, minus the empty pixels after an "H":'
+            leftPart.x + leftPart.width <= obstacleLeft
+            leftPart.x + leftPart.width >= obstacleLeft - 4
+        and : 'The right part ends at the right edge of the content area at 390 pixels, minus the empty pixels after an "H":'
+            rightPart.x + rightPart.width <= 390
+            rightPart.x + rightPart.width >= 390 - 4
     }
 
     static Rectangle boundsOfPixelsPaintedIn( BufferedImage image, Color color ) {
