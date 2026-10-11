@@ -752,6 +752,70 @@ class Styled_Text_Placement_Spec extends Specification
             boundsOfPixelsPaintedIn(image, RED, belowFirstLine) == null
     }
 
+    def 'SwingTree paints no text on an obstacle from `obstacles(..)` which covers the full width of the content area, and continues the text below the obstacle.'()
+    {
+        reportInfo """
+            An obstacle is a shape which you pass to `obstacles(..)`. SwingTree does not paint
+            text on an obstacle and moves the text around it. Usually some width is left free
+            next to the obstacle, and SwingTree puts the words of the line into that free width.
+            But an obstacle can also cover the content area from its left edge to its right edge.
+            The content area is the component minus its margin, its border and its padding.
+            At the height of such an obstacle, a line of text has no free space at all.
+            So SwingTree paints no text at that height and continues the text below the obstacle.
+            If SwingTree painted a line of text at that height anyway, the letters of that line
+            would be painted on top of the obstacle, for example on top of a child component
+            which sits there.
+
+            In this scenario the component is 300 pixels wide and 200 pixels tall, and it has
+            a padding of 10 pixels on every side. So the content area reaches from x = 10 to
+            x = 290 and from y = 10 to y = 190. A rectangle covers the full width of the
+            component from y = 0 to y = 60, so it covers the content area from y = 10 to y = 60.
+            The text starts at the top of the content area with `TOP_LEFT`. The first line which
+            SwingTree can paint lies below y = 60, so the painted pixels of the text start at
+            y = 60 or further down. The text needs two lines, and a line of a font of size 20 is
+            about 27 pixels tall, so the two lines need about 2 × 27 = 54 pixels. These fit into the
+            130 pixels of the content area from y = 60 to y = 190, so all words of the text are
+            painted below the rectangle.
+        """
+        given : 'A rectangle which covers the full width of the component from y = 0 to y = 60:'
+            var obstacle = new Rectangle(0, 0, 300, 60)
+        and : """
+            A component with a text of 12 words "HH". Each word "HH" is about 30 pixels wide and
+            a space about 5 to 6 pixels, so at most 8 words fit into the 280 pixels of one line,
+            and 12 words need two lines. The text is red, except for its last word, which is blue.
+            If the blue word is painted, then SwingTree has painted the text up to its end:
+        """
+            var box =
+                    UI.box().withStyle( it -> it
+                        .size(300, 200)
+                        .padding(10)
+                        .text( t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .obstacles(obstacle)
+                            .font( f -> f.family(Font.DIALOG).size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "HH HH HH HH HH HH HH HH HH HH HH " ),
+                                StyledString.of( f -> f.color(BLUE), "HH" )
+                            )
+                        )
+                    )
+                    .get(JBox)
+
+        when : 'We render the component and find the rectangles around the red pixels and around the blue pixels:'
+            var image = Utility.renderSingleComponent(box)
+            var redPixels  = boundsOfPixelsPaintedIn(image, RED)
+            var bluePixels = boundsOfPixelsPaintedIn(image, BLUE)
+
+        then : 'No red pixel and no blue pixel lies on the obstacle:'
+            boundsOfPixelsPaintedIn(image, RED,  obstacle) == null
+            boundsOfPixelsPaintedIn(image, BLUE, obstacle) == null
+        and : 'Both colours are painted, and both start at the bottom edge of the obstacle at y = 60 or further down:'
+            redPixels != null && bluePixels != null
+            redPixels.y  >= 60
+            bluePixels.y >= 60
+    }
+
     static Rectangle boundsOfPixelsPaintedIn( BufferedImage image, Color color ) {
         return boundsOfPixelsPaintedIn(image, color, new Rectangle(0, 0, image.width, image.height))
     }
