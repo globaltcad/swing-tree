@@ -464,8 +464,12 @@ final class TextLayoutEngine {
                         final List<LayoutLine.Segment> segments = new ArrayList<>(Math.max(1, intervals.size()));
 
                         if ( intervals.isEmpty() ) {
-                            // All space is blocked — advance the measurer so the loop terminates.
-                            // When not wrapping, consume all remaining text in one shot.
+                            final boolean skippingALineMovesDown = currentY + estLineHeight > currentY;
+                            if ( skippingALineMovesDown && currentY < _finiteBottomOf(obstacles) ) {
+                                paraLines.add(LayoutLine.blank(boundsX, effectiveWidth));
+                                currentY += estLineHeight;
+                                continue;
+                            }
                             final TextLayout layout = data.measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
                             if ( layout != null )
                                 segments.add(new LayoutLine.Segment(layout, boundsX, effectiveWidth));
@@ -594,6 +598,16 @@ final class TextLayoutEngine {
         }
         // Returned immutable to stay consistent with the other (singletonList / emptyList) return paths.
         return Collections.unmodifiableList(result);
+    }
+
+    private static double _finiteBottomOf( Tuple<Shape> obstacles ) {
+        double bottom = Double.NEGATIVE_INFINITY;
+        for ( Shape obstacle : obstacles ) {
+            final double obstacleBottom = obstacle.getBounds2D().getMaxY();
+            if ( Double.isFinite(obstacleBottom) )
+                bottom = Math.max(bottom, obstacleBottom);
+        }
+        return bottom;
     }
 
     private static List<Range> narrowDownRangesToInclude( Area intersection, List<Range> free ) {

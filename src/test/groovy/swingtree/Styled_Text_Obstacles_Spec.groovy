@@ -12,6 +12,7 @@ import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
 import javax.swing.*
+import java.awt.Font
 import java.awt.Shape
 import java.awt.geom.Ellipse2D
 import java.awt.geom.Rectangle2D
@@ -1482,5 +1483,84 @@ class Styled_Text_Obstacles_Spec extends Specification
             customConf.toString().contains("obstaclesFromChildrenAs=INTERIOR_TO_CONTENT")
         and : 'The default instance serialises to a compact NONE marker — defaults never leak into the string:'
             defaultConf.toString() == "TextConf[NONE]"
+    }
+
+
+    def 'When a text is put into a corner through `font(f -> f.alignment(..))` instead of `placement(..)`, the preferred height from `autoPreferredHeight(true)` counts the extra lines which the text needs because an obstacle makes its lines narrower.'()
+    {
+        reportInfo """
+            There are two ways to put a text into the top left corner of the content area
+            of a component. The content area is the component minus its margin, its border
+            and its padding. You can call `placement(UI.Placement.TOP_LEFT)` on the text.
+            Or you can leave out `placement(..)` and give the font of the text the alignment
+            `TOP_LEFT` with `font(f -> f.alignment(UI.Placement.TOP_LEFT))`. When you do not
+            call `placement(..)`, SwingTree paints the text at the position given by the
+            alignment of the font. So both ways paint the text at exactly the same place.
+
+            An obstacle is a shape which you pass to `obstacles(..)`. SwingTree does not paint
+            text on an obstacle. It ends a line of text before the obstacle and continues the
+            text in the next line. SwingTree moves text around obstacles only for a text placed
+            at the top of the content area, which means at `TOP_LEFT`, `TOP` or `TOP_RIGHT`.
+
+            With `autoPreferredHeight(true)`, the preferred height of the component is the
+            height of all lines of its text plus the padding above and below the text.
+            Both ways of putting the text into the top left corner paint the same lines,
+            so both must give the component the same preferred height.
+            If SwingTree left out the obstacle while measuring the text which is placed through
+            the alignment of its font, SwingTree would count too few lines. The preferred height
+            of the component would then be too small, and a layout which gives the component its
+            preferred height would cut off the last lines of the text at the bottom.
+
+            In this scenario both components are 300 pixels wide and have a padding of
+            10 pixels on every side, so the text may use the 280 pixels from x = 10 to x = 290.
+            A rectangle covers everything from x = 150 to the right edge of the component at
+            x = 300, from the top of the component to far below the text. So every line of the
+            text must fit into the 140 pixels from x = 10 to x = 150, and the text needs more
+            lines than it would need without the rectangle.
+        """
+        given : 'A rectangle which covers everything from x = 150 to x = 300, from y = 0 to y = 1000:'
+            var obstacle = new Rectangle2D.Float(150, 0, 150, 1000)
+        and : 'A component whose text is put into the top left corner through the alignment of its font:'
+            var placedThroughFontAlignment =
+                    UI.box().withStyle( it -> it
+                        .padding(10)
+                        .text( t -> t
+                            .wrapLines(true)
+                            .autoPreferredHeight(true)
+                            .obstacles(obstacle)
+                            .font( f -> f.family(Font.DIALOG).size(20).alignment(UI.Placement.TOP_LEFT) )
+                            .content("HH HH HH HH HH HH HH HH HH HH HH HH HH HH")
+                        )
+                    )
+                    .get(JBox)
+        and : 'A component whose text is put into the top left corner with `placement(..)`:'
+            var placedWithPlacement =
+                    UI.box().withStyle( it -> it
+                        .padding(10)
+                        .text( t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .autoPreferredHeight(true)
+                            .obstacles(obstacle)
+                            .font( f -> f.family(Font.DIALOG).size(20) )
+                            .content("HH HH HH HH HH HH HH HH HH HH HH HH HH HH")
+                        )
+                    )
+                    .get(JBox)
+
+        when : """
+            SwingTree computes the preferred height of a component from its text when it paints
+            the component. So we give each component its width of 300 pixels with `setSize`
+            and paint each component once into a small image before we read the preferred heights:
+        """
+            UI.runNow({
+                [placedThroughFontAlignment, placedWithPlacement].each { box ->
+                    box.setSize(300, 0)
+                    box.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                }
+            })
+
+        then : 'Both components have the same preferred height:'
+            placedThroughFontAlignment.getPreferredSize().height == placedWithPlacement.getPreferredSize().height
     }
 }
