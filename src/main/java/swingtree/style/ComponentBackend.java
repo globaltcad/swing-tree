@@ -965,7 +965,10 @@ public final class ComponentBackend<C extends JComponent>
      *  height changed, the component is added to the list which a SwingTree scroll pane around it keeps
      *  in its client property {@code "swingtree.componentsWithNewTextHeight"} while it is being laid out;
      *  the scroll pane then lays out its content again before its layout finishes.
-     *  Without such a scroll pane, the component calls {@link Component#revalidate()} in a later task.
+     *  The root pane of a window keeps the same list while {@code show()} of SwingTree's window builders
+     *  calls {@link Window#pack()}, which then packs the window again, so that the window is shown
+     *  at the height which its text needs.
+     *  Without such a scroll pane or window, the component calls {@link Component#revalidate()} in a later task.
      *  <p>
      *  When the width did not change, this only compares two numbers. When it changed but the
      *  style of the component has no text with an automatic preferred height, it also looks

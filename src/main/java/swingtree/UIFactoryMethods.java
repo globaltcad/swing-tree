@@ -7273,7 +7273,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             this.component = c;
             UI.runNow(()->{
                 frame.add(component);
-                frame.pack(); // Otherwise some components resize strangely or are not shown at all...
+                WindowPackCorrection.pack(frame); // Otherwise some components resize strangely or are not shown at all...
                 // Make sure that the window is centered on the screen again but with the component:
                 frame.setLocationRelativeTo(null);
                 // We set the size to fit the component:

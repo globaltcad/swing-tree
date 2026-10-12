@@ -727,6 +727,80 @@ class Text_Height_Layout_Spec extends Specification
             UI.runNow { frame.dispose() }
     }
 
+    def 'A window shown by `show()` has the height which the text of a box in it needs, as soon as it becomes visible.'()
+    {
+        reportInfo """
+            `UI.of(frame).show()` calls `pack()` on the window, which sets the window to the preferred size
+            of its content and then lays it out. The preferred size is asked before any layout gave
+            the box its width, so at that moment the box prefers only the 16 pixels of its padding.
+            The box learns its width and measures its text during the layout of `pack()`, when the
+            size of the window is already decided.
+
+            So `show()` packs the window again for as long as a box in it measured a new text height,
+            at most 3 more times. This happens before the window becomes visible, in the same task
+            on Swing's event thread, so the window is never shown cut off and later resized.
+            Here the column of the box grows with the window, so the width of the box depends on the
+            size of the window, which in turn depends on the height of the box.
+        """
+        given : """
+            About 480 characters of text, a closure which builds a box with 8 pixels of padding on
+            every side that shows a text wrapped into lines from its top left corner, with the
+            height of the wrapped text as the preferred height of the box (`autoPreferredHeight`),
+            and a closure which returns the text height of a box.
+        """
+            var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
+            var newTextBox = { ->
+                UI.box()
+                .withStyle(it -> it
+                    .padding(8)
+                    .text(t -> t
+                        .content(text)
+                        .placement(UI.Placement.TOP_LEFT)
+                        .wrapLines(true)
+                        .autoPreferredHeight(true)
+                    )
+                )
+                .get(JBox)
+            }
+            var textHeightOf = { JBox measured ->
+                UI.runAndGet({
+                    JBox twin = newTextBox()
+                    twin.setFont(measured.getFont())
+                    twin.setSize(measured.getWidth(), 10)
+                    twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                    twin.getPreferredSize().height
+                })
+            }
+        and : 'A window whose content is a panel with one growing column, holding a box which prefers 300 pixels of width.'
+            JBox box = UI.runAndGet({ newTextBox() })
+            var panel = UI.panel("wrap 1, ins 0, gap 0", "[grow]").get(JPanel)
+            var frame = new JFrame()
+            UI.runNow {
+                panel.add(box, "growx, wmin 0, w 300")
+                frame.setContentPane(panel)
+            }
+
+        when : 'We show the window and read the sizes in the same task on Swing\'s event thread.'
+            var sizes = UI.runAndGet({
+                UI.of(frame).show()
+                [box.getSize(), panel.getHeight(), panel.getPreferredSize().height]
+            })
+            Dimension size = sizes[0]
+            int contentHeight = sizes[1]
+            int preferredContentHeight = sizes[2]
+            int textHeight = textHeightOf(box)
+
+        then : 'The box is 300 pixels wide, and its text needs much more than the 16 pixels of its padding.'
+            size.width == UI.scale(300)
+            textHeight > UI.scale(16)
+        and : 'The window gives its content the height the content prefers, so the box has its text height.'
+            contentHeight == preferredContentHeight
+            size.height == textHeight
+
+        cleanup :
+            UI.runNow { frame.dispose() }
+    }
+
     private static void showAndWaitUntilTheWindowHasSettled( JFrame frame ) {
         var windowEvents = new AtomicInteger(0)
         var countWindowEvents = new ComponentAdapter() {

@@ -47,7 +47,7 @@ public final class UIForJDialog<D extends JDialog> extends UIForAnyWindow<UIForJ
 		JDialog dialog = get(_state.componentType());
 		Component[] components = dialog.getComponents();
 		dialog.setLocationRelativeTo(null); // Initial centering!v
-		dialog.pack(); // Otherwise some components resize strangely or are not shown at all...
+		WindowPackCorrection.pack(dialog); // Otherwise some components resize strangely or are not shown at all...
 		// First let's check if the dialog has an owner:
 		Window owner = dialog.getOwner();
 		// If there is no owner, we make sure that the window is centered on the screen again but with the component:
