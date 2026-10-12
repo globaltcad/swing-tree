@@ -1,0 +1,577 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TreeConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">TreeConf.java</span></div><h1>TreeConf.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.Association;
+import sprouts.HasId;
+import sprouts.Pair;
+import sprouts.Tuple;
+import swingtree.api.Configurator;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+
+/**
+ *  Describes the shape of a tree: which node types have children, where those children
+ *  live inside the node, how a node is labelled, and what identifies it.
+ *  &lt;p&gt;
+ *  A {@link javax.swing.JTree} in SwingTree is bound to a single property holding a
+ *  deeply immutable, nested data structure. This class is how you tell the tree which
+ *  parts of that structure to zoom into:
+ *  &lt;pre&gt;{@code
+ *  public sealed interface FsNode extends HasId&lt;UUID&gt; { String name(); }
+ *  public record Dir( UUID id, String name, Tuple&lt;FsNode&gt; entries ) implements FsNode {}
+ *  public record Doc( UUID id, String name, String body )           implements FsNode {}
+ *
+ *  UI.tree(fileSystem, conf -&gt; conf
+ *      .nodesOf(Dir.class, dir -&gt; dir.children(Dir::entries).text(Dir::name))
+ *      .nodesOf(Doc.class, doc -&gt; doc.text(Doc::name))
+ *  );
+ *  }&lt;/pre&gt;
+ *  Each {@link #nodesOf(Class, Configurator)} block covers one node type and reads like one
+ *  {@code case} of the {@code switch} you would otherwise write by hand, which is why this
+ *  API pairs so naturally with a sealed interface based sum type.
+ *  &lt;p&gt;
+ *  &lt;b&gt;On identity.&lt;/b&gt; A tree of value objects has a problem a list of them does not:
+ *  {@link javax.swing.JTree} keys expansion and selection on {@link javax.swing.tree.TreePath},
+ *  which compares nodes with {@link Object#equals(Object)}. Records compare by content, so
+ *  editing one leaf would invalidate every path in the tree at once. SwingTree therefore
+ *  identifies a node by its &lt;i&gt;path of ids&lt;/i&gt;. Nodes implementing {@link HasId} supply that
+ *  id for free; for types you do not own, declare one with {@link #idOf(Function)}. Ids only
+ *  need to be unique &lt;i&gt;among siblings&lt;/i&gt;, because the path disambiguates the rest.
+ *  &lt;p&gt;
+ *  A configuration describes node types, not the shape of the top level, so the very same
+ *  value binds a single rooted tree through {@link UI#tree(sprouts.Var, TreeConf)} and a
+ *  forest of them through {@link UI#trees(sprouts.Var, TreeConf)}.
+ *  &lt;p&gt;
+ *  Instances of this class are immutable values, so every method returns a new
+ *  instance instead of modifying the receiver.
+ *
+ * @param &lt;I&gt; The identity type of the nodes, which selection paths are made of.
+ * @param &lt;N&gt; The common node type of the tree, typically a sealed interface.
+ */
+public final class TreeConf&lt;I, N&gt;
+{
+<span class="fc" id="L63">    private static final Logger log = LoggerFactory.getLogger(TreeConf.class);</span>
+
+    private final Class&lt;N&gt;                                    _nodeType;
+    private final @Nullable Class&lt;I&gt;                          _idType;
+    private final Association&lt;Class&lt;?&gt;, TreeNodeConf&lt;N, ?&gt;&gt;   _rules;
+    private final @Nullable Function&lt;N, I&gt;                    _idGetter;
+    private final boolean                                     _leafWhenEmpty;
+
+    /*
+        Caches whose content is fully determined by the immutable fields above. Concurrent
+        because a lens resolves rules on the application thread while the tree paints rows
+        on the Event Dispatch Thread.
+    */
+<span class="fc" id="L76">    private final Map&lt;Class&lt;?&gt;, Object&gt; _ruleMemo     = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="fc" id="L77">    private final Set&lt;Class&lt;?&gt;&gt;         _warnedAbout  = ConcurrentHashMap.newKeySet();</span>
+
+    /**
+     *  Declares the shape of a tree whose nodes carry their own identity through
+     *  {@link HasId}, which is the usual case. The result is an ordinary immutable value:
+     *  bind it to a tree with {@link UI#tree(sprouts.Var, TreeConf)}, and ask it questions
+     *  about paths with {@link #nodeAt(Object, Tuple)} and {@link #nodesAlong(Object, Tuple)}.
+     *  &lt;pre&gt;{@code
+     *  TreeConf&lt;String, Packed&gt; shape = TreeConf.of(Packed.class)
+     *          .nodesOf(Box.class,  it -&gt; it.children(Box::contents).text(Box::label))
+     *          .nodesOf(Item.class, it -&gt; it.text(Item::label));
+     *  }&lt;/pre&gt;
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param &lt;I&gt; The identity type of the nodes, taken from the {@link HasId} bound.
+     * @param &lt;N&gt; The common node type of the tree.
+     * @return A new, empty tree configuration.
+     */
+    public static &lt;I, N extends HasId&lt;I&gt;&gt; TreeConf&lt;I, N&gt; of( Class&lt;N&gt; nodeType ) {
+<span class="fc" id="L96">        Objects.requireNonNull(nodeType, &quot;nodeType&quot;);</span>
+<span class="fc" id="L97">        return _of(nodeType, null);</span>
+    }
+
+    /**
+     *  Declares the shape of a tree whose node types cannot implement {@link HasId}, by
+     *  naming the identity type explicitly. Their identity is then declared with
+     *  {@link #idOf(Function)}.
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param idType The type of the node identities, which selection paths are made of.
+     * @param &lt;I&gt; The identity type of the nodes.
+     * @param &lt;N&gt; The common node type of the tree.
+     * @return A new, empty tree configuration.
+     */
+    public static &lt;I, N&gt; TreeConf&lt;I, N&gt; of( Class&lt;N&gt; nodeType, Class&lt;I&gt; idType ) {
+<span class="fc" id="L112">        Objects.requireNonNull(nodeType, &quot;nodeType&quot;);</span>
+<span class="fc" id="L113">        Objects.requireNonNull(idType, &quot;idType&quot;);</span>
+<span class="fc" id="L114">        return _of(nodeType, idType);</span>
+    }
+
+    @SuppressWarnings({&quot;unchecked&quot;, &quot;rawtypes&quot;})
+    static &lt;I, N&gt; TreeConf&lt;I, N&gt; _of( Class&lt;N&gt; nodeType, @Nullable Class&lt;I&gt; idType ) {
+<span class="fc" id="L119">        return new TreeConf&lt;&gt;(</span>
+            nodeType,
+            idType,
+<span class="fc" id="L122">            (Association) Association.betweenLinked(Class.class, TreeNodeConf.class),</span>
+            null,
+            false
+        );
+    }
+
+    private TreeConf(
+        Class&lt;N&gt;                                  nodeType,
+        @Nullable Class&lt;I&gt;                        idType,
+        Association&lt;Class&lt;?&gt;, TreeNodeConf&lt;N, ?&gt;&gt; rules,
+        @Nullable Function&lt;N, I&gt;                  idGetter,
+        boolean                                   leafWhenEmpty
+<span class="fc" id="L134">    ) {</span>
+<span class="fc" id="L135">        _nodeType      = Objects.requireNonNull(nodeType);</span>
+<span class="fc" id="L136">        _idType        = idType;</span>
+<span class="fc" id="L137">        _rules         = Objects.requireNonNull(rules);</span>
+<span class="fc" id="L138">        _idGetter      = idGetter;</span>
+<span class="fc" id="L139">        _leafWhenEmpty = leafWhenEmpty;</span>
+<span class="fc" id="L140">    }</span>
+
+    /**
+     *  Declares how nodes of the given type behave: whether they have children and where,
+     *  how they are labelled, and what icon they carry. Declaring a block for a type that
+     *  already has one replaces the previous block.
+     *  &lt;pre&gt;{@code
+     *  UI.tree(fileSystem, conf -&gt; conf
+     *      .nodesOf(Dir.class, dir -&gt; dir
+     *          .children(Dir::entries, Dir::withEntries)
+     *          .text(Dir::name, Dir::withName)
+     *      )
+     *  );
+     *  }&lt;/pre&gt;
+     *  A node whose type matches no block at all is treated as a leaf labelled by its
+     *  {@link Object#toString()}, and SwingTree logs a warning naming the type, because
+     *  that is almost always a forgotten case rather than an intent.
+     *  &lt;p&gt;
+     *  Where several blocks match a node, the most specific one wins and is used &lt;i&gt;on its
+     *  own&lt;/i&gt;: a block is chosen, never merged with a more general one, in the same way one
+     *  {@code case} of a {@code switch} does not continue into another. A block which wants
+     *  the label of a catch-all block above it therefore has to declare that label too.
+     *
+     * @param type The concrete node type this block applies to.
+     * @param conf Configures the behaviour of nodes of that type.
+     * @param &lt;B&gt; The concrete node type.
+     * @return An updated configuration.
+     */
+    public &lt;B extends N&gt; TreeConf&lt;I, N&gt; nodesOf( Class&lt;B&gt; type, Configurator&lt;TreeNodeConf&lt;N, B&gt;&gt; conf ) {
+<span class="fc" id="L169">        Objects.requireNonNull(type, &quot;type&quot;);</span>
+<span class="fc" id="L170">        Objects.requireNonNull(conf, &quot;conf&quot;);</span>
+<span class="fc" id="L171">        TreeNodeConf&lt;N, B&gt; nodeConf = TreeNodeConf.of(type);</span>
+        try {
+<span class="fc" id="L173">            nodeConf = conf.configure(nodeConf);</span>
+<span class="nc" id="L174">        } catch (Exception e) {</span>
+<span class="nc" id="L175">            log.error(SwingTree.get().logMarker(),</span>
+<span class="nc" id="L176">                    &quot;Failed to configure tree nodes of type '{}'.&quot;, type.getSimpleName(), e);</span>
+<span class="nc" id="L177">            return this;</span>
+<span class="fc" id="L178">        }</span>
+<span class="fc" id="L179">        Objects.requireNonNull(nodeConf);</span>
+<span class="fc" id="L180">        return new TreeConf&lt;&gt;(_nodeType, _idType, _rules.put(type, nodeConf), _idGetter, _leafWhenEmpty);</span>
+    }
+
+    /**
+     *  Declares how &lt;i&gt;every&lt;/i&gt; node behaves, which is the right thing when the tree is
+     *  homogeneous and one rule covers all of it. It is exactly
+     *  {@code nodesOf(theNodeType, conf)}, so a more specific block declared for a subtype
+     *  wins over it — and, because the winning block is used on its own, replaces it rather
+     *  than adding to it. A subtype which wants what is declared here has to restate it.
+     *
+     * @param conf Configures the behaviour of all nodes.
+     * @return An updated configuration.
+     */
+    public TreeConf&lt;I, N&gt; nodesOf( Configurator&lt;TreeNodeConf&lt;N, N&gt;&gt; conf ) {
+<span class="fc" id="L194">        return nodesOf(_nodeType, conf);</span>
+    }
+
+    /**
+     *  Declares what identifies a node, which is what lets expansion and selection survive
+     *  an edit anywhere in the tree. Node types implementing {@link HasId} need no such
+     *  declaration; use this one for types you do not own:
+     *  &lt;pre&gt;{@code
+     *  .idOf( node -&gt; node instanceof Department ? ((Department) node).id() : node )
+     *  }&lt;/pre&gt;
+     *  Ids only have to be unique among the children of one parent.
+     *
+     * @param id Produces the identity of a node.
+     * @return An updated configuration.
+     */
+    public TreeConf&lt;I, N&gt; idOf( Function&lt;N, I&gt; id ) {
+<span class="fc" id="L210">        Objects.requireNonNull(id, &quot;id&quot;);</span>
+<span class="fc" id="L211">        return new TreeConf&lt;&gt;(_nodeType, _idType, _rules, id, _leafWhenEmpty);</span>
+    }
+
+    /**
+     *  Decides whether a branch that currently has no children should be drawn as a leaf.
+     *  SwingTree defaults to {@code false}, meaning the presence of a {@code children(..)}
+     *  rule alone makes a node a branch, so an empty folder still looks like a folder.
+     *  Pass {@code true} for the plain {@link javax.swing.JTree} behaviour, where a node
+     *  with zero children is a leaf.
+     *
+     * @param leafWhenEmpty True to draw childless branches as leaves.
+     * @return An updated configuration.
+     */
+    public TreeConf&lt;I, N&gt; leafWhenEmpty( boolean leafWhenEmpty ) {
+<span class="fc" id="L225">        return new TreeConf&lt;&gt;(_nodeType, _idType, _rules, _idGetter, leafWhenEmpty);</span>
+    }
+
+    /**
+     *  Resolves a selection path back to the node it names, which is what a view bound to
+     *  a selection needs in order to show anything about what is selected.
+     *  &lt;p&gt;
+     *  A selection is a {@link Tuple} of ids leading down from the root, because that is
+     *  the only thing which identifies a &lt;i&gt;position&lt;/i&gt; in a tree. The node living at that
+     *  position is a question about the tree, and this is how you ask it.
+     *  &lt;p&gt;
+     *  Declaring the shape as an ordinary value rather than inline is what makes that
+     *  elegant, because the same value then serves twice: it builds the tree, and it answers
+     *  the detail pane standing next to the tree.
+     *  &lt;pre&gt;{@code
+     *  private final Var&lt;FsNode&gt;        fileSystem   = vm.zoomTo(Workspace::files,  Workspace::withFiles);
+     *  private final Var&lt;Tuple&lt;String&gt;&gt; selectedPath = vm.zoomTo(Workspace::opened, Workspace::withOpened);
+     *
+     *  private final TreeConf&lt;String, FsNode&gt; shape =
+     *          TreeConf.of(FsNode.class)
+     *                  .nodesOf(Dir.class, it -&gt; it.children(Dir::entries).text(Dir::name))
+     *                  .nodesOf(Doc.class, it -&gt; it.text(Doc::name));
+     *
+     *  // &quot;Which node is selected&quot; is a function of the tree and the path, so it is derived:
+     *  private final Val&lt;FsNode&gt; selectedNode =
+     *          Viewable.of(fileSystem, selectedPath,
+     *                  (root, path) -&gt; shape.nodeAt(root, path).orElse(null));
+     *
+     *  UI.panel(&quot;fill&quot;)
+     *  .add(&quot;grow, w 35%&quot;,
+     *      UI.scrollPane().add(
+     *          UI.tree(fileSystem, shape)     // the shape builds the tree...
+     *          .withSelection(selectedPath)   // ...which reports a path of ids in here...
+     *      )
+     *  )
+     *  .add(&quot;grow, w 65%&quot;,
+     *      UI.panel(&quot;fill&quot;).add(selectedNode, this::detailsOf)   // ...which answers this pane
+     *  );
+     *  }&lt;/pre&gt;
+     *  Note that no listener appears anywhere above, and nothing reaches into the
+     *  {@link javax.swing.JTree}. Clicking a row writes a path into {@code selectedPath}, which
+     *  makes {@code selectedNode} a different node, which swaps the view in the right hand
+     *  panel — three pure functions of one property each.
+     *  &lt;p&gt;
+     *  Use {@link #nodeAt(Tuple, Tuple)} instead where the tree was bound with
+     *  {@link UI#trees(sprouts.Var, swingtree.api.Configurator)}, whose property holds a
+     *  {@link Tuple} of top level nodes rather than one root.
+     *  &lt;p&gt;
+     *  The result is empty for the empty path (nothing is selected), for a path which no
+     *  longer leads anywhere, which is what a path pointing into a since-deleted branch does,
+     *  and for a root which is {@code null}, which is what a property holding nothing is.
+     *
+     * @param root The root value of the tree, which is what the path is relative to,
+     *             or {@code null} where the property holding it is empty.
+     * @param path The ids leading from the root down to the node, the root's own id first.
+     * @return The node at that path, or an empty optional if the path names nothing.
+     */
+    public Optional&lt;N&gt; nodeAt( @Nullable N root, Tuple&lt;I&gt; path ) {
+<span class="fc" id="L283">        Tuple&lt;N&gt; along = nodesAlong(root, path);</span>
+<span class="fc bfc" id="L284" title="All 2 branches covered.">        return ( along.isEmpty() ? Optional.empty() : Optional.of(along.last()) );</span>
+    }
+
+    /**
+     *  Resolves a selection path of a &lt;b&gt;forest&lt;/b&gt; back to the node it names, which is the
+     *  same question {@link #nodeAt(Object, Tuple)} answers for a single rooted tree. A forest
+     *  has no root, so the first id of the path names one of the top level nodes rather than a
+     *  container above them, and this overload therefore takes the whole top level.
+     *  &lt;p&gt;
+     *  It is the detail pane of {@link #nodeAt(Object, Tuple)} with one property widened, and
+     *  nothing else about the view changes:
+     *  &lt;pre&gt;{@code
+     *  private final Var&lt;Tuple&lt;FsNode&gt;&gt; projects     = vm.zoomTo(Workspace::open,   Workspace::withOpen);
+     *  private final Var&lt;Tuple&lt;String&gt;&gt; selectedPath = vm.zoomTo(Workspace::opened, Workspace::withOpened);
+     *
+     *  private final TreeConf&lt;String, FsNode&gt; shape =
+     *          TreeConf.of(FsNode.class)
+     *                  .nodesOf(Dir.class, it -&gt; it.children(Dir::entries).text(Dir::name))
+     *                  .nodesOf(Doc.class, it -&gt; it.text(Doc::name));
+     *
+     *  // The node type has to be named here, because the property no longer has it:
+     *  private final Val&lt;FsNode&gt; selectedNode =
+     *          Viewable.of(FsNode.class, projects, selectedPath,
+     *                  (roots, path) -&gt; shape.nodeAt(roots, path).orElse(null));
+     *
+     *  UI.panel(&quot;fill&quot;)
+     *  .add(&quot;grow, w 35%&quot;,
+     *      UI.scrollPane().add(
+     *          UI.trees(projects, shape)      // several top level nodes, no root drawn
+     *          .withSelection(selectedPath)   // [ &quot;myapp&quot;, &quot;src&quot;, &quot;App.java&quot; ]
+     *      )
+     *  )
+     *  .add(&quot;grow, w 65%&quot;,
+     *      UI.panel(&quot;fill&quot;).add(selectedNode, this::detailsOf)
+     *  );
+     *  }&lt;/pre&gt;
+     *  The one line worth pausing on is the {@code FsNode.class} in the middle. The three
+     *  argument {@code Viewable.of(..)} takes its result type from the first property, which
+     *  here holds a {@code Tuple&lt;FsNode&gt;} and not an {@code FsNode}, so the four argument form
+     *  is the one a forest needs.
+     *
+     * @param roots The top level nodes of the forest, which is what the path is relative to.
+     * @param path The ids leading from a top level node down to the node, its own id first.
+     * @return The node at that path, or an empty optional if the path names nothing.
+     */
+    public Optional&lt;N&gt; nodeAt( Tuple&lt;N&gt; roots, Tuple&lt;I&gt; path ) {
+<span class="fc" id="L330">        Tuple&lt;N&gt; along = nodesAlong(roots, path);</span>
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        return ( along.isEmpty() ? Optional.empty() : Optional.of(along.last()) );</span>
+    }
+
+    /**
+     *  Resolves a selection path to every node along it, the root first and the named node
+     *  last, which is what a breadcrumb trail is made of. Where
+     *  {@link #nodeAt(Object, Tuple)} answers &quot;what is selected&quot;, this answers &quot;how did we get
+     *  there&quot;, and a bar above the tree is the usual reason to ask:
+     *  &lt;pre&gt;{@code
+     *  private final Var&lt;FsNode&gt;        fileSystem   = vm.zoomTo(Workspace::files,  Workspace::withFiles);
+     *  private final Var&lt;Tuple&lt;String&gt;&gt; selectedPath = vm.zoomTo(Workspace::opened, Workspace::withOpened);
+     *
+     *  private final TreeConf&lt;String, FsNode&gt; shape =
+     *          TreeConf.of(FsNode.class)
+     *                  .nodesOf(Dir.class, it -&gt; it.children(Dir::entries).text(Dir::name))
+     *                  .nodesOf(Doc.class, it -&gt; it.text(Doc::name));
+     *
+     *  private final Val&lt;String&gt; breadcrumb =
+     *          Viewable.of(String.class, fileSystem, selectedPath,
+     *                  (root, path) -&gt; shape.nodesAlong(root, path)
+     *                                       .stream().map(FsNode::name)
+     *                                       .collect(Collectors.joining(&quot;  &gt;  &quot;)));
+     *
+     *  UI.panel(&quot;fill, wrap 1&quot;)
+     *  .add(&quot;growx&quot;, UI.label(breadcrumb))   // Workspace  &gt;  src  &gt;  App.java
+     *  .add(&quot;grow&quot;,
+     *      UI.scrollPane().add(
+     *          UI.tree(fileSystem, shape).withSelection(selectedPath)
+     *      )
+     *  );
+     *  }&lt;/pre&gt;
+     *  The label reads correctly after a rename anywhere along that trail, because the trail
+     *  is resolved from the ids the selection holds every time either property changes,
+     *  rather than being a string somebody remembered to rebuild.
+     *  &lt;p&gt;
+     *  Use {@link #nodesAlong(Tuple, Tuple)} instead where the tree was bound with
+     *  {@link UI#trees(sprouts.Var, swingtree.api.Configurator)}.
+     *  &lt;p&gt;
+     *  The result is empty when the path names nothing, so a partial trail is never
+     *  returned: either the whole path resolves or none of it does.
+     *
+     * @param root The root value of the tree, which is what the path is relative to,
+     *             or {@code null} where the property holding it is empty.
+     * @param path The ids leading from the root down to the node, the root's own id first.
+     * @return Every node from the root down to the named one, or an empty tuple.
+     */
+    public Tuple&lt;N&gt; nodesAlong( @Nullable N root, Tuple&lt;I&gt; path ) {
+<span class="fc" id="L378">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="pc bpc" id="L379" title="1 of 2 branches missed.">        if ( root == null )</span>
+<span class="nc" id="L380">            return Tuple.of(_nodeType);</span>
+<span class="fc" id="L381">        return nodesAlong(Tuple.of(_nodeType, Collections.singletonList(root)), path);</span>
+    }
+
+    /**
+     *  Resolves a selection path of a &lt;b&gt;forest&lt;/b&gt; to every node along it, the top level node
+     *  first and the named node last. It is {@link #nodesAlong(Object, Tuple)} in every respect
+     *  but where the trail starts: a forest has no root, so its trails begin one level lower
+     *  and the bar has one segment fewer.
+     *  &lt;pre&gt;{@code
+     *  private final Var&lt;Tuple&lt;FsNode&gt;&gt; projects     = vm.zoomTo(Workspace::open,   Workspace::withOpen);
+     *  private final Var&lt;Tuple&lt;String&gt;&gt; selectedPath = vm.zoomTo(Workspace::opened, Workspace::withOpened);
+     *
+     *  private final TreeConf&lt;String, FsNode&gt; shape =
+     *          TreeConf.of(FsNode.class)
+     *                  .nodesOf(Dir.class, it -&gt; it.children(Dir::entries).text(Dir::name))
+     *                  .nodesOf(Doc.class, it -&gt; it.text(Doc::name));
+     *
+     *  private final Val&lt;String&gt; breadcrumb =
+     *          Viewable.of(String.class, projects, selectedPath,
+     *                  (roots, path) -&gt; shape.nodesAlong(roots, path)
+     *                                        .stream().map(FsNode::name)
+     *                                        .collect(Collectors.joining(&quot;  &gt;  &quot;)));
+     *
+     *  UI.panel(&quot;fill, wrap 1&quot;)
+     *  .add(&quot;growx&quot;, UI.label(breadcrumb))   // myapp  &gt;  src  &gt;  App.java
+     *  .add(&quot;grow&quot;,
+     *      UI.scrollPane().add(
+     *          UI.trees(projects, shape).withSelection(selectedPath)
+     *      )
+     *  );
+     *  }&lt;/pre&gt;
+     *  Compare that comment with the one on {@link #nodesAlong(Object, Tuple)}: the workspace
+     *  itself is not in the trail, because in a forest it is not a node at all. Which is the
+     *  whole point of binding one — there is no invented container to explain away, either on
+     *  screen or inside the paths the application stores.
+     *
+     * @param roots The top level nodes of the forest, which is what the path is relative to.
+     * @param path The ids leading from a top level node down to the node, its own id first.
+     * @return Every node from the top level down to the named one, or an empty tuple.
+     */
+    public Tuple&lt;N&gt; nodesAlong( Tuple&lt;N&gt; roots, Tuple&lt;I&gt; path ) {
+<span class="fc" id="L422">        Objects.requireNonNull(roots, &quot;roots&quot;);</span>
+<span class="fc" id="L423">        Objects.requireNonNull(path, &quot;path&quot;);</span>
+<span class="fc" id="L424">        Tuple&lt;N&gt; empty = Tuple.of(_nodeType);</span>
+<span class="fc bfc" id="L425" title="All 2 branches covered.">        if ( path.isEmpty() )</span>
+<span class="fc" id="L426">            return empty;</span>
+<span class="fc" id="L427">        int found = _indexOfId(roots, path.get(0));</span>
+<span class="pc bpc" id="L428" title="1 of 2 branches missed.">        if ( found &lt; 0 )</span>
+<span class="nc" id="L429">            return empty;</span>
+<span class="fc" id="L430">        List&lt;N&gt; along = new ArrayList&lt;&gt;(path.size());</span>
+<span class="fc" id="L431">        Object current = roots.get(found);</span>
+<span class="fc" id="L432">        along.add(_nodeType.cast(current));</span>
+<span class="fc bfc" id="L433" title="All 2 branches covered.">        for ( int level = 1; level &lt; path.size(); level++ ) {</span>
+<span class="fc" id="L434">            TreeNodeConf&lt;N, ?&gt; rule = ruleFor(current);</span>
+<span class="pc bpc" id="L435" title="2 of 4 branches missed.">            if ( rule == null || !rule.hasChildrenRule() )</span>
+<span class="nc" id="L436">                return empty;</span>
+            Tuple&lt;Object&gt; children;
+            try {
+<span class="fc" id="L439">                children = rule.childrenOf(current);</span>
+<span class="nc" id="L440">            } catch (Exception e) {</span>
+<span class="nc" id="L441">                log.debug(SwingTree.get().logMarker(), &quot;Failed to walk a tree path.&quot;, e);</span>
+<span class="nc" id="L442">                return empty;</span>
+<span class="fc" id="L443">            }</span>
+<span class="fc" id="L444">            found = _indexOfId(children, path.get(level));</span>
+<span class="fc bfc" id="L445" title="All 2 branches covered.">            if ( found &lt; 0 )</span>
+<span class="fc" id="L446">                return empty;</span>
+<span class="fc" id="L447">            current = children.get(found);</span>
+<span class="fc" id="L448">            along.add(_nodeType.cast(current));</span>
+        }
+<span class="fc" id="L450">        return Tuple.of(_nodeType, along);</span>
+    }
+
+    private int _indexOfId( Tuple&lt;?&gt; nodes, I id ) {
+<span class="fc bfc" id="L454" title="All 2 branches covered.">        for ( int i = 0; i &lt; nodes.size(); i++ )</span>
+<span class="fc bfc" id="L455" title="All 2 branches covered.">            if ( Objects.equals(idOf(nodes.get(i)), id) )</span>
+<span class="fc" id="L456">                return i;</span>
+<span class="fc" id="L457">        return -1;</span>
+    }
+
+    Class&lt;N&gt; nodeType() {
+<span class="fc" id="L461">        return _nodeType;</span>
+    }
+
+    /** Null where no type was declared, in which case {@code PropertyTreeModel} derives one. */
+    @Nullable Class&lt;I&gt; idType() {
+<span class="fc" id="L466">        return _idType;</span>
+    }
+
+    boolean leafWhenEmpty() {
+<span class="fc" id="L470">        return _leafWhenEmpty;</span>
+    }
+
+    boolean hasRules() {
+<span class="pc bpc" id="L474" title="1 of 2 branches missed.">        return !_rules.isEmpty();</span>
+    }
+
+    /** Decides whether the tree gets an in place rename editor at all. */
+    boolean hasRenamableRule() {
+<span class="fc bfc" id="L479" title="All 2 branches covered.">        for ( TreeNodeConf&lt;N, ?&gt; rule : _rules.values() )</span>
+<span class="fc bfc" id="L480" title="All 2 branches covered.">            if ( rule.isRenamable() )</span>
+<span class="fc" id="L481">                return true;</span>
+<span class="fc" id="L482">        return false;</span>
+    }
+
+    /**
+     *  A declared id getter wins over {@link HasId}, and a node offering neither falls back
+     *  to itself, which still works for a static tree of distinct siblings.
+     */
+    Object idOf( @Nullable Object node ) {
+<span class="pc bpc" id="L490" title="1 of 2 branches missed.">        if ( node == null )</span>
+<span class="nc" id="L491">            return NULL_ID;</span>
+<span class="fc" id="L492">        Function&lt;N, I&gt; getter = _idGetter;</span>
+<span class="fc bfc" id="L493" title="All 2 branches covered.">        if ( getter != null ) {</span>
+            try {
+<span class="fc" id="L495">                Object id = getter.apply(_nodeType.cast(node));</span>
+<span class="pc bpc" id="L496" title="1 of 2 branches missed.">                if ( id != null )</span>
+<span class="fc" id="L497">                    return id;</span>
+<span class="nc" id="L498">            } catch (Exception e) {</span>
+<span class="nc" id="L499">                log.debug(SwingTree.get().logMarker(), &quot;Failed to read the id of tree node '{}'.&quot;, node, e);</span>
+<span class="nc" id="L500">            }</span>
+        }
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">        if ( node instanceof HasId ) {</span>
+<span class="fc" id="L503">            Object id = ((HasId&lt;?&gt;) node).id();</span>
+<span class="pc bpc" id="L504" title="1 of 2 branches missed.">            if ( id != null )</span>
+<span class="fc" id="L505">                return id;</span>
+        }
+<span class="nc" id="L507">        return node;</span>
+    }
+
+    /**
+     *  Among all rules whose type is assignable from the node's type, the one whose type no
+     *  other match is assignable from — so a concrete record beats the sealed interface
+     *  above it. Where two matches are unrelated, the one declared first wins.
+     */
+    private @Nullable TreeNodeConf&lt;N, ?&gt; _findRule( Class&lt;?&gt; type ) {
+<span class="fc" id="L516">        @Nullable TreeNodeConf&lt;N, ?&gt; best = null;</span>
+<span class="fc bfc" id="L517" title="All 2 branches covered.">        for ( Pair&lt;Class&lt;?&gt;, TreeNodeConf&lt;N, ?&gt;&gt; entry : _rules.entrySet() ) {</span>
+<span class="fc bfc" id="L518" title="All 2 branches covered.">            if ( !entry.first().isAssignableFrom(type) )</span>
+<span class="fc" id="L519">                continue;</span>
+<span class="pc bpc" id="L520" title="1 of 4 branches missed.">            if ( best == null || best.type().isAssignableFrom(entry.first()) )</span>
+<span class="fc" id="L521">                best = entry.second();</span>
+<span class="fc" id="L522">        }</span>
+<span class="fc" id="L523">        return best;</span>
+    }
+
+<span class="fc" id="L526">    private static final Object NO_RULE = new Object();</span>
+<span class="fc" id="L527">    static final Object NULL_ID = new Object() {</span>
+<span class="nc" id="L528">        @Override public String toString() { return &quot;null&quot;; }</span>
+    };
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Nullable TreeNodeConf&lt;N, ?&gt; ruleFor( @Nullable Object node ) {
+<span class="fc bfc" id="L533" title="All 2 branches covered.">        if ( node == null )</span>
+<span class="fc" id="L534">            return null;</span>
+<span class="fc" id="L535">        Class&lt;?&gt; type = node.getClass();</span>
+<span class="fc" id="L536">        Object cached = _ruleMemo.get(type);</span>
+<span class="fc bfc" id="L537" title="All 2 branches covered.">        if ( cached == null ) {</span>
+<span class="fc" id="L538">            @Nullable TreeNodeConf&lt;N, ?&gt; found = _findRule(type);</span>
+<span class="fc bfc" id="L539" title="All 2 branches covered.">            if ( found == null )</span>
+<span class="fc" id="L540">                log.warn(SwingTree.get().logMarker(),</span>
+                        &quot;No tree node rule declared for type '{}'. It will be rendered as a leaf &quot; +
+                        &quot;labelled by its 'toString()'. Declare one through 'nodesOf({}.class, ..)'.&quot;,
+<span class="fc" id="L543">                        type.getName(), type.getSimpleName());</span>
+<span class="fc bfc" id="L544" title="All 2 branches covered.">            cached = ( found == null ? NO_RULE : found );</span>
+<span class="fc" id="L545">            _ruleMemo.put(type, cached);</span>
+        }
+<span class="fc bfc" id="L547" title="All 2 branches covered.">        return cached == NO_RULE ? null : (TreeNodeConf&lt;N, ?&gt;) cached;</span>
+    }
+
+    /**
+     *  Tells whether a complaint about the given node type has still to be made,
+     *  and remembers that it now has been.
+     *
+     * @param type The node type the complaint is about.
+     * @return True the first time this configuration is asked about that type.
+     */
+    boolean shouldWarnAbout( Class&lt;?&gt; type ) {
+<span class="fc" id="L558">        return _warnedAbout.add(type);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L563">        StringBuilder types = new StringBuilder();</span>
+<span class="nc bnc" id="L564" title="All 2 branches missed.">        for ( Class&lt;?&gt; type : _rules.keySet() ) {</span>
+<span class="nc bnc" id="L565" title="All 2 branches missed.">            if ( types.length() &gt; 0 )</span>
+<span class="nc" id="L566">                types.append(&quot;, &quot;);</span>
+<span class="nc" id="L567">            types.append(type.getSimpleName());</span>
+<span class="nc" id="L568">        }</span>
+<span class="nc" id="L569">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L570">                    &quot;nodeType=&quot;      + _nodeType.getSimpleName() + &quot;, &quot; +</span>
+                    &quot;rules=[&quot;        + types + &quot;], &quot; +
+<span class="nc bnc" id="L572" title="All 2 branches missed.">                    &quot;idOf=&quot;          + ( _idGetter == null ? &quot;byHasId&quot; : &quot;declared&quot; ) + &quot;, &quot; +</span>
+                    &quot;leafWhenEmpty=&quot; + _leafWhenEmpty +
+                &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
