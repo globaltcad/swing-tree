@@ -644,6 +644,89 @@ class Text_Height_Layout_Spec extends Specification
             UI.runNow { frame.dispose() }
     }
 
+    def 'A window sized by `pack()` grows until a box in it has the height of its text.'()
+    {
+        reportInfo """
+            A window holds a panel of 300 pixels width with a box of wrapped text, and we call
+            `pack()` on the window, which is what `UI.show(..)` does. `pack()` asks the content
+            for its preferred size before any layout gave the box its width, so at that moment
+            the box prefers only the 16 pixels of its padding. `pack()` sets the window to that
+            size and lays it out, and during this layout the box learns its width and measures
+            its text.
+
+            SwingTree then calls `revalidate()` on the box in a later task on Swing's event
+            thread, but a revalidation lays out the content of a window without ever changing
+            the size of the window. If nothing else happened, the window would keep the size
+            which `pack()` gave it, and the box would be cut off below its first line.
+
+            A window which was sized by `pack()` belongs to its content, so SwingTree makes
+            it as tall as its content prefers once the box has measured its text.
+        """
+        given : """
+            About 480 characters of text, a closure which builds a box with 8 pixels of padding on
+            every side that shows a text wrapped into lines from its top left corner, with the
+            height of the wrapped text as the preferred height of the box (`autoPreferredHeight`),
+            and a closure which returns the text height of a box.
+        """
+            var text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor. " * 6
+            var newTextBox = { ->
+                UI.box()
+                .withStyle(it -> it
+                    .padding(8)
+                    .text(t -> t
+                        .content(text)
+                        .placement(UI.Placement.TOP_LEFT)
+                        .wrapLines(true)
+                        .autoPreferredHeight(true)
+                    )
+                )
+                .get(JBox)
+            }
+            var textHeightOf = { JBox measured ->
+                UI.runAndGet({
+                    JBox twin = newTextBox()
+                    twin.setFont(measured.getFont())
+                    twin.setSize(measured.getWidth(), 10)
+                    twin.paintComponent(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                    twin.getPreferredSize().height
+                })
+            }
+        and : 'A window whose content is a panel, 300 pixels wide, holding one box.'
+            JBox box = UI.runAndGet({ newTextBox() })
+            var panel = UI.panel("wrap 1, ins 0, gap 0", "[300!]").get(JPanel)
+            var frame = new JFrame()
+            UI.runNow {
+                panel.add(box, "growx, wmin 0")
+                frame.setContentPane(panel)
+            }
+
+        when : """
+            We call `pack()` on the window and let Swing run the tasks which follow it.
+            Each of three new tasks on Swing's event thread (`UI.runNow`) first lets Swing
+            run the tasks queued before it, such as a later `revalidate()` call of SwingTree,
+            and then calls `RepaintManager.validateInvalidComponents()`, which lays out what
+            the `revalidate()` calls requested.
+        """
+            UI.runNow { frame.pack() }
+            3.times {
+                UI.runNow { RepaintManager.currentManager(panel).validateInvalidComponents() }
+            }
+            Dimension size = UI.runAndGet({ box.getSize() })
+            int textHeight = textHeightOf(box)
+            int contentHeight = UI.runAndGet({ panel.getHeight() })
+            int preferredContentHeight = UI.runAndGet({ panel.getPreferredSize().height })
+
+        then : 'The box is 300 pixels wide, and its text needs much more than the 16 pixels of its padding.'
+            size.width == 300
+            textHeight > 16
+        and : 'The window gives its content the height the content prefers, so the box has its text height.'
+            contentHeight == preferredContentHeight
+            size.height == textHeight
+
+        cleanup :
+            UI.runNow { frame.dispose() }
+    }
+
     private static void showAndWaitUntilTheWindowHasSettled( JFrame frame ) {
         var windowEvents = new AtomicInteger(0)
         var countWindowEvents = new ComponentAdapter() {
