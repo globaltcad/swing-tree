@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -898,6 +899,24 @@ public final class ComponentBackend<C extends JComponent>
         Objects.requireNonNull(styler);
         _styleSource = _styleSource.withLocalStyler(styler);
         gatherApplyAndInstallStyle(false);
+    }
+
+    void makeTextSelectable(
+        UI.Layer                               layer,
+        String                                 textName,
+        TextSelection                          shown,
+        Consumer<UnaryOperator<TextSelection>> updateProperty
+    ) {
+        if ( get(SelectableText.class).isPresent() ) {
+            log.warn(SwingTree.get().logMarker(), "The component '{}' already has a selectable text, so the text '{}' does not become selectable.", _owner, textName);
+            return;
+        }
+        final SelectableText selectable = getOrSet(SelectableText.class, () -> new SelectableText(_owner, layer, textName, shown, updateProperty));
+        addStyler( it -> it.text(layer, textName, text -> text.selection(selectable.styled(text.selection()))) );
+    }
+
+    void showTextSelection( TextSelection selection ) {
+        get(SelectableText.class).ifPresent( selectable -> selectable.show(selection) );
     }
 
     /**

@@ -27,6 +27,8 @@ import swingtree.layout.*;
 import swingtree.style.ComponentBackend;
 import swingtree.style.FontConf;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
+import swingtree.style.TextConf;
+import swingtree.style.TextSelection;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -1585,6 +1587,131 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setBorder(BorderFactory.createTitledBorder(title.orElseThrowUnchecked()));
                 })
                 ._this();
+    }
+
+    /**
+     *  Lets your users select the characters of a styled text with the mouse and copy them
+     *  with the keyboard, and keeps the given property up to date with the selection.
+     *  The layer and the name are the layer and the name under which the text is declared
+     *  in the style of the component, with {@code text(layer, name, ..)}:
+     *  <pre>{@code
+     *  Var<TextSelection> selection = Var.of(TextSelection.caretAt(0));
+     *  UI.box()
+     *  .withStyle( it -> it
+     *      .text(UI.Layer.FOREGROUND, "caption", t -> t
+     *          .content("Hello world")
+     *          .selection( s -> s.color(new Color(80, 140, 255, 90)) )
+     *      )
+     *  )
+     *  .withTextSelection(UI.Layer.FOREGROUND, "caption", selection);
+     *  }</pre>
+     *  Your users select characters by dragging the mouse across them, a word by double-clicking it,
+     *  and everything with Ctrl+A (Command+A on macOS). A click with the shift key held down moves
+     *  the caret of the selection and keeps its anchor. Ctrl+C (Command+C on macOS) copies the selected
+     *  characters to the clipboard. The mouse cursor is the text cursor while it is over the text.
+     *  Pressing the mouse on the component calls {@link JComponent#requestFocusInWindow()}, because
+     *  the keyboard shortcuts only reach the component which has the keyboard focus.
+     *  This method replaces the {@link TransferHandler} of the component with one which copies
+     *  the selected characters, so a component which has its own handler for drag and drop loses it.
+     *  When the selection in the property is disabled with {@link TextSelection#withEnabled(boolean)},
+     *  the mouse and the keyboard select and copy nothing, and no selection is painted.
+     *  <p>
+     *  Every selection which your users make is written into the property, on the application thread.
+     *  Every selection which your code writes into the property is painted. After SwingTree has painted
+     *  the text, it also writes a selection into the property which holds the selected characters and
+     *  the pixel rectangles of the anchor and the caret, see {@link TextSelection#selectedText()} and
+     *  {@link TextSelection#caretBounds()}. It writes this selection after the paint and only when it
+     *  differs from the selection in the property, for example after the component got a new size.
+     *  <p>
+     *  A position in a selection counts the characters which are painted: the paragraphs of the text
+     *  are separated by one {@code '\n'} each, and a {@link swingtree.style.StyledString} with an empty
+     *  string or a font size of 0 is not painted and takes up no position. A component has at most one
+     *  selectable text, and a property holds the selection of one component.
+     *
+     * @param layer The layer in which the text is declared with {@code text(layer, name, ..)}.
+     * @param textName The name under which the text is declared with {@code text(layer, name, ..)}.
+     * @param selection The property which holds the selection, see {@link TextSelection}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SuppressWarnings("DoNotCall")
+    public final I withTextSelection( UI.Layer layer, String textName, Var<TextSelection> selection ) {
+        NullUtil.nullArgCheck(layer, "layer", UI.Layer.class);
+        NullUtil.nullArgCheck(textName, "textName", String.class);
+        NullUtil.nullArgCheck(selection, "selection", Var.class);
+        NullUtil.nullPropertyCheck(selection, "selection", "Use 'TextSelection.caretAt(0)' for a selection of no characters.");
+        return _with( thisComponent -> {
+                    LibraryInternalCrossPackageStyleUtil._makeTextSelectable(
+                        thisComponent,
+                        layer,
+                        textName,
+                        selection.orElseThrowUnchecked(),
+                        update -> _runInApp( () -> selection.set(From.VIEW, update.apply(selection.get())) )
+                    );
+                    _onShow( selection, thisComponent, (c, shown) -> LibraryInternalCrossPackageStyleUtil._showTextSelection(c, shown) );
+                })
+                ._this();
+    }
+
+    /**
+     *  Makes the text declared with {@code text(name, ..)} selectable, in the layer
+     *  {@link UI.Layer#CONTENT}, which is where {@code text(name, ..)} declares it.
+     *  See {@link #withTextSelection(UI.Layer, String, Var)} for everything this does.
+     *
+     * @param textName The name under which the text is declared with {@code text(name, ..)}.
+     * @param selection The property which holds the selection, see {@link TextSelection}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withTextSelection( String textName, Var<TextSelection> selection ) {
+        return withTextSelection(TextConf.DEFAULT_LAYER, textName, selection);
+    }
+
+    /**
+     *  Makes the text declared with {@code text(t -> ..)}, which has no name, selectable.
+     *  See {@link #withTextSelection(UI.Layer, String, Var)} for everything this does.
+     *
+     * @param selection The property which holds the selection, see {@link TextSelection}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SuppressWarnings("DoNotCall")
+    public final I withTextSelection( Var<TextSelection> selection ) {
+        return withTextSelection(TextConf.DEFAULT_LAYER, LibraryInternalCrossPackageStyleUtil._nameOfUnnamedStyle(), selection);
+    }
+
+    /**
+     *  Makes the text declared with {@code text(layer, name, ..)} selectable, without a property,
+     *  for a text whose selection your code does not need to know.
+     *  See {@link #withTextSelection(UI.Layer, String, Var)} for everything this does.
+     *
+     * @param layer The layer in which the text is declared with {@code text(layer, name, ..)}.
+     * @param textName The name under which the text is declared with {@code text(layer, name, ..)}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withTextSelection( UI.Layer layer, String textName ) {
+        return withTextSelection(layer, textName, Var.of(TextSelection.caretAt(0)));
+    }
+
+    /**
+     *  Makes the text declared with {@code text(name, ..)} selectable, in the layer
+     *  {@link UI.Layer#CONTENT}, without a property, for a text whose selection your code does not need to know.
+     *  See {@link #withTextSelection(UI.Layer, String, Var)} for everything this does.
+     *
+     * @param textName The name under which the text is declared with {@code text(name, ..)}.
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    public final I withTextSelection( String textName ) {
+        return withTextSelection(TextConf.DEFAULT_LAYER, textName, Var.of(TextSelection.caretAt(0)));
+    }
+
+    /**
+     *  Makes the text declared with {@code text(t -> ..)}, which has no name, selectable,
+     *  without a property, for a text whose selection your code does not need to know.
+     *  See {@link #withTextSelection(UI.Layer, String, Var)} for everything this does.
+     *
+     * @return This very instance, which enables builder-style method chaining.
+     */
+    @SuppressWarnings("DoNotCall")
+    public final I withTextSelection() {
+        return withTextSelection(TextConf.DEFAULT_LAYER, LibraryInternalCrossPackageStyleUtil._nameOfUnnamedStyle(), Var.of(TextSelection.caretAt(0)));
     }
 
     /**

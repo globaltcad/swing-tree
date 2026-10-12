@@ -2,7 +2,6 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
-import sprouts.Pair;
 import sprouts.Tuple;
 import swingtree.SwingTree;
 import swingtree.UI;
@@ -12,7 +11,6 @@ import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
 import java.awt.*;
-import java.awt.font.FontRenderContext;
 import java.awt.geom.*;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -1413,54 +1411,87 @@ final class StyleRenderer
         if ( text.content().isEmpty() )
             return;
 
-        final BoxModelConf boxModel = conf.boxModel();
-
-        final Font initialFont = g2d.getFont();
-        final Shape oldClip = g2d.getClip();
-
-        final Tuple<Pooled<Paragraph>> textToRender  = text.content();
-        final UI.ComponentArea     clipArea          = text.clipArea();
-        final UI.Placement         placement         = _findDesiredPlacementFrom(text);
-        final boolean              wrapLines         = text.wrapLines();
-        // Computing the area available for text rendering after applying the offset and insets:
-        final Bounds textBounds = TextLayoutEngine.computeTextBounds(text, boxModel);
+        final BoxModelConf boxModel    = conf.boxModel();
+        final Font         initialFont = g2d.getFont();
+        final Shape        oldClip     = g2d.getClip();
+        final Bounds       textBounds  = TextLayoutEngine.computeTextBounds(text, boxModel);
         try {
-            Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
-            font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
+            final Font font = TextLayoutEngine.fontOf(text, boxModel, initialFont);
             g2d.setFont(font);
-            // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
-            final FontRenderContext frc = g2d.getFontRenderContext();
-            final float boundsWidth = textBounds.size().widthOrElse(0f);
-            final float boundsX     = textBounds.location().x();
-            final float boundsY     = textBounds.location().y();
-            final Pair<Float, List<TextLayoutEngine.LayoutLine>> layoutResult = TextLayoutEngine._buildTextLayoutsAndPreferredHeight(font, frc, textToRender, boundsWidth, boundsX, boundsY, wrapLines, conf.boxModel(), text.obstacles(), placement);
-            final List<TextLayoutEngine.LayoutLine> lines    = layoutResult.second();
-            final float            totalHeight = layoutResult.first();
-            // Phase 3 - 5: Rendering
-            Shape newClip = conf.areas().get(clipArea);
-            // We merge the new clip with the old one:
+            Shape newClip = conf.areas().get(text.clipArea());
             if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
             g2d.clip(newClip);
-            for ( TextLayoutEngine.PlacedFragment fragment : TextLayoutEngine.placeVisibleFragments(lines, totalHeight, font, textBounds, placement) )
+            final List<TextLayoutEngine.PlacedFragment> fragments = TextLayoutEngine.placeText(text, textBounds, boxModel, font, g2d.getFontRenderContext());
+            final @Nullable TextSelection range = text.selection().rangeToPaint();
+            if ( range != null )
+                _renderSelection(text, range, fragments, g2d);
+            for ( TextLayoutEngine.PlacedFragment fragment : fragments )
                 fragment.layout.draw(g2d, fragment.x, fragment.baselineY);
         } catch (Exception e) {
-            log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
+            log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", text.content(), e);
         } finally {
             g2d.setFont(initialFont);
             g2d.setClip(oldClip);
         }
     }
 
-    static UI.Placement _findDesiredPlacementFrom(TextConf text) {
-        UI.Placement chosenPlacement = text.placement();
-        if ( chosenPlacement == UI.Placement.UNDEFINED ) {
-            chosenPlacement = UI.Placement.of(
-                                    text.fontConf().verticalAlignment(),
-                                    text.fontConf().horizontalAlignment()
-                                );
+    private static void _renderSelection(
+        final TextConf      text,
+        final TextSelection range,
+        final List<TextLayoutEngine.PlacedFragment> fragments,
+        final Graphics2D    g2d
+    ) {
+        final TextSelectionConf look = text.selection();
+        final Paint initialPaint = g2d.getPaint();
+        try {
+            if ( range.isEmpty() ) {
+                g2d.setPaint(look.caretColor().orElseGet(() -> _colorOf(text.fontConf())));
+                CaretTable.caretBoundsOf(fragments, range.caret()).ifPresent( caret -> g2d.fill(new Rectangle2D.Float(caret.location().x(), caret.location().y(), caret.size().width().orElse(0f), caret.size().height().orElse(0f))) );
+                return;
+            }
+            final float           radius      = look.convexRadius();
+            final float           borderWidth = look.borderWidth();
+            final boolean         hasBorder   = borderWidth > 0 && look.borderColor().isPresent();
+            final List<Rectangle2D> areas     = CaretTable.areasBetween(fragments, range.start(), range.end());
+            if ( look.mergeLines() ) {
+                final MergedSelection merged = MergedSelection.of(areas, radius, look.concaveRadius(), hasBorder ? borderWidth : 0);
+                _fillSelection(g2d, look, merged.outline(), merged.insideTheBorder());
+                return;
+            }
+            for ( Rectangle2D area : areas )
+                _fillSelection(
+                    g2d, look,
+                    _selectionArea(area.getX(), area.getY(), area.getWidth(), area.getHeight(), radius),
+                    hasBorder ? _selectionArea(
+                                    area.getX() + borderWidth, area.getY() + borderWidth,
+                                    Math.max(0, area.getWidth() - 2 * borderWidth), Math.max(0, area.getHeight() - 2 * borderWidth),
+                                    Math.max(0, radius - borderWidth)
+                                ) : null
+                );
+        } finally {
+            g2d.setPaint(initialPaint);
         }
-        return chosenPlacement;
+    }
+
+    private static void _fillSelection( Graphics2D g2d, TextSelectionConf look, Shape outline, @Nullable Shape insideTheBorder ) {
+        if ( insideTheBorder != null ) {
+            final Path2D border = new Path2D.Double(Path2D.WIND_EVEN_ODD);
+            border.append(outline, false);
+            border.append(insideTheBorder, false);
+            g2d.setPaint(look.borderColor().orElse(look.color()));
+            g2d.fill(border);
+        }
+        g2d.setPaint(look.color());
+        g2d.fill(insideTheBorder != null ? insideTheBorder : outline);
+    }
+
+    private static Shape _selectionArea( double x, double y, double width, double height, float radius ) {
+        return radius > 0 ? new RoundRectangle2D.Double(x, y, width, height, radius * 2, radius * 2) : new Rectangle2D.Double(x, y, width, height);
+    }
+
+    private static Color _colorOf( final FontConf font ) {
+        return font.paint().filter( paint -> paint instanceof Color ).map( paint -> (Color) paint ).orElse(Color.BLACK);
     }
 
     private static void _executeUserPainters(

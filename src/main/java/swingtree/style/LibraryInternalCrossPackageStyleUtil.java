@@ -26,6 +26,27 @@ public final class LibraryInternalCrossPackageStyleUtil {
     private static final Insets ZERO_INSETS = new Insets(0,0,0,0);
 
     @DoNotCall @Deprecated
+    public static String _nameOfUnnamedStyle() {
+        return StyleUtil.DEFAULT_KEY;
+    }
+
+    @DoNotCall @Deprecated
+    public static void _makeTextSelectable(
+        JComponent                                                   component,
+        UI.Layer                                                     layer,
+        String                                                       textName,
+        TextSelection                                                shown,
+        java.util.function.Consumer<java.util.function.UnaryOperator<TextSelection>> updateProperty
+    ) {
+        ComponentBackend.powering(component).makeTextSelectable(layer, textName, shown, updateProperty);
+    }
+
+    @DoNotCall @Deprecated
+    public static void _showTextSelection( JComponent component, TextSelection selection ) {
+        ComponentBackend.powering(component).showTextSelection(selection);
+    }
+
+    @DoNotCall @Deprecated
     public static boolean _currentLookAndFeelHasBadScaling() {
         return LookAndFeelType.current().isOneOf(LookAndFeelType.METAL, LookAndFeelType.NIMBUS);
     }
