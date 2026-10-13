@@ -2,6 +2,7 @@ package swingtree.style
 
 import spock.lang.IgnoreIf
 import spock.lang.Narrative
+import spock.lang.PendingFeature
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
@@ -24,6 +25,7 @@ import java.awt.*
 import java.awt.datatransfer.Clipboard
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.StringSelection
+import java.awt.event.FocusEvent
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
 import java.awt.event.MouseEvent
@@ -4901,6 +4903,3230 @@ class Styled_Text_Selection_Spec extends Specification
 
         then : 'The clipboard still holds "copied before":'
             clipboard.getData(DataFlavor.stringFlavor) == "copied before"
+    }
+
+    def 'With `selection(s -> s.showCaret(true).caretShape(UI.CaretShape.#shape).caretWidth(3))` at a UI scale of #uiScale, every pixel of the caret lies inside the rectangle which `caretBounds()` returns.'(
+        UI.CaretShape shape, float uiScale
+    ) {
+        reportInfo """
+            After SwingTree has painted a text made selectable with `withTextSelection`, the property holds a
+            selection whose `caretBounds()` is the pixel rectangle of the caret on the component. Your code can
+            paint something of its own next to the caret, for example a round handle below it, and such a handle
+            only lines up with the caret if no part of the caret sticks out of that rectangle.
+
+            The rectangle reaches from the top to the bottom of the line, and its left edge is the gap where the
+            caret is. A `BAR` is a vertical bar as wide as `caretWidth(3)`, so it fills the rectangle. A `BLOCK`
+            covers the character behind the gap, and an `UNDERLINE` is a line, 3 pixels thick, along the bottom
+            of that character. For a `BLOCK` and an `UNDERLINE` the rectangle is as wide as the character behind
+            the gap, so both shapes stay inside it too.
+
+            The text is "HHHH HHHH", and the caret is at position 2, which is the gap in front of the third "H".
+            The caret is painted in green behind the red letters. The edges of a painted rectangle which do not
+            fall on a pixel boundary cover their pixel only partly, so the green pixels may reach one pixel beyond
+            `caretBounds()` at each edge. If SwingTree painted a shape somewhere else than where `caretBounds()`
+            says, for example an underline at the top of the line or a block in front of the gap, the green pixels
+            would lie several pixels outside of the rectangle.
+
+            In this scenario the shape is `${shape}` and the UI scale is ${uiScale}.
+        """
+        given : 'We set the UI scale factor of SwingTree. Every size in a style is multiplied by it:'
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A property which holds an empty selection with the caret at position 2:'
+            var selection = Var.of(TextSelection.caretAt(2))
+        and : 'A component which paints "HHHH HHHH" in red on white, with a green caret of the given shape, 3 pixels thick:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.showCaret(true).caretShape(shape).caretWidth(3).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the rectangles around the red and the green pixels. When SwingTree
+            paints the component, it queues a task on the UI thread which writes the caret rectangle into the
+            property. `UI.sync()` waits until the UI thread has run every task queued so far:
+        """
+            var image  = Utility.renderSingleComponent(box)
+            UI.sync()
+            var text   = boundsOfPixelsPaintedIn(image, RED)
+            var caret  = boundsOfPixelsPaintedIn(image, GREEN)
+            var bounds = selection.get().caretBounds().get()
+            int left   = Math.round(bounds.location().x())
+            int top    = Math.round(bounds.location().y())
+            int right  = Math.round(bounds.location().x() + bounds.size().width().get())
+            int bottom = Math.round(bounds.location().y() + bounds.size().height().get())
+
+        then : 'The text and the caret are painted:'
+            text  != null
+            caret != null
+        and : 'The green pixels lie inside the rectangle of `caretBounds()`, give or take one pixel at each edge:'
+            caret.x >= left - 1
+            caret.y >= top  - 1
+            caret.x + caret.width  <= right  + 1
+            caret.y + caret.height <= bottom + 1
+
+        cleanup : 'We set the UI scale factor back to 1:'
+            SwingTree.get().setUiScaleFactor(1f)
+
+        where :
+            [shape, uiScale] << [
+                [UI.CaretShape.BAR, UI.CaretShape.BLOCK, UI.CaretShape.UNDERLINE],
+                [1f, 2f]
+            ].combinations()
+    }
+
+    def 'With `selection(s -> s.showCaret(true).caretWidth(#caretWidth))` at a UI scale of #uiScale, the caret is a bar #expectedWidth pixels wide on the screen, and `caretBounds()` is just as wide.'(
+        double caretWidth, float uiScale, int expectedWidth
+    ) {
+        reportInfo """
+            The default shape of the caret is a vertical bar, and `caretWidth(..)` decides how wide it is.
+            Like every size in a style, the width is multiplied by the UI scale: a bar with `caretWidth(4)`
+            is 4 pixels wide on the screen at a UI scale of 1 and 8 pixels wide at a UI scale of 2.
+
+            However thin you make it, SwingTree paints the bar at least one pixel wide on the screen. A bar of
+            0.2 pixels would cover a fifth of a pixel column, which shows as a faint grey line that your users
+            barely see. So `caretWidth(0.2)` at a UI scale of 1 and `caretWidth(0.3)` at a UI scale of 2,
+            which is 0.6 pixels on the screen, both paint a bar of one pixel.
+
+            `caretBounds()` is as wide as the bar, so that your code which paints next to the caret knows its
+            right edge too. The text is "HHHH HHHH", and the caret is at position 2, which is the gap in front of
+            the third "H". The left edge of the bar lies on a whole pixel, so its width shows exactly in the
+            green pixels; this scenario still allows one pixel of difference for smoothing.
+
+            In this scenario `caretWidth(${caretWidth})` is used at a UI scale of ${uiScale}.
+        """
+        given : 'We set the UI scale factor of SwingTree. Every size in a style is multiplied by it:'
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A property which holds an empty selection with the caret at position 2:'
+            var selection = Var.of(TextSelection.caretAt(2))
+        and : 'A component which paints "HHHH HHHH" in red on white, with a green caret of the given width:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.showCaret(true).caretWidth(caretWidth).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the rectangles around the red and the green pixels. `UI.sync()`
+            waits until SwingTree has written the caret rectangle into the property:
+        """
+            var image  = Utility.renderSingleComponent(box)
+            UI.sync()
+            var text   = boundsOfPixelsPaintedIn(image, RED)
+            var caret  = boundsOfPixelsPaintedIn(image, GREEN)
+            var bounds = selection.get().caretBounds().get()
+
+        then : 'The caret is painted, at least as tall as the letters:'
+            caret.height >= text.height
+        and : 'The rectangle of `caretBounds()` is exactly as wide as expected:'
+            bounds.size().width().get() == expectedWidth
+        and : 'The green pixels are as wide as that, give or take one pixel:'
+            Math.abs(caret.width - expectedWidth) <= 1
+
+        cleanup : 'We set the UI scale factor back to 1:'
+            SwingTree.get().setUiScaleFactor(1f)
+
+        where :
+            caretWidth | uiScale || expectedWidth
+            4          | 1f      || 4
+            4          | 2f      || 8
+            0.2        | 1f      || 1
+            0.3        | 2f      || 1
+    }
+
+    def 'Without `caretWidth(..)`, the caret of `selection(s -> s.showCaret(true))` at a UI scale of #uiScale is a bar #expectedWidth pixels wide on the screen, and `caretBounds()` is just as wide.'(
+        float uiScale, int expectedWidth
+    ) {
+        reportInfo """
+            The default shape of the caret is a vertical bar, and without `caretWidth(..)` it is 1 pixel wide
+            before the UI scale is applied, like the caret of most text fields. Like every size in a style, this
+            width is multiplied by the UI scale, so the bar is 1 pixel wide on the screen at a UI scale of 1 and
+            2 pixels wide at a UI scale of 2. If SwingTree did not scale the default width, the caret would look
+            half as thick as the letters around it on a screen with twice the pixel density.
+
+            The text is "HHHH HHHH", and the caret is at position 2, which is the gap in front of the third "H".
+            The left edge of the bar lies on a whole pixel, so its width shows exactly in the green pixels;
+            this scenario still allows one pixel of difference for smoothing.
+
+            In this scenario the UI scale is ${uiScale}.
+        """
+        given : 'We set the UI scale factor of SwingTree. Every size in a style is multiplied by it:'
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A property which holds an empty selection with the caret at position 2:'
+            var selection = Var.of(TextSelection.caretAt(2))
+        and : 'A component which paints "HHHH HHHH" in red on white, with a green caret and no `caretWidth(..)`:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.showCaret(true).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the rectangles around the red and the green pixels. `UI.sync()`
+            waits until SwingTree has written the caret rectangle into the property:
+        """
+            var image  = Utility.renderSingleComponent(box)
+            UI.sync()
+            var text   = boundsOfPixelsPaintedIn(image, RED)
+            var caret  = boundsOfPixelsPaintedIn(image, GREEN)
+            var bounds = selection.get().caretBounds().get()
+
+        then : 'The caret is painted, at least as tall as the letters:'
+            caret.height >= text.height
+        and : 'The rectangle of `caretBounds()` is exactly as wide as expected:'
+            bounds.size().width().get() == expectedWidth
+        and : 'The green pixels are as wide as that, give or take one pixel:'
+            Math.abs(caret.width - expectedWidth) <= 1
+
+        cleanup : 'We set the UI scale factor back to 1:'
+            SwingTree.get().setUiScaleFactor(1f)
+
+        where :
+            uiScale || expectedWidth
+            1f      || 1
+            2f      || 2
+    }
+
+    def 'With `selection(s -> s.showCaret(true).caretShape(UI.CaretShape.UNDERLINE).caretWidth(#caretWidth))` at a UI scale of #uiScale, the caret is a line about #expectedThickness pixels thick along the bottom of the line of text.'(
+        double caretWidth, float uiScale, int expectedThickness
+    ) {
+        reportInfo """
+            An `UNDERLINE` caret is a line under the character behind the gap, like the caret of an old
+            terminal. `caretWidth(..)` decides how thick it is, and the line grows upwards from the bottom
+            of the line of text. Like every size in a style, the thickness is multiplied by the UI scale:
+            `caretWidth(3)` is 3 pixels thick at a UI scale of 1 and 6 pixels at a UI scale of 2, and
+            `caretWidth(2)` is 2 pixels thick at a UI scale of 1.
+
+            The text is "HHHH HHHH", and the caret is at position 2, which is the gap in front of the third "H".
+            The bottom of the line of text is the bottom of `caretBounds()`, which lies a few pixels below the
+            bottom of the "H", because a line has room for letters like "g" and "y" which reach below the others.
+            So the underline is painted below the letters, where your users see it. If SwingTree grew the line
+            downwards from the bottom of the line, it would be painted outside of the line, and if it ignored
+            `caretWidth(..)`, it would be as thick as a whole line.
+
+            The top and the bottom of a line of text rarely fall on a pixel boundary, so the edges of the
+            underline cover their pixel row only partly, and this scenario allows one pixel of difference.
+
+            In this scenario `caretWidth(${caretWidth})` is used at a UI scale of ${uiScale}.
+        """
+        given : 'We set the UI scale factor of SwingTree. Every size in a style is multiplied by it:'
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A property which holds an empty selection with the caret at position 2:'
+            var selection = Var.of(TextSelection.caretAt(2))
+        and : 'A component which paints "HHHH HHHH" in red on white, with a green underline caret of the given thickness:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.showCaret(true).caretShape(UI.CaretShape.UNDERLINE).caretWidth(caretWidth).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the rectangles around the red and the green pixels. `UI.sync()`
+            waits until SwingTree has written the caret rectangle into the property:
+        """
+            var image  = Utility.renderSingleComponent(box)
+            UI.sync()
+            var text   = boundsOfPixelsPaintedIn(image, RED)
+            var caret  = boundsOfPixelsPaintedIn(image, GREEN)
+            var bounds = selection.get().caretBounds().get()
+            var bottom = bounds.location().y() + bounds.size().height().get()
+
+        then : 'The text and the caret are painted:'
+            text  != null
+            caret != null
+        and : 'The green line is as thick as expected, give or take one pixel:'
+            Math.abs(caret.height - expectedThickness) <= 1
+        and : 'It ends at the bottom of `caretBounds()`, give or take one pixel:'
+            Math.abs((caret.y + caret.height) - bottom) <= 1
+        and : 'It lies below the red letters, apart from at most one pixel row of smoothing:'
+            caret.y >= text.y + text.height - 1
+
+        cleanup : 'We set the UI scale factor back to 1:'
+            SwingTree.get().setUiScaleFactor(1f)
+
+        where :
+            caretWidth | uiScale || expectedThickness
+            2          | 1f      || 2
+            3          | 1f      || 3
+            3          | 2f      || 6
+    }
+
+    def 'With `selection(s -> s.showCaret(true).caretShape(UI.CaretShape.#shape).caretWidth(6))`, the caret is as wide as the character behind the gap, so it is wider in front of an "H" than in front of an "i".'(
+        UI.CaretShape shape
+    ) {
+        reportInfo """
+            A `BLOCK` caret covers the character behind the gap, like the caret of a terminal, and an `UNDERLINE`
+            caret is a line under that character. Both take their width from that character, so they are as wide
+            as an "H" in front of an "H" and as narrow as an "i" in front of an "i". In the Ubuntu font at a size
+            of 20, an "H" takes about 14 pixels, and an "i" about 5 pixels. `caretWidth(6)` is the thickness
+            of an underline, and it does not change the width of either shape.
+
+            The text is "iiHii", with the "H" in blue and every "i" in red. The caret is painted in green behind
+            the letters. First, the caret is at position 2, the gap in front of the "H": the green pixels reach
+            from the left edge of the "H" to its right edge, and `caretBounds()` is as wide as the green pixels.
+            Then your code moves the caret to position 3, the gap in front of the third "i": the green pixels
+            get less than half as wide. If SwingTree took the width from `caretWidth(6)` instead, both carets
+            would be 6 pixels wide, which is too narrow for the "H", and in front of the "i" the caret would be
+            more than half as wide as in front of the "H".
+
+            In this scenario the shape is `${shape}`.
+        """
+        given : 'A property which holds an empty selection with the caret at position 2, in front of the "H":'
+            var selection = Var.of(TextSelection.caretAt(2))
+        and : 'A component which paints "ii" in red, "H" in blue and "ii" in red on white, with a green caret of the given shape:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "ii" ),
+                                StyledString.of( f -> f.color(BLUE), "H"  ),
+                                StyledString.of( f -> f.color(RED),  "ii" )
+                            )
+                            .selection( s -> s.showCaret(true).caretShape(shape).caretWidth(6).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the rectangles around the blue and the green pixels. `UI.sync()`
+            waits until SwingTree has written the caret rectangle into the property:
+        """
+            var image          = Utility.renderSingleComponent(box)
+            UI.sync()
+            var letterH        = boundsOfPixelsPaintedIn(image, BLUE)
+            var caretInFrontOfH = boundsOfPixelsPaintedIn(image, GREEN)
+            var boundsInFrontOfH = selection.get().caretBounds().get()
+        and : 'Your code moves the caret to position 3, in front of the third "i", and we render the component again:'
+            UI.runNow { selection.set(TextSelection.caretAt(3)) }
+            var caretInFrontOfI = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), GREEN)
+
+        then : 'In front of the "H", the green pixels reach from the left edge to the right edge of the blue "H":'
+            caretInFrontOfH.x <= letterH.x
+            caretInFrontOfH.x + caretInFrontOfH.width >= letterH.x + letterH.width
+        and : 'They are as wide as `caretBounds()`, give or take one pixel:'
+            Math.abs(caretInFrontOfH.width - boundsInFrontOfH.size().width().get()) <= 1
+        and : 'In front of the "i", the green pixels are less than half as wide as in front of the "H":'
+            caretInFrontOfI.width < caretInFrontOfH.width / 2
+        and : 'In front of the "H", the caret is wider than the 6 pixels of `caretWidth(6)`, by more than a pixel:'
+            caretInFrontOfH.width > 6 + 1
+
+        where :
+            shape << [UI.CaretShape.BLOCK, UI.CaretShape.UNDERLINE]
+    }
+
+    def 'With `selection(s -> s.showCaret(true).caretShape(UI.CaretShape.#shape).caretWidth(3))`, a caret behind the last character of the text, where no character follows, is half as wide as the line is tall.'(
+        UI.CaretShape shape
+    ) {
+        reportInfo """
+            A `BLOCK` caret covers the character behind the gap, and an `UNDERLINE` caret is a line under that
+            character. Behind the last character of the text, no character follows the gap, so there is no
+            character to take the width from. There, SwingTree paints both shapes half as wide as the line is
+            tall. In the Ubuntu font at a size of 20, a line is about 22.4 pixels tall, so the caret is about
+            11.2 pixels wide, which is close to the width of a letter. If SwingTree took the width of a missing
+            character as 0, your users would see no caret at all at the end of the text.
+
+            The text is "HHHH HHHH", which has 9 characters, and the caret is at position 9, the gap behind the
+            last "H". The caret is painted in green, and `caretWidth(3)` makes an underline 3 pixels thick, which
+            does not change the width of either shape.
+
+            In this scenario the shape is `${shape}`.
+        """
+        given : 'A property which holds an empty selection with the caret at position 9, the end of the text:'
+            var selection = Var.of(TextSelection.caretAt(9))
+        and : 'A component which paints "HHHH HHHH" in red on white, with a green caret of the given shape:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.showCaret(true).caretShape(shape).caretWidth(3).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the rectangles around the red and the green pixels. `UI.sync()`
+            waits until SwingTree has written the caret rectangle into the property:
+        """
+            var image  = Utility.renderSingleComponent(box)
+            UI.sync()
+            var text   = boundsOfPixelsPaintedIn(image, RED)
+            var caret  = boundsOfPixelsPaintedIn(image, GREEN)
+            var bounds = selection.get().caretBounds().get()
+
+        then : 'The rectangle of `caretBounds()` is half as wide as it is tall:'
+            bounds.size().width().get() == bounds.size().height().get() / 2
+        and : 'The green pixels are as wide as that, give or take one pixel:'
+            Math.abs(caret.width - bounds.size().width().get()) <= 1
+        and : 'The caret lies right of the last red letter, apart from at most one pixel column of smoothing:'
+            caret.x >= text.x + text.width - 1
+
+        where :
+            shape << [UI.CaretShape.BLOCK, UI.CaretShape.UNDERLINE]
+    }
+
+    def 'When the `caretWidth(..)` and the `caretShape(..)` of a style change after the first paint, `caretBounds()` follows them at the next paint.'()
+    {
+        reportInfo """
+            The style of a component is a function which SwingTree runs again whenever it paints the component.
+            So a style may read the width and the shape of the caret from properties of your view model, for
+            example from a setting which your users change. `caretBounds()` must follow such a change at the next
+            paint, because your code places things next to the caret with it.
+
+            SwingTree measures the positions of the gaps between the characters once and reuses the measurement
+            until something changes which moves them or changes the caret, so that moving the mouse over a long
+            text stays fast. The width and the shape of the caret are part of what it checks. If they were not,
+            `caretBounds()` would keep the width of the first paint for as long as the text stays the same.
+
+            The text is "HHHH HHHH", and the caret is at position 2, which is the gap in front of the third "H".
+            First the caret is a bar 1 pixel wide. Then your code sets its width to 6, so `caretBounds()` gets
+            6 pixels wide. Then your code turns it into a `BLOCK`, which covers the "H" behind the gap: in the Ubuntu
+            font at a size of 20, an "H" takes about 14 pixels, so `caretBounds()` gets more than 10 pixels wide.
+        """
+        given : 'A property which holds an empty selection with the caret at position 2:'
+            var selection = Var.of(TextSelection.caretAt(2))
+        and : 'Two properties of your view model, holding the width and the shape of the caret:'
+            var width = Var.of(1d)
+            var shape = Var.of(UI.CaretShape.BAR)
+        and : 'A component whose style reads the width and the shape of the caret from these properties:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("HHHH HHHH")
+                            .selection( s -> s.showCaret(true).caretWidth(width.get()).caretShape(shape.get()) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : """
+            We paint the component. When SwingTree paints the component, it queues a task on the UI thread which
+            writes the caret rectangle into the property. `UI.sync()` waits until the UI thread has run every task
+            queued so far:
+        """
+            Utility.renderSingleComponent(box)
+            UI.sync()
+
+        expect : 'The caret rectangle is 1 pixel wide:'
+            selection.get().caretBounds().get().size().width().get() == 1
+
+        when : 'Your code sets the width of the caret to 6, and we paint the component again:'
+            UI.runNow { width.set(6d) }
+            Utility.renderSingleComponent(box)
+            UI.sync()
+        then : 'The caret rectangle is 6 pixels wide:'
+            selection.get().caretBounds().get().size().width().get() == 6
+
+        when : 'Your code turns the caret into a block, and we paint the component again:'
+            UI.runNow { shape.set(UI.CaretShape.BLOCK) }
+            Utility.renderSingleComponent(box)
+            UI.sync()
+        then : 'The caret rectangle covers the "H" behind the gap, so it is more than 10 pixels wide:'
+            selection.get().caretBounds().get().size().width().get() > 10
+    }
+
+    def 'A text which never had the keyboard focus paints its selection and its caret in the focused look.'()
+    {
+        reportInfo """
+            From the moment a component loses the keyboard focus until it gets it back, SwingTree greys its
+            selection and paints no caret. A component which never had the keyboard focus has not lost it, so it
+            looks focused: SwingTree paints the selection in the colour of `color(..)` and the caret of
+            `showCaret(true)`. A text which your code shows in a window before your users ever click into it
+            therefore shows the colours of its style. If SwingTree greyed every text which does not have the
+            keyboard focus, every selectable text of a window would be grey but the one with the focus, and a
+            text in a component which can never get the keyboard focus would always be grey.
+
+            The component paints the text "HHHH HHHH" in red. First the first word is selected in yellow. Then
+            your code writes a caret at position 4, behind the first word, into the property, and the caret is
+            painted in green. The component never gets a focus event.
+        """
+        given : 'A property which holds a selection of the first word:'
+            var selection = Var.of(TextSelection.between(0, 4))
+        and : 'A component which paints "HHHH HHHH" in red on white, with a yellow selection and a green caret:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.color(YELLOW).showCaret(true).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : 'We render the component:'
+            var withSelection = Utility.renderSingleComponent(box)
+        then : 'The text is painted, and the selected word lies on yellow:'
+            boundsOfPixelsPaintedIn(withSelection, RED)    != null
+            boundsOfPixelsPaintedIn(withSelection, YELLOW) != null
+
+        when : 'Your code writes a caret at position 4 into the property, and we render the component again:'
+            UI.runNow { selection.set(TextSelection.caretAt(4)) }
+            var withCaret = Utility.renderSingleComponent(box)
+        then : 'The green caret is painted, at least as tall as the letters:'
+            boundsOfPixelsPaintedIn(withCaret, GREEN).height >= boundsOfPixelsPaintedIn(withCaret, RED).height
+    }
+
+    def 'With `withTextSelection("body", selection)`, a selection #fill turns grey from the moment the component loses the keyboard focus until it gets it back, and keeps its brightness.'(
+        String fill, Color color, Color seenOnWhite
+    ) {
+        reportInfo """
+            Many programs, like the text fields of web browsers and of macOS, grey a selection when the keyboard
+            focus goes elsewhere, so that your users can tell at a glance where the keys they type go to.
+            SwingTree does the same for a styled text made
+            selectable with `withTextSelection`: from the moment the component loses the keyboard focus until
+            it gets it back, the selection colour and the border colour lose most of their saturation, which
+            is how far a colour is from the grey of the same brightness.
+
+            The brightness stays the same, and so does the transparency, so the grey selection is as easy to
+            see as the coloured one. This scenario measures brightness the way the television standard
+            ITU-R BT.601 does, as 0.299 × red + 0.587 × green + 0.114 × blue, and saturation as the largest
+            minus the smallest of red, green and blue. An opaque yellow (255, 220, 0) has a saturation of 255,
+            and the grey selection may keep at most a third of it. A blue of (0, 0, 220) which is half transparent
+            looks like (127, 127, 237) on the white background of the component. If SwingTree made the grey
+            colour opaque, the dark grey of that blue would hide the background and be far darker; if it faded
+            the colour instead of greying it, the selection would be far brighter and hard to see.
+
+            The selection has a green border 4 pixels wide, which turns grey in the same way. A component which
+            never had the keyboard focus looks focused, so the first picture shows the colours of the style.
+
+            A focus event sent with `dispatchEvent` first passes the `KeyboardFocusManager` of Swing, which drops it
+            when the component is not inside a focused window. A real window only gets the keyboard focus when the
+            window manager of the operating system gives it, which takes an unknown amount of time and may not
+            happen at all while other windows are in front, so a scenario which waited for it would fail at random. So this scenario hands the focus events to the component with
+            `KeyboardFocusManager.redispatchEvent`, which delivers them directly, as if Swing had moved the
+            keyboard focus away from the component and back, whatever the window manager does.
+
+            In this scenario the selection is ${fill}.
+        """
+        given : 'A component which paints "HHHH HHHH" in red on white, with the first word selected in the given colour and with a green border:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.color(color).border(4, GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", Var.of(TextSelection.between(0, 4)))
+                    .get(JBox)
+        and : 'Four small measuring tools: one finds a pixel painted in a colour, one reads the colour of a pixel, one measures brightness, one measures saturation:'
+            var aPixelPaintedIn = { BufferedImage image, Color wanted ->
+                for ( int y = 0; y < image.height; y++ )
+                    for ( int x = 0; x < image.width; x++ )
+                        if ( boundsOfPixelsPaintedIn(image, wanted, new Rectangle(x, y, 1, 1)) != null )
+                            return new Rectangle(x, y, 1, 1)
+                return null
+            }
+            var colourOf = { BufferedImage image, Rectangle pixel -> new Color(image.getRGB((int) pixel.x, (int) pixel.y)) }
+            var brightnessOf = { Color c -> 0.299 * c.red + 0.587 * c.green + 0.114 * c.blue }
+            var saturationOf = { Color c -> [c.red, c.green, c.blue].max() - [c.red, c.green, c.blue].min() }
+
+        when : 'We render the component and pick one pixel of the selection colour and one pixel of the border:'
+            var focusedImage = Utility.renderSingleComponent(box)
+            var inside   = aPixelPaintedIn(focusedImage, seenOnWhite)
+            var onBorder = aPixelPaintedIn(focusedImage, GREEN)
+        then : 'Both colours of the style are painted, so the component looks focused without ever having had the focus:'
+            inside   != null
+            onBorder != null
+
+        when : 'The component loses the keyboard focus, and we render it again:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_LOST))
+            }
+            var unfocusedImage = Utility.renderSingleComponent(box)
+        and : 'We read the two pixels in both pictures:'
+            var focusedInside     = colourOf(focusedImage,   inside)
+            var focusedOnBorder   = colourOf(focusedImage,   onBorder)
+            var unfocusedInside   = colourOf(unfocusedImage, inside)
+            var unfocusedOnBorder = colourOf(unfocusedImage, onBorder)
+
+        then : 'The two pixels are no longer painted in the colours of the style:'
+            boundsOfPixelsPaintedIn(unfocusedImage, seenOnWhite, inside) == null
+            boundsOfPixelsPaintedIn(unfocusedImage, GREEN, onBorder) == null
+        and : 'Without the focus, the two pixels keep their brightness, give or take 8 out of 255:'
+            Math.abs(brightnessOf(unfocusedInside)   - brightnessOf(focusedInside))   <= 8
+            Math.abs(brightnessOf(unfocusedOnBorder) - brightnessOf(focusedOnBorder)) <= 8
+        and : 'They keep at most a third of their saturation:'
+            saturationOf(unfocusedInside)   <= saturationOf(focusedInside)   / 3
+            saturationOf(unfocusedOnBorder) <= saturationOf(focusedOnBorder) / 3
+
+        when : 'The component gets the keyboard focus back, and we render it again:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_GAINED))
+            }
+            var refocusedImage = Utility.renderSingleComponent(box)
+
+        then : 'The two pixels are painted in the colours of the style again:'
+            boundsOfPixelsPaintedIn(refocusedImage, seenOnWhite, inside) != null
+            boundsOfPixelsPaintedIn(refocusedImage, GREEN, onBorder) != null
+
+        where :
+            fill                                       | color                       | seenOnWhite
+            "in an opaque yellow"                      | YELLOW                      | YELLOW
+            "in a blue which is half transparent"      | new Color(0, 0, 220, 128)   | new Color(127, 127, 237)
+    }
+
+    def 'With `selection(s -> s.unfocusedColor(..).unfocusedBorderColor(..))`, the selection is painted in these two colours from the moment the component loses the keyboard focus until it gets it back.'()
+    {
+        reportInfo """
+            By default, SwingTree greys the selection from the moment the component loses the keyboard focus
+            until it gets it back.
+            With `unfocusedColor(..)` and `unfocusedBorderColor(..)` you choose the two colours yourself,
+            for example the colours which the text fields of your application use for an unfocused selection.
+
+            The component paints the text "HHHH HHHH" in red with the first word selected. While the component
+            has the keyboard focus, the selection is yellow with a green border 4 pixels wide. After it lost the
+            keyboard focus, the selection is blue with a purple border. The colours of one state never show in the other
+            state: if SwingTree painted the unfocused fill but kept the focused border, or the other way around,
+            green or yellow pixels would remain next to the blue or purple ones.
+
+            A focus event sent with `dispatchEvent` first passes the `KeyboardFocusManager` of Swing, which drops it
+            when the component is not inside a focused window. A real window only gets the keyboard focus when the
+            window manager of the operating system gives it, which takes an unknown amount of time and may not
+            happen at all while other windows are in front, so a scenario which waited for it would fail at random. So this scenario hands the focus events to the component with
+            `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A purple for the border of the unfocused selection:'
+            var purple = new Color(150, 0, 150)
+        and : 'A component which paints "HHHH HHHH" in red on white, with the first word selected:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s
+                                .color(YELLOW).border(4, GREEN)
+                                .unfocusedColor(BLUE).unfocusedBorderColor(purple)
+                            )
+                        )
+                    )
+                    .withTextSelection("body", Var.of(TextSelection.between(0, 4)))
+                    .get(JBox)
+
+        when : 'The component loses the keyboard focus, and we render it:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_LOST))
+            }
+            var unfocused = Utility.renderSingleComponent(box)
+
+        then : 'The text is painted:'
+            boundsOfPixelsPaintedIn(unfocused, RED) != null
+        and : 'The selection is blue inside a purple border:'
+            var fillWithoutFocus   = boundsOfPixelsPaintedIn(unfocused, BLUE)
+            var borderWithoutFocus = boundsOfPixelsPaintedIn(unfocused, purple)
+            fillWithoutFocus.x > borderWithoutFocus.x
+            fillWithoutFocus.y > borderWithoutFocus.y
+            fillWithoutFocus.x + fillWithoutFocus.width  < borderWithoutFocus.x + borderWithoutFocus.width
+            fillWithoutFocus.y + fillWithoutFocus.height < borderWithoutFocus.y + borderWithoutFocus.height
+        and : 'No pixel is yellow or green:'
+            boundsOfPixelsPaintedIn(unfocused, YELLOW) == null
+            boundsOfPixelsPaintedIn(unfocused, GREEN)  == null
+
+        when : 'The component gets the keyboard focus back, and we render it again:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_GAINED))
+            }
+            var focused = Utility.renderSingleComponent(box)
+
+        then : 'The selection is yellow inside a green border, where the blue and the purple pixels were:'
+            boundsOfPixelsPaintedIn(focused, YELLOW) == fillWithoutFocus
+            boundsOfPixelsPaintedIn(focused, GREEN)  == borderWithoutFocus
+        and : 'No pixel is blue or purple:'
+            boundsOfPixelsPaintedIn(focused, BLUE)   == null
+            boundsOfPixelsPaintedIn(focused, purple) == null
+    }
+
+    def 'With `selection(s -> s.borderWidth(4).unfocusedBorderColor(..))` and no `borderColor(..)`, the selection has no border, neither with nor without the keyboard focus.'()
+    {
+        reportInfo """
+            SwingTree paints the border of a selection only when the border has a width and a colour. Here the
+            style gives the border a width of 4 pixels with `borderWidth(4)`, but no colour, so the selection has
+            no border while the component has the keyboard focus. `unfocusedBorderColor(..)` only replaces the
+            colour of a border which is painted while the component has the focus, so it does not add a border
+            after the component lost the focus either. If it did, the selection of your users would
+            grow a border the moment they click into another component.
+
+            The component paints the text "HHHH HHHH" in red with the first word selected, in yellow while it
+            has the keyboard focus and in blue while it does not. The border colour for an unfocused selection
+            is purple, and no purple pixel may appear.
+
+            A focus event sent with `dispatchEvent` first passes the `KeyboardFocusManager` of Swing, which drops it
+            when the component is not inside a focused window. A real window only gets the keyboard focus when the
+            window manager of the operating system gives it, which takes an unknown amount of time and may not
+            happen at all while other windows are in front, so a scenario which waited for it would fail at random. So this scenario hands the focus event to the component with
+            `KeyboardFocusManager.redispatchEvent`, which delivers it directly.
+        """
+        given : 'A purple for the border of the unfocused selection:'
+            var purple = new Color(150, 0, 150)
+        and : 'A component which paints "HHHH HHHH" in red on white, with the first word selected, and a border width but no border colour:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s
+                                .color(YELLOW).borderWidth(4)
+                                .unfocusedColor(BLUE).unfocusedBorderColor(purple)
+                            )
+                        )
+                    )
+                    .withTextSelection("body", Var.of(TextSelection.between(0, 4)))
+                    .get(JBox)
+        and : 'We render the component, which never had the keyboard focus and so looks focused, and find the yellow pixels:'
+            var focused = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), YELLOW)
+
+        when : 'The component loses the keyboard focus, and we render it again:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_LOST))
+            }
+            var unfocused = Utility.renderSingleComponent(box)
+
+        then : 'The selection was painted in yellow while the component looked focused:'
+            focused != null
+        and : 'Without the focus, the blue pixels cover the same rectangle as the yellow pixels did, because no border takes room from them:'
+            boundsOfPixelsPaintedIn(unfocused, BLUE) == focused
+        and : 'No pixel is purple:'
+            boundsOfPixelsPaintedIn(unfocused, purple) == null
+    }
+
+    def 'With nothing but `selection(s -> s.useUnfocusedLook(false))`, the default selection colour stays the same when the component loses the keyboard focus.'()
+    {
+        reportInfo """
+            Without `color(..)`, SwingTree paints a partly transparent light blue behind the selected characters,
+            and by default it greys that blue from the moment the component loses the keyboard focus until it gets it back.
+            `useUnfocusedLook(false)` switches the grey off, and it does so on its own too, in a style which says
+            nothing else about the selection. If SwingTree treated such a style like a style without any
+            `selection(..)`, the selection would still turn grey.
+
+            The component paints the text "HHHH HHHH" in red on white, with the first word selected. This scenario
+            renders it once with the keyboard focus and once without, and compares the two pictures pixel by pixel.
+            They must be the same. To be sure that the pictures show a selection at all, it also renders the
+            component with no selected character, and that picture must differ.
+
+            A focus event sent with `dispatchEvent` first passes the `KeyboardFocusManager` of Swing, which drops it
+            when the component is not inside a focused window. A real window only gets the keyboard focus when the
+            window manager of the operating system gives it, which takes an unknown amount of time and may not
+            happen at all while other windows are in front, so a scenario which waited for it would fail at random. So this scenario hands the focus events to the component with
+            `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a selection of the first word:'
+            var selection = Var.of(TextSelection.between(0, 4))
+        and : 'A component which paints "HHHH HHHH" in red on white, whose selection style only switches the unfocused look off:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.useUnfocusedLook(false) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A small tool which tells whether two pictures have the same colour in every pixel:'
+            var samePixels = { BufferedImage a, BufferedImage b ->
+                for ( int y = 0; y < a.height; y++ )
+                    for ( int x = 0; x < a.width; x++ )
+                        if ( a.getRGB(x, y) != b.getRGB(x, y) )
+                            return false
+                return true
+            }
+
+        when : 'We render the component with the keyboard focus, which it gets with a focus event:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_GAINED))
+            }
+            var focused = Utility.renderSingleComponent(box)
+        and : 'We render it again after it lost the keyboard focus:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_LOST))
+            }
+            var unfocused = Utility.renderSingleComponent(box)
+        and : 'Your code writes a caret without selected characters into the property, and we render the component once more:'
+            UI.runNow { selection.set(TextSelection.caretAt(0)) }
+            var nothingSelected = Utility.renderSingleComponent(box)
+
+        then : 'The text is painted:'
+            boundsOfPixelsPaintedIn(focused, RED) != null
+        and : 'The selection is painted, because the picture without a selection differs:'
+            !samePixels(focused, nothingSelected)
+        and : 'The pictures with and without the keyboard focus are the same in every pixel:'
+            samePixels(focused, unfocused)
+    }
+
+    def 'With `selection(s -> s.showCaret(true))`, SwingTree paints no caret from the moment the component loses the keyboard focus until it gets it back.'()
+    {
+        reportInfo """
+            The caret marks the gap where the keys which your users type would act. While the component does not
+            have the keyboard focus, these keys go to another component, and a caret would point your users to the
+            wrong place. So SwingTree paints no caret from the moment the component loses the keyboard focus until
+            it gets it back. A component which never had the keyboard focus looks focused, so its caret is painted.
+
+            The text is "HHHH HHHH", and the caret is at position 4, behind the first word. It is painted in green.
+
+            A focus event sent with `dispatchEvent` first passes the `KeyboardFocusManager` of Swing, which drops it
+            when the component is not inside a focused window. A real window only gets the keyboard focus when the
+            window manager of the operating system gives it, which takes an unknown amount of time and may not
+            happen at all while other windows are in front, so a scenario which waited for it would fail at random. So this scenario hands the focus events to the component with
+            `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A component which paints "HHHH HHHH" in red on white, with a green caret at position 4:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.showCaret(true).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", Var.of(TextSelection.caretAt(4)))
+                    .get(JBox)
+
+        when : 'We render the component, which never had the keyboard focus:'
+            var neverFocused = Utility.renderSingleComponent(box)
+        then : 'The caret is painted:'
+            var caret = boundsOfPixelsPaintedIn(neverFocused, GREEN)
+            caret != null
+
+        when : 'The component loses the keyboard focus, and we render it again:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_LOST))
+            }
+            var unfocused = Utility.renderSingleComponent(box)
+        then : 'The text is painted, and the caret is not:'
+            boundsOfPixelsPaintedIn(unfocused, RED)   != null
+            boundsOfPixelsPaintedIn(unfocused, GREEN) == null
+
+        when : 'The component gets the keyboard focus back, and we render it again:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_GAINED))
+            }
+            var refocused = Utility.renderSingleComponent(box)
+        then : 'The caret is painted where it was before:'
+            boundsOfPixelsPaintedIn(refocused, GREEN) == caret
+    }
+
+    def 'With `withTextSelection("body", selection)`, SwingTree asks Swing to paint the component again when it loses the keyboard focus and when it gets the focus back.'()
+    {
+        reportInfo """
+            From the moment the component loses the keyboard focus until it gets it back, SwingTree paints its selection in grey and
+            paints no caret. Swing does not paint a component again by itself when the keyboard focus moves, so
+            SwingTree asks for it: it calls `repaint()` on the component when it loses the focus and when it gets
+            the focus back. If it forgot that, your users would see the old colours until something else
+            happened to make Swing paint the component again, for example until the mouse moved over it.
+
+            Swing collects the components which ask to be painted again in its `RepaintManager`. This scenario
+            replaces the `RepaintManager` with one which writes down every component which asks, and checks
+            that the component is written down after each of the two focus events.
+
+            A focus event sent with `dispatchEvent` first passes the `KeyboardFocusManager` of Swing, which drops it
+            when the component is not inside a focused window. A real window only gets the keyboard focus when the
+            window manager of the operating system gives it, which takes an unknown amount of time and may not
+            happen at all while other windows are in front, so a scenario which waited for it would fail at random. So this scenario hands the focus events to the component with
+            `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A component which paints "HHHH HHHH" with its first word selected:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("HHHH HHHH")
+                        )
+                    )
+                    .withTextSelection("body", Var.of(TextSelection.between(0, 4)))
+                    .get(JBox)
+        and : 'A `RepaintManager` which writes down every component which asks to be painted again:'
+            var askedToBePainted = new CopyOnWriteArrayList<JComponent>()
+            var formerManager = RepaintManager.currentManager(box)
+            RepaintManager.setCurrentManager(new RepaintManager() {
+                @Override
+                void addDirtyRegion(JComponent component, int x, int y, int w, int h) {
+                    askedToBePainted.add(component)
+                    super.addDirtyRegion(component, x, y, w, h)
+                }
+            })
+
+        when : 'The component loses the keyboard focus:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_LOST))
+            }
+        then : 'It asked to be painted again:'
+            askedToBePainted.contains(box)
+
+        when : 'We forget what was written down, and the component gets the keyboard focus back:'
+            askedToBePainted.clear()
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_GAINED))
+            }
+        then : 'It asked to be painted again:'
+            askedToBePainted.contains(box)
+
+        cleanup : 'We put the former `RepaintManager` back:'
+            RepaintManager.setCurrentManager(formerManager)
+    }
+
+    def 'With `selection(s -> s.useUnfocusedLook(false))`, the selection colour, its border and the caret look the same whether the component has the keyboard focus or not.'()
+    {
+        reportInfo """
+            By default, SwingTree greys the selection and hides the caret while the component does not have the
+            keyboard focus. With `useUnfocusedLook(false)`, the keyboard focus changes nothing that your users
+            can see. This suits an application whose look should not change with the focus, and a test which
+            compares pictures of the component taken while the keyboard focus is somewhere else.
+
+            The component paints the text "HHHH HHHH" in red. First, the first word is selected, in yellow with
+            a green border 4 pixels wide. Then your code writes a caret at position 4, behind the first word, into
+            the property, and the caret is painted in blue. Both are painted after the component lost the keyboard
+            focus exactly where they are painted while it has the focus. If SwingTree ignored `useUnfocusedLook(false)`,
+            the yellow and the green would turn grey and the blue caret would disappear.
+
+            A focus event sent with `dispatchEvent` first passes the `KeyboardFocusManager` of Swing, which drops it
+            when the component is not inside a focused window. A real window only gets the keyboard focus when the
+            window manager of the operating system gives it, which takes an unknown amount of time and may not
+            happen at all while other windows are in front, so a scenario which waited for it would fail at random. So this scenario hands the focus events to the component with
+            `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a selection of the first word:'
+            var selection = Var.of(TextSelection.between(0, 4))
+        and : 'A component which paints "HHHH HHHH" in red on white, with a yellow selection, a green border and a blue caret:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s
+                                .color(YELLOW).border(4, GREEN)
+                                .showCaret(true).caretColor(BLUE)
+                                .useUnfocusedLook(false)
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component while it has the keyboard focus, which it gets with a focus event, and find the yellow and the green pixels:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_GAINED))
+            }
+            var focused = Utility.renderSingleComponent(box)
+            var fill    = boundsOfPixelsPaintedIn(focused, YELLOW)
+            var border  = boundsOfPixelsPaintedIn(focused, GREEN)
+
+        when : 'The component loses the keyboard focus, and we render it again:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_LOST))
+            }
+            var unfocused = Utility.renderSingleComponent(box)
+
+        then : 'The selection was painted while the component had the focus:'
+            fill   != null
+            border != null
+        and : 'Without the focus, the yellow and the green pixels are where they were:'
+            boundsOfPixelsPaintedIn(unfocused, YELLOW) == fill
+            boundsOfPixelsPaintedIn(unfocused, GREEN)  == border
+            numberOfPixelsPaintedIn(unfocused, YELLOW) == numberOfPixelsPaintedIn(focused, YELLOW)
+
+        when : 'Your code writes a caret at position 4 into the property, and we render the component again, still without the focus:'
+            UI.runNow { selection.set(TextSelection.caretAt(4)) }
+            var caretWithoutFocus = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+
+        then : 'The caret is painted, at least as tall as the yellow selection was without its border:'
+            caretWithoutFocus != null
+            caretWithoutFocus.height >= fill.height
+    }
+
+    def 'A `TextSelection` tells with `isCaretAtLineEnd()` on which of two lines its caret lies; `caretAt(..)`, `between(..)` and `withCaret(..)` choose it by whether the caret ends the selected characters, and `withCaretAtLineEnd(..)` sets it.'()
+    {
+        reportInfo """
+            Where SwingTree wraps a long line, one position is both the end of the upper line and the start of
+            the next line. A caret at such a position could be painted in two places. `isCaretAtLineEnd()` says
+            which one: `true` means at the end of the upper line, next to the character in front of the caret,
+            and `false` means at the start of the next line, in front of the character behind the caret.
+
+            When your code does not choose, SwingTree decides by the selected characters. `caretAt(5)` selects
+            nothing, so its caret belongs in front of the character behind it: the flag is `false`.
+            `between(2, 5)` selects up to position 5, so its caret is the end of the selected characters and
+            belongs next to the last of them: the flag is `true`. `between(5, 2)` has its caret at the start of
+            the selected characters, so the flag is `false`. `withCaret(..)` uses the same rule for the selection
+            which it returns. `withCaretAtLineEnd(..)` sets the flag and keeps everything else.
+
+            The flag is part of the value: two selections with the same positions but different flags are not
+            equal, because your users see their carets in different places. `toString()` shows it.
+        """
+        expect : 'A caret made by `caretAt(..)` lies at the start of the next line:'
+            !TextSelection.caretAt(5).isCaretAtLineEnd()
+        and : 'A caret which ends the selected characters lies at the end of the upper line, every other caret at the start of the next line:'
+            TextSelection.between(2, 5).isCaretAtLineEnd()
+            !TextSelection.between(5, 2).isCaretAtLineEnd()
+            !TextSelection.between(5, 5).isCaretAtLineEnd()
+        and : '`withCaret(..)` applies the same rule to the selection which it returns:'
+            TextSelection.caretAt(2).withCaret(5).isCaretAtLineEnd()
+            !TextSelection.caretAt(5).withCaret(2).isCaretAtLineEnd()
+            !TextSelection.between(2, 5).withCaret(2).isCaretAtLineEnd()
+
+        when : 'We set the flag of a caret at position 5 with `withCaretAtLineEnd(true)`:'
+            var atLineEnd = TextSelection.caretAt(5).withCaretAtLineEnd(true)
+        then : 'Only the flag changed:'
+            atLineEnd.isCaretAtLineEnd()
+            atLineEnd.anchor() == 5
+            atLineEnd.caret()  == 5
+            atLineEnd.isEnabled()
+        and : 'The flag survives `withEnabled(..)`:'
+            atLineEnd.withEnabled(false).isCaretAtLineEnd()
+        and : 'A selection with the flag is not equal to the same selection without it, and equal to another one with it:'
+            atLineEnd != TextSelection.caretAt(5)
+            atLineEnd == TextSelection.caretAt(5).withCaretAtLineEnd(true)
+            atLineEnd.hashCode() == TextSelection.caretAt(5).withCaretAtLineEnd(true).hashCode()
+            atLineEnd.withCaretAtLineEnd(false) == TextSelection.caretAt(5)
+        and : '`toString()` shows the flag:'
+            atLineEnd.toString().contains("caretAtLineEnd=true")
+            TextSelection.caretAt(5).toString().contains("caretAtLineEnd=false")
+    }
+
+    def 'With `withCaretAtLineEnd(#atLineEnd)`, a caret without selected characters at the place where a line wraps is painted #where, where `caretBounds()` says it is.'(
+        boolean atLineEnd, String where
+    ) {
+        reportInfo """
+            The content area of the component is 100 pixels wide, and the text is "HHHH HHHH". At a font size
+            of 20, one word of four "H" letters is about 56 pixels wide and a space about 5 pixels, so the two
+            words need about 117 pixels. With `wrapLines(true)` the first word and the space behind it go onto
+            the first line, and the second word onto the second line. Position 5 is the gap behind the space,
+            where the first line ends, and also the gap in front of the first "H" of the second line.
+
+            `isCaretAtLineEnd()` chooses between these two places. With `true`, SwingTree paints the caret at
+            the end of the first line, right of the red letters. With `false`, it paints the caret at the start
+            of the second line, in front of the green letters. `caretBounds()` returns the same place, so that
+            your code which paints next to the caret and the caret which your users see agree.
+
+            In this scenario the flag is `${atLineEnd}`, so the caret is painted ${where}.
+        """
+        given : 'A property which holds a caret at position 5 with the given flag:'
+            var selection = Var.of(TextSelection.caretAt(5).withCaretAtLineEnd(atLineEnd))
+        and : 'A component whose content area is 100 pixels wide, with the first word in red, the second in green, and a blue caret:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHH " ),
+                                StyledString.of( f -> f.color(GREEN), "HHHH"  )
+                            )
+                            .selection( s -> s.showCaret(true).caretColor(BLUE) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the rectangles around the red, the green and the blue pixels.
+            `UI.sync()` waits until SwingTree has written the caret rectangle into the property:
+        """
+            var image      = Utility.renderSingleComponent(box)
+            UI.sync()
+            var firstWord  = boundsOfPixelsPaintedIn(image, RED)
+            var secondWord = boundsOfPixelsPaintedIn(image, GREEN)
+            var caret      = boundsOfPixelsPaintedIn(image, BLUE)
+            var bounds     = selection.get().caretBounds().get()
+
+        then : 'The text was really wrapped, so the second word is below the first word:'
+            secondWord.y >= firstWord.y + firstWord.height
+        and : 'The caret is painted next to the red letters on the first line, or in front of the green letters on the second line:'
+            atLineEnd ? caret.x >= firstWord.x + firstWord.width - 1 && caret.y < firstWord.y + firstWord.height
+                      : caret.x <= secondWord.x && caret.y >= firstWord.y + firstWord.height - 1
+        and : 'The painted caret lies where `caretBounds()` says, give or take one pixel:'
+            Math.abs(caret.x - bounds.location().x()) <= 1
+            Math.abs(caret.y - bounds.location().y()) <= 1
+        and : 'The property kept the flag:'
+            selection.get().isCaretAtLineEnd() == atLineEnd
+
+        where :
+            atLineEnd | where
+            true      | "at the end of the first line"
+            false     | "at the start of the second line"
+    }
+
+    def 'With `withCaretAtLineEnd(#atLineEnd)` and `obstacles(..)`, a caret at the position where the text jumps over an obstacle lies #where.'(
+        boolean atLineEnd, String where
+    ) {
+        reportInfo """
+            The content area of the component reaches from x = 10 to x = 390, and an obstacle covers the first
+            line from x = 150 to x = 250. The text is "HHHHH HHHHHHH HHHHHHH". At a font size of 20, an "H" is
+            about 14 pixels wide, so the first word, 70 pixels, fits left of the obstacle, and the second word,
+            98 pixels, goes right of it. Position 6 is the gap behind the space after the first word. It ends the
+            part of the line left of the obstacle and starts the part right of it, so it has two places, like the
+            place where a line wraps.
+
+            `isCaretAtLineEnd()` chooses between them: `true` puts the caret right of the red first word, left of
+            the obstacle, and `false` puts it in front of the blue second word, right of the obstacle.
+
+            In this scenario the flag is `${atLineEnd}`, so the caret lies ${where}.
+        """
+        given : 'A property which holds a caret at position 6 with the given flag:'
+            var selection = Var.of(TextSelection.caretAt(6).withCaretAtLineEnd(atLineEnd))
+        and : 'A component which paints the first word in red and the rest in blue, around an obstacle on the first line:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 200)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .obstacles(new Rectangle(150, 0, 100, 30))
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "HHHHH " ),
+                                StyledString.of( f -> f.color(BLUE), "HHHHHHH HHHHHHH" )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : 'We render the component, find the red pixels, and let SwingTree write the caret rectangle into the property:'
+            var image     = Utility.renderSingleComponent(box)
+            UI.sync()
+            var firstWord = boundsOfPixelsPaintedIn(image, RED)
+            var bounds    = selection.get().caretBounds().get()
+
+        then : 'The caret lies on the first line, from its top to its bottom:'
+            bounds.location().y() <= firstWord.y
+            bounds.location().y() + bounds.size().height().get() >= firstWord.y + firstWord.height
+        and : 'It lies right of the red word and left of the obstacle, or right of the obstacle:'
+            atLineEnd ? bounds.location().x() >= firstWord.x + firstWord.width - 1 && bounds.location().x() < 150
+                      : bounds.location().x() >= 250
+
+        where :
+            atLineEnd | where
+            true      | "right of the first word, left of the obstacle"
+            false     | "in front of the second word, right of the obstacle"
+    }
+
+    def 'With `withTextSelection("body", selection)`, a click right of the end of a wrapped line puts the caret at the end of that line, and a click in front of the first letter of the next line puts it at the start of that line.'()
+    {
+        reportInfo """
+            The content area of the component is 100 pixels wide, and the text is "HHHH HHHH". With `wrapLines(true)`
+            the first word and the space behind it go onto the first line, and the second word onto the second line.
+            Position 5 is the gap behind the space, where the first line ends, and also the gap in front of the first
+            "H" of the second line.
+
+            When your user clicks right of the end of the first line, the nearest gap of the first line is position 5.
+            Your user clicked on the first line, so SwingTree puts the caret at the end of the first line and sets
+            `isCaretAtLineEnd()` to `true`. If it put the caret at the start of the second line, your user would
+            see it jump to a line which they did not click on. When your user clicks on the left edge of the first
+            "H" of the second line, the nearest gap is position 5 as well, and SwingTree puts the caret at the start
+            of the second line, with the flag `false`.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component whose content area is 100 pixels wide, with the first word in red, the second in green, and a blue caret:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHH " ),
+                                StyledString.of( f -> f.color(GREEN), "HHHH"  )
+                            )
+                            .selection( s -> s.showCaret(true).caretColor(BLUE) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the rectangles around the red and the green letters:'
+            var image      = Utility.renderSingleComponent(box)
+            var firstWord  = boundsOfPixelsPaintedIn(image, RED)
+            var secondWord = boundsOfPixelsPaintedIn(image, GREEN)
+
+        when : 'We click at x = 105, right of the end of the first line, in the middle of the first line:'
+            int firstLineMiddle = firstWord.centerY
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, 105, firstLineMiddle, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, 105, firstLineMiddle, 1, false, MouseEvent.BUTTON1))
+            }
+        and : 'We render the component again:'
+            var caretAtLineEnd = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+        then : 'The text was really wrapped, so the second word is below the first word:'
+            secondWord.y >= firstWord.y + firstWord.height
+        and : 'The caret is at position 5, at the end of the first line:'
+            selection.get().caret() == 5
+            selection.get().isCaretAtLineEnd()
+        and : 'It is painted right of the red letters, on the first line:'
+            caretAtLineEnd.x >= firstWord.x + firstWord.width - 1
+            caretAtLineEnd.y < firstWord.y + firstWord.height
+
+        when : 'We click on the left edge of the first green letter:'
+            int leftEdgeOfSecondWord = secondWord.x
+            int secondLineMiddle     = secondWord.centerY
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, leftEdgeOfSecondWord, secondLineMiddle, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, leftEdgeOfSecondWord, secondLineMiddle, 1, false, MouseEvent.BUTTON1))
+            }
+        and : 'We render the component again:'
+            var caretAtLineStart = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+        then : 'The caret is at position 5 again, now at the start of the second line:'
+            selection.get().caret() == 5
+            !selection.get().isCaretAtLineEnd()
+        and : 'It is painted in front of the green letters, on the second line:'
+            caretAtLineStart.x <= secondWord.x
+            caretAtLineStart.y >= firstWord.y + firstWord.height - 1
+    }
+
+    def 'With `withTextSelection("body", selection)`, the left and the right arrow key move the caret by one character, and put it at the start or the end of selected characters instead of moving it.'()
+    {
+        reportInfo """
+            The component paints the text "Hello world", which has 11 characters. A selection holds two positions,
+            and a position is a gap between two characters: position 0 is the gap in front of the "H", and
+            position 11 is the gap behind the "d".
+
+            The right arrow key moves the caret one position forwards and the left arrow key one position
+            backwards, and neither selects anything. At the start and at the end of the text the caret stays
+            where it is, so a position never leaves the text. When characters are selected, a press without the
+            shift key ends the selection, like in a text editor: the left arrow key puts the caret at the start
+            of the selected characters, and the right arrow key at their end. Your users expect this, because it
+            lets them continue typing on the side of the selection where they look.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a selection from position 3 to position 8, which is "lo wo":'
+            var selection = Var.of(TextSelection.between(3, 8))
+        and : 'A component which paints "Hello world":'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello world")
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We press the right arrow key:'
+            press(KeyEvent.VK_RIGHT, 0)
+        then : 'The selection ends, with the caret at the end of the selected characters:'
+            selection.get().anchor() == 8
+            selection.get().caret()  == 8
+        when : 'We press the left arrow key:'
+            press(KeyEvent.VK_LEFT, 0)
+        then : 'The caret moved one position backwards:'
+            selection.get().anchor() == 7
+            selection.get().caret()  == 7
+
+        when : 'Your code selects "lo wo" again, and we press the left arrow key:'
+            UI.runNow { selection.set(TextSelection.between(3, 8)) }
+            press(KeyEvent.VK_LEFT, 0)
+        then : 'The selection ends, with the caret at the start of the selected characters:'
+            selection.get().anchor() == 3
+            selection.get().caret()  == 3
+        when : 'We press the right arrow key:'
+            press(KeyEvent.VK_RIGHT, 0)
+        then : 'The caret moved one position forwards:'
+            selection.get().anchor() == 4
+            selection.get().caret()  == 4
+
+        when : 'Your code puts the caret at the start of the text, and we press the left arrow key:'
+            UI.runNow { selection.set(TextSelection.caretAt(0)) }
+            press(KeyEvent.VK_LEFT, 0)
+        then : 'The caret stays at the start:'
+            selection.get().caret() == 0
+        when : 'Your code puts the caret at the end of the text, and we press the right arrow key:'
+            UI.runNow { selection.set(TextSelection.caretAt(11)) }
+            press(KeyEvent.VK_RIGHT, 0)
+        then : 'The caret stays at the end:'
+            selection.get().caret() == 11
+    }
+
+    def 'With `withTextSelection("body", selection)`, the arrow keys, Home and End with the shift key held down keep the anchor and move only the caret, so they select the characters which the caret passes over.'()
+    {
+        reportInfo """
+            The component paints the text "Hello world", which has 11 characters. A selection holds two positions:
+            the *anchor*, which stays where it is, and the *caret*, which moves. Position 6 is the gap in front of
+            the "w".
+
+            With the shift key held down, every key which moves the caret keeps the anchor where it is, so the
+            characters between the anchor and the caret are selected, like in a text editor. Starting at position 6,
+            two presses of Shift+Right select "wo", three presses of Shift+Left then move the caret back over the
+            "o", the "w" and the space, so the selection reaches from 6 back to 5 and holds only the space.
+            Shift+End and Shift+Home then move the caret to the end and to the start of the line, and the anchor
+            stays at position 6 throughout.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a caret at position 6, in front of the "w":'
+            var selection = Var.of(TextSelection.caretAt(6))
+        and : 'A component which paints "Hello world":'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello world")
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We press Shift+Right twice:'
+            2.times { press(KeyEvent.VK_RIGHT, InputEvent.SHIFT_DOWN_MASK) }
+        then : '"wo" is selected:'
+            selection.get().anchor() == 6
+            selection.get().caret()  == 8
+            selection.get().selectedText() == "wo"
+
+        when : 'We press Shift+Left three times:'
+            3.times { press(KeyEvent.VK_LEFT, InputEvent.SHIFT_DOWN_MASK) }
+        then : 'The caret moved back behind the anchor, so the space is selected:'
+            selection.get().anchor() == 6
+            selection.get().caret()  == 5
+            selection.get().selectedText() == " "
+
+        when : 'We press Shift+End:'
+            press(KeyEvent.VK_END, InputEvent.SHIFT_DOWN_MASK)
+        then : '"world" is selected:'
+            selection.get().anchor() == 6
+            selection.get().caret()  == 11
+            selection.get().selectedText() == "world"
+
+        when : 'We press Shift+Home:'
+            press(KeyEvent.VK_HOME, InputEvent.SHIFT_DOWN_MASK)
+        then : '"Hello " is selected:'
+            selection.get().anchor() == 6
+            selection.get().caret()  == 0
+            selection.get().selectedText() == "Hello "
+    }
+
+    def 'With `withTextSelection("body", selection)`, the left and the right arrow key with Ctrl held down, or Alt on macOS, move the caret to the start of the word in front of it or to the end of the word behind it.'()
+    {
+        reportInfo """
+            The component paints the text "Hello brave world", which has 17 characters. Position 6 is the gap in
+            front of "brave", position 11 the gap behind it, position 12 the gap in front of "world", and
+            position 17 the end of the text.
+
+            With Ctrl held down, the right arrow key moves the caret over the next word to its end, skipping the
+            spaces in front of it, and the left arrow key moves it to the start of the word in front of it. A word
+            is a run of letters and digits. On macOS, Ctrl together with the arrow keys switches between desktops,
+            and text fields jump by words with the Alt key, which macOS calls Option, instead. SwingTree uses
+            Alt wherever the keyboard shortcuts of the operating system use the Command key instead of Ctrl, which
+            `Toolkit.getMenuShortcutKeyMask()` tells. This scenario asks it in the same way.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a caret at position 6, in front of "brave":'
+            var selection = Var.of(TextSelection.caretAt(6))
+        and : 'A component which paints "Hello brave world":'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello brave world")
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'The modifier key which jumps by words: Alt where the shortcut key is the Command key, and Ctrl everywhere else:'
+            int wordKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.META_MASK
+                            ? InputEvent.ALT_DOWN_MASK
+                            : InputEvent.CTRL_DOWN_MASK
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We press the right arrow key with the word key held down:'
+            press(KeyEvent.VK_RIGHT, wordKey)
+        then : 'The caret is at the end of "brave":'
+            selection.get().caret() == 11
+            selection.get().isEmpty()
+        when : 'We press it again:'
+            press(KeyEvent.VK_RIGHT, wordKey)
+        then : 'The caret skipped the space and is at the end of "world", which is the end of the text:'
+            selection.get().caret() == 17
+        when : 'We press the left arrow key with the word key held down:'
+            press(KeyEvent.VK_LEFT, wordKey)
+        then : 'The caret is at the start of "world":'
+            selection.get().caret() == 12
+        when : 'We press it twice more:'
+            2.times { press(KeyEvent.VK_LEFT, wordKey) }
+        then : 'The caret skipped "brave" and is at the start of "Hello", which is the start of the text:'
+            selection.get().caret() == 0
+        when : 'We press the right arrow key with the word key and the shift key held down:'
+            press(KeyEvent.VK_RIGHT, wordKey | InputEvent.SHIFT_DOWN_MASK)
+        then : 'The word "Hello" is selected:'
+            selection.get().anchor() == 0
+            selection.get().caret()  == 5
+    }
+
+    def 'With `withTextSelection("body", selection)`, Home and End move the caret to the start and the end of the painted line, also where a line wraps, and with Ctrl held down, or Alt on macOS, to the start and the end of the text.'()
+    {
+        reportInfo """
+            The content area of the component is 100 pixels wide, and the text is "HHHH HHHH". At a font size
+            of 20, one word of four "H" letters is about 56 pixels wide and a space about 5 pixels, so with
+            `wrapLines(true)` the first word and the space behind it go onto the first line, and the second word
+            onto the second line. Position 5 is the gap behind the space, where the first line ends, and also the
+            gap in front of the first "H" of the second line. Position 9 is the end of the text.
+
+            Home and End move the caret to the start and to the end of the line which your users see it on.
+            End on the first line moves the caret to position 5, and SwingTree paints it at the end of the first
+            line, because that is the line your users pressed End on. If it painted the caret at the start of the
+            second line instead, End would look as if it jumped to the next line, and a second press of End would
+            then go to the end of the second line. Home on the second line moves the caret to position 5 as well,
+            and there SwingTree paints it at the start of the second line. The flag `isCaretAtLineEnd()` of the
+            selection tells which of the two places the caret has.
+
+            With Ctrl held down, Home and End move the caret to the start and the end of the whole text. SwingTree
+            uses Alt instead of Ctrl wherever the keyboard shortcuts of the operating system use the Command key,
+            which `Toolkit.getMenuShortcutKeyMask()` tells, and this scenario asks it in the same way.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a caret at position 2, on the first line:'
+            var selection = Var.of(TextSelection.caretAt(2))
+        and : 'A component whose content area is 100 pixels wide, with the first word in red and the second in green:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHH " ),
+                                StyledString.of( f -> f.color(GREEN), "HHHH"  )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'The modifier key which jumps to the start or the end of the text: Alt where the shortcut key is the Command key, and Ctrl everywhere else:'
+            int farKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.META_MASK
+                            ? InputEvent.ALT_DOWN_MASK
+                            : InputEvent.CTRL_DOWN_MASK
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component and find the red and the green letters:'
+            var image      = Utility.renderSingleComponent(box)
+            var firstWord  = boundsOfPixelsPaintedIn(image, RED)
+            var secondWord = boundsOfPixelsPaintedIn(image, GREEN)
+
+        when : 'We press End:'
+            press(KeyEvent.VK_END, 0)
+        then : 'The text was really wrapped, so the second word is below the first word:'
+            secondWord.y >= firstWord.y + firstWord.height
+        and : 'The caret is at position 5, at the end of the first line, right of the red letters:'
+            selection.get().caret() == 5
+            selection.get().isCaretAtLineEnd()
+            selection.get().caretBounds().get().location().x() >= firstWord.x + firstWord.width - 1
+            selection.get().caretBounds().get().location().y() < firstWord.y + firstWord.height
+        when : 'We press End again:'
+            press(KeyEvent.VK_END, 0)
+        then : 'The caret stays at the end of the first line:'
+            selection.get().caret() == 5
+            selection.get().isCaretAtLineEnd()
+        when : 'We press Home:'
+            press(KeyEvent.VK_HOME, 0)
+        then : 'The caret is at the start of the first line:'
+            selection.get().caret() == 0
+
+        when : 'Your code puts the caret at position 7, on the second line, and we press Home:'
+            UI.runNow { selection.set(TextSelection.caretAt(7)) }
+            press(KeyEvent.VK_HOME, 0)
+        then : 'The caret is at position 5, at the start of the second line, in front of the green letters:'
+            selection.get().caret() == 5
+            !selection.get().isCaretAtLineEnd()
+            selection.get().caretBounds().get().location().x() <= secondWord.x
+            selection.get().caretBounds().get().location().y() >= firstWord.y + firstWord.height - 1
+        when : 'We press End:'
+            press(KeyEvent.VK_END, 0)
+        then : 'The caret is at the end of the second line, which is the end of the text:'
+            selection.get().caret() == 9
+
+        when : 'We press Home with the far key held down:'
+            press(KeyEvent.VK_HOME, farKey)
+        then : 'The caret is at the start of the text:'
+            selection.get().caret() == 0
+        when : 'We press End with the far key held down:'
+            press(KeyEvent.VK_END, farKey)
+        then : 'The caret is at the end of the text:'
+            selection.get().caret() == 9
+    }
+
+    def 'With `withTextSelection("body", selection)`, the up and the down arrow key move the caret to the gap nearest to it on the line above or below, also across the place where a line wraps.'()
+    {
+        reportInfo """
+            The content area of the component is 100 pixels wide, and the text is "HHHH HHHHHH". At a font size
+            of 20, an "H" is about 14 pixels wide and a space about 5 pixels, so with `wrapLines(true)` the first
+            word and the space go onto the first line, and the six letters of the second word, about 84 pixels,
+            onto the second line. Position 5 ends the first line and starts the second, and position 11 is the end
+            of the text.
+
+            The up and the down arrow key move the caret to the line above or below, to the gap which lies nearest
+            to the caret horizontally. Position 7 lies two letters into the second line, at the same distance
+            from the left edge as position 2 on the first line, so the up arrow key moves the caret from 7 to 2,
+            and the down arrow key back to 7. On the last line there is no line below, so the down arrow key moves
+            the caret to the end of the text, and on the first line the up arrow key moves it to the start of the
+            text, like in a text editor.
+
+            The end of the text, position 11, lies about 94 pixels right of the left edge, and the first line
+            ends at about 75 pixels. So from there the up arrow key moves the caret to position 5, at the end of
+            the first line, and SwingTree paints the caret at the end of the first line, not at the start of the
+            second line, which would look as if the caret had not moved up at all.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a caret at position 7, two letters into the second line:'
+            var selection = Var.of(TextSelection.caretAt(7))
+        and : 'A component whose content area is 100 pixels wide, with the first word in red and the second in green:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHH " ),
+                                StyledString.of( f -> f.color(GREEN), "HHHHHH" )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component and find the red and the green letters:'
+            var image      = Utility.renderSingleComponent(box)
+            var firstWord  = boundsOfPixelsPaintedIn(image, RED)
+            var secondWord = boundsOfPixelsPaintedIn(image, GREEN)
+
+        when : 'We press the up arrow key:'
+            press(KeyEvent.VK_UP, 0)
+        then : 'The text was really wrapped, so the second word is below the first word:'
+            secondWord.y >= firstWord.y + firstWord.height
+        and : 'The caret moved to position 2 on the first line:'
+            selection.get().caret() == 2
+        when : 'We press the down arrow key:'
+            press(KeyEvent.VK_DOWN, 0)
+        then : 'The caret is back at position 7:'
+            selection.get().caret() == 7
+        when : 'We press the down arrow key on the last line:'
+            press(KeyEvent.VK_DOWN, 0)
+        then : 'The caret is at the end of the text:'
+            selection.get().caret() == 11
+
+        when : 'Your code puts the caret at the end of the text again, and we press the up arrow key:'
+            UI.runNow { selection.set(TextSelection.caretAt(11)) }
+            press(KeyEvent.VK_UP, 0)
+        then : 'The caret is at position 5, at the end of the first line, right of the red letters:'
+            selection.get().caret() == 5
+            selection.get().isCaretAtLineEnd()
+            selection.get().caretBounds().get().location().x() >= firstWord.x + firstWord.width - 1
+            selection.get().caretBounds().get().location().y() < firstWord.y + firstWord.height
+        when : 'We press the up arrow key on the first line:'
+            press(KeyEvent.VK_UP, 0)
+        then : 'The caret is at the start of the text:'
+            selection.get().caret() == 0
+    }
+
+    def 'With `withTextSelection("body", selection)` and `obstacles(..)`, the up and the down arrow key move the caret between the line below an obstacle and the two parts of the line beside it.'()
+    {
+        reportInfo """
+            The content area of the component reaches from x = 10 to x = 390, and an obstacle covers the first
+            line from x = 150 to x = 250. The text is "HHHHH HHHHHHH " followed by a word of 22 letters "H". At a
+            font size of 20, an "H" is about 14 pixels wide. The first word and the space behind it, positions 0 to
+            6, fit left of the obstacle, and the second word and the space behind it, positions 6 to 14, go right
+            of it. The long third word, positions 14 to 36, is about 308 pixels wide, so it goes onto the second
+            line, below the obstacle, starting at the left edge and reaching to about x = 318, under the second word.
+
+            The up and the down arrow key move the caret to the gap nearest to it horizontally on the line above
+            or below. On the line above, both parts beside the obstacle count, and the caret goes to the part which
+            lies nearest to it horizontally. Position 16 lies two letters into the third word, at about x = 38,
+            below the first word, so the up arrow key moves the caret to position 2, two letters into the first
+            word. Position 9 lies three letters into the second word, at about x = 292, right of the obstacle, and
+            the down arrow key moves the caret from there to the gap below it, 20 letters into the third word,
+            which is position 34. The up arrow key brings it back to position 9, right of the obstacle, and not to
+            the end of the first word, which is the gap of the left part nearest to x = 292.
+        """
+        given : 'A property which holds a caret at position 16, two letters into the third word:'
+            var selection = Var.of(TextSelection.caretAt(16))
+        and : 'A component which paints the three words around an obstacle on the first line:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 200)
+                        .padding(10)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .obstacles(new Rectangle(150, 0, 100, 30))
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("HHHHH HHHHHHH " + "H" * 22)
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component once, and let SwingTree write the caret rectangles into the property:'
+            Utility.renderSingleComponent(box)
+            UI.sync()
+
+        expect : 'The text flows around the obstacle: position 9 lies right of the obstacle, and position 16 below it:'
+            selection.get().withCaret(9).caretBounds().get().location().x() >= 250
+            selection.get().caretBounds().get().location().y() >= 30
+
+        when : 'We press the up arrow key:'
+            press(KeyEvent.VK_UP, 0)
+        then : 'The caret moved to position 2, left of the obstacle:'
+            selection.get().caret() == 2
+
+        when : 'Your code puts the caret at position 9, right of the obstacle, and we press the down arrow key:'
+            UI.runNow { selection.set(TextSelection.caretAt(9)) }
+            press(KeyEvent.VK_DOWN, 0)
+        then : 'The caret is 20 letters into the third word, below the place where it was:'
+            selection.get().caret() == 34
+        when : 'We press the up arrow key:'
+            press(KeyEvent.VK_UP, 0)
+        then : 'The caret is back at position 9, right of the obstacle:'
+            selection.get().caret() == 9
+    }
+
+    def 'With `withTextSelection("body", selection)`, several presses of the up or the down arrow key in a row keep the caret near the place where the first press started, even across a shorter line.'()
+    {
+        reportInfo """
+            The component paints three paragraphs: "HHHHHH", "HH" and "HHHHHH". A line break between two
+            paragraphs is one character, so the second paragraph holds the positions 7 to 9 and the third the
+            positions 10 to 16. At a font size of 20, an "H" is about 14 pixels wide.
+
+            The caret is at position 5, five letters into the first line, about 70 pixels right of the start of the
+            line. The down arrow key moves it to the second line, which is only two letters long, so the nearest gap
+            is the end of that line, position 9, about 28 pixels right of the start. A second press of the down
+            arrow key moves the caret to the third line. A text editor remembers where the first press started, so
+            the caret goes back to about 70 pixels, which is position 15, and not to about 28 pixels, which would
+            be position 12. The caret keeps that place for as long as your users press only the up and the down
+            arrow key: two presses of the up arrow key move it back to position 9 and then to position 5.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a caret at position 5:'
+            var selection = Var.of(TextSelection.caretAt(5))
+        and : 'A component which paints three paragraphs, the middle one shorter than the others:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 150)
+                        .padding(10)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("HHHHHH\nHH\nHHHHHH")
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We press the down arrow key:'
+            press(KeyEvent.VK_DOWN, 0)
+        then : 'The caret is at the end of the short line:'
+            selection.get().caret() == 9
+        when : 'We press the down arrow key again:'
+            press(KeyEvent.VK_DOWN, 0)
+        then : 'The caret is on the third line, five letters in, below the place where it started:'
+            selection.get().caret() == 15
+        when : 'We press the up arrow key twice:'
+            2.times { press(KeyEvent.VK_UP, 0) }
+        then : 'The caret is back where it started:'
+            selection.get().caret() == 5
+
+        when : 'We press the right arrow key, which ends the row of up and down presses, and then the down arrow key twice:'
+            press(KeyEvent.VK_RIGHT, 0)
+            2.times { press(KeyEvent.VK_DOWN, 0) }
+        then : 'The caret is six letters into the third line, because the new row of presses started at position 6:'
+            selection.get().caret() == 16
+    }
+
+    def 'With `withTextSelection("body", selection)`, Shift+Down from the start of a wrapped line selects up to the start of the next line and shows the caret there, not at the end of the line above.'()
+    {
+        reportInfo """
+            The content area of the component is 100 pixels wide, and the text is "HHHH HHHH". With `wrapLines(true)`
+            the first word and the space behind it go onto the first line, and the second word onto the second line.
+            Position 5 ends the first line and starts the second.
+
+            The caret is at position 0. Shift+Down keeps the anchor at 0 and moves the caret to the gap on the second
+            line nearest to it, which is the start of the second line, position 5. The selection now reaches from 0
+            to 5, and its caret is the end of the selected characters. Your users moved the caret down, so SwingTree
+            shows it at the start of the second line, where it went, and `caretBounds()` returns that place. If
+            SwingTree showed it at the end of the selected characters on the first line instead, the caret would
+            look as if Shift+Down had not moved it to another line at all.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key event to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers it directly.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component whose content area is 100 pixels wide, with the first word in red and the second in green:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHH " ),
+                                StyledString.of( f -> f.color(GREEN), "HHHH"  )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the red and the green letters:'
+            var image      = Utility.renderSingleComponent(box)
+            var firstWord  = boundsOfPixelsPaintedIn(image, RED)
+            var secondWord = boundsOfPixelsPaintedIn(image, GREEN)
+
+        when : 'We press Shift+Down, handing the key event over with `redispatchEvent`:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                    new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, InputEvent.SHIFT_DOWN_MASK, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED)
+                )
+            }
+
+        then : 'The text was really wrapped, so the second word is below the first word:'
+            secondWord.y >= firstWord.y + firstWord.height
+        and : 'The first line is selected, from position 0 to position 5:'
+            selection.get().anchor() == 0
+            selection.get().caret()  == 5
+        and : 'The caret lies at the start of the second line, in front of the green letters:'
+            !selection.get().isCaretAtLineEnd()
+            selection.get().caretBounds().get().location().x() <= secondWord.x
+            selection.get().caretBounds().get().location().y() >= firstWord.y + firstWord.height - 1
+    }
+
+    def 'With `selection(s -> s.navigateWithKeyboard(false))`, the arrow keys, Home and End leave the selection as it is, while the keyboard shortcut for selecting everything still selects every character.'()
+    {
+        reportInfo """
+            By default, the arrow keys, Home and End move the caret of a text made selectable with
+            `withTextSelection`. With `navigateWithKeyboard(false)`, SwingTree leaves these keys alone, for example
+            because your code moves the caret with keys of its own, and two handlers of the same key would move the
+            caret twice. The other keyboard shortcuts of the selection are not about moving the caret, so they keep
+            working: Ctrl+A, or Command+A on macOS, still selects everything.
+
+            The component paints "Hello world", and "lo" is selected, from position 3 to position 5. Every key
+            press of this scenario, with and without the shift key, leaves that selection exactly as it is.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a selection from position 3 to position 5:'
+            var selection = Var.of(TextSelection.between(3, 5))
+        and : 'A component which paints "Hello world", whose selection style switches keyboard navigation off:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello world")
+                            .selection( s -> s.navigateWithKeyboard(false) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We press each of the six keys, once without and once with the shift key:'
+            [KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_HOME, KeyEvent.VK_END].each {
+                press(it, 0)
+                press(it, InputEvent.SHIFT_DOWN_MASK)
+            }
+        then : 'The selection is still "lo":'
+            selection.get().anchor() == 3
+            selection.get().caret()  == 5
+
+        when : 'We press the keyboard shortcut for selecting everything:'
+            int shortcutKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.META_MASK
+                                ? InputEvent.META_DOWN_MASK
+                                : InputEvent.CTRL_DOWN_MASK
+            press(KeyEvent.VK_A, shortcutKey)
+        then : 'Everything is selected:'
+            selection.get().anchor() == 0
+            selection.get().caret()  == 11
+    }
+
+    @IgnoreIf({ GraphicsEnvironment.isHeadless() })
+    def 'With `selection(s -> s.navigateWithKeyboard(false))`, the keyboard shortcut for copying still puts the selected characters onto the clipboard of the computer.'()
+    {
+        reportInfo """
+            `navigateWithKeyboard(false)` switches off the keys which move the caret: the arrow keys, Home and End.
+            Copying does not move the caret, so Ctrl+C, or Command+C on macOS, still puts the selected characters
+            onto the clipboard of the computer. The component paints "Hello world", and "world" is selected.
+
+            When Java runs in headless mode, `Toolkit.getSystemClipboard()` throws a `HeadlessException`, so this
+            scenario only runs when Java is not headless. A key event sent with `dispatchEvent` only reaches the
+            component which has the keyboard focus, and a component which is not inside a window never has the
+            keyboard focus. So we hand the key event to the component with `KeyboardFocusManager.redispatchEvent`,
+            which delivers it directly.
+        """
+        given : 'A component which paints "Hello world" with "world" selected, whose selection style switches keyboard navigation off:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello world")
+                            .selection( s -> s.navigateWithKeyboard(false) )
+                        )
+                    )
+                    .withTextSelection("body", Var.of(TextSelection.between(6, 11)))
+                    .get(JBox)
+        and : 'The real clipboard of the computer, whose text we remember so that we can put it back, with something else on it:'
+            var systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard()
+            var formerContents  = systemClipboard.getContents(null)
+            var formerText      = formerContents != null && formerContents.isDataFlavorSupported(DataFlavor.stringFlavor)
+                                    ? formerContents.getTransferData(DataFlavor.stringFlavor)
+                                    : null
+            systemClipboard.setContents(new StringSelection("something else"), null)
+
+        when : 'We send the keyboard shortcut for copying:'
+            int shortcutKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.META_MASK
+                                ? InputEvent.META_DOWN_MASK
+                                : InputEvent.CTRL_DOWN_MASK
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                    new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, shortcutKey, KeyEvent.VK_C, KeyEvent.CHAR_UNDEFINED)
+                )
+            }
+
+        then : 'The clipboard holds the selected word:'
+            systemClipboard.getData(DataFlavor.stringFlavor) == "world"
+
+        cleanup : 'We put the text back which was on the clipboard before the scenario began:'
+            if ( formerText != null )
+                systemClipboard.setContents(new StringSelection(formerText as String), null)
+    }
+
+    def 'When the selection in the property of `withTextSelection` is disabled with `withEnabled(false)`, the arrow keys, Home and End move nothing.'()
+    {
+        reportInfo """
+            A selection whose `isEnabled()` is `false` cannot be changed by your users: SwingTree ignores the mouse and
+            the keyboard. This includes the keys which move the caret. The component paints "Hello world", and the
+            disabled selection reaches from position 3 to position 5. After presses of every arrow key, Home and End,
+            with and without the shift key, the property still holds that selection.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a disabled selection from position 3 to position 5:'
+            var selection = Var.of(TextSelection.between(3, 5).withEnabled(false))
+        and : 'A component which paints "Hello world":'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello world")
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We press each of the six keys, once without and once with the shift key:'
+            [KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_UP, KeyEvent.VK_DOWN, KeyEvent.VK_HOME, KeyEvent.VK_END].each {
+                press(it, 0)
+                press(it, InputEvent.SHIFT_DOWN_MASK)
+            }
+        then : 'The selection is still the disabled selection from 3 to 5:'
+            selection.get().anchor() == 3
+            selection.get().caret()  == 5
+            !selection.get().isEnabled()
+    }
+
+    def 'With `withTextSelection("body", selection)`, a caret in the middle of a line which your users reach with the right arrow key equals the same caret reached with the left arrow key, and neither says `isCaretAtLineEnd()`.'()
+    {
+        reportInfo """
+            `isCaretAtLineEnd()` tells on which of two lines a caret lies where a position is both the end of one
+            painted line and the start of the next. In the middle of a line there is only one place, so the flag
+            has nothing to choose. When SwingTree writes a selection into the property, it keeps the flag only
+            where the caret really is the end of a painted line, and sets it to `false` everywhere else.
+
+            The component paints "Hello world" on one line. Your user moves the caret to position 5, behind
+            "Hello", once with the right arrow key from position 4 and once with the left arrow key from position 6.
+            Both carets lie in the same place, so the property holds two equal selections, and neither says that
+            its caret is at the end of a line. If the right arrow key left the flag `true` there, the flag would
+            claim a line end in the middle of a line, and your code which compares the selection with
+            `TextSelection.caretAt(5)` would get a different answer depending on the key your user pressed.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a caret at position 4:'
+            var selection = Var.of(TextSelection.caretAt(4))
+        and : 'A component which paints "Hello world" on one line:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello world")
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We press the right arrow key, handing the key event over with `redispatchEvent`:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                    new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, 0, KeyEvent.VK_RIGHT, KeyEvent.CHAR_UNDEFINED)
+                )
+            }
+            var reachedFromTheLeft = selection.get()
+        and : 'Your code puts the caret at position 6, and we press the left arrow key:'
+            UI.runNow { selection.set(TextSelection.caretAt(6)) }
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                    new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, 0, KeyEvent.VK_LEFT, KeyEvent.CHAR_UNDEFINED)
+                )
+            }
+            var reachedFromTheRight = selection.get()
+
+        then : 'Both carets are at position 5:'
+            reachedFromTheLeft.caret()  == 5
+            reachedFromTheRight.caret() == 5
+        and : 'Neither says that it is at the end of a line:'
+            !reachedFromTheLeft.isCaretAtLineEnd()
+            !reachedFromTheRight.isCaretAtLineEnd()
+        and : 'The two selections are equal:'
+            reachedFromTheLeft == reachedFromTheRight
+            reachedFromTheLeft.hashCode() == reachedFromTheRight.hashCode()
+    }
+
+    def 'After SwingTree has written a selection into the property of `withTextSelection`, `isCaretAtLineEnd()` is `true` only for a caret at the end of a painted line.'()
+    {
+        reportInfo """
+            `TextSelection.between(anchor, caret)` sets `isCaretAtLineEnd()` to `true` when the caret ends the
+            selected characters, because where a line wraps, such a caret belongs at the end of the upper line,
+            next to the last selected character. A selection which your code creates holds that value until
+            SwingTree has written it into the property. Then SwingTree keeps the flag only where the caret really
+            is the end of a painted line, so the flag never claims a line end where there is none.
+
+            The content area of the component is 100 pixels wide, and the text is "HHHH HHHH". With
+            `wrapLines(true)` the first word and the space behind it go onto the first line, and the second word
+            onto the second line, so position 5 ends the first line. Position 7 lies two letters into the second
+            line. `between(2, 7)` therefore says `true` when your code creates it, and `false` once SwingTree has
+            painted it. `between(2, 5)` ends at the end of the first line, so it still says `true` after the paint.
+        """
+        given : 'A property which holds a selection from position 2 to position 7:'
+            var selection = Var.of(TextSelection.between(2, 7))
+        and : 'A component whose content area is 100 pixels wide:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 150)
+                        .padding(10)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("HHHH HHHH")
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        expect : 'The selection which your code created says that its caret is at the end of a line:'
+            selection.get().isCaretAtLineEnd()
+
+        when : """
+            We render the component. When SwingTree paints the component, it queues a task on the UI thread which
+            writes the selection with its pixel rectangles into the property. `UI.sync()` waits until the UI thread
+            has run every task queued so far:
+        """
+            Utility.renderSingleComponent(box)
+            UI.sync()
+        then : 'The caret at position 7, in the middle of the second line, is not at the end of a line:'
+            selection.get().caret() == 7
+            !selection.get().isCaretAtLineEnd()
+
+        when : 'Your code writes the selection from position 2 to position 5 into the property, and we render the component again:'
+            UI.runNow { selection.set(TextSelection.between(2, 5)) }
+            Utility.renderSingleComponent(box)
+            UI.sync()
+        then : 'The caret at position 5, at the end of the first line, still says so:'
+            selection.get().caret() == 5
+            selection.get().isCaretAtLineEnd()
+    }
+
+    def 'With `withTextSelection("body", selection)`, the arrow keys with Ctrl held down, or Alt on macOS, and a double click agree on what a word is, so "don\'t" is one word for both.'()
+    {
+        reportInfo """
+            A double click selects the word under the mouse, and SwingTree finds the start and the end of that
+            word with `java.text.BreakIterator.getWordInstance()`, which knows the word rules of many languages.
+            By these rules, the apostrophe in "don't" belongs to the word. The right arrow key with Ctrl held down,
+            or Alt on macOS, jumps over the next word by the same rules, skipping the spaces and punctuation in
+            front of it. So your users see one rule for words in the whole text: if the keys stopped behind
+            "don", a double click on "don't" would still select all five characters.
+
+            The component paints "don't stop", which has 10 characters. Position 5 is the gap behind "don't".
+            SwingTree uses Alt instead of Ctrl wherever the keyboard shortcuts of the operating system use the
+            Command key, which `Toolkit.getMenuShortcutKeyMask()` tells, and this scenario asks it in the same way.
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key event to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers it directly.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "don\'t stop" in red on white:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "don't" ),
+                                StyledString.of( f -> f.color(BLUE), " stop"  )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'The modifier key which jumps by words: Alt where the shortcut key is the Command key, and Ctrl everywhere else:'
+            int wordKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.META_MASK
+                            ? InputEvent.ALT_DOWN_MASK
+                            : InputEvent.CTRL_DOWN_MASK
+        and : 'We render the component and find the middle of the red letters of "don\'t":'
+            var dont = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), RED)
+            int x = dont.centerX
+            int y = dont.centerY
+
+        when : 'We press the right arrow key with the word key held down:'
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                    new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, wordKey, KeyEvent.VK_RIGHT, KeyEvent.CHAR_UNDEFINED)
+                )
+            }
+        then : 'The caret jumped over the whole of "don\'t":'
+            selection.get().caret() == 5
+
+        when : 'We double-click the middle of "don\'t":'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, x, y, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, x, y, 2, false, MouseEvent.BUTTON1))
+            }
+        then : 'The double click selected the same word, from position 0 to position 5:'
+            selection.get().anchor() == 0
+            selection.get().caret()  == 5
+    }
+
+    def 'With `selection(s -> s.selectWordOnDoubleClick(false))`, a double click puts the caret into the gap nearest to the mouse, like a single click, and a triple click still selects the paragraph.'()
+    {
+        reportInfo """
+            By default, a double click selects the word under the mouse. With `selectWordOnDoubleClick(false)`,
+            the second click of a double click does what a single click does: it puts the caret into the gap
+            nearest to the mouse, and selects nothing. The triple click is a switch of its own, so a third click
+            still selects the whole paragraph.
+
+            The component paints "Hello world", which has 11 characters. Your user double-clicks on the left
+            edge of the "w", where the nearest gap is position 6. Then your user clicks a third time, which
+            selects the paragraph from position 0 to position 11. Swing reports the second and the third press
+            of such a series of clicks as mouse press events whose click count is 2 and 3.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "Hello " in red and "world" in blue, whose selection style switches the double click off:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "Hello " ),
+                                StyledString.of( f -> f.color(BLUE), "world"  )
+                            )
+                            .selection( s -> s.selectWordOnDoubleClick(false) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the left edge of the blue "w":'
+            var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+            int x = world.x
+            int y = world.centerY
+
+        when : 'We double-click on the left edge of the "w":'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, x, y, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, x, y, 2, false, MouseEvent.BUTTON1))
+            }
+        then : 'Nothing is selected, and the caret is in the gap in front of the "w":'
+            selection.get().isEmpty()
+            selection.get().caret() == 6
+
+        when : 'We click a third time:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  4, InputEvent.BUTTON1_DOWN_MASK, x, y, 3, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 5, 0, x, y, 3, false, MouseEvent.BUTTON1))
+            }
+        then : 'The whole paragraph is selected:'
+            selection.get().anchor() == 0
+            selection.get().caret()  == 11
+    }
+
+    def 'With `withTextSelection("body", selection)`, a triple click selects the #which paragraph, which is everything between two line breaks however many lines it wraps over, without the line breaks.'(
+        String which, Color colour, boolean aimAtItsLastLine, int start, int end, String text
+    ) {
+        reportInfo """
+            A paragraph is everything between two line breaks of the text, the "\\n" characters. A triple click
+            selects the paragraph under the mouse, also when the paragraph is wrapped over several painted lines.
+            The line breaks themselves are not selected, so a copied paragraph does not end with an empty line.
+            The first paragraph starts at the start of the text, and the last one ends at the end of the text.
+
+            The content area of the component is 100 pixels wide. The text has three paragraphs: "HH HH" in red,
+            "HHHH HHHH HHHH" in green and "HH" in blue. At a font size of 20, an "H" is about 14 pixels wide, so the
+            green paragraph, about 178 pixels, wraps over three lines with one word on each, while the red and the
+            blue one fit on a line. A line break counts as one character, so the red paragraph holds the positions
+            0 to 5, the green one 6 to 20 and the blue one 21 to 23. For the green paragraph your user clicks on its
+            last line, so the selection reaches back over two lines which your user did not click on.
+
+            Swing reports the second and the third press of a series of clicks as mouse press events whose click
+            count is 2 and 3. In this scenario your user triple-clicks the ${which} paragraph.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component whose content area is 100 pixels wide, which paints three paragraphs in red, green and blue:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 200)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HH HH\n" ),
+                                StyledString.of( f -> f.color(GREEN), "HHHH HHHH HHHH\n" ),
+                                StyledString.of( f -> f.color(BLUE),  "HH" )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the letters of the paragraph, and the point to click on: the first letter of its last line, or its middle:'
+            var image     = Utility.renderSingleComponent(box)
+            var paragraph = boundsOfPixelsPaintedIn(image, colour)
+            int x = aimAtItsLastLine ? paragraph.x + 3 : paragraph.centerX
+            int y = aimAtItsLastLine ? paragraph.y + paragraph.height - 5 : paragraph.centerY
+
+        when : 'We triple-click there:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, x, y, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, x, y, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  4, InputEvent.BUTTON1_DOWN_MASK, x, y, 3, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 5, 0, x, y, 3, false, MouseEvent.BUTTON1))
+            }
+
+        then : 'The green paragraph was really wrapped, so it is taller than one line of about 22 pixels:'
+            boundsOfPixelsPaintedIn(image, GREEN).height > 30
+        and : 'The whole paragraph is selected, without the line breaks:'
+            selection.get().anchor() == start
+            selection.get().caret()  == end
+            selection.get().selectedText() == text
+
+        where :
+            which    | colour | aimAtItsLastLine || start | end | text
+            "first"  | RED    | false            || 0     | 5   | "HH HH"
+            "middle" | GREEN  | true             || 6     | 20  | "HHHH HHHH HHHH"
+            "last"   | BLUE   | false            || 21    | 23  | "HH"
+    }
+
+    def 'With `selection(s -> s.selectParagraphOnTripleClick(false))`, the third click of a triple click puts the caret into the gap nearest to the mouse, like a single click.'()
+    {
+        reportInfo """
+            By default, a triple click selects the whole paragraph under the mouse. With
+            `selectParagraphOnTripleClick(false)`, the third click does what a single click does: it puts the
+            caret into the gap nearest to the mouse and selects nothing. The second click still selects the word,
+            because the double click is a switch of its own.
+
+            The component paints "Hello world". Your user triple-clicks on the left edge of the "w", where the
+            nearest gap is position 6. After the second click "world" is selected, from position 6 to position 11,
+            and after the third click only the caret is left, at position 6. Swing reports the second and the
+            third press of such a series of clicks as mouse press events whose click count is 2 and 3.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "Hello " in red and "world" in blue, whose selection style switches the triple click off:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "Hello " ),
+                                StyledString.of( f -> f.color(BLUE), "world"  )
+                            )
+                            .selection( s -> s.selectParagraphOnTripleClick(false) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the left edge of the blue "w":'
+            var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+            int x = world.x
+            int y = world.centerY
+
+        when : 'We double-click on the left edge of the "w":'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, x, y, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, x, y, 2, false, MouseEvent.BUTTON1))
+            }
+        then : 'The word "world" is selected:'
+            selection.get().anchor() == 6
+            selection.get().caret()  == 11
+
+        when : 'We click a third time:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  4, InputEvent.BUTTON1_DOWN_MASK, x, y, 3, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 5, 0, x, y, 3, false, MouseEvent.BUTTON1))
+            }
+        then : 'Nothing is selected, and the caret is in the gap in front of the "w":'
+            selection.get().isEmpty()
+            selection.get().caret() == 6
+    }
+
+    def 'Without `selection(s -> s.selectWordOnLongPress(true))`, holding the mouse button down on a word selects nothing.'()
+    {
+        reportInfo """
+            On a phone, your users select a word by holding a finger on it. On a desktop they double-click it, so
+            by default SwingTree does not select a word when the mouse button is held down: the press only puts the
+            caret into the gap nearest to the mouse. The time a long press needs is about half a second. This
+            scenario holds the button down for three times as long, which a long press would certainly have used.
+
+            The component paints "Hello world". Your user presses the button on the middle of "world" and keeps it
+            down.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "Hello " in red and "world" in blue:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "Hello " ),
+                                StyledString.of( f -> f.color(BLUE), "world"  )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the middle of the blue "world":'
+            var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+            int x = world.centerX
+            int y = world.centerY
+
+        when : 'We press the mouse button on the middle of "world" and keep it down for 1.5 seconds, three times the time of a long press:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED, 0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+            }
+            Thread.sleep(1500)
+            UI.sync()
+
+        then : 'The press put the caret into "world", and nothing is selected:'
+            selection.get().isEmpty()
+            selection.get().caret() > 6
+            selection.get().caret() < 11
+    }
+
+    def 'With `selection(s -> s.selectWordOnLongPress(true))` at a UI scale of #uiScale, holding the mouse button down on a word and moving it by #dx pixels to the right and #dy pixels down on the screen selects that word after about half a second.'(
+        float uiScale, int dx, int dy
+    ) {
+        reportInfo """
+            On a phone, your users select a word by holding a finger on it. With `selectWordOnLongPress(true)`
+            SwingTree does the same for the mouse: about half a second after your user pressed the left button, the
+            word under the mouse is selected, as if your user had double-clicked it. A finger never holds perfectly
+            still, so a movement of up to 5 pixels in each direction before then does not cancel the long press.
+
+            SwingTree multiplies these 5 pixels by the UI scale, just as it multiplies every size in a style:
+            at a UI scale of 2 the letters are twice as large, a finger covers twice as many pixels of the screen,
+            and the long press allows 10 pixels on the screen. A movement of 8 pixels then keeps the long press
+            alive. If SwingTree compared the movement with 5 pixels of the screen, it would cancel it.
+
+            The component paints "Hello world". Your user presses the button on the middle of "world" and moves the
+            mouse while holding it. The time of a long press depends on the timer of Swing and on how busy the
+            computer is, so this scenario does not wait a fixed time: it checks the property every 10 milliseconds
+            and gives up only after 5 seconds.
+
+            In this scenario the UI scale is ${uiScale}, and the mouse moves ${dx} pixels to the right and ${dy}
+            pixels down.
+        """
+        given : 'We set the UI scale factor of SwingTree. Every size in a style is multiplied by it:'
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "Hello " in red and "world" in blue, whose selection style switches the long press on:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "Hello " ),
+                                StyledString.of( f -> f.color(BLUE), "world"  )
+                            )
+                            .selection( s -> s.selectWordOnLongPress(true) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the middle of the blue "world":'
+            var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+            int x = world.centerX
+            int y = world.centerY
+
+        when : 'We press the mouse button on the middle of "world" and move the mouse while holding it:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED, 0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_DRAGGED, 1, InputEvent.BUTTON1_DOWN_MASK, x + dx, y + dy, 1, false, MouseEvent.BUTTON1))
+            }
+        and : 'We check the property every 10 milliseconds until "world" is selected, for at most 5 seconds:'
+            var deadline = System.currentTimeMillis() + 5000
+            while ( selection.get().selectedText() != "world" && System.currentTimeMillis() < deadline )
+                Thread.sleep(10)
+
+        then : 'The word "world" is selected, from its start at position 6 to its end at position 11:'
+            selection.get().anchor() == 6
+            selection.get().caret()  == 11
+
+        cleanup : 'We release the mouse button and set the UI scale factor back to 1:'
+            UI.runNow {
+                box?.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 2, 0, x + dx, y + dy, 1, false, MouseEvent.BUTTON1))
+            }
+            SwingTree.get().setUiScaleFactor(1f)
+
+        where :
+            uiScale | dx | dy
+            1f      | 3  | 2
+            2f      | 8  | 0
+    }
+
+    def 'At a UI scale of 2, with `selection(s -> s.selectWordOnLongPress(true))`, moving the mouse by 14 pixels on the screen, more than the 10 pixels which the allowed 5 pixels become, cancels the long press.'()
+    {
+        reportInfo """
+            With `selectWordOnLongPress(true)`, holding the left mouse button down on a word for about half a second
+            selects that word, and a movement of up to 5 pixels before then is allowed. Just as with every size in a style,
+            these 5 pixels are multiplied by the UI scale, so at a UI scale of 2 the long press allows 10 pixels on
+            the screen, and a movement of 14 pixels cancels it. The movement is then a drag, which selects from the
+            press to the mouse, and not the word.
+
+            The component paints "Hello world". Your user presses the button on the middle of "world" and moves the
+            mouse 14 pixels to the right. To prove that the long press does not happen later, this scenario waits
+            1.5 seconds, three times the time of a long press.
+        """
+        given : 'We set the UI scale factor of SwingTree to 2. Every size in a style is multiplied by it:'
+            SwingTree.get().setUiScaleFactor(2f)
+        and : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "Hello " in red and "world" in blue, whose selection style switches the long press on:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "Hello " ),
+                                StyledString.of( f -> f.color(BLUE), "world"  )
+                            )
+                            .selection( s -> s.selectWordOnLongPress(true) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the middle of the blue "world":'
+            var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+            int x = world.centerX
+            int y = world.centerY
+
+        when : 'We press the mouse button on the middle of "world", move the mouse 14 pixels to the right while holding it, and wait 1.5 seconds:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED, 0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_DRAGGED, 1, InputEvent.BUTTON1_DOWN_MASK, x + 14, y, 1, false, MouseEvent.BUTTON1))
+            }
+            Thread.sleep(1500)
+            UI.sync()
+
+        then : 'The drag selected from the gap nearest to the press to the gap nearest to the mouse, and not the word:'
+            selection.get().anchor() == selection.get().positionAt(Position.of(x, y)).get()
+            selection.get().caret()  == selection.get().positionAt(Position.of(x + 14, y)).get()
+            selection.get().selectedText() != "world"
+
+        cleanup : 'We release the mouse button and set the UI scale factor back to 1:'
+            UI.runNow {
+                box?.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 2, 0, x + 14, y, 1, false, MouseEvent.BUTTON1))
+            }
+            SwingTree.get().setUiScaleFactor(1f)
+    }
+
+    def 'With `selection(s -> s.selectWordOnLongPress(true))`, moving the mouse by more than 5 pixels, releasing the button early, or losing the keyboard focus cancels the long press.'()
+    {
+        reportInfo """
+            With `selectWordOnLongPress(true)`, holding the left mouse button down on a word for about half a second
+            selects that word. Three things cancel the long press before then, and after each of them the press is
+            only what it is without a long press. If the long press fired anyway, the selection of your user would
+            jump to a word half a second after your user started to do something else.
+
+            Moving the mouse by more than 5 pixels while holding the button is a drag, so it selects from the
+            press to the mouse and not the word. Releasing the button early is a click, so it leaves only the caret.
+            Losing the keyboard focus, for example because a dialog opened, also leaves only the caret.
+
+            The component paints "Hello world". Each time, your user presses the button on the left edge of the
+            "w", where the nearest gap is position 6. To prove that nothing happens later, this scenario waits
+            1.5 seconds after each cancellation, three times the time of a long press. A focus event sent with
+            `dispatchEvent` first passes the `KeyboardFocusManager` of Swing, which drops it when the component is
+            not inside a focused window. A real window only gets the keyboard focus when the window manager of the
+            operating system gives it, which takes an unknown amount of time and may not happen at all while other
+            windows are in front, so this scenario hands the focus event over with
+            `KeyboardFocusManager.redispatchEvent`, which delivers it directly.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "Hello " in red and "world" in blue, whose selection style switches the long press on:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "Hello " ),
+                                StyledString.of( f -> f.color(BLUE), "world"  )
+                            )
+                            .selection( s -> s.selectWordOnLongPress(true) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the left edge of the blue "w":'
+            var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+            int x = world.x
+            int y = world.centerY
+
+        when : 'We press the button on the left edge of the "w", move the mouse 20 pixels to the right while holding it, and wait 1.5 seconds:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED, 0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_DRAGGED, 1, InputEvent.BUTTON1_DOWN_MASK, x + 20, y, 1, false, MouseEvent.BUTTON1))
+            }
+            Thread.sleep(1500)
+            UI.sync()
+        then : 'The drag selected from the "w" to the gap nearest to the mouse, and not the word:'
+            selection.get().anchor() == 6
+            selection.get().caret()  == selection.get().positionAt(Position.of(x + 20, y)).get()
+            selection.get().caret()  < 11
+
+        when : 'We release the button, press it again on the left edge of the "w", release it at once, and wait 1.5 seconds:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 2, 0, x + 20, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  3, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 4, 0, x, y, 1, false, MouseEvent.BUTTON1))
+            }
+            Thread.sleep(1500)
+            UI.sync()
+        then : 'Only the caret is left, in front of the "w":'
+            selection.get().isEmpty()
+            selection.get().caret() == 6
+
+        when : 'We press the button again on the left edge of the "w", the component loses the keyboard focus, and we wait 1.5 seconds:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED, 5, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box, new FocusEvent(box, FocusEvent.FOCUS_LOST))
+            }
+            Thread.sleep(1500)
+            UI.sync()
+        then : 'Only the caret is left, in front of the "w":'
+            selection.get().isEmpty()
+            selection.get().caret() == 6
+
+        cleanup : 'We release the mouse button:'
+            UI.runNow {
+                box?.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 6, 0, x, y, 1, false, MouseEvent.BUTTON1))
+            }
+    }
+
+    def 'With `selection(s -> s.copyToClipboard(false))`, copying puts nothing onto a clipboard and leaves on it what was there, while the keyboard shortcut for selecting everything still selects every character.'()
+    {
+        reportInfo """
+            By default, your users can copy the selected characters. With `copyToClipboard(false)`, they can still
+            select them, but nothing reaches any clipboard: the `TransferHandler` of the component, which the keyboard
+            shortcut for copying calls, hands out nothing. Whatever was on the clipboard before stays there, so your
+            users do not lose what they copied from another program. Selecting everything with Ctrl+A, or Command+A
+            on macOS, is not copying, so it still works.
+
+            The component paints "Hello world", and "world" is selected. This scenario calls `exportToClipboard` on
+            the `TransferHandler` of the component with a clipboard that only this scenario uses, which holds the
+            text "copied before", so it neither needs nor overwrites the clipboard of the computer. A key event sent
+            with `dispatchEvent` only reaches the component which has the keyboard focus, and a component which is
+            not inside a window never has the keyboard focus. So we hand the key event for selecting everything to
+            the component with `KeyboardFocusManager.redispatchEvent`, which delivers it directly.
+        """
+        given : 'A property which holds a selection of "world", from position 6 to position 11:'
+            var selection = Var.of(TextSelection.between(6, 11))
+        and : 'A component which paints "Hello world", whose selection style switches copying off:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello world")
+                            .selection( s -> s.copyToClipboard(false) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'A clipboard that only this scenario uses, which holds the text "copied before":'
+            var clipboard = new Clipboard("clipboard of this scenario")
+            clipboard.setContents(new StringSelection("copied before"), null)
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We call `exportToClipboard` on the `TransferHandler` of the component:'
+            UI.runNow { box.getTransferHandler().exportToClipboard(box, clipboard, TransferHandler.COPY) }
+        then : '"world" is still selected, and the clipboard still holds "copied before":'
+            selection.get().selectedText() == "world"
+            clipboard.getData(DataFlavor.stringFlavor) == "copied before"
+
+        when : 'We press the keyboard shortcut for selecting everything:'
+            int shortcutKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.META_MASK
+                                ? InputEvent.META_DOWN_MASK
+                                : InputEvent.CTRL_DOWN_MASK
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                    new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, shortcutKey, KeyEvent.VK_A, KeyEvent.CHAR_UNDEFINED)
+                )
+            }
+        then : 'Everything is selected:'
+            selection.get().anchor() == 0
+            selection.get().caret()  == 11
+    }
+
+    @IgnoreIf({ GraphicsEnvironment.isHeadless() })
+    def 'With `selection(s -> s.copyToClipboard(false))`, the keyboard shortcut for copying leaves the clipboard of the computer as it was.'()
+    {
+        reportInfo """
+            With `copyToClipboard(false)`, nothing reaches any clipboard, also not through the keyboard shortcut for
+            copying, which is Ctrl+C on Windows and Linux and Command+C on macOS. The component paints "Hello world"
+            and "world" is selected, but after the shortcut the clipboard of the computer still holds what was on it.
+
+            When Java runs in headless mode, `Toolkit.getSystemClipboard()` throws a `HeadlessException`, so this
+            scenario only runs when Java is not headless. A key event sent with `dispatchEvent` only reaches the
+            component which has the keyboard focus, and a component which is not inside a window never has the
+            keyboard focus. So we hand the key event to the component with `KeyboardFocusManager.redispatchEvent`,
+            which delivers it directly.
+        """
+        given : 'A component which paints "Hello world" with "world" selected, whose selection style switches copying off:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .text("body", t -> t
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("Hello world")
+                            .selection( s -> s.copyToClipboard(false) )
+                        )
+                    )
+                    .withTextSelection("body", Var.of(TextSelection.between(6, 11)))
+                    .get(JBox)
+        and : 'The real clipboard of the computer, whose text we remember so that we can put it back, with "something else" on it:'
+            var systemClipboard = Toolkit.getDefaultToolkit().getSystemClipboard()
+            var formerContents  = systemClipboard.getContents(null)
+            var formerText      = formerContents != null && formerContents.isDataFlavorSupported(DataFlavor.stringFlavor)
+                                    ? formerContents.getTransferData(DataFlavor.stringFlavor)
+                                    : null
+            systemClipboard.setContents(new StringSelection("something else"), null)
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We send the keyboard shortcut for copying:'
+            int shortcutKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.META_MASK
+                                ? InputEvent.META_DOWN_MASK
+                                : InputEvent.CTRL_DOWN_MASK
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                    new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, shortcutKey, KeyEvent.VK_C, KeyEvent.CHAR_UNDEFINED)
+                )
+            }
+
+        then : 'The clipboard still holds "something else":'
+            systemClipboard.getData(DataFlavor.stringFlavor) == "something else"
+
+        cleanup : 'We put the text back which was on the clipboard before the scenario began:'
+            if ( formerText != null )
+                systemClipboard.setContents(new StringSelection(formerText as String), null)
+    }
+
+    def 'Setting each of the switches `navigateWithKeyboard`, `selectWordOnDoubleClick`, `selectParagraphOnTripleClick`, `selectWordOnLongPress` and `copyToClipboard` to its default makes a selection style equal to the default one.'()
+    {
+        reportInfo """
+            The selection style has five switches for what the mouse and the keyboard do: `navigateWithKeyboard`,
+            `selectWordOnDoubleClick`, `selectParagraphOnTripleClick` and `copyToClipboard` are `true` by default,
+            and `selectWordOnLongPress` is `false`. Setting a switch to the value which it already has changes
+            nothing, so a style which sets all five to their defaults equals a style which sets none of them, has
+            the same hash code and prints the same text. Your code can therefore set a switch from a setting of
+            your users without checking whether the setting differs from the default. If setting a switch to its
+            current value flipped it instead, `selectWordOnLongPress(false)` would switch the long press on.
+
+            We let the style of a text hand the selection style which it builds to a variable of this scenario.
+            `selection(..)` passes the current selection style to the function you give it, and uses the style
+            which that function returns.
+        """
+        given : 'Two variables which receive the selection styles:'
+            var withoutSwitches  = null
+            var withDefaultsSet  = null
+        and : 'Two components, one whose selection style sets no switch, and one which sets every switch to its default:'
+            UI.box()
+            .withStyle( it -> it.text("body", t -> t.content("Hello world").selection( s -> withoutSwitches = s.showCaret(true) )) )
+            .withTextSelection("body")
+            .get(JBox)
+            UI.box()
+            .withStyle( it -> it.text("body", t -> t.content("Hello world").selection( s -> withDefaultsSet = s
+                .showCaret(true)
+                .navigateWithKeyboard(true)
+                .selectWordOnDoubleClick(true)
+                .selectParagraphOnTripleClick(true)
+                .selectWordOnLongPress(false)
+                .copyToClipboard(true)
+            )) )
+            .withTextSelection("body")
+            .get(JBox)
+
+        expect : 'Both styles are equal, have the same hash code and print the same text:'
+            withoutSwitches != null
+            withoutSwitches == withDefaultsSet
+            withoutSwitches.hashCode() == withDefaultsSet.hashCode()
+            withoutSwitches.toString() == withDefaultsSet.toString()
+        and : 'The text names every switch with its value:'
+            withoutSwitches.toString().contains("navigateWithKeyboard=true")
+            withoutSwitches.toString().contains("selectWordOnDoubleClick=true")
+            withoutSwitches.toString().contains("selectParagraphOnTripleClick=true")
+            withoutSwitches.toString().contains("selectWordOnLongPress=false")
+            withoutSwitches.toString().contains("copyToClipboard=true")
+        and : 'Flipping any one switch makes a style which is not equal to them:'
+            withoutSwitches != withDefaultsSet.navigateWithKeyboard(false)
+            withoutSwitches != withDefaultsSet.selectWordOnDoubleClick(false)
+            withoutSwitches != withDefaultsSet.selectParagraphOnTripleClick(false)
+            withoutSwitches != withDefaultsSet.selectWordOnLongPress(true)
+            withoutSwitches != withDefaultsSet.copyToClipboard(false)
+    }
+
+    def 'With `withTextSelection("body", selection)`, Home and End leave a caret in an empty paragraph where it is, while Ctrl+End, or Alt+End on macOS, still moves it to the end of the text.'()
+    {
+        reportInfo """
+            Home and End move the caret to the start and the end of its line. In an empty paragraph, which lies
+            between two line breaks in a row, the start and the end of the line are the same gap, so Home and End
+            leave the caret where it is. If they jumped to the start or the end of the whole text instead, your
+            users would lose their place in a long text by pressing a key which should keep them on their line.
+
+            The text is "First", two line breaks and "Third". A line break counts as one character, so position 5
+            is the gap in front of the first line break, position 6 is the gap between the two line breaks, which
+            is the empty paragraph, and position 12 is the end of the text. With Ctrl held down, or Alt where the
+            keyboard shortcuts of the operating system use the Command key, End still moves the caret to the end of
+            the text. This scenario asks `Toolkit.getMenuShortcutKeyMask()` which of the two keys applies.
+
+            A key event sent with `dispatchEvent` only reaches the component which has the keyboard focus, and a
+            component which is not inside a window never has the keyboard focus. So we hand the key events to the
+            component with `KeyboardFocusManager.redispatchEvent`, which delivers them directly.
+        """
+        given : 'A property which holds a caret at position 5, behind "First":'
+            var selection = Var.of(TextSelection.caretAt(5))
+        and : 'A component which paints "First", an empty paragraph and "Third":'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 150)
+                        .padding(10)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content("First\n\nThird")
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'The modifier key which jumps to the end of the text: Alt where the shortcut key is the Command key, and Ctrl everywhere else:'
+            int farKey = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.META_MASK
+                            ? InputEvent.ALT_DOWN_MASK
+                            : InputEvent.CTRL_DOWN_MASK
+        and : 'A small tool which presses a key with the given modifier keys held down:'
+            var press = { int keyCode, int modifiers ->
+                UI.runNow {
+                    KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                        new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, modifiers, keyCode, KeyEvent.CHAR_UNDEFINED)
+                    )
+                }
+            }
+        and : 'We render the component once, so that SwingTree knows where every character is:'
+            Utility.renderSingleComponent(box)
+
+        when : 'We press the right arrow key, which moves the caret over the first line break into the empty paragraph:'
+            press(KeyEvent.VK_RIGHT, 0)
+        then : 'The caret is at position 6:'
+            selection.get().caret() == 6
+
+        when : 'We press End:'
+            press(KeyEvent.VK_END, 0)
+        then : 'The caret is still at position 6:'
+            selection.get().caret() == 6
+        when : 'We press Home:'
+            press(KeyEvent.VK_HOME, 0)
+        then : 'The caret is still at position 6:'
+            selection.get().caret() == 6
+
+        when : 'We press End with the far key held down:'
+            press(KeyEvent.VK_END, farKey)
+        then : 'The caret is at the end of the text:'
+            selection.get().caret() == 12
+    }
+
+    @PendingFeature(reason = "an empty paragraph has no painted line, so no caret rectangle and no mouse position (TextLayoutEngine)")
+    def 'With `withTextSelection("body", selection)`, a triple click on an empty paragraph selects nothing and puts the caret between its two line breaks.'()
+    {
+        reportInfo """
+            A paragraph is everything between two line breaks of the text, the "\\n" characters, and a triple click
+            selects the paragraph under the mouse. Two line breaks in a row make an empty paragraph, which SwingTree
+            paints as an empty line. A triple click on that line selects everything between its two line breaks,
+            which is nothing, so only the caret is left, in the gap between them.
+
+            The text is "First", two line breaks and "Third". A line break counts as one character, so position 6 is
+            the gap between the two line breaks. Your user triple-clicks in the middle of the empty line, halfway
+            between the letters of "First" and the letters of "Third". If SwingTree took the paragraph of the nearest
+            letters instead, it would select "First" or "Third", which your user did not click on.
+
+            Swing reports the second and the third press of a series of clicks as mouse press events whose click
+            count is 2 and 3.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "First" in red, an empty paragraph, and "Third" in blue:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "First\n\n" ),
+                                StyledString.of( f -> f.color(BLUE), "Third" )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the point halfway between the red and the blue letters:'
+            var image = Utility.renderSingleComponent(box)
+            var above = boundsOfPixelsPaintedIn(image, RED)
+            var below = boundsOfPixelsPaintedIn(image, BLUE)
+            int x = above.x
+            int y = ((above.y + above.height) + below.y) / 2
+
+        when : 'We triple-click there:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, x, y, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, x, y, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  4, InputEvent.BUTTON1_DOWN_MASK, x, y, 3, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 5, 0, x, y, 3, false, MouseEvent.BUTTON1))
+            }
+
+        then : '"Third" is painted two lines below "First", with the empty line between them:'
+            below.y >= above.y + above.height + 15
+        and : 'Nothing is selected, and the caret is in the gap between the two line breaks:'
+            selection.get().isEmpty()
+            selection.get().caret() == 6
+    }
+
+    @PendingFeature(reason = "an empty paragraph has no painted line, so no caret rectangle and no mouse position (TextLayoutEngine)")
+    def 'With `withTextSelection("body", selection)`, a caret in an empty paragraph has a rectangle on the empty line, and the down arrow key reaches it from the line above.'()
+    {
+        reportInfo """
+            Two line breaks in a row make an empty paragraph, which SwingTree paints as an empty line. A caret in that
+            paragraph lies on the empty line, so `caretBounds()` returns a rectangle below the line above it and above
+            the line below it, and SwingTree paints the caret there. The down arrow key moves the caret from the line
+            above to the line below it, and the empty line is the line below the first one, so the caret goes into the
+            empty paragraph and not over it.
+
+            The text is "First", two line breaks and "Third". A line break counts as one character, so position 6 is
+            the gap between the two line breaks. A key event sent with `dispatchEvent` only reaches the component which
+            has the keyboard focus, and a component which is not inside a window never has the keyboard focus. So we
+            hand the key event to the component with `KeyboardFocusManager.redispatchEvent`, which delivers it directly.
+        """
+        given : 'A property which holds a caret at position 6, in the empty paragraph:'
+            var selection = Var.of(TextSelection.caretAt(6))
+        and : 'A component which paints "First" in red, an empty paragraph, and "Third" in blue:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "First\n\n" ),
+                                StyledString.of( f -> f.color(BLUE), "Third" )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the red and the blue letters. `UI.sync()` waits until SwingTree has
+            written the caret rectangle into the property:
+        """
+            var image = Utility.renderSingleComponent(box)
+            UI.sync()
+            var above = boundsOfPixelsPaintedIn(image, RED)
+            var below = boundsOfPixelsPaintedIn(image, BLUE)
+
+        then : 'The caret rectangle lies between the red and the blue letters:'
+            selection.get().caretBounds().isPresent()
+            selection.get().caretBounds().get().location().y() >= above.y + above.height - 1
+            selection.get().caretBounds().get().location().y() + selection.get().caretBounds().get().size().height().get() <= below.y + 1
+
+        when : 'Your code puts the caret at position 2, in "First", and we press the down arrow key:'
+            UI.runNow { selection.set(TextSelection.caretAt(2)) }
+            UI.runNow {
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().redispatchEvent(box,
+                    new KeyEvent(box, KeyEvent.KEY_PRESSED, 0, 0, KeyEvent.VK_DOWN, KeyEvent.CHAR_UNDEFINED)
+                )
+            }
+        then : 'The caret is in the empty paragraph:'
+            selection.get().caret() == 6
+    }
+
+    def 'With `withTextSelection()` and no property, your users can select and copy the text which `text(t -> ..)` declares without a name.'()
+    {
+        reportInfo """
+            `withTextSelection()` takes no property, for a text which your users should be able to select and copy
+            while your code never needs to know what they selected. SwingTree then keeps the selection inside the
+            component. It makes the text selectable which the style declares with `text(t -> ..)`, without a name,
+            in the content layer.
+
+            The component paints "Hello " in red and "world" in blue. Your user presses the mouse button on the left
+            edge of the "w", drags it to the right edge of the "d" and releases it there. Then the scenario copies
+            the selection by calling `exportToClipboard` on the `TransferHandler` of the component, which is what the
+            keyboard shortcut for copying calls, with a clipboard that only this scenario uses. If SwingTree made the
+            wrong text selectable, or none, the clipboard would stay empty.
+        """
+        given : 'A component which paints "Hello " in red and "world" in blue as the text without a name, made selectable with `withTextSelection()`:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                            .text( t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "Hello " ),
+                                StyledString.of( f -> f.color(BLUE), "world"  )
+                            )
+                        )
+                    )
+                    .withTextSelection()
+                    .get(JBox)
+        and : 'We render the component and find the left edge of the "w" and the right edge of the "d":'
+            var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+            int leftEdgeOfW  = world.x
+            int rightEdgeOfD = world.x + world.width - 1
+            int lineMiddle   = world.centerY
+
+        when : 'We drag from the left edge of the "w" to the right edge of the "d":'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, leftEdgeOfW, lineMiddle, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_DRAGGED,  1, InputEvent.BUTTON1_DOWN_MASK, rightEdgeOfD, lineMiddle, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 2, 0, rightEdgeOfD, lineMiddle, 1, false, MouseEvent.BUTTON1))
+            }
+        and : 'We copy the selection into a clipboard that only this scenario uses:'
+            var clipboard = new Clipboard("clipboard of this scenario")
+            UI.runNow { box.getTransferHandler().exportToClipboard(box, clipboard, TransferHandler.COPY) }
+
+        then : 'The clipboard holds "world":'
+            clipboard.getData(DataFlavor.stringFlavor) == "world"
+    }
+
+    def 'With `withTextSelection(UI.Layer.FOREGROUND, "caption")` and no property, your users can select and copy the text which the style declares in its foreground with `text(UI.Layer.FOREGROUND, "caption", ..)`.'()
+    {
+        reportInfo """
+            `withTextSelection(UI.Layer.FOREGROUND, "caption")` takes no property, for a text which your users should
+            be able to select and copy while your code never needs to know what they selected. SwingTree then keeps
+            the selection inside the component. It makes the text named "caption" selectable which the style
+            declares in its foreground layer with `text(UI.Layer.FOREGROUND, "caption", ..)`.
+
+            The component paints "Hello " in red and "world" in blue. Your user presses the mouse button on the left
+            edge of the "w", drags it to the right edge of the "d" and releases it there. Then the scenario copies
+            the selection by calling `exportToClipboard` on the `TransferHandler` of the component, which is what the
+            keyboard shortcut for copying calls, with a clipboard that only this scenario uses. If SwingTree made the
+            wrong text selectable, or none, the clipboard would stay empty.
+        """
+        given : 'A component which paints "Hello " in red and "world" in blue as the foreground text "caption", made selectable with `withTextSelection(UI.Layer.FOREGROUND, "caption")`:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                            .text(UI.Layer.FOREGROUND, "caption", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "Hello " ),
+                                StyledString.of( f -> f.color(BLUE), "world"  )
+                            )
+                        )
+                    )
+                    .withTextSelection(UI.Layer.FOREGROUND, "caption")
+                    .get(JBox)
+        and : 'We render the component and find the left edge of the "w" and the right edge of the "d":'
+            var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
+            int leftEdgeOfW  = world.x
+            int rightEdgeOfD = world.x + world.width - 1
+            int lineMiddle   = world.centerY
+
+        when : 'We drag from the left edge of the "w" to the right edge of the "d":'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, leftEdgeOfW, lineMiddle, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_DRAGGED,  1, InputEvent.BUTTON1_DOWN_MASK, rightEdgeOfD, lineMiddle, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 2, 0, rightEdgeOfD, lineMiddle, 1, false, MouseEvent.BUTTON1))
+            }
+        and : 'We copy the selection into a clipboard that only this scenario uses:'
+            var clipboard = new Clipboard("clipboard of this scenario")
+            UI.runNow { box.getTransferHandler().exportToClipboard(box, clipboard, TransferHandler.COPY) }
+
+        then : 'The clipboard holds "world":'
+            clipboard.getData(DataFlavor.stringFlavor) == "world"
+    }
+
+    def 'Moving the anchor with `withAnchorAt(..)` keeps the caret and the line on which it lies, also where a line wraps.'()
+    {
+        reportInfo """
+            `withAnchorAt(..)` moves the anchor of a selection to the position nearest to a pixel coordinate, for
+            example where your code paints a handle which your users drag. The caret is the other end of the
+            selection, and it stays exactly where it was: at the same position, and on the same one of the two
+            lines where its position is both the end of one line and the start of the next.
+
+            The content area of the component is 100 pixels wide, and the text is "HHHH HHHH". With
+            `wrapLines(true)` the first word and the space behind it go onto the first line, and the second word
+            onto the second line, so position 5 ends the first line and starts the second. Your code selects from
+            position 2 to position 5, so the caret lies at the end of the first line. Then it moves the anchor to
+            the middle of the third green letter, on the second line, which is position 7. The selection now reaches
+            from 7 back to 5, but its caret still lies at the end of the first line. If `withAnchorAt(..)` worked out
+            the place of the caret again, the caret would jump to the start of the second line, although your users
+            moved only the anchor.
+        """
+        given : 'A property which holds a selection from position 2 to position 5:'
+            var selection = Var.of(TextSelection.between(2, 5))
+        and : 'A component whose content area is 100 pixels wide, with the first word in red and the second in green:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHH " ),
+                                StyledString.of( f -> f.color(GREEN), "HHHH"  )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component, find the letters, and let SwingTree write the selection with its rectangles into the property:'
+            var image      = Utility.renderSingleComponent(box)
+            UI.sync()
+            var firstWord  = boundsOfPixelsPaintedIn(image, RED)
+            var secondWord = boundsOfPixelsPaintedIn(image, GREEN)
+            var before     = selection.get()
+
+        when : 'Your code moves the anchor to the gap between the second and the third green letter, two letters into the second line:'
+            var moved = before.withAnchorAt(Position.of(secondWord.x + 2 * secondWord.width / 4, secondWord.centerY))
+
+        then : 'The text was really wrapped, so the second word is below the first word:'
+            secondWord.y >= firstWord.y + firstWord.height
+        and : 'The anchor moved to position 7, and the caret stayed at position 5, at the end of the first line:'
+            moved.anchor() == 7
+            moved.caret()  == 5
+            moved.isCaretAtLineEnd()
+            moved.caretBounds() == before.caretBounds()
+            moved.caretBounds().get().location().y() < firstWord.y + firstWord.height
     }
 
     static int numberOfPixelsPaintedIn( BufferedImage image, Color color ) {
