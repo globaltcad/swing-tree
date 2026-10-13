@@ -1436,6 +1436,17 @@ final class StyleRenderer
         }
     }
 
+    private static Rectangle2D _caretShape( Bounds caret, TextSelectionConf look ) {
+        final float x      = caret.location().x();
+        final float top    = caret.location().y();
+        final float width  = caret.size().width().orElse(0f);
+        final float height = caret.size().height().orElse(0f);
+        if ( look.caretShape() != UI.CaretShape.UNDERLINE )
+            return new Rectangle2D.Float(x, top, width, height);
+        final float thickness = Math.min(height, CaretTable.thicknessOf(look.caretWidth()));
+        return new Rectangle2D.Float(x, top + height - thickness, width, thickness);
+    }
+
     private static void _renderSelection(
         final TextConf      text,
         final TextSelection range,
@@ -1447,7 +1458,7 @@ final class StyleRenderer
         try {
             if ( range.isEmpty() ) {
                 g2d.setPaint(look.caretColor().orElseGet(() -> _colorOf(text.fontConf())));
-                CaretTable.caretBoundsOf(fragments, range.caret()).ifPresent( caret -> g2d.fill(new Rectangle2D.Float(caret.location().x(), caret.location().y(), caret.size().width().orElse(0f), caret.size().height().orElse(0f))) );
+                CaretTable.caretBoundsOf(fragments, range.caret(), range.isCaretAtLineEnd(), look).ifPresent( caret -> g2d.fill(_caretShape(caret, look)) );
                 return;
             }
             final float           radius      = look.convexRadius();

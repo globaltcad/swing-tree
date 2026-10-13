@@ -32,17 +32,19 @@ import java.util.Optional;
  *  characters are selected: {@link #start()} is always the smaller and {@link #end()} always
  *  the larger of the two.
  *  <p>
- *  The two positions and {@link #isEnabled()} are the only parts of a selection which your code
- *  chooses. Everything else is read only, and SwingTree fills it in: after SwingTree has painted
- *  the text, it writes a selection into the property which holds the selected characters in
+ *  The two positions, {@link #isCaretAtLineEnd()} and {@link #isEnabled()} are the only parts of a
+ *  selection which your code chooses. Everything else is read only, and SwingTree fills it in:
+ *  after SwingTree has painted the text, it writes a selection into the property which holds the
+ *  selected characters in
  *  {@link #selectedText()}, the pixel rectangles of the anchor and the caret in {@link #anchorBounds()}
  *  and {@link #caretBounds()}, and which converts a pixel coordinate into a position in
  *  {@link #positionAt(Position)}. SwingTree also moves a position which lies behind the end of the
- *  text to the end of the text. A selection which your code creates with {@link #caretAt(int)} or
+ *  text to the end of the text, and sets {@link #isCaretAtLineEnd()} to {@code false} where the caret
+ *  is not the end of a painted line. A selection which your code creates with {@link #caretAt(int)} or
  *  {@link #between(int, int)} has none of this until SwingTree has written it into the property.
  *  <p>
- *  Two selections are equal when their positions, their {@link #isEnabled()} flag and everything
- *  that SwingTree filled in are equal. So the property receives a new selection whenever the
+ *  Two selections are equal when their positions, their {@link #isCaretAtLineEnd()} and {@link #isEnabled()}
+ *  flags and everything that SwingTree filled in are equal. So the property receives a new selection whenever the
  *  painted text moves, for example when the component gets a new size.
  */
 @Immutable
@@ -50,22 +52,25 @@ public final class TextSelection
 {
     private final int        _anchor;
     private final int        _caret;
+    private final boolean    _caretAtLineEnd;
     private final boolean    _enabled;
     private final CaretTable _carets;
 
-    private TextSelection( int anchor, int caret, boolean enabled, CaretTable carets ) {
+    private TextSelection( int anchor, int caret, boolean caretAtLineEnd, boolean enabled, CaretTable carets ) {
         if ( anchor < 0 || caret < 0 )
             throw new IllegalArgumentException(
                 "A text position is never negative, but the anchor is " + anchor + " and the caret is " + caret + "."
             );
-        _anchor  = anchor;
-        _caret   = caret;
-        _enabled = enabled;
-        _carets  = Objects.requireNonNull(carets);
+        _anchor         = anchor;
+        _caret          = caret;
+        _caretAtLineEnd = caretAtLineEnd;
+        _enabled        = enabled;
+        _carets         = Objects.requireNonNull(carets);
     }
 
     /**
      *  Creates an enabled selection of no characters, whose anchor and caret are both at the given position.
+     *  Where a line wraps, the caret lies at the start of the next line, see {@link #isCaretAtLineEnd()}.
      *
      * @param position The gap between two characters at which both the anchor and the caret are,
      *                 counted from 0 for the gap in front of the first character.
@@ -73,13 +78,14 @@ public final class TextSelection
      * @throws IllegalArgumentException If the position is negative.
      */
     public static TextSelection caretAt( int position ) {
-        return new TextSelection(position, position, true, CaretTable.EMPTY);
+        return new TextSelection(position, position, false, true, CaretTable.EMPTY);
     }
 
     /**
      *  Creates an enabled selection of the characters between the two given positions.
      *  The anchor may lie behind the caret, which is what a selection made by
-     *  dragging the mouse backwards looks like.
+     *  dragging the mouse backwards looks like. When the caret lies behind the anchor, so that the caret is
+     *  the end of the selected characters, {@link #isCaretAtLineEnd()} is {@code true}, otherwise {@code false}.
      *
      * @param anchor The position where the selection began, which a shift-click keeps.
      * @param caret The position which moves, which a shift-click replaces.
@@ -87,7 +93,7 @@ public final class TextSelection
      * @throws IllegalArgumentException If one of the positions is negative.
      */
     public static TextSelection between( int anchor, int caret ) {
-        return new TextSelection(anchor, caret, true, CaretTable.EMPTY);
+        return new TextSelection(anchor, caret, anchor < caret, true, CaretTable.EMPTY);
     }
 
     /**
@@ -143,19 +149,59 @@ public final class TextSelection
      * @return A selection with the given flag.
      */
     public TextSelection withEnabled( boolean enabled ) {
-        return enabled == _enabled ? this : new TextSelection(_anchor, _caret, enabled, _carets);
+        return enabled == _enabled ? this : new TextSelection(_anchor, _caret, _caretAtLineEnd, enabled, _carets);
     }
 
     /**
      *  Returns a selection with the same anchor and the given caret,
      *  which is what a click with the shift key held down makes of this selection.
+     *  When the new caret lies behind the anchor, so that it is the end of the selected characters,
+     *  {@link #isCaretAtLineEnd()} of the new selection is {@code true}, otherwise {@code false}.
+     *  If the caret already is at the given position, this method returns this selection.
      *
      * @param caret The new position of the caret.
      * @return A selection from the anchor of this selection to the given caret.
      * @throws IllegalArgumentException If the caret is negative.
      */
     public TextSelection withCaret( int caret ) {
-        return caret == _caret ? this : new TextSelection(_anchor, caret, _enabled, _carets);
+        return caret == _caret ? this : new TextSelection(_anchor, caret, _anchor < caret, _enabled, _carets);
+    }
+
+    /**
+     *  Tells where the caret lies when its position is both the end of one painted line and the start of the
+     *  next one. That happens where SwingTree wraps a long line, and on the two sides of an obstacle which the
+     *  text flows around. With {@code true}, the caret lies at the end of the upper line, right next to the
+     *  character in front of it. With {@code false}, it lies at the start of the next line, in front of the
+     *  character behind it. At every other position there is only one place, and this flag changes nothing.
+     *  Text editors know this as the affinity of the caret.
+     *  <p>
+     *  SwingTree sets the flag wherever your users put the caret: a click right of the end of a line, the End
+     *  key and the arrow keys up and down landing on the end of a line put the caret at the end of that line,
+     *  and a click in front of the first character of a line and the Home key put it at the start of the line.
+     *  When SwingTree writes a selection into the property, it keeps this flag only where the caret really is
+     *  the end of a painted line, and sets it to {@code false} everywhere else, so two carets in the same
+     *  place are equal. A selection which your code creates holds the value which your code chose until
+     *  SwingTree has written it into the property.
+     *  {@link #caretBounds()} returns the place which this flag chooses:
+     *  <pre>{@code
+     *  // "HHHH HHHH" wraps behind the space, so position 5 ends the first line and starts the second:
+     *  TextSelection atStartOfSecondLine = TextSelection.caretAt(5);
+     *  TextSelection atEndOfFirstLine    = TextSelection.caretAt(5).withCaretAtLineEnd(true);
+     *  }</pre>
+     *
+     * @return {@code true} if the caret lies at the end of the upper line where a position has two places.
+     */
+    public boolean isCaretAtLineEnd() { return _caretAtLineEnd; }
+
+    /**
+     *  Returns a selection with the same positions whose caret lies at the end of the upper line, or at the
+     *  start of the next line, where its position is both, see {@link #isCaretAtLineEnd()}.
+     *
+     * @param atLineEnd {@code true} for the end of the upper line, {@code false} for the start of the next line.
+     * @return A selection with the given flag.
+     */
+    public TextSelection withCaretAtLineEnd( boolean atLineEnd ) {
+        return atLineEnd == _caretAtLineEnd ? this : new TextSelection(_anchor, _caret, atLineEnd, _enabled, _carets);
     }
 
     /**
@@ -174,24 +220,29 @@ public final class TextSelection
      *  Returns the pixel rectangle of the caret on the component, which is where SwingTree paints the
      *  caret when {@code showCaret(true)} is set in the style of the selection. The rectangle uses the
      *  same coordinates as the mouse events of the component: pixels, counted from the top left corner
-     *  of the component, with the UI scale already applied. It reaches from the top to the bottom of the line of the caret.
-     *  Its left edge is the gap between the two characters, and it is one pixel wide, or as wide
-     *  as the UI scale factor when that is larger.
+     *  of the component, with the UI scale already applied. It reaches from the top to the bottom of the line of the caret,
+     *  and its left edge is the gap between the two characters, whatever the shape of the caret is.
+     *  For a {@link swingtree.UI.CaretShape#BAR}, which is the default, it is as wide as the {@code caretWidth} of the style
+     *  of the selection, and at least one pixel. For a {@link swingtree.UI.CaretShape#BLOCK} and an
+     *  {@link swingtree.UI.CaretShape#UNDERLINE}, it is as wide as the character behind the gap, and SwingTree
+     *  paints an underline into the bottom of it, as thick as the {@code caretWidth}.
      *  <p>
      *  The position where a line wraps is both the end of that line and the start of the next line.
-     *  When this selection is not empty and the caret is its {@link #end()}, the rectangle lies at the
-     *  end of the line which holds the last selected character. In every other case, the rectangle lies
-     *  in front of the character behind the caret. For example, when your users select up to the place
-     *  where a line wraps, the rectangle of the caret lies at the right end of the upper line, next to
-     *  the last selected character, and not in front of the first character of the next line. A caret
-     *  without selected characters at that place lies at the start of the next line.
+     *  There, {@link #isCaretAtLineEnd()} decides where the rectangle lies: at the end of the upper line
+     *  when it is {@code true}, and in front of the character behind the caret when it is {@code false}.
+     *  For example, when your users select up to the place where a line wraps, the rectangle of the caret
+     *  lies at the right end of the upper line, next to the last selected character, and not in front of
+     *  the first character of the next line. A caret made by {@link #caretAt(int)} at that place lies at
+     *  the start of the next line.
      *  <p>
-     *  It is empty for a selection which SwingTree has not written into the property yet, and for a
-     *  caret on a line which is not painted because the component is too small to show it.
+     *  It is empty for a selection which SwingTree has not written into the property yet, for a
+     *  caret on a line which is not painted because the component is too small to show it, and for a
+     *  caret in an empty paragraph between two line breaks in a row, which SwingTree paints as an empty
+     *  line without a rectangle for the caret.
      *
      * @return The rectangle of the caret, or an empty {@link Optional}.
      */
-    public Optional<Bounds> caretBounds() { return _carets.boundsOf(_caret, !isEmpty() && _caret == end()); }
+    public Optional<Bounds> caretBounds() { return _carets.boundsOf(_caret, _caretAtLineEnd); }
 
     /**
      *  Returns the pixel rectangle of the anchor on the component, measured in the same way as
@@ -222,7 +273,9 @@ public final class TextSelection
     /**
      *  Returns a selection with the same anchor and the caret at the position nearest to the given
      *  pixel coordinate, see {@link #positionAt(Position)}. This is what dragging the mouse to the
-     *  coordinate does.
+     *  coordinate does to the position of the caret. {@link #isCaretAtLineEnd()} follows the rule of
+     *  {@link #withCaret(int)}, so call {@link #withCaretAtLineEnd(boolean)} afterwards to choose the
+     *  other place of a position where a line wraps.
      *
      * @param point A pixel coordinate on the component.
      * @return A selection with the moved caret, or this selection if SwingTree has not written it into the property yet.
@@ -240,7 +293,7 @@ public final class TextSelection
      */
     public TextSelection withAnchorAt( Position point ) {
         return positionAt(point)
-                .map( anchor -> anchor == _anchor ? this : new TextSelection(anchor, _caret, _enabled, _carets) )
+                .map( anchor -> anchor == _anchor ? this : new TextSelection(anchor, _caret, _caretAtLineEnd, _enabled, _carets) )
                 .orElse(this);
     }
 
@@ -250,10 +303,11 @@ public final class TextSelection
     TextSelection resolvedWith( CaretTable carets ) {
         final int length = carets.text().length();
         final int anchor = Math.min(_anchor, length);
-        final int caret  = Math.min(_caret, length);
-        if ( anchor == _anchor && caret == _caret && carets == _carets )
+        final int     caret     = Math.min(_caret, length);
+        final boolean atLineEnd = _caretAtLineEnd && carets.isLineEnd(caret);
+        if ( anchor == _anchor && caret == _caret && atLineEnd == _caretAtLineEnd && carets == _carets )
             return this;
-        return new TextSelection(anchor, caret, _enabled, carets);
+        return new TextSelection(anchor, caret, atLineEnd, _enabled, carets);
     }
 
     @Override
@@ -263,15 +317,16 @@ public final class TextSelection
         if ( !(other instanceof TextSelection) )
             return false;
         final TextSelection that = (TextSelection) other;
-        return _anchor  == that._anchor  &&
-               _caret   == that._caret   &&
-               _enabled == that._enabled &&
+        return _anchor         == that._anchor         &&
+               _caret          == that._caret          &&
+               _caretAtLineEnd == that._caretAtLineEnd &&
+               _enabled        == that._enabled        &&
                _carets.equals(that._carets);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_anchor, _caret, _enabled, _carets);
+        return Objects.hash(_anchor, _caret, _caretAtLineEnd, _enabled, _carets);
     }
 
     @Override
@@ -279,6 +334,7 @@ public final class TextSelection
         return getClass().getSimpleName() + "[" +
                     "anchor=" + _anchor + ", " +
                     "caret=" + _caret + ", " +
+                    "caretAtLineEnd=" + _caretAtLineEnd + ", " +
                     "enabled=" + _enabled + ", " +
                     "selectedText='" + selectedText() + "', " +
                     "anchorBounds=" + anchorBounds().map(Object::toString).orElse("?") + ", " +
