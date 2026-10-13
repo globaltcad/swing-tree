@@ -216,7 +216,7 @@ public class JScrollPanels extends UI.ScrollPane
 <span class="fc" id="L216">        Objects.requireNonNull(entryViewModel);</span>
 <span class="fc" id="L217">        EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, viewSupplier, _internal.getComponents().length);</span>
 <span class="fc" id="L218">        _internal.add(entryPanel);</span>
-<span class="fc" id="L219">        this.validate();</span>
+<span class="fc" id="L219">        this.revalidate();</span>
 <span class="fc" id="L220">    }</span>
 
     /**
@@ -257,7 +257,7 @@ public class JScrollPanels extends UI.ScrollPane
 <span class="fc bfc" id="L257" title="All 2 branches covered.">        for ( int j = 0; j &lt; entryPanels.size(); j++ ) {</span>
 <span class="fc" id="L258">            _internal.add(entryPanels.get(j), index + j);</span>
         }
-<span class="fc" id="L260">        this.validate();</span>
+<span class="fc" id="L260">        this.revalidate();</span>
 <span class="fc" id="L261">    }</span>
 
     /**
@@ -318,7 +318,7 @@ public class JScrollPanels extends UI.ScrollPane
 <span class="nc" id="L318">            }</span>
 <span class="nc" id="L319">        }</span>
 <span class="pc bpc" id="L320" title="1 of 2 branches missed.">        if ( somethingChanged ) {</span>
-<span class="nc" id="L321">            this.validate();</span>
+<span class="nc" id="L321">            this.revalidate();</span>
         }
 <span class="fc" id="L323">    }</span>
 
@@ -327,7 +327,7 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public void removeAllEntries() {
 <span class="fc" id="L329">        _internal.removeAll();</span>
-<span class="fc" id="L330">        this.validate();</span>
+<span class="fc" id="L330">        this.revalidate();</span>
 <span class="fc" id="L331">    }</span>
 
     /**
@@ -336,7 +336,7 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public void removeEntryAt( int index ) {
 <span class="nc" id="L338">        _internal.remove(index);</span>
-<span class="nc" id="L339">        this.validate();</span>
+<span class="nc" id="L339">        this.revalidate();</span>
 <span class="nc" id="L340">    }</span>
 
     /**
@@ -346,7 +346,7 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public void removeEntriesAt( int index, int count ) {
 <span class="fc" id="L348">        IntStream.range(0, count).forEach( i -&gt; _internal.remove(index) );</span>
-<span class="fc" id="L349">        this.validate();</span>
+<span class="fc" id="L349">        this.revalidate();</span>
 <span class="fc" id="L350">    }</span>
 
     /**
@@ -362,7 +362,7 @@ public class JScrollPanels extends UI.ScrollPane
 <span class="fc" id="L362">        Objects.requireNonNull(entryViewModel);</span>
 <span class="fc" id="L363">        EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);</span>
 <span class="fc" id="L364">        _internal.add(entryPanel, index);</span>
-<span class="fc" id="L365">        this.validate();</span>
+<span class="fc" id="L365">        this.revalidate();</span>
 <span class="fc" id="L366">    }</span>
 
     /**
@@ -412,7 +412,7 @@ public class JScrollPanels extends UI.ScrollPane
         // We have to re-add the entry panel at the same index
         // because the layout manager will otherwise add it at the end.
 <span class="fc" id="L414">        _internal.add(newEntryPanel, index);</span>
-<span class="fc" id="L415">        this.validate();</span>
+<span class="fc" id="L415">        this.revalidate();</span>
 <span class="fc" id="L416">    }</span>
 
     /**

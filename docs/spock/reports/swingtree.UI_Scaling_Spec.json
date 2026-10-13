@@ -1,10 +1,10 @@
 {
   "className":"swingtree.UI_Scaling_Spec",
-  "title":"High IPD Scaling",
+  "title":"High DPI Scaling",
   "narrative":"Higher resolution displays with higher pixel density\n    (measured in pixels per inch (PPI) or dots per inch (DPI)) have become the norm.\n    This is especially true for mobile devices, but it is also true for desktop displays.\n\n    Vanilla Swing does not handle this well unfortunately, even with the introduction of\n    the HiDPI support in Java 9, which allows us to determine the DPI of the display.\n    Because although we calculate the scaling factor, there is no way to apply it to the UI.\n    Instead the task is left to the Look and Feel implementations which may or may not\n    scale the UI.\n    The problem is that older Look and Feels do not scale the UI, and even newer ones\n    may not scale the UI at all.\n    In fact none of the Look and Feels included in the JDK scale the UI.\n\n    SwingTree can hardly solve this problem entirely, but it can help by scaling the UI\n    where the Look and Feel does not.\n    In this specification you will find out how to adjust the SwingTree scaling factor\n    and how it affects the properties of the UI components.",
   "subjects":[],
   "statistics":{
-    "runs":"32",
+    "runs":"33",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -682,6 +682,39 @@
         {"kind":"when","text":"Dynamic properties change at scaled factor","code":["dynamicFont.set(UI.Font.of(\"Verdana\", UI.FontStyle.PLAIN, 20))","dynamicSize.set(18)","UI.sync()"]},
 
         {"kind":"then","text":"Dynamic fonts update while static ones remain scaled","code":["button.font.size == 27  // unchanged custom font at scale","label.font.style == Font.PLAIN","label.font.size == 30   // 20 * 1.5","textField.font.size == 27  // 18 * 1.5","textArea.font.size == 18   // unchanged static size at scale"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A composite font passed to `withFont(Font)` keeps its fallback fonts when the UI scale factor changes.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            No font contains a glyph for every character. This is why Swing's `StyleContext`\n            returns a *composite font* from `getFont(String, int, int)`: the requested font\n            family, followed by a list of fallback fonts. When the requested family has no glyph\n            for a character, Swing draws that character with the first fallback font that has\n            one. FlatLaf creates the fonts it installs in the same way. A label whose font is a\n            composite font of the Ubuntu family therefore displays symbols such as ▸, ▾ and ✦,\n            although the Ubuntu family has no glyphs for them.\n\n            When the UI scale factor changes, SwingTree calls `setFont(..)` on every component\n            that has a font of its own, with a font of the new size. This new font must have\n            the same fallback fonts as the font it replaces. `Font.deriveFont(float)` copies the\n            fallback fonts to the font it returns. `new Font(Map)` does not: it builds a font\n            with the same family, style and size, but without fallback fonts, and Swing draws\n            every character the family has no glyph for as an empty box.\n\n            SwingTree used to build the font of the new size with `new Font(Map)`. A label\n            displayed the symbols correctly until the first change of the UI scale factor, and\n            displayed empty boxes instead of them from then on. This scenario pins the fix:\n            the font of the new size draws every character that the font passed to\n            `withFont(Font)` could draw.\n\n            The scenario uses the Ubuntu font from SwingTree's test resources, because the\n            Ubuntu family has no glyphs for the three symbols. The test configuration of\n            SwingTree installs a plain 13 point Ubuntu font as the default font of every\n            component. The fonts in this scenario are 14 points large, so that they are\n            never equal to that default font. The next scenario explains why a font equal\n            to the current font of a component is a case of its own.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"SwingTree is initialized with its test configuration, which registers the Ubuntu font from the test resources with the JVM. The UI scale factor is one.","code":["SwingTree.initializeUsing(SwingTreeTestConfigurator.get())","SwingTree.get().setEventProcessor(EventProcessor.COUPLED)","SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"Three symbols that the Ubuntu family has no glyphs for, and a plain 14 point Ubuntu font created with `new Font(..)`.","code":["var symbols = \"▸▾✦\"","var bareUbuntu = new Font(\"Ubuntu\", Font.PLAIN, 14)"]},
+
+        {"kind":"and","text":"A 14 point composite font from the `StyleContext`, consisting of the Ubuntu family followed by fallback fonts.","code":["var compositeUbuntu = StyleContext.getDefaultStyleContext().getFont(\"Ubuntu\", Font.PLAIN, 14)"]},
+
+        {"kind":"and","text":"A label that displays the symbols, with the composite font passed to `withFont(Font)`.","code":["var label = UI.label(symbols + \" Wake\").withFont(compositeUbuntu).get(JLabel)"]},
+
+        {"kind":"expect","text":"The plain Ubuntu font cannot draw the first symbol, so only the fallback fonts of the composite font can draw the symbols.","code":["bareUbuntu.family == \"Ubuntu\"","bareUbuntu.canDisplayUpTo(symbols) == 0"]},
+
+        {"kind":"and","text":"The font of the label is 14 points large and draws all three symbols.","code":["label.font.size == 14","label.font.canDisplayUpTo(symbols) == -1"]},
+
+        {"kind":"when","text":"The UI scale factor changes from one to two.","code":["SwingTree.get().setUiScaleFactor(2f)","UI.sync()"]},
+
+        {"kind":"then","text":"The font of the label is 28 points large and still of the Ubuntu family.","code":["label.font.size == 28","label.font.family == \"Ubuntu\""]},
+
+        {"kind":"and","text":"The 28 point font draws all three symbols, because it has the fallback fonts of the composite font.","code":["label.font.canDisplayUpTo(symbols) == -1"]},
+
+        {"kind":"when","text":"The UI scale factor changes from two back to one.","code":["SwingTree.get().setUiScaleFactor(1f)","UI.sync()"]},
+
+        {"kind":"then","text":"The font of the label is 14 points large again and draws all three symbols.","code":["label.font.size == 14","label.font.canDisplayUpTo(symbols) == -1"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

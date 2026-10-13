@@ -218,7 +218,7 @@ final class StyleConfLayers
 <span class="fc" id="L218">                                totalHeight += insets.bottom().orElse(0f);</span>
 <span class="fc" id="L219">                                return totalHeight;</span>
                             }
-<span class="fc" id="L221">                            final Bounds textBounds = StyleRenderer.computeTextBounds(textConf, predictedBoxModel);</span>
+<span class="fc" id="L221">                            final Bounds textBounds = TextLayoutEngine.computeTextBounds(textConf, predictedBoxModel);</span>
 <span class="fc" id="L222">                            final float boundsWidth = textBounds.size().widthOrElse(0f);</span>
 <span class="fc" id="L223">                            final float boundsX     = textBounds.location().x();</span>
 <span class="fc" id="L224">                            final float boundsY     = textBounds.location().y();</span>
@@ -233,7 +233,7 @@ final class StyleConfLayers
 <span class="fc" id="L233">                                final FontRenderContext frc = g2d.getFontRenderContext();</span>
 <span class="fc" id="L234">                                final Pair&lt;Float, List&lt;TextLayoutEngine.LayoutLine&gt;&gt; layoutResult =</span>
 <span class="fc" id="L235">                                        TextLayoutEngine._buildTextLayoutsAndPreferredHeight(</span>
-<span class="fc" id="L236">                                                font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles(), textConf.placement()</span>
+<span class="fc" id="L236">                                                font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles(), StyleRenderer._findDesiredPlacementFrom(textConf)</span>
                                         );
 <span class="fc" id="L238">                                double totalHeight = layoutResult.first().doubleValue();</span>
 <span class="fc" id="L239">                                totalHeight += boundsY;</span>

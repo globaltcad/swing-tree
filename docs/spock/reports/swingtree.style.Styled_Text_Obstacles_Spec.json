@@ -4,7 +4,7 @@
   "narrative":"SwingTree's styled text layout engine supports the notion of *obstacles*:\n    shapes (given in component coordinates) that the text must flow around\n    and may never be rendered on top of.  The practical motivation is that\n    a styled component can contain child components — buttons, icons, or\n    small widgets — that live in the same visual area as the text, and the\n    text should politely step aside rather than collide with them.\n\n    An obstacle shape is registered through the `TextConf#obstacles(Shape...)`\n    or `TextConf#obstacles(Tuple<Shape>)` method.  During layout, each text\n    line queries the obstacle-free horizontal intervals at its vertical position\n    and fits the text into those intervals.  Obstacles that do not intersect\n    a given line have no effect on that line at all.\n\n    The two most important emergent properties of this design are:\n\n     1.  *An obstacle only matters when a text line reaches it.*\n         If a line wraps naturally before hitting an obstacle's left edge, the\n         obstacle is completely invisible to the layout engine for that line.\n         The preferred height therefore stays identical to the obstacle-free case.\n\n     2.  *An obstacle that does intersect a line narrows the available width.*\n         Narrower width means earlier wrapping, which means more lines, which\n         means a taller preferred height.  The effect is proportional to the\n         width of the obstacle: a wider obstacle steals more horizontal space,\n         forcing more lines and producing a taller component.\n\n    This specification explores both properties, as well as the compounding\n    effect of multiple obstacles, the geometric precision with which curved\n    (elliptical) obstacles are handled, and the way obstacle position interacts\n    with line length to determine when a height increase becomes observable.",
   "subjects":["swingtree.style.TextConf","swingtree.style.StyledString"],
   "statistics":{
-    "runs":"16",
+    "runs":"17",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -441,6 +441,27 @@
         {"kind":"and","text":"\n            The textual serialisation of the configuration (`toString()`) exposes both\n            flags so that debug output and logs show exactly what was configured.\n            This is what users see when they inspect the style conf after painting,\n            and what the living-documentation examples above rely on to verify\n            child-obstacle behaviour:\n        ","code":[]},
 
         {"kind":"and","text":"The default instance serialises to a compact NONE marker — defaults never leak into the string:","code":[]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When a text is put into a corner through `font(f -> f.alignment(..))` instead of `placement(..)`, the preferred height from `autoPreferredHeight(true)` counts the extra lines which the text needs because an obstacle makes its lines narrower.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            There are two ways to put a text into the top left corner of the content area\n            of a component. The content area is the component minus its margin, its border\n            and its padding. You can call `placement(UI.Placement.TOP_LEFT)` on the text.\n            Or you can leave out `placement(..)` and give the font of the text the alignment\n            `TOP_LEFT` with `font(f -> f.alignment(UI.Placement.TOP_LEFT))`. When you do not\n            call `placement(..)`, SwingTree paints the text at the position given by the\n            alignment of the font. So both ways paint the text at exactly the same place.\n\n            An obstacle is a shape which you pass to `obstacles(..)`. SwingTree does not paint\n            text on an obstacle. It ends a line of text before the obstacle and continues the\n            text in the next line. SwingTree moves text around obstacles only for a text placed\n            at the top of the content area, which means at `TOP_LEFT`, `TOP` or `TOP_RIGHT`.\n\n            With `autoPreferredHeight(true)`, the preferred height of the component is the\n            height of all lines of its text plus the padding above and below the text.\n            Both ways of putting the text into the top left corner paint the same lines,\n            so both must give the component the same preferred height.\n            If SwingTree left out the obstacle while measuring the text which is placed through\n            the alignment of its font, SwingTree would count too few lines. The preferred height\n            of the component would then be too small, and a layout which gives the component its\n            preferred height would cut off the last lines of the text at the bottom.\n\n            In this scenario both components are 300 pixels wide and have a padding of\n            10 pixels on every side, so the text may use the 280 pixels from x = 10 to x = 290.\n            A rectangle covers everything from x = 150 to the right edge of the component at\n            x = 300, from the top of the component to far below the text. So every line of the\n            text must fit into the 140 pixels from x = 10 to x = 150, and the text needs more\n            lines than it would need without the rectangle.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A rectangle which covers everything from x = 150 to x = 300, from y = 0 to y = 1000:","code":[]},
+
+        {"kind":"and","text":"A component whose text is put into the top left corner through the alignment of its font:","code":[]},
+
+        {"kind":"and","text":"A component whose text is put into the top left corner with `placement(..)`:","code":[]},
+
+        {"kind":"when","text":"\n            SwingTree computes the preferred height of a component from its text when it paints\n            the component. So we give each component its width of 300 pixels with `setSize`\n            and paint each component once into a small image before we read the preferred heights:\n        ","code":[]},
+
+        {"kind":"then","text":"Both components have the same preferred height:","code":[]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

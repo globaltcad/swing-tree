@@ -169,7 +169,7 @@ instead of guessing.
 <dependency>
   <groupId>io.github.globaltcad</groupId>
   <artifactId>swing-tree</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 </dependency>
 ```
 **Note:** If you are experiencing issues with SLF4J checkout [the workaround in this ticket](https://github.com/globaltcad/swing-tree/issues/787#issuecomment-6016062421).
@@ -179,11 +179,11 @@ instead of guessing.
 ## 📥 Getting started with Gradle ##
 Groovy DSL:
 ```groovy
-implementation 'io.github.globaltcad:swing-tree:1.0.1'
+implementation 'io.github.globaltcad:swing-tree:1.0.2'
 ```
 Kotlin DSL:
 ```kotlin
-implementation("io.github.globaltcad:swing-tree:1.0.1")
+implementation("io.github.globaltcad:swing-tree:1.0.2")
 ```
 ---
 
@@ -202,7 +202,7 @@ allprojects {
 ...either by specifying the version tag:
 ```groovy
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:1.0.1'
+	implementation 'com.github.globaltcad:swing-tree:1.0.2'
 }
 ```
 ...or by using a custom commit hash instead:

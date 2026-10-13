@@ -147,31 +147,37 @@ public class JIcon extends JLabel implements StylableComponent
 <span class="fc" id="L147">        paintForeground(g, super::paintChildren);</span>
 <span class="fc" id="L148">    }</span>
 
+    /** {@inheritDoc} */
+    @Override public void doLayout() {
+<span class="fc" id="L152">        super.doLayout();</span>
+<span class="fc" id="L153">        ComponentBackend.measureTextHeightAfterLayoutOf(this);</span>
+<span class="fc" id="L154">    }</span>
+
     @Override public void setUISilently( ComponentUI ui ) {
-<span class="nc" id="L151">        this.ui = ui;</span>
-<span class="nc" id="L152">    }</span>
+<span class="nc" id="L157">        this.ui = ui;</span>
+<span class="nc" id="L158">    }</span>
 
     @Override
     public void updateUI() {
-<span class="fc" id="L156">        ComponentBackend.powering(this).installCustomUIIfPossible();</span>
+<span class="fc" id="L162">        ComponentBackend.powering(this).installCustomUIIfPossible();</span>
         /*
             The JIcon is a SwingTree native component type, so it also
             enjoys the perks of having a SwingTree based look and feel!
         */
-<span class="fc" id="L161">    }</span>
+<span class="fc" id="L167">    }</span>
 
     @SuppressWarnings(&quot;NullAway&quot;)
     private static @Nullable ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
-<span class="fc bfc" id="L165" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
-<span class="fc" id="L166">            log.warn(SwingTree.get().logMarker(),</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L172">            log.warn(SwingTree.get().logMarker(),</span>
                 &quot;Loading an icon off the UI thread. &quot; +
                 &quot;This may lead to unexpected behavior and should be avoided.&quot;,
                 new Throwable(&quot;Stack trace for debugging purposes.&quot;)
             );
-<span class="fc" id="L171">            return UI.runAndGet(()-&gt;_getFromCacheOrLoadFrom(declaration));</span>
+<span class="fc" id="L177">            return UI.runAndGet(()-&gt;_getFromCacheOrLoadFrom(declaration));</span>
         }
 
-<span class="fc" id="L174">        return UI.findIcon(declaration).orElse(null);</span>
+<span class="fc" id="L180">        return UI.findIcon(declaration).orElse(null);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
