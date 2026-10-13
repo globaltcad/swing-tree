@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import swingtree.SwingTree;
 import swingtree.UI;
+import swingtree.api.Configurator;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -29,7 +30,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
 
 final class SelectableText extends MouseAdapter
 {
@@ -39,7 +39,7 @@ final class SelectableText extends MouseAdapter
     private final JComponent                             _owner;
     private final UI.Layer                               _layer;
     private final String                                 _textName;
-    private final Consumer<UnaryOperator<TextSelection>> _updateProperty;
+    private final Consumer<Configurator<TextSelection>>  _propertyUpdateDispatcher; // The passed configurator is executed on the app thread!
     private TextSelection                                _shown;
     private boolean                                      _showsTextCursor;
     private @Nullable Cursor                             _cursorOutsideText;
@@ -53,17 +53,17 @@ final class SelectableText extends MouseAdapter
     private CaretTable                                   _carets = CaretTable.EMPTY;
 
     SelectableText(
-        JComponent                             owner,
-        UI.Layer                               layer,
-        String                                 textName,
-        TextSelection                          shown,
-        Consumer<UnaryOperator<TextSelection>> updateProperty
+        final JComponent                             owner,
+        final UI.Layer                               layer,
+        final String                                 textName,
+        final TextSelection                          shown,
+        final Consumer<Configurator<TextSelection>>  updateProperty
     ) {
-        _owner          = owner;
-        _layer          = layer;
-        _textName       = textName;
-        _shown          = shown;
-        _updateProperty = updateProperty;
+        _owner                    = owner;
+        _layer                    = layer;
+        _textName                 = textName;
+        _shown                    = shown;
+        _propertyUpdateDispatcher = updateProperty;
         owner.addMouseListener(this);
         owner.addMouseMotionListener(this);
         owner.setTransferHandler(new Copying());
@@ -134,7 +134,7 @@ final class SelectableText extends MouseAdapter
         if ( resolved == _shown )
             return;
         if ( !resolved.equals(_shown) )
-            _updateProperty.accept( current -> current.resolvedWith(carets) );
+            _propertyUpdateDispatcher.accept(current -> current.resolvedWith(carets) );
         _shown = resolved;
     }
 
@@ -185,7 +185,8 @@ final class SelectableText extends MouseAdapter
             return;
         _shown = resolved;
         _owner.repaint();
-        _updateProperty.accept( current -> resolved.withEnabled(current.isEnabled()) );
+        // We send the modification to the application thread:
+        _propertyUpdateDispatcher.accept(current -> resolved.withEnabled(current.isEnabled()) );
     }
 
     private static TextSelection _wordAround( String text, int character ) {

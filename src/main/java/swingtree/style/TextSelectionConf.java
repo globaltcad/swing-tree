@@ -22,8 +22,8 @@ import java.util.Optional;
  *  }</pre>
  *  The selection itself, which says which characters are selected, is not part of this
  *  configuration. It is held by the property which you pass to
- *  {@link swingtree.UIForAnySwing#withTextSelection(swingtree.UI.Layer, String, sprouts.Var)}, and a component
- *  without {@code withTextSelection} paints no selection at all.
+ *  {@link swingtree.UIForAnySwing#withTextSelection(swingtree.UI.Layer, String, sprouts.Var)}.
+ *  **So please note that a component without {@code withTextSelection} paints no selection at all.**
  *  <p>
  *  SwingTree paints the selection colour, and the border if there is one, behind the selected
  *  characters and then paints the characters on top of it, in their own colour.

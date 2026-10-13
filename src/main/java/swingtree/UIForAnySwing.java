@@ -1645,9 +1645,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                         layer,
                         textName,
                         selection.orElseThrowUnchecked(),
-                        update -> _runInApp( () -> selection.set(From.VIEW, update.apply(selection.get())) )
+                        updater -> _runInApp( () -> {
+                            try {
+                                selection.set(From.VIEW, updater.configure(selection.get()));
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
                     );
-                    _onShow( selection, thisComponent, (c, shown) -> LibraryInternalCrossPackageStyleUtil._showTextSelection(c, shown) );
+                    _onShow( selection, thisComponent, LibraryInternalCrossPackageStyleUtil::_showTextSelection );
                 })
                 ._this();
     }

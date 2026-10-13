@@ -902,10 +902,10 @@ public final class ComponentBackend<C extends JComponent>
     }
 
     void makeTextSelectable(
-        UI.Layer                               layer,
-        String                                 textName,
-        TextSelection                          shown,
-        Consumer<UnaryOperator<TextSelection>> updateProperty
+        final UI.Layer                               layer,
+        final String                                 textName,
+        final TextSelection                          shown,
+        final Consumer<Configurator<TextSelection>>  updateProperty
     ) {
         if ( get(SelectableText.class).isPresent() ) {
             log.warn(SwingTree.get().logMarker(), "The component '{}' already has a selectable text, so the text '{}' does not become selectable.", _owner, textName);

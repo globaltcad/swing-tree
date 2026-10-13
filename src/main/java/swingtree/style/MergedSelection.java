@@ -17,7 +17,9 @@ final class MergedSelection
     private static final double ARC_CONTROL = 0.5522847498;
     private static final double SNAP_DISTANCE = 0.5;
 
-    private static volatile @Nullable MergedSelection _lastPainted;
+    // A simple global cache, because typically there is always only a single selection:
+    private static volatile @Nullable MergedSelection _lastPaintedCache;
+
 
     private final List<Rectangle2D> _areas;
     private final float             _convexRadius;
@@ -37,11 +39,11 @@ final class MergedSelection
     }
 
     static MergedSelection of( List<Rectangle2D> areas, float convexRadius, float concaveRadius, float borderWidth ) {
-        final @Nullable MergedSelection last = _lastPainted;
+        final @Nullable MergedSelection last = _lastPaintedCache;
         if ( last != null && last._convexRadius == convexRadius && last._concaveRadius == concaveRadius && last._borderWidth == borderWidth && last._areas.equals(areas) )
             return last;
         final MergedSelection merged = new MergedSelection(areas, convexRadius, concaveRadius, borderWidth);
-        _lastPainted = merged;
+        _lastPaintedCache = merged;
         return merged;
     }
 

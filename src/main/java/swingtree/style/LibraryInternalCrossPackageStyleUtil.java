@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.DoNotCall;
 import org.jspecify.annotations.Nullable;
 import sprouts.Result;
 import swingtree.UI;
+import swingtree.api.Configurator;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -15,6 +16,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 
 /**
@@ -32,11 +34,11 @@ public final class LibraryInternalCrossPackageStyleUtil {
 
     @DoNotCall @Deprecated
     public static void _makeTextSelectable(
-        JComponent                                                   component,
-        UI.Layer                                                     layer,
-        String                                                       textName,
-        TextSelection                                                shown,
-        java.util.function.Consumer<java.util.function.UnaryOperator<TextSelection>> updateProperty
+        JComponent                             component,
+        UI.Layer                               layer,
+        String                                 textName,
+        TextSelection                          shown,
+        Consumer<Configurator<TextSelection>>  updateProperty
     ) {
         ComponentBackend.powering(component).makeTextSelectable(layer, textName, shown, updateProperty);
     }
