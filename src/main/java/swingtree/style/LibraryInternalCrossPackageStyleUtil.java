@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.DoNotCall;
 import org.jspecify.annotations.Nullable;
 import sprouts.Result;
 import swingtree.UI;
+import swingtree.api.Configurator;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -15,6 +16,7 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 
 /**
@@ -24,6 +26,27 @@ import java.util.Objects;
 @Deprecated
 public final class LibraryInternalCrossPackageStyleUtil {
     private static final Insets ZERO_INSETS = new Insets(0,0,0,0);
+
+    @DoNotCall @Deprecated
+    public static String _nameOfUnnamedStyle() {
+        return StyleUtil.DEFAULT_KEY;
+    }
+
+    @DoNotCall @Deprecated
+    public static void _makeTextSelectable(
+        JComponent                             component,
+        UI.Layer                               layer,
+        String                                 textName,
+        TextSelection                          shown,
+        Consumer<Configurator<TextSelection>>  updateProperty
+    ) {
+        ComponentBackend.powering(component).makeTextSelectable(layer, textName, shown, updateProperty);
+    }
+
+    @DoNotCall @Deprecated
+    public static void _showTextSelection( JComponent component, TextSelection selection ) {
+        ComponentBackend.powering(component).showTextSelection(selection);
+    }
 
     @DoNotCall @Deprecated
     public static boolean _currentLookAndFeelHasBadScaling() {

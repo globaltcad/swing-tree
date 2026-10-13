@@ -235,6 +235,27 @@ final class TextLayoutEngine {
         return Bounds.of(leftX, topY, localWidth, localHeight);
     }
 
+    static Font fontOf( final TextConf text, final BoxModelConf boxModel, final @Nullable Font componentFont ) {
+        final Font font = componentFont != null ? componentFont : new Font(Font.DIALOG, Font.PLAIN, UI.scale(12));
+        return text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
+    }
+
+    static List<PlacedFragment> placeText(
+        final TextConf          text,
+        final Bounds            textBounds,
+        final BoxModelConf      boxModel,
+        final Font              font,
+        final FontRenderContext frc
+    ) {
+        final UI.Placement placement = text.resolvedPlacement();
+        final Pair<Float, List<LayoutLine>> layout = _buildTextLayoutsAndPreferredHeight(
+                font, frc, text.content(),
+                textBounds.size().widthOrElse(0f), textBounds.location().x(), textBounds.location().y(),
+                text.wrapLines(), boxModel, text.obstacles(), placement
+            );
+        return placeVisibleFragments(layout.second(), layout.first(), font, textBounds, placement);
+    }
+
     static List<PlacedFragment> placeVisibleFragments(
         final List<LayoutLine> lines,
         final float            totalHeight,
@@ -247,8 +268,16 @@ final class TextLayoutEngine {
         final VisibleSlice slice        = _visibleSliceOf(lines, totalHeight, boundsHeight, font, placement);
         final List<PlacedFragment> fragments = new ArrayList<>(slice.end - slice.start);
         float y = _topOfVisibleLines(boundsY, boundsHeight, slice.height, placement);
-        for ( int i = slice.start; i < slice.end; i++ ) {
-            final LayoutLine line    = lines.get(i);
+        int paragraphStart = 0;
+        int endOfLastUncoveredLine = -1;
+        for ( int i = 0; i < slice.end; i++ ) {
+            final LayoutLine line = lines.get(i);
+            if ( endOfLastUncoveredLine >= 0 && line.startsParagraph() )
+                paragraphStart += endOfLastUncoveredLine + 1;
+            if ( !line.isCoveredByObstacle )
+                endOfLastUncoveredLine = line.charEnd();
+            if ( i < slice.start )
+                continue;
             final TextLayout primary = line.primary().layout;
             if ( primary == null ) {
                 y += font.getSize2D();
@@ -259,6 +288,7 @@ final class TextLayoutEngine {
                 if ( segment.layout != null )
                     fragments.add(new PlacedFragment(
                         segment.layout,
+                        paragraphStart + segment.charStart,
                         _alignedX(placement, segment.regionX, segment.regionWidth, segment.layout.getVisibleAdvance()),
                         y
                     ));
@@ -466,13 +496,14 @@ final class TextLayoutEngine {
                         if ( intervals.isEmpty() ) {
                             final boolean skippingALineMovesDown = currentY + estLineHeight > currentY;
                             if ( skippingALineMovesDown && currentY < _finiteBottomOf(obstacles) ) {
-                                paraLines.add(LayoutLine.blank(boundsX, effectiveWidth));
+                                paraLines.add(LayoutLine.coveredByObstacle(boundsX, effectiveWidth));
                                 currentY += estLineHeight;
                                 continue;
                             }
-                            final TextLayout layout = data.measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
+                            final int        charStart = data.measurer.getPosition();
+                            final TextLayout layout    = data.measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);
                             if ( layout != null )
-                                segments.add(new LayoutLine.Segment(layout, boundsX, effectiveWidth));
+                                segments.add(new LayoutLine.Segment(layout, charStart, boundsX, effectiveWidth));
                         } else {
                             final int lastIdx = intervals.size() - 1;
                             for ( int i = 0; i <= lastIdx; i++ ) {
@@ -482,8 +513,9 @@ final class TextLayoutEngine {
                                 // When not wrapping, give the last band an unlimited width so all
                                 // remaining text is consumed here instead of wrapping to a new line.
                                 final float      nextWidth = (wrapLines || i < lastIdx) ? w : _UNBOUNDED_LINE_WIDTH;
+                                final int        charStart = data.measurer.getPosition();
                                 final TextLayout layout    = data.measurer.nextLayout(nextWidth);
-                                segments.add(new LayoutLine.Segment(layout, x, w));
+                                segments.add(new LayoutLine.Segment(layout, charStart, x, w));
                             }
                         }
 
@@ -677,42 +709,72 @@ final class TextLayoutEngine {
         /** A text fragment placed in one of the obstacle-free intervals on this line. */
         static final class Segment {
             final @Nullable TextLayout layout;
+            final int                  charStart;
             final float                regionX;
             final float                regionWidth;
-            Segment(@Nullable TextLayout layout, float regionX, float regionWidth) {
+            Segment(@Nullable TextLayout layout, int charStart, float regionX, float regionWidth) {
                 this.layout      = layout;
+                this.charStart   = charStart;
                 this.regionX     = regionX;
                 this.regionWidth = regionWidth;
+            }
+            int charEnd() {
+                return layout == null ? charStart : charStart + layout.getCharacterCount();
             }
         }
 
         final List<Segment> segments;
+        final boolean       isCoveredByObstacle;
 
         LayoutLine(List<Segment> segments) {
-            this.segments = segments;
+            this(segments, false);
+        }
+
+        private LayoutLine(List<Segment> segments, boolean isCoveredByObstacle) {
+            this.segments            = segments;
+            this.isCoveredByObstacle = isCoveredByObstacle;
         }
 
         static LayoutLine blank(float regionX, float regionWidth) {
-            return new LayoutLine(Collections.singletonList(new Segment(null, regionX, regionWidth)));
+            return new LayoutLine(Collections.singletonList(new Segment(null, 0, regionX, regionWidth)));
+        }
+
+        static LayoutLine coveredByObstacle(float regionX, float regionWidth) {
+            return new LayoutLine(Collections.singletonList(new Segment(null, 0, regionX, regionWidth)), true);
         }
 
         static LayoutLine single(TextLayout layout, float regionX, float regionWidth) {
-            return new LayoutLine(Collections.singletonList(new Segment(layout, regionX, regionWidth)));
+            return new LayoutLine(Collections.singletonList(new Segment(layout, 0, regionX, regionWidth)));
         }
 
         Segment primary() { return segments.get(0); }
+
+        boolean startsParagraph() { return !isCoveredByObstacle && primary().charStart == 0; }
+
+        int charEnd() { return segments.get(segments.size() - 1).charEnd(); }
 
         boolean isBlank() { return primary().layout == null; }
     }
 
     static final class PlacedFragment {
         final TextLayout layout;
+        final int        charStart;
         final float      x;
         final float      baselineY;
-        PlacedFragment( TextLayout layout, float x, float baselineY ) {
+        PlacedFragment( TextLayout layout, int charStart, float x, float baselineY ) {
             this.layout    = layout;
+            this.charStart = charStart;
             this.x         = x;
             this.baselineY = baselineY;
+        }
+        int charEnd() {
+            return charStart + layout.getCharacterCount();
+        }
+        float top() {
+            return baselineY - layout.getAscent();
+        }
+        float bottom() {
+            return baselineY + layout.getDescent() + layout.getLeading();
         }
     }
 
