@@ -2,7 +2,6 @@ package swingtree.style
 
 import spock.lang.IgnoreIf
 import spock.lang.Narrative
-import spock.lang.PendingFeature
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
@@ -7858,7 +7857,6 @@ class Styled_Text_Selection_Spec extends Specification
             selection.get().caret() == 12
     }
 
-    @PendingFeature(reason = "an empty paragraph has no painted line, so no caret rectangle and no mouse position (TextLayoutEngine)")
     def 'With `withTextSelection("body", selection)`, a triple click on an empty paragraph selects nothing and puts the caret between its two line breaks.'()
     {
         reportInfo """
@@ -7919,7 +7917,6 @@ class Styled_Text_Selection_Spec extends Specification
             selection.get().caret() == 6
     }
 
-    @PendingFeature(reason = "an empty paragraph has no painted line, so no caret rectangle and no mouse position (TextLayoutEngine)")
     def 'With `withTextSelection("body", selection)`, a caret in an empty paragraph has a rectangle on the empty line, and the down arrow key reaches it from the line above.'()
     {
         reportInfo """
@@ -7977,6 +7974,62 @@ class Styled_Text_Selection_Spec extends Specification
                 )
             }
         then : 'The caret is in the empty paragraph:'
+            selection.get().caret() == 6
+    }
+
+    def 'With `withTextSelection("body", selection)`, a double click on an empty paragraph selects nothing and puts the caret between its two line breaks.'()
+    {
+        reportInfo """
+            A double click selects the word under the mouse. Two line breaks in a row, the "\\n" characters, make an
+            empty paragraph, which SwingTree paints as an empty line. There is no word on that line, so a double
+            click on it selects nothing and leaves only the caret, in the gap between the two line breaks.
+
+            The text is "First", two line breaks and "Third". A line break counts as one character, so position 6 is
+            the gap between the two line breaks. Your user double-clicks in the middle of the empty line. If SwingTree
+            took the word of the nearest letters, it would select "First" or "Third", which your user did not click on.
+            If it took the character under the mouse, it would select the second line break, which nobody can see.
+
+            Swing reports the second press of a double click as a mouse press event whose click count is 2.
+        """
+        given : 'A property which holds a caret at position 0:'
+            var selection = Var.of(TextSelection.caretAt(0))
+        and : 'A component which paints "First" in red, an empty paragraph, and "Third" in blue:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "First\n\n" ),
+                                StyledString.of( f -> f.color(BLUE), "Third" )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the point halfway between the red and the blue letters, above the middle of "First":'
+            var image = Utility.renderSingleComponent(box)
+            var above = boundsOfPixelsPaintedIn(image, RED)
+            var below = boundsOfPixelsPaintedIn(image, BLUE)
+            int x = above.centerX
+            int y = ((above.y + above.height) + below.y) / 2
+
+        when : 'We double-click there:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, x, y, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, x, y, 2, false, MouseEvent.BUTTON1))
+            }
+
+        then : '"Third" is painted two lines below "First", with the empty line between them:'
+            below.y >= above.y + above.height + 15
+        and : 'Nothing is selected, and the caret is in the gap between the two line breaks:'
+            selection.get().isEmpty()
             selection.get().caret() == 6
     }
 
