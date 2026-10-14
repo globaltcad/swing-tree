@@ -8113,6 +8113,128 @@ class Styled_Text_Selection_Spec extends Specification
             7      | "right of the end of the first line, in front of the anchor" | true
     }
 
+    def 'With `placement(UI.Placement.TOP)`, a caret in an empty paragraph lies in the middle of the empty line, like the centred lines around it.'()
+    {
+        reportInfo """
+            Two line breaks in a row, the "\\n" characters, make an empty paragraph, which SwingTree paints as an
+            empty line. The placement decides where in the content area a line is painted, and an empty line follows
+            it like every other line. With `placement(UI.Placement.TOP)` every line is centred horizontally, so a
+            caret in the empty paragraph lies in the horizontal middle of the content area, between the middles of
+            the lines above and below it.
+
+            The component is 400 pixels wide and has a padding of 10 pixels, so its content area reaches from x = 10
+            to x = 390, and its middle is at x = 200. The text is "First", two line breaks and "Third". A line break
+            counts as one character, so position 6 is the gap between the two line breaks. If SwingTree put the caret
+            of an empty line at the left edge of the content area, it would hang at x = 10, far away from the centred
+            words.
+        """
+        given : 'A property which holds a caret at position 6, in the empty paragraph:'
+            var selection = Var.of(TextSelection.caretAt(6))
+        and : 'A component which centres "First" in red, an empty paragraph, and "Third" in blue:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),  "First\n\n" ),
+                                StyledString.of( f -> f.color(BLUE), "Third" )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and find the red and the blue letters. `UI.sync()` waits until SwingTree has
+            written the caret rectangle into the property:
+        """
+            var image = Utility.renderSingleComponent(box)
+            UI.sync()
+            var above = boundsOfPixelsPaintedIn(image, RED)
+            var below = boundsOfPixelsPaintedIn(image, BLUE)
+            var caret = selection.get().caretBounds().get()
+
+        then : 'The two words really are centred, so the middle of each lies within 5 pixels of x = 200:'
+            Math.abs(above.centerX - 200) <= 5
+            Math.abs(below.centerX - 200) <= 5
+        and : 'The caret lies in the middle of the content area, give or take one pixel:'
+            Math.abs(caret.location().x() - 200) <= 1
+        and : 'It lies on the empty line, below "First" and above "Third":'
+            caret.location().y() >= above.y + above.height - 1
+            caret.location().y() + caret.size().height().get() <= below.y + 1
+    }
+
+    def 'With `withTextSelection("body", selection)` and an obstacle across the full width of the content area, a click on the obstacle puts the caret on the nearest line of text.'()
+    {
+        reportInfo """
+            An obstacle is a shape which you pass to `obstacles(..)`. SwingTree paints no text on it, and when it
+            covers the content area from its left edge to its right edge, SwingTree paints no line at its height and
+            continues the text below it. A click puts the caret into the gap nearest to the mouse, on the nearest
+            line of text. A click on the obstacle is a click between two lines of text, so the caret goes to the
+            line which is nearer to the mouse.
+
+            The component is 240 pixels wide and has a padding of 10 pixels. The obstacle covers the full width
+            from y = 40 to y = 80. The text is "HHHHHHHHHH " in red and "NNNNNNNNNN" in green. At a font size of 20,
+            an "H" and an "N" are about 14 pixels wide, so the red word fits on the first line, above the obstacle,
+            and the green word goes onto the next line, below the obstacle. Your user clicks at y = 70, near the
+            bottom of the obstacle, above the middle of the green word. The green line is nearer to that point
+            than the red line, so the caret goes into the green word, between position 11, in front of its first
+            "N", and position 21, behind its last "N".
+
+            If SwingTree treated the height which it skips at the obstacle as an empty line of its own, the click
+            would land on that empty line, and the caret would jump to the start of the paragraph, at position 0.
+        """
+        given : 'A property which holds a caret at position 3:'
+            var selection = Var.of(TextSelection.caretAt(3))
+        and : 'A rectangle which covers the full width of the component from y = 40 to y = 80:'
+            var obstacle = new Rectangle(0, 40, 240, 40)
+        and : 'A component which paints "HHHHHHHHHH " in red and "NNNNNNNNNN" in green around the obstacle:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(240, 220)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .obstacles(obstacle)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHHHHHHHH " ),
+                                StyledString.of( f -> f.color(GREEN), "NNNNNNNNNN"  )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : 'We render the component and find the red and the green letters:'
+            var image     = Utility.renderSingleComponent(box)
+            var redWord   = boundsOfPixelsPaintedIn(image, RED)
+            var greenWord = boundsOfPixelsPaintedIn(image, GREEN)
+            int x = greenWord.centerX
+            int y = 70
+
+        when : 'We click on the obstacle at y = 70, above the middle of the green word:'
+            UI.runNow {
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, x, y, 1, false, MouseEvent.BUTTON1))
+            }
+
+        then : 'The red word lies above the obstacle, and the green word below it:'
+            redWord.y + redWord.height <= 40
+            greenWord.y >= 80
+        and : 'Nothing is selected, and the caret is inside the green word:'
+            selection.get().isEmpty()
+            selection.get().caret() > 11
+            selection.get().caret() < 21
+    }
+
     def 'With `withTextSelection()` and no property, your users can select and copy the text which `text(t -> ..)` declares without a name.'()
     {
         reportInfo """
