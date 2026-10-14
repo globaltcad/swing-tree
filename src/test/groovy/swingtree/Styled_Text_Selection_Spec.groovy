@@ -7060,8 +7060,12 @@ class Styled_Text_Selection_Spec extends Specification
                     .withTextSelection("body", selection)
                     .get(JBox)
 
-        expect : 'The selection which your code created says that its caret is at the end of a line:'
-            selection.get().isCaretAtLineEnd()
+        expect : """
+            A selection which your code creates with `between(2, 7)` says that its caret is at the end of a line.
+            We ask a new one instead of the property, because SwingTree may already have written its own selection
+            into the property while it built the component:
+        """
+            TextSelection.between(2, 7).isCaretAtLineEnd()
 
         when : """
             We render the component. When SwingTree paints the component, it queues a task on the UI thread which
