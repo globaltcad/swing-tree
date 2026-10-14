@@ -507,23 +507,26 @@ class Styled_Text_Selection_Spec extends Specification
                     .get(JBox)
         and : """
             We render the component and find the rectangle around the red pixels of "Hello".
-            Its rightmost pixel column belongs to the right half of the "o", so the gap nearest
-            to it is the gap behind the "o":
+            Its rightmost pixel column belongs to the right half of the "o". Glyph edges are smoothed,
+            and on some computers that outermost pixel is painted in the first pixel column of the space
+            behind the "o", where a double click would select the space. So we aim 3 pixels further left,
+            which is still in the right half of an "o" that is about 11 pixels wide, so the gap nearest
+            to it is still the gap behind the "o":
         """
             var image = Utility.renderSingleComponent(box)
             var hello = boundsOfPixelsPaintedIn(image, RED)
-            int rightEdgeOfO = hello.x + hello.width - 1
+            int rightHalfOfO = hello.x + hello.width - 1 - 3
             int lineMiddle   = hello.centerY
 
         when : """
-            We send the events of a double click to the right edge of the "o". Swing reports the
+            We send the events of a double click to the right half of the "o". Swing reports the
             second press of a double click as a mouse press event whose click count is 2:
         """
             UI.runNow {
-                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, rightEdgeOfO, lineMiddle, 1, false, MouseEvent.BUTTON1))
-                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, rightEdgeOfO, lineMiddle, 1, false, MouseEvent.BUTTON1))
-                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, rightEdgeOfO, lineMiddle, 2, false, MouseEvent.BUTTON1))
-                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, rightEdgeOfO, lineMiddle, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, rightHalfOfO, lineMiddle, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, rightHalfOfO, lineMiddle, 1, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  2, InputEvent.BUTTON1_DOWN_MASK, rightHalfOfO, lineMiddle, 2, false, MouseEvent.BUTTON1))
+                box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 3, 0, rightHalfOfO, lineMiddle, 2, false, MouseEvent.BUTTON1))
             }
 
         then : 'The word "Hello" is selected, from its start at position 0 to its end at position 5:'
@@ -5246,9 +5249,13 @@ class Styled_Text_Selection_Spec extends Specification
             UI.runNow { selection.set(TextSelection.caretAt(3)) }
             var caretInFrontOfI = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), GREEN)
 
-        then : 'In front of the "H", the green pixels reach from the left edge to the right edge of the blue "H":'
-            caretInFrontOfH.x <= letterH.x
-            caretInFrontOfH.x + caretInFrontOfH.width >= letterH.x + letterH.width
+        then : """
+            In front of the "H", the green pixels reach from the left edge to the right edge of the blue "H".
+            The edges of the letter and of the caret are smoothed, and the green rectangle starts at the gap rounded
+            to a whole pixel, so the two edges may lie one pixel apart on another computer:
+        """
+            caretInFrontOfH.x <= letterH.x + 1
+            caretInFrontOfH.x + caretInFrontOfH.width >= letterH.x + letterH.width - 1
         and : 'They are as wide as `caretBounds()`, give or take one pixel:'
             Math.abs(caretInFrontOfH.width - boundsInFrontOfH.size().width().get()) <= 1
         and : 'In front of the "i", the green pixels are less than half as wide as in front of the "H":'
@@ -7282,10 +7289,16 @@ class Styled_Text_Selection_Spec extends Specification
             caret into the gap nearest to the mouse and selects nothing. The second click still selects the word,
             because the double click is a switch of its own.
 
-            The component paints "Hello world". Your user triple-clicks on the left edge of the "w", where the
+            The component paints "Hello world". Your user triple-clicks on the left half of the "w", where the
             nearest gap is position 6. After the second click "world" is selected, from position 6 to position 11,
             and after the third click only the caret is left, at position 6. Swing reports the second and the
             third press of such a series of clicks as mouse press events whose click count is 2 and 3.
+
+            A double click selects the word of the character under the mouse, so the mouse must be on the "w"
+            itself and not on its outermost pixel. Glyph edges are smoothed, and on some computers the leftmost
+            pixel of the "w" is painted in the last pixel column of the space in front of it. A double click on
+            that pixel would select the space. So the scenario aims 4 pixels right of the leftmost blue pixel,
+            which is still in the left half of a "w" that is about 14 pixels wide.
         """
         given : 'A property which holds a caret at position 0:'
             var selection = Var.of(TextSelection.caretAt(0))
@@ -7308,12 +7321,12 @@ class Styled_Text_Selection_Spec extends Specification
                     )
                     .withTextSelection("body", selection)
                     .get(JBox)
-        and : 'We render the component and find the left edge of the blue "w":'
+        and : 'We render the component and aim 4 pixels right of the leftmost blue pixel, into the left half of the "w":'
             var world = boundsOfPixelsPaintedIn(Utility.renderSingleComponent(box), BLUE)
-            int x = world.x
+            int x = world.x + 4
             int y = world.centerY
 
-        when : 'We double-click on the left edge of the "w":'
+        when : 'We double-click on the left half of the "w":'
             UI.runNow {
                 box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_PRESSED,  0, InputEvent.BUTTON1_DOWN_MASK, x, y, 1, false, MouseEvent.BUTTON1))
                 box.dispatchEvent(new MouseEvent(box, MouseEvent.MOUSE_RELEASED, 1, 0, x, y, 1, false, MouseEvent.BUTTON1))
