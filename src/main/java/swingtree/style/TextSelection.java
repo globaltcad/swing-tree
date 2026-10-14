@@ -274,15 +274,18 @@ public final class TextSelection
     /**
      *  Returns a selection with the same anchor and the caret at the position nearest to the given
      *  pixel coordinate, see {@link #positionAt(Position)}. This is what dragging the mouse to the
-     *  coordinate does to the position of the caret. {@link #isCaretAtLineEnd()} follows the rule of
-     *  {@link #withCaret(int)}, so call {@link #withCaretAtLineEnd(boolean)} afterwards to choose the
-     *  other place of a position where a line wraps.
+     *  coordinate does. Where a line wraps, the caret lies on the line of the coordinate:
+     *  {@link #isCaretAtLineEnd()} is {@code true} for a coordinate at the end of the upper line and
+     *  {@code false} for a coordinate at the start of the next line. So a handle which your code paints at
+     *  {@link #caretBounds()} stays under the finger of your users while they drag it across that place.
      *
      * @param point A pixel coordinate on the component.
      * @return A selection with the moved caret, or this selection if SwingTree has not written it into the property yet.
      */
     public TextSelection withCaretAt( Position point ) {
-        return positionAt(point).map(this::withCaret).orElse(this);
+        return positionAt(point)
+                .map( caret -> withCaret(caret).withCaretAtLineEnd(_carets.endsLineAt(point.x(), point.y())) )
+                .orElse(this);
     }
 
     /**
