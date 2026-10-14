@@ -442,8 +442,9 @@ public final class TextSelectionConf
      *          On the first line, the up arrow key moves the caret to the start of the text,
      *          and on the last line, the down arrow key moves it to the end of the text.</li>
      *      <li>Home and End move the caret to the start or the end of the painted line which holds it,
-     *          and with Ctrl held down, or Alt on macOS, to the start or the end of the text. A caret in an
-     *          empty paragraph, between two line breaks in a row, stays where it is.</li>
+     *          and with Ctrl held down, or Alt on macOS, to the start or the end of the text. In an empty
+     *          paragraph, between two line breaks in a row, the start and the end of the line are the same
+     *          gap, so a caret there stays where it is.</li>
      *  </ul>
      *  With the shift key held down, each of these keys keeps the anchor where it is and moves only the caret,
      *  so your users select the characters which the caret passes over. The keys only reach the component

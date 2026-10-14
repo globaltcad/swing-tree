@@ -1427,7 +1427,8 @@ final class StyleRenderer
             if ( range != null )
                 _renderSelection(text, range, fragments, g2d);
             for ( TextLayoutEngine.PlacedFragment fragment : fragments )
-                fragment.layout.draw(g2d, fragment.x, fragment.baselineY);
+                if ( fragment.layout != null )
+                    fragment.layout.draw(g2d, fragment.x, fragment.baselineY);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", text.content(), e);
         } finally {

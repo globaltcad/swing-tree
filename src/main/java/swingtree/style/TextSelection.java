@@ -235,10 +235,11 @@ public final class TextSelection
      *  the first character of the next line. A caret made by {@link #caretAt(int)} at that place lies at
      *  the start of the next line.
      *  <p>
-     *  It is empty for a selection which SwingTree has not written into the property yet, for a
-     *  caret on a line which is not painted because the component is too small to show it, and for a
-     *  caret in an empty paragraph between two line breaks in a row, which SwingTree paints as an empty
-     *  line without a rectangle for the caret.
+     *  Two line breaks in a row make an empty paragraph, which SwingTree paints as an empty line.
+     *  The rectangle of a caret in it lies at the start of that empty line and is as tall as the font size.
+     *  <p>
+     *  It is empty for a selection which SwingTree has not written into the property yet, and for a
+     *  caret on a line which is not painted because the component is too small to show it.
      *
      * @return The rectangle of the caret, or an empty {@link Optional}.
      */

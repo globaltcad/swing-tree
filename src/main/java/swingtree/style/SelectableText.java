@@ -369,9 +369,12 @@ final class SelectableText extends MouseAdapter implements FocusListener
     private static TextSelection _wordAround( String text, int character ) {
         if ( text.isEmpty() )
             return TextSelection.caretAt(0);
+        final int clamped = Math.max(0, Math.min(character, text.length() - 1));
+        if ( text.charAt(clamped) == '\n' )
+            return TextSelection.caretAt(clamped);
         final BreakIterator words = BreakIterator.getWordInstance();
         words.setText(text);
-        final int end   = words.following(Math.max(0, Math.min(character, text.length() - 1)));
+        final int end   = words.following(clamped);
         final int start = words.previous();
         return TextSelection.between(start, end);
     }
