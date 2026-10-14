@@ -1,0 +1,93 @@
+{
+  "className":"swingtree.List_Threading_Spec",
+  "title":"Lists Across Threads",
+  "narrative":"A `JList` may be bound to a `Vals`/`Vars` property list of entries,\n    as well as to a selection property. Both bindings follow the thread\n    safe publication protocol of the decoupled threading mode:\n    the list model works with a UI thread owned snapshot of the entries,\n    which is refreshed through the change events of the bound property\n    list, while a selection made by the user in the view is handed over\n    to the application thread, which writes it into the selection\n    property. The two threads never wait for one another.\n\n    The features in this specification are regression guards against\n    deadlocks and data races: every feature runs under a timeout, so if\n    a blocking handover between the two threads ever sneaks back into\n    the list binding machinery, this specification fails loudly instead\n    of hanging the build.",
+  "subjects":["swingtree.UIForList","swingtree.threading.EventProcessor"],
+  "statistics":{
+    "runs":"3",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Changing the bound entries of a list from the application thread never waits for the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The application thread must be able to update the entry property\n            list of a `JList` at any time, even while the UI thread is\n            completely unresponsive. To prove this, we park the UI thread\n            behind a latch and mutate the entries from this thread: the\n            mutation must return immediately (if it secretly waited for the\n            UI thread, this feature would hang and trip its timeout), and\n            the list must keep offering its old snapshot of the entries\n            until the UI thread is released and catches up.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property, an entry property list, and a list view built in decoupled mode.","code":["var selection = Var.of(\"B\")","var entries = Vars.of(\"A\", \"B\", \"C\")","var list = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.list(selection, entries)).get(JList)","})"]},
+
+        {"kind":"expect","text":"The list model offers the three initial entries.","code":["list.model.size == 3"]},
+
+        {"kind":"when","text":"We park the UI thread and add an entry from this thread, peeking at the list model before releasing the UI thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var entryCountWhileParked = -1","try {","    entries.add(\"D\")","    entryCountWhileParked = list.model.size","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The mutation returned while the UI thread was still parked, and the list still offered the old entries...","code":["entryCountWhileParked == 3"]},
+
+        {"kind":"and","text":"...but once the UI thread caught up, the new entry appeared.","code":["list.model.size == 4","list.model.getElementAt(3) == \"D\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Rendering a list always sees an internally consistent snapshot, even during an entry mutation storm.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing consults `getSize()` and `getElementAt(i)` whenever it\n            paints a `JList`, and it may do so at any time. Historically\n            these reads went straight into the live property list, so a\n            mutation on the application thread could shift the entries\n            between the size query and the element access, producing\n            phantom nulls, torn entry lists or even exceptions in the\n            middle of painting.\n\n            With the snapshot protocol, all reads within one UI thread task\n            are served from a single immutable snapshot. This feature\n            hammers the entries from this thread while the UI thread\n            continuously reads the model like a renderer would, and asserts\n            that not a single read round ever observes an inconsistency.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy, so that silently logged errors fail this test.","code":["var log = LogSpy.attach()"]},
+
+        {"kind":"and","text":"An entry property list and a list view built in decoupled mode.","code":["var entries = Vars.of(\"A\", \"B\", \"C\")","var list = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.list(entries)).get(JList)","})"]},
+
+        {"kind":"and","text":"A list collecting every inconsistency a render pass may observe.","code":["var violations = new java.util.concurrent.CopyOnWriteArrayList<String>()"]},
+
+        {"kind":"when","text":"We fire 60 mutation steps from this thread, and after each one, a full renderer style read pass runs on the UI thread.","code":["60.times { step ->","    if ( entries.size() < 6 )","        entries.add(\"entry-$step\".toString())","    else","        entries.removeAt(0, 3)","    UI.runNow({","        int count = list.model.size","        for ( int i = 0; i < count; i++ ) {","            if ( list.model.getElementAt(i) == null )","                violations.add(\"Phantom null at index $i of $count in step $step!\".toString())","        }","    })","}","UI.sync()"]},
+
+        {"kind":"then","text":"Not a single render pass observed a torn snapshot.","code":["violations.isEmpty()"]},
+
+        {"kind":"and","text":"No exception was silently logged along the way.","code":["log.errors().isEmpty()"]},
+
+        {"kind":"and","text":"After everything settled, the list agrees with the final state of the entries.","code":["list.model.size == entries.size()","(0..<list.model.size).collect({ list.model.getElementAt(it) }) == entries.toList()"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A selection made by the user in a list waits in the application event queue instead of touching the property directly.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When the user selects a list entry, the UI thread must not\n            write into the bound selection property itself, because the\n            property belongs to the application thread, whose listeners\n            expect to never be invoked from the UI thread. Instead, the\n            new selection is handed over to the application event queue.\n\n            In this feature nobody processes that queue at first, which\n            makes the handover visible: the list already shows the new\n            selection, while the property still holds the old one. Only\n            when this thread volunteers to process the events does the\n            new selection reach the view model, on this very thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property with a change listener which records the thread it runs on.","code":["var trace = new java.util.concurrent.CopyOnWriteArrayList<String>()","var selection = Var.of(\"B\")","selection.onChange(sprouts.From.VIEW, it ->","    trace << \"changed to '${it.currentValue().orElseThrowUnchecked()}' on '${Thread.currentThread().name}'\".toString()",")"]},
+
+        {"kind":"and","text":"A list view over three entries, built in decoupled mode.","code":["var entries = Vars.of(\"A\", \"B\", \"C\")","var list = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.list(selection, entries)).get(JList)","})"]},
+
+        {"kind":"expect","text":"The list starts out with the initial selection of the property.","code":["UI.runAndGet({ list.selectedValue }) == \"B\""]},
+
+        {"kind":"when","text":"The user selects the third entry, on the UI thread.","code":["UI.runNow({ list.setSelectedIndex(2) })"]},
+
+        {"kind":"then","text":"The list itself shows the new selection right away, it is UI owned state...","code":["UI.runAndGet({ list.selectedValue }) == \"C\""]},
+
+        {"kind":"and","text":"...but the property has not been touched yet! The write is waiting in the application event queue.","code":["selection.is(\"B\")","trace.isEmpty()"]},
+
+        {"kind":"when","text":"This test thread, playing the application thread, processes the event queue.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()"]},
+
+        {"kind":"then","text":"Now the property was updated, and its change listener ran on the application thread.","code":["selection.is(\"C\")","trace == [\"changed to 'C' on '${Thread.currentThread().name}'\".toString()]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
