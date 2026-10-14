@@ -41,7 +41,7 @@ public final class TextSelectionConf
     private static final int   _SELECT_WORD_ON_LONG_PRESS        = 1 << 3;
     private static final int   _COPY_TO_CLIPBOARD                = 1 << 4;
     private static final int   _DEFAULT_BEHAVIOURS               = _NAVIGATE_WITH_KEYBOARD | _SELECT_WORD_ON_DOUBLE_CLICK | _SELECT_PARAGRAPH_ON_TRIPLE_CLICK | _COPY_TO_CLIPBOARD;
-    private static final TextSelectionConf _NONE = new TextSelectionConf(null, _DEFAULT_COLOR, null, false, 0f, 0f, 0f, null, null, false, null, UI.CaretShape.BAR, 1f, true, _DEFAULT_BEHAVIOURS);
+    private static final TextSelectionConf _NONE = new TextSelectionConf(null, _DEFAULT_COLOR, null, false, 0f, 0f, 0f, null, null, false, null, UI.CaretShape.BAR, 1f, 0f, true, _DEFAULT_BEHAVIOURS);
 
     static TextSelectionConf none() { return _NONE; }
 
@@ -58,6 +58,7 @@ public final class TextSelectionConf
     private final @Nullable Color _caretColor;
     private final UI.CaretShape   _caretShape;
     private final float           _caretWidth;
+    private final float           _caretRadius;
     private final boolean         _useUnfocusedLook;
     private final int             _behaviours;
 
@@ -75,6 +76,7 @@ public final class TextSelectionConf
         @Nullable Color         caretColor,
         UI.CaretShape           caretShape,
         float                   caretWidth,
+        float                   caretRadius,
         boolean                 useUnfocusedLook,
         int                     behaviours
     ) {
@@ -91,6 +93,7 @@ public final class TextSelectionConf
         _caretColor           = caretColor;
         _caretShape           = Objects.requireNonNull(caretShape);
         _caretWidth           = caretWidth;
+        _caretRadius          = caretRadius;
         _useUnfocusedLook     = useUnfocusedLook;
         _behaviours           = behaviours;
     }
@@ -109,10 +112,11 @@ public final class TextSelectionConf
         @Nullable Color         caretColor,
         UI.CaretShape           caretShape,
         float                   caretWidth,
+        float                   caretRadius,
         boolean                 useUnfocusedLook,
         int                     behaviours
     ) {
-        final TextSelectionConf conf = new TextSelectionConf(range, color, unfocusedColor, mergeLines, convexRadius, concaveRadius, borderWidth, borderColor, unfocusedBorderColor, showCaret, caretColor, caretShape, caretWidth, useUnfocusedLook, behaviours);
+        final TextSelectionConf conf = new TextSelectionConf(range, color, unfocusedColor, mergeLines, convexRadius, concaveRadius, borderWidth, borderColor, unfocusedBorderColor, showCaret, caretColor, caretShape, caretWidth, caretRadius, useUnfocusedLook, behaviours);
         return conf.equals(_NONE) ? _NONE : conf;
     }
 
@@ -136,6 +140,8 @@ public final class TextSelectionConf
 
     float caretWidth() { return _caretWidth; }
 
+    float caretRadius() { return _caretRadius; }
+
     boolean navigateWithKeyboard() { return _does(_NAVIGATE_WITH_KEYBOARD); }
 
     boolean selectWordOnDoubleClick() { return _does(_SELECT_WORD_ON_DOUBLE_CLICK); }
@@ -150,11 +156,11 @@ public final class TextSelectionConf
 
     private TextSelectionConf _withBehaviour( int behaviour, boolean on ) {
         final int behaviours = on ? _behaviours | behaviour : _behaviours & ~behaviour;
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, behaviours);
     }
 
     TextSelectionConf caretGeometry() {
-        return of(null, _DEFAULT_COLOR, null, false, 0f, 0f, 0f, null, null, false, null, _caretShape, _caretWidth, true, _DEFAULT_BEHAVIOURS);
+        return of(null, _DEFAULT_COLOR, null, false, 0f, 0f, 0f, null, null, false, null, _caretShape, _caretWidth, 0f, true, _DEFAULT_BEHAVIOURS);
     }
 
     @Nullable TextSelection rangeToPaint() {
@@ -166,7 +172,7 @@ public final class TextSelectionConf
             return this;
         final Color           unfocusedColor       = _unfocusedColor != null ? _unfocusedColor : _greyed(_color);
         final @Nullable Color unfocusedBorderColor = _borderColor == null ? null : _unfocusedBorderColor != null ? _unfocusedBorderColor : _greyed(_borderColor);
-        return of(_range, unfocusedColor, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, unfocusedBorderColor, _unfocusedBorderColor, false, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, unfocusedColor, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, unfocusedBorderColor, _unfocusedBorderColor, false, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     private static Color _greyed( Color color ) {
@@ -184,7 +190,7 @@ public final class TextSelectionConf
     }
 
     TextSelectionConf range( TextSelection range ) {
-        return of(range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -197,7 +203,7 @@ public final class TextSelectionConf
      */
     public TextSelectionConf color( Color color ) {
         Objects.requireNonNull(color);
-        return of(_range, color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -226,7 +232,7 @@ public final class TextSelectionConf
      * @return A new selection configuration with the given radius for convex corners.
      */
     public TextSelectionConf convexRadius( double radius ) {
-        return of(_range, _color, _unfocusedColor, _mergeLines, (float) Math.max(0, radius), _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, (float) Math.max(0, radius), _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -244,7 +250,7 @@ public final class TextSelectionConf
      * @return A new selection configuration with the given radius for concave corners.
      */
     public TextSelectionConf concaveRadius( double radius ) {
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, (float) Math.max(0, radius), _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, (float) Math.max(0, radius), _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -261,7 +267,7 @@ public final class TextSelectionConf
      * @return A new selection configuration which joins the lines or not.
      */
     public TextSelectionConf mergeLines( boolean merge ) {
-        return of(_range, _color, _unfocusedColor, merge, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, merge, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -291,7 +297,7 @@ public final class TextSelectionConf
      * @return A new selection configuration with the given border width.
      */
     public TextSelectionConf borderWidth( double width ) {
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, (float) Math.max(0, width), _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, (float) Math.max(0, width), _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -304,7 +310,7 @@ public final class TextSelectionConf
      */
     public TextSelectionConf borderColor( Color color ) {
         Objects.requireNonNull(color);
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, color, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, color, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -320,7 +326,7 @@ public final class TextSelectionConf
      * @return A new selection configuration which paints the caret or not.
      */
     public TextSelectionConf showCaret( boolean show ) {
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, show, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, show, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -333,7 +339,7 @@ public final class TextSelectionConf
      */
     public TextSelectionConf caretColor( Color color ) {
         Objects.requireNonNull(color);
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, color, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, color, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -351,7 +357,7 @@ public final class TextSelectionConf
      */
     public TextSelectionConf caretShape( UI.CaretShape shape ) {
         Objects.requireNonNull(shape);
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, shape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, shape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -366,7 +372,26 @@ public final class TextSelectionConf
      * @return A new selection configuration with the given caret width.
      */
     public TextSelectionConf caretWidth( double width ) {
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, (float) Math.max(0, width), _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, (float) Math.max(0, width), _caretRadius, _useUnfocusedLook, _behaviours);
+    }
+
+    /**
+     *  Rounds the corners of the caret, which SwingTree paints when {@link #showCaret(boolean)} is enabled
+     *  and no character is selected. Every corner of the caret becomes a quarter circle with this radius,
+     *  or with half the length of the shorter side of the caret when this radius is larger. So any radius of
+     *  at least half of the {@link #caretWidth(double)} turns a {@link UI.CaretShape#BAR} into a thin pill
+     *  with round ends, and an {@link UI.CaretShape#UNDERLINE} into a flat pill.
+     *  The rounding only cuts the corners off, so the caret never reaches outside of
+     *  {@link TextSelection#caretBounds()}. With a radius of 0, which is the default, the corners are square:
+     *  <pre>{@code
+     *  .selection( s -> s.showCaret(true).caretWidth(3).caretRadius(1.5) )
+     *  }</pre>
+     *
+     * @param radius The radius of the quarter circle of every corner of the caret, in pixels before the UI scale is applied.
+     * @return A new selection configuration with the given corner radius for the caret.
+     */
+    public TextSelectionConf caretRadius( double radius ) {
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, (float) Math.max(0, radius), _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -391,7 +416,7 @@ public final class TextSelectionConf
      */
     public TextSelectionConf unfocusedColor( Color color ) {
         Objects.requireNonNull(color);
-        return of(_range, _color, color, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, color, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -407,7 +432,7 @@ public final class TextSelectionConf
      */
     public TextSelectionConf unfocusedBorderColor( Color color ) {
         Objects.requireNonNull(color);
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, color, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, color, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     /**
@@ -424,7 +449,7 @@ public final class TextSelectionConf
      * @return A new selection configuration which changes its look with the keyboard focus or not.
      */
     public TextSelectionConf useUnfocusedLook( boolean use ) {
-        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, use, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, use, _behaviours);
     }
 
     /**
@@ -532,9 +557,9 @@ public final class TextSelectionConf
     }
 
     TextSelectionConf _scale( double scale ) {
-        if ( _convexRadius == 0f && _concaveRadius == 0f && _borderWidth == 0f )
+        if ( _convexRadius == 0f && _concaveRadius == 0f && _borderWidth == 0f && _caretRadius == 0f )
             return this;
-        return of(_range, _color, _unfocusedColor, _mergeLines, (float) (_convexRadius * scale), (float) (_concaveRadius * scale), (float) (_borderWidth * scale), _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return of(_range, _color, _unfocusedColor, _mergeLines, (float) (_convexRadius * scale), (float) (_concaveRadius * scale), (float) (_borderWidth * scale), _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, (float) (_caretRadius * scale), _useUnfocusedLook, _behaviours);
     }
 
     @Override
@@ -557,13 +582,14 @@ public final class TextSelectionConf
                Objects.equals(_caretColor, that._caretColor) &&
                _caretShape == that._caretShape &&
                Float.floatToIntBits(_caretWidth) == Float.floatToIntBits(that._caretWidth) &&
+               Float.floatToIntBits(_caretRadius) == Float.floatToIntBits(that._caretRadius) &&
                _useUnfocusedLook == that._useUnfocusedLook &&
                _behaviours == that._behaviours;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _useUnfocusedLook, _behaviours);
+        return Objects.hash(_range, _color, _unfocusedColor, _mergeLines, _convexRadius, _concaveRadius, _borderWidth, _borderColor, _unfocusedBorderColor, _showCaret, _caretColor, _caretShape, _caretWidth, _caretRadius, _useUnfocusedLook, _behaviours);
     }
 
     @Override
@@ -584,6 +610,7 @@ public final class TextSelectionConf
                     "caretColor=" + _caretColor + ", " +
                     "caretShape=" + _caretShape + ", " +
                     "caretWidth=" + _caretWidth + ", " +
+                    "caretRadius=" + _caretRadius + ", " +
                     "useUnfocusedLook=" + _useUnfocusedLook + ", " +
                     "navigateWithKeyboard=" + navigateWithKeyboard() + ", " +
                     "selectWordOnDoubleClick=" + selectWordOnDoubleClick() + ", " +

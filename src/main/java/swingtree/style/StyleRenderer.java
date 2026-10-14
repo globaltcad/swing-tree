@@ -1437,15 +1437,14 @@ final class StyleRenderer
         }
     }
 
-    private static Rectangle2D _caretShape( Bounds caret, TextSelectionConf look ) {
+    private static Shape _caretShape( Bounds caret, TextSelectionConf look ) {
         final float x      = caret.location().x();
         final float top    = caret.location().y();
         final float width  = caret.size().width().orElse(0f);
         final float height = caret.size().height().orElse(0f);
-        if ( look.caretShape() != UI.CaretShape.UNDERLINE )
-            return new Rectangle2D.Float(x, top, width, height);
-        final float thickness = Math.min(height, CaretTable.thicknessOf(look.caretWidth()));
-        return new Rectangle2D.Float(x, top + height - thickness, width, thickness);
+        final float thickness = look.caretShape() == UI.CaretShape.UNDERLINE ? Math.min(height, CaretTable.thicknessOf(look.caretWidth())) : height;
+        final float radius    = Math.min(look.caretRadius(), Math.min(width, thickness) / 2);
+        return _selectionArea(x, top + height - thickness, width, thickness, radius);
     }
 
     private static void _renderSelection(
