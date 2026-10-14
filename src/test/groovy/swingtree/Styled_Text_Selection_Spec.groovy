@@ -2998,8 +2998,8 @@ class Styled_Text_Selection_Spec extends Specification
             the next line are the same position. The selections in this scenario reach from position 0 to
             the position, so the position is their end, and `caretBounds()` returns the rectangle at the end
             of the upper line for it, next to the last selected character. It also checks that `withCaretAt(..)`, given the middle of the caret
-            rectangle, returns a selection which equals the selection it was called on, because the caret
-            does not move, and that `withAnchorAt(..)`, given the same coordinate, puts the anchor at the
+            rectangle, returns a selection whose caret is at the same position and has the same caret rectangle,
+            because the caret does not move, and that `withAnchorAt(..)`, given the same coordinate, puts the anchor at the
             same position.
 
             If the conversion from a coordinate to a position used another rule than the conversion from a
@@ -3053,7 +3053,8 @@ class Styled_Text_Selection_Spec extends Specification
         and : 'Moving the caret of each of these selections to the middle of its own caret rectangle changes nothing:'
             (0..21).every { position ->
                 var atPosition = painted.withCaret(position)
-                atPosition.withCaretAt(middles[position]) == atPosition
+                var movedThere = atPosition.withCaretAt(middles[position])
+                movedThere.caret() == atPosition.caret() && movedThere.caretBounds() == atPosition.caretBounds()
             }
         and : 'Moving the anchor to the middle of the caret rectangle of a position puts the anchor at that position:'
             (0..21).every { position -> painted.withAnchorAt(middles[position]).anchor() == position }
@@ -8031,6 +8032,85 @@ class Styled_Text_Selection_Spec extends Specification
         and : 'Nothing is selected, and the caret is in the gap between the two line breaks:'
             selection.get().isEmpty()
             selection.get().caret() == 6
+    }
+
+    def 'Moving the caret with `withCaretAt(..)` to a coordinate at the place where a line wraps puts the caret on the line of that coordinate, like dragging the mouse there.'(
+        int anchor, String aimedAt, boolean atLineEnd
+    ) {
+        reportInfo """
+            `withCaretAt(point)` moves the caret to the gap nearest to a pixel coordinate. Your code calls it when it
+            moves the caret itself, for example while your users drag a round handle on a touch screen. Where a line
+            wraps, one position is both the end of the upper line and the start of the next line, so the caret has
+            two places for it. `withCaretAt(..)` picks the place on the line of the coordinate, just as dragging the
+            mouse does: aimed at the end of the upper line, `isCaretAtLineEnd()` is `true` and `caretBounds()` lies
+            at the end of the upper line; aimed at the start of the next line, it is `false` and `caretBounds()` lies
+            at the start of the next line.
+
+            The content area of the component is 100 pixels wide, and the text is "HHHH HHHH". At a font size of 20,
+            one word of four "H" letters is about 56 pixels wide and a space about 5 pixels, so the two words need
+            about 117 pixels and `wrapLines(true)` puts the second word onto a second line. Position 5 is the gap
+            behind the space, which ends the first line and starts the second one.
+
+            If `withCaretAt(..)` chose the place by where the anchor lies instead, a handle which your users drag to
+            the start of the second line would jump back to the end of the first line, away from their finger.
+
+            In this scenario the anchor is at position ${anchor}, and the coordinate lies ${aimedAt}.
+        """
+        given : 'A property which holds a caret at the anchor position:'
+            var selection = Var.of(TextSelection.caretAt(anchor))
+        and : 'A component whose content area is 100 pixels wide, with the first word in red and the second word in green:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(120, 150)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .wrapLines(true)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content(
+                                StyledString.of( f -> f.color(RED),   "HHHH " ),
+                                StyledString.of( f -> f.color(GREEN), "HHHH"  )
+                            )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+        and : """
+            We render the component and find the red and the green letters. `UI.sync()` waits until SwingTree has
+            written the selection with its pixel rectangles into the property:
+        """
+            var image = Utility.renderSingleComponent(box)
+            UI.sync()
+            var firstWord  = boundsOfPixelsPaintedIn(image, RED)
+            var secondWord = boundsOfPixelsPaintedIn(image, GREEN)
+        and : """
+            The coordinate: 30 pixels right of the red letters, which is behind the space and the end of the first
+            line, or the left edge of the green letters, which is the start of the second line:
+        """
+            var point = atLineEnd
+                            ? Position.of(firstWord.x + firstWord.width + 30, firstWord.centerY as int)
+                            : Position.of(secondWord.x, secondWord.centerY as int)
+
+        when : 'Your code moves the caret to that coordinate:'
+            var moved = selection.get().withCaretAt(point)
+
+        then : 'The text was really wrapped, so the second word is below the first word:'
+            secondWord.y >= firstWord.y + firstWord.height
+        and : 'The caret is at position 5, on the line of the coordinate:'
+            moved.caret() == 5
+            moved.isCaretAtLineEnd() == atLineEnd
+        and : 'Its rectangle lies on that line, at the end of the red letters or in front of the green letters:'
+            atLineEnd ? moved.caretBounds().get().location().x() >= firstWord.x + firstWord.width - 1
+                      : moved.caretBounds().get().location().x() <= secondWord.x
+            atLineEnd ? moved.caretBounds().get().location().y() <= firstWord.y
+                      : moved.caretBounds().get().location().y() >= firstWord.y + firstWord.height - 1
+
+        where :
+            anchor | aimedAt                                                      | atLineEnd
+            2      | "at the start of the second line, behind the anchor"         | false
+            7      | "right of the end of the first line, in front of the anchor" | true
     }
 
     def 'With `withTextSelection()` and no property, your users can select and copy the text which `text(t -> ..)` declares without a name.'()
