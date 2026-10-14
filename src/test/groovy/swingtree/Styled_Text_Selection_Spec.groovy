@@ -5267,6 +5267,102 @@ class Styled_Text_Selection_Spec extends Specification
             shape << [UI.CaretShape.BLOCK, UI.CaretShape.UNDERLINE]
     }
 
+    def 'With `selection(s -> s.showCaret(true).caretShape(UI.CaretShape.#shape).caretWidth(8).caretRadius(#radius))` at a UI scale of #uiScale, the top left corner of the caret is #cornerLooks.'(
+        UI.CaretShape shape, double radius, float uiScale, String cornerLooks
+    ) {
+        reportInfo """
+            `caretRadius(..)` rounds every corner of the caret into a quarter circle, so a thick `BAR`
+            looks like a pill instead of a sharp slab. Like every size in a style, the radius is multiplied
+            by the UI scale. Without `caretRadius(..)`, or with a radius of 0, the corners are square.
+
+            The text is "HHHH HHHH", and the caret is at position 9, behind the last "H", so no letter lies
+            behind the caret. A `BAR` is as wide as `caretWidth(8)`. A `BLOCK` behind the last character is
+            half as wide as the line is tall, and an `UNDERLINE` is just as wide and as thick as `caretWidth(8)`,
+            along the bottom of the line. A radius of 4 is half the thickness of the bar and of the underline,
+            so both become pills.
+
+            A radius of 20 is more than half of every side of the bar and of the underline. SwingTree rounds
+            each corner by half the shorter side instead, which is 4 for both, so a radius of 20 paints the same
+            pill as a radius of 4. If SwingTree rounded the long side of the bar by more than that, the corners of
+            the bar would turn into tall pointed curves, and the pixel next to its corner would be mostly white at
+            a UI scale of 1.
+
+            The caret is painted in green on a white background. We look at two pixels: the one in the top
+            left corner of the caret, and the one diagonally next to it, one pixel to the right and one pixel
+            down. A square caret covers both pixels completely, so both are pure green. A radius of 4 pixels
+            leaves the corner pixel out, or covers only a small part of it, so it stays mostly white, while the
+            curve still covers most of the pixel next to it. At a UI scale of 2 the radius is 8 pixels on the
+            screen, and a curve that large leaves out the pixel next to the corner too. If SwingTree did not
+            multiply the radius by the UI scale, that pixel would be mostly green at a UI scale of 2 as well.
+
+            In this scenario the shape is `${shape}`, the radius is ${radius} and the UI scale is ${uiScale}.
+        """
+        given : 'We set the UI scale factor of SwingTree. Every size in a style is multiplied by it:'
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'A property which holds an empty selection with the caret behind the last character:'
+            var selection = Var.of(TextSelection.caretAt(9))
+        and : 'A component which paints "HHHH HHHH" in red on white, with a green caret, 8 pixels thick, with the given corner radius:'
+            var box =
+                    UI.box()
+                    .withStyle( it -> it
+                        .size(400, 100)
+                        .padding(10)
+                        .backgroundColor(WHITE)
+                        .text("body", t -> t
+                            .placement(UI.Placement.TOP_LEFT)
+                            .font( f -> f.family("Ubuntu").size(20) )
+                            .content( StyledString.of( f -> f.color(RED), "HHHH HHHH" ) )
+                            .selection( s -> s.showCaret(true).caretShape(shape).caretWidth(8).caretRadius(radius).caretColor(GREEN) )
+                        )
+                    )
+                    .withTextSelection("body", selection)
+                    .get(JBox)
+
+        when : """
+            We render the component and look up the rectangle of the caret. `UI.sync()` waits until the
+            UI thread has written that rectangle into the property. An underline covers only the bottom
+            8 pixels of that rectangle, or 16 pixels at a UI scale of 2. Its top edge may fall between two
+            pixel rows, so we look at the first pixel row which the caret covers completely:
+        """
+            var image     = Utility.renderSingleComponent(box)
+            UI.sync()
+            var bounds    = selection.get().caretBounds().get()
+            float height  = bounds.size().height().get()
+            float topEdge = shape == UI.CaretShape.UNDERLINE ? bounds.location().y() + height - 8 * uiScale : bounds.location().y()
+            int left      = Math.round(bounds.location().x())
+            int top       = (int) Math.ceil(topEdge)
+            var corner    = new Color(image.getRGB(left, top))
+            var next      = new Color(image.getRGB(left + 1, top + 1))
+
+        then : 'The caret is painted:'
+            boundsOfPixelsPaintedIn(image, GREEN) != null
+        and : 'A square caret fills both pixels with pure green:'
+            radius != 0 || corner == GREEN
+            radius != 0 || next   == GREEN
+        and : 'A rounded caret leaves the corner pixel mostly white:'
+            radius == 0 || corner.red > 128
+        and : 'The pixel next to the corner is mostly green at a UI scale of 1 and mostly white at a UI scale of 2:'
+            radius == 0 || uiScale != 1f || next.red < 128
+            radius == 0 || uiScale != 2f || next.red > 128
+
+        cleanup : 'We set the UI scale factor back to 1:'
+            SwingTree.get().setUiScaleFactor(1f)
+
+        where :
+            [shape, radius, uiScale] << [
+                [UI.CaretShape.BAR, UI.CaretShape.BLOCK, UI.CaretShape.UNDERLINE],
+                [0, 4],
+                [1f, 2f]
+            ].combinations() + [
+                [UI.CaretShape.BAR,       20, 1f],
+                [UI.CaretShape.BAR,       20, 2f],
+                [UI.CaretShape.UNDERLINE, 20, 1f],
+                [UI.CaretShape.UNDERLINE, 20, 2f]
+            ]
+
+            cornerLooks = radius == 0 ? "square" : "round"
+    }
+
     def 'With `selection(s -> s.showCaret(true).caretShape(UI.CaretShape.#shape).caretWidth(3))`, a caret behind the last character of the text, where no character follows, is half as wide as the line is tall.'(
         UI.CaretShape shape
     ) {

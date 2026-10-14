@@ -38,6 +38,9 @@ import java.util.Optional;
  *  and selects the word under the finger after a long press. Dragging across the text without a pin selects nothing,
  *  like on a phone. A caret without selected characters keeps its pin, so your users can drag it to start a selection.
  *  Every press in touch mode also gives the text the keyboard focus, so Ctrl+A and Ctrl+C keep working.
+ *  <p>
+ *  The controls below the checkboxes change the shape, the width and the corner radius of the caret
+ *  while you watch it, which you see best with a caret between two letters and nothing selected.
  *  The overlay has the same bounds as the text component, so the rectangles of the selection need no conversion.
  */
 public class TextSelectionPinsExample extends UI.Panel
@@ -83,6 +86,9 @@ public class TextSelectionPinsExample extends UI.Panel
 
     private final Var<TextSelection> selection = Var.of(TextSelection.between(STYLE_START, STYLE_START + "style".length()));
     private final Var<Boolean>       touchMode = Var.of(false);
+    private final Var<UI.CaretShape> caretShape  = Var.of(UI.CaretShape.BAR);
+    private final Var<Integer>       caretWidth  = Var.of(2);
+    private final Var<Integer>       caretRadius = Var.of(1);
     private final Timer              longPress = new Timer(LONG_PRESS_MILLIS, e -> _selectWordAtPress());
     private final JBox               text      = _text();
     private Grab                     grab      = Grab.NOTHING;
@@ -93,7 +99,7 @@ public class TextSelectionPinsExample extends UI.Panel
         longPress.setRepeats(false);
         text.addPropertyChangeListener("preferredSize", e -> UI.runLater(this::_growWindowToFitText));
         Var<Boolean> selectable = selection.zoomTo(TextSelection::isEnabled, TextSelection::withEnabled);
-        UI.of(this).withLayout("fill, wrap 1, insets 18", "[grow]", "[]12[grow]12[]6[]6[]")
+        UI.of(this).withLayout("fill, wrap 1, insets 18", "[grow]", "[]12[grow]12[]6[]6[]6[]")
         .withStyle( it -> it.backgroundColor(BACKDROP) )
         .add("growx",
             UI.label("Styled text selection")
@@ -115,6 +121,16 @@ public class TextSelectionPinsExample extends UI.Panel
             .add(UI.checkBox("Selectable", selectable))
         )
         .add("growx",
+            UI.panel("insets 0", "[]6[]18[]6[120]18[]6[120]")
+            .withStyle( it -> it.backgroundColor(BACKDROP) )
+            .add(UI.label("Caret"))
+            .add(UI.comboBox(caretShape))
+            .add(UI.label("Width"))
+            .add("growx", UI.slider(UI.Axis.HORIZONTAL, 1, 12, caretWidth))
+            .add(UI.label("Corner radius"))
+            .add("growx", UI.slider(UI.Axis.HORIZONTAL, 0, 8, caretRadius))
+        )
+        .add("growx",
             UI.panel("insets 0", "[][][]")
             .withStyle( it -> it.backgroundColor(BACKDROP) )
             .add(UI.button("Select the title").onClick( it -> selection.update( s -> TextSelection.between(0, TITLE.length()).withEnabled(s.isEnabled()) ) ))
@@ -126,6 +142,7 @@ public class TextSelectionPinsExample extends UI.Panel
     private JBox _text() {
         return
             UI.box("fill, insets 0", "[grow][]", "[]push")
+            .withRepaintOn(caretShape, caretWidth, caretRadius)
             .withStyle( it -> it
                 .margin(6)
                 .padding(26)
@@ -148,6 +165,9 @@ public class TextSelectionPinsExample extends UI.Panel
                         .concaveRadius(4)
                         .showCaret(true)
                         .caretColor(ACCENT)
+                        .caretShape(caretShape.get())
+                        .caretWidth(caretWidth.get())
+                        .caretRadius(caretRadius.get())
                     )
                 )
             )
