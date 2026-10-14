@@ -43,7 +43,7 @@ final class RunningAnimation
     public Optional&lt;JComponent&gt; component() {
 <span class="fc bfc" id="L44" title="All 2 branches covered.">        if ( _compRef == null ) return Optional.empty();</span>
 <span class="fc" id="L45">        Component _component = this._compRef.get();</span>
-<span class="pc bpc" id="L46" title="1 of 2 branches missed.">        return Optional.ofNullable( _component instanceof JComponent ? (JComponent) _component : null );</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        return Optional.ofNullable( _component instanceof JComponent ? (JComponent) _component : null );</span>
     }
 
     public @Nullable WeakReference&lt;Component&gt; compRef() {

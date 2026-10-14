@@ -145,7 +145,7 @@ final class StyleConfLayers
 <span class="fc bfc" id="L145" title="All 2 branches covered.">        return predicate.test(UI.Layer.BACKGROUND, _background)</span>
 <span class="fc bfc" id="L146" title="All 2 branches covered.">            || predicate.test(UI.Layer.CONTENT,    _content)</span>
 <span class="fc bfc" id="L147" title="All 2 branches covered.">            || predicate.test(UI.Layer.BORDER,     _border)</span>
-<span class="pc bpc" id="L148" title="1 of 2 branches missed.">            || predicate.test(UI.Layer.FOREGROUND, _foreground);</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">            || predicate.test(UI.Layer.FOREGROUND, _foreground);</span>
     }
 
     StyleConfLayers map( Configurator&lt;StyleConfLayer&gt; f ) {
@@ -186,7 +186,7 @@ final class StyleConfLayers
 <span class="fc" id="L186">        StyleConfLayer foreground = _foreground.simplified();</span>
 <span class="pc bpc" id="L187" title="1 of 2 branches missed.">        StyleConfLayer any        = ( _any == null ? null : _any.simplified() );</span>
 
-<span class="pc bpc" id="L189" title="2 of 12 branches missed.">        if (</span>
+<span class="pc bpc" id="L189" title="1 of 12 branches missed.">        if (</span>
              filter     == _filter     &amp;&amp;
              background == _background &amp;&amp;
              content    == _content    &amp;&amp;
@@ -233,7 +233,7 @@ final class StyleConfLayers
 <span class="fc" id="L233">                                final FontRenderContext frc = g2d.getFontRenderContext();</span>
 <span class="fc" id="L234">                                final Pair&lt;Float, List&lt;TextLayoutEngine.LayoutLine&gt;&gt; layoutResult =</span>
 <span class="fc" id="L235">                                        TextLayoutEngine._buildTextLayoutsAndPreferredHeight(</span>
-<span class="fc" id="L236">                                                font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles(), StyleRenderer._findDesiredPlacementFrom(textConf)</span>
+<span class="fc" id="L236">                                                font, frc, textConf.content(), boundsWidth, boundsX, boundsY, wrapLines, predictedBoxModel, textConf.obstacles(), textConf.resolvedPlacement()</span>
                                         );
 <span class="fc" id="L238">                                double totalHeight = layoutResult.first().doubleValue();</span>
 <span class="fc" id="L239">                                totalHeight += boundsY;</span>

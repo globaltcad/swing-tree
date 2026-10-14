@@ -201,11 +201,12 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
                                                 false,
 <span class="fc" id="L202">                                                Tuple.of(Shape.class),</span>
                                                 UI.ComponentBoundary.OUTER_TO_EXTERIOR,
-                                                true
+                                                true,
+<span class="fc" id="L205">                                                TextSelectionConf.none()</span>
                                             );
 
     static final TextConf none() {
-<span class="fc" id="L208">        return _NONE;</span>
+<span class="fc" id="L209">        return _NONE;</span>
     }
 
     private final Tuple&lt;Pooled&lt;Paragraph&gt;&gt;  _content;
@@ -219,6 +220,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
     private final Tuple&lt;Shape&gt;              _obstacles;
     private final UI.ComponentBoundary      _obstaclesFromChildrenAs;
     private final boolean                   _obstaclesFromChildrenEnabled;
+    private final TextSelectionConf         _selection;
 
     private TextConf(
         Tuple&lt;Pooled&lt;Paragraph&gt;&gt;  content,
@@ -231,21 +233,23 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
         boolean                   autoPreferredHeight,
         Tuple&lt;Shape&gt;              obstacles,
         UI.ComponentBoundary      obstaclesFromChildrenAs,
-        boolean                   obstaclesFromChildrenEnabled
+        boolean                   obstaclesFromChildrenEnabled,
+        TextSelectionConf         selection
     )
-<span class="fc" id="L236">    {</span>
-<span class="fc" id="L237">        _content                      = Objects.requireNonNull(content);</span>
-<span class="fc" id="L238">        _fontConf                     = Objects.requireNonNull(fontConf);</span>
-<span class="fc" id="L239">        _clipArea                     = Objects.requireNonNull(clipArea);</span>
-<span class="fc" id="L240">        _placementBoundary            = Objects.requireNonNull(placementBoundary);</span>
-<span class="fc" id="L241">        _placement                    = Objects.requireNonNull(placement);</span>
-<span class="fc" id="L242">        _offset                       = Objects.requireNonNull(offset);</span>
-<span class="fc" id="L243">        _wrapLines                    = wrapLines;</span>
-<span class="fc" id="L244">        _autoPreferredHeight          = autoPreferredHeight;</span>
-<span class="fc" id="L245">        _obstacles                    = Objects.requireNonNull(obstacles);</span>
-<span class="fc" id="L246">        _obstaclesFromChildrenAs      = Objects.requireNonNull(obstaclesFromChildrenAs);</span>
-<span class="fc" id="L247">        _obstaclesFromChildrenEnabled = obstaclesFromChildrenEnabled;</span>
-<span class="fc" id="L248">    }</span>
+<span class="fc" id="L239">    {</span>
+<span class="fc" id="L240">        _content                      = Objects.requireNonNull(content);</span>
+<span class="fc" id="L241">        _fontConf                     = Objects.requireNonNull(fontConf);</span>
+<span class="fc" id="L242">        _clipArea                     = Objects.requireNonNull(clipArea);</span>
+<span class="fc" id="L243">        _placementBoundary            = Objects.requireNonNull(placementBoundary);</span>
+<span class="fc" id="L244">        _placement                    = Objects.requireNonNull(placement);</span>
+<span class="fc" id="L245">        _offset                       = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L246">        _wrapLines                    = wrapLines;</span>
+<span class="fc" id="L247">        _autoPreferredHeight          = autoPreferredHeight;</span>
+<span class="fc" id="L248">        _obstacles                    = Objects.requireNonNull(obstacles);</span>
+<span class="fc" id="L249">        _obstaclesFromChildrenAs      = Objects.requireNonNull(obstaclesFromChildrenAs);</span>
+<span class="fc" id="L250">        _obstaclesFromChildrenEnabled = obstaclesFromChildrenEnabled;</span>
+<span class="fc" id="L251">        _selection                    = Objects.requireNonNull(selection);</span>
+<span class="fc" id="L252">    }</span>
 
     private static TextConf of(
         Tuple&lt;Pooled&lt;Paragraph&gt;&gt; content,
@@ -258,24 +262,26 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
         boolean              autoPreferredHeight,
         Tuple&lt;Shape&gt;         obstacles,
         UI.ComponentBoundary obstaclesFromChildrenAs,
-        boolean              obstaclesFromChildrenEnabled
+        boolean              obstaclesFromChildrenEnabled,
+        TextSelectionConf    selection
     ) {
-<span class="fc" id="L263">        if (</span>
-<span class="fc bfc" id="L264" title="All 2 branches covered.">            content.isEmpty() &amp;&amp;</span>
-<span class="fc bfc" id="L265" title="All 2 branches covered.">            fontConf.equals(_NONE._fontConf) &amp;&amp;</span>
-<span class="pc bpc" id="L266" title="1 of 2 branches missed.">            clipArea.equals(_NONE._clipArea) &amp;&amp;</span>
-<span class="pc bpc" id="L267" title="1 of 2 branches missed.">            placementBoundary.equals(_NONE._placementBoundary) &amp;&amp;</span>
-<span class="fc bfc" id="L268" title="All 2 branches covered.">            placement.equals(_NONE._placement) &amp;&amp;</span>
-<span class="pc bpc" id="L269" title="2 of 6 branches missed.">            offset.equals(_NONE._offset) &amp;&amp;</span>
+<span class="fc" id="L268">        if (</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">            content.isEmpty() &amp;&amp;</span>
+<span class="fc bfc" id="L270" title="All 2 branches covered.">            fontConf.equals(_NONE._fontConf) &amp;&amp;</span>
+<span class="pc bpc" id="L271" title="1 of 2 branches missed.">            clipArea.equals(_NONE._clipArea) &amp;&amp;</span>
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">            placementBoundary.equals(_NONE._placementBoundary) &amp;&amp;</span>
+<span class="fc bfc" id="L273" title="All 2 branches covered.">            placement.equals(_NONE._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L274" title="2 of 6 branches missed.">            offset.equals(_NONE._offset) &amp;&amp;</span>
             wrapLines == _NONE._wrapLines &amp;&amp;
             autoPreferredHeight == _NONE._autoPreferredHeight &amp;&amp;
-<span class="pc bpc" id="L272" title="1 of 6 branches missed.">            obstacles.isEmpty() &amp;&amp;</span>
+<span class="pc bpc" id="L277" title="1 of 6 branches missed.">            obstacles.isEmpty() &amp;&amp;</span>
             obstaclesFromChildrenAs == _NONE._obstaclesFromChildrenAs &amp;&amp;
-            obstaclesFromChildrenEnabled == _NONE._obstaclesFromChildrenEnabled
+            obstaclesFromChildrenEnabled == _NONE._obstaclesFromChildrenEnabled &amp;&amp;
+<span class="fc bfc" id="L280" title="All 2 branches covered.">            selection.equals(_NONE._selection)</span>
         ) {
-<span class="fc" id="L276">            return _NONE;</span>
+<span class="fc" id="L282">            return _NONE;</span>
         }
-<span class="fc" id="L278">        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight, obstacles, obstaclesFromChildrenAs, obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L284">        return new TextConf(content, fontConf, clipArea, placementBoundary, placement, offset, wrapLines, autoPreferredHeight, obstacles, obstaclesFromChildrenAs, obstaclesFromChildrenEnabled, selection);</span>
     }
 
     /**
@@ -288,39 +294,39 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return The tuple of {@link Pooled} {@link Paragraph} objects for this text configuration.
      */
     Tuple&lt;Pooled&lt;Paragraph&gt;&gt; content() {
-<span class="fc" id="L291">        return _content;</span>
+<span class="fc" id="L297">        return _content;</span>
     }
 
     FontConf fontConf() {
-<span class="fc" id="L295">        return _fontConf;</span>
+<span class="fc" id="L301">        return _fontConf;</span>
     }
 
     UI.ComponentArea clipArea() {
-<span class="fc" id="L299">        return _clipArea;</span>
+<span class="fc" id="L305">        return _clipArea;</span>
     }
 
     UI.ComponentBoundary placementBoundary() {
-<span class="fc" id="L303">        return _placementBoundary;</span>
+<span class="fc" id="L309">        return _placementBoundary;</span>
     }
 
     UI.Placement placement() {
-<span class="fc" id="L307">        return _placement;</span>
+<span class="nc" id="L313">        return _placement;</span>
     }
 
     Offset offset() {
-<span class="fc" id="L311">        return _offset;</span>
+<span class="fc" id="L317">        return _offset;</span>
     }
 
     boolean wrapLines() {
-<span class="fc" id="L315">        return _wrapLines;</span>
+<span class="fc" id="L321">        return _wrapLines;</span>
     }
 
     boolean autoPreferredHeight() {
-<span class="fc" id="L319">        return _autoPreferredHeight;</span>
+<span class="fc" id="L325">        return _autoPreferredHeight;</span>
     }
 
     Tuple&lt;Shape&gt; obstacles() {
-<span class="fc" id="L323">        return _obstacles;</span>
+<span class="fc" id="L329">        return _obstacles;</span>
     }
 
     /**
@@ -335,7 +341,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      *         its obstacle extends; defaults to {@link UI.ComponentBoundary#OUTER_TO_EXTERIOR}.
      */
     UI.ComponentBoundary obstaclesFromChildren() {
-<span class="fc" id="L338">        return _obstaclesFromChildrenAs;</span>
+<span class="fc" id="L344">        return _obstaclesFromChildrenAs;</span>
     }
 
     /**
@@ -344,10 +350,10 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new {@link TextConf} object with the given text content.
      */
     public TextConf content( String textString ) {
-<span class="fc" id="L347">        Objects.requireNonNull(textString);</span>
-<span class="pc bpc" id="L348" title="1 of 2 branches missed.">        if ( textString.isEmpty() )</span>
-<span class="nc" id="L349">            return _withRawContent(Tuple.of(StyledString.class));</span>
-<span class="fc" id="L350">        return _withRawContent(Tuple.of(StyledString.of(textString)));</span>
+<span class="fc" id="L353">        Objects.requireNonNull(textString);</span>
+<span class="pc bpc" id="L354" title="1 of 2 branches missed.">        if ( textString.isEmpty() )</span>
+<span class="nc" id="L355">            return _withRawContent(Tuple.of(StyledString.class));</span>
+<span class="fc" id="L356">        return _withRawContent(Tuple.of(StyledString.of(textString)));</span>
     }
 
     /**
@@ -361,8 +367,8 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @throws NullPointerException if the supplied styledStrings is null.
      */
     public TextConf content( StyledString... styledStrings ) {
-<span class="fc" id="L364">        Objects.requireNonNull(styledStrings);</span>
-<span class="fc" id="L365">        return _withRawContent(Tuple.of(StyledString.class, styledStrings));</span>
+<span class="fc" id="L370">        Objects.requireNonNull(styledStrings);</span>
+<span class="fc" id="L371">        return _withRawContent(Tuple.of(StyledString.class, styledStrings));</span>
     }
 
     /**
@@ -376,10 +382,10 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @throws NullPointerException if the supplied styledStrings is null.
      */
     public TextConf content( Tuple&lt;StyledString&gt; styledStrings ) {
-<span class="fc" id="L379">        Objects.requireNonNull(styledStrings);</span>
-<span class="pc bpc" id="L380" title="1 of 2 branches missed.">        if ( _contentEqualTo(styledStrings) )</span>
-<span class="nc" id="L381">            return this;</span>
-<span class="fc" id="L382">        return _withRawContent(styledStrings);</span>
+<span class="fc" id="L385">        Objects.requireNonNull(styledStrings);</span>
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">        if ( _contentEqualTo(styledStrings) )</span>
+<span class="nc" id="L387">            return this;</span>
+<span class="fc" id="L388">        return _withRawContent(styledStrings);</span>
     }
 
     /**
@@ -393,8 +399,8 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @throws NullPointerException if the supplied styledStrings is null.
      */
     public TextConf content( Collection&lt;StyledString&gt; styledStrings ) {
-<span class="nc" id="L396">        Objects.requireNonNull(styledStrings);</span>
-<span class="nc" id="L397">        return content(Tuple.of(StyledString.class, styledStrings));</span>
+<span class="nc" id="L402">        Objects.requireNonNull(styledStrings);</span>
+<span class="nc" id="L403">        return content(Tuple.of(StyledString.class, styledStrings));</span>
     }
 
     /**
@@ -404,16 +410,16 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * is deferred until {@link #simplified()} is called.
      */
     private TextConf _withRawContent( Tuple&lt;StyledString&gt; strings ) {
-<span class="fc bfc" id="L407" title="All 2 branches covered.">        if ( strings.isEmpty() ) {</span>
-<span class="fc" id="L408">            return of(_EMPTY_CONTENT, _fontConf, _clipArea, _placementBoundary, _placement,</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">        if ( strings.isEmpty() ) {</span>
+<span class="fc" id="L414">            return of(_EMPTY_CONTENT, _fontConf, _clipArea, _placementBoundary, _placement,</span>
                       _offset, _wrapLines, _autoPreferredHeight, _obstacles,
-                      _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+                      _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);
         }
-<span class="fc" id="L412">        final Pooled&lt;Paragraph&gt; pooled = new Pooled&lt;&gt;(Paragraph.of(strings));</span>
-<span class="fc" id="L413">        final Tuple&lt;Pooled&lt;Paragraph&gt;&gt; wrapped = Tuple.of(Pooled.classTyped(Paragraph.class)).add(pooled);</span>
-<span class="fc" id="L414">        return of(wrapped, _fontConf, _clipArea, _placementBoundary, _placement,</span>
+<span class="fc" id="L418">        final Pooled&lt;Paragraph&gt; pooled = new Pooled&lt;&gt;(Paragraph.of(strings));</span>
+<span class="fc" id="L419">        final Tuple&lt;Pooled&lt;Paragraph&gt;&gt; wrapped = Tuple.of(Pooled.classTyped(Paragraph.class)).add(pooled);</span>
+<span class="fc" id="L420">        return of(wrapped, _fontConf, _clipArea, _placementBoundary, _placement,</span>
                   _offset, _wrapLines, _autoPreferredHeight, _obstacles,
-                  _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+                  _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);
     }
 
     /**
@@ -422,13 +428,13 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * Used to short-circuit no-op calls to {@link #content(Tuple)}.
      */
     private boolean _contentEqualTo( Tuple&lt;StyledString&gt; strings ) {
-<span class="pc bpc" id="L425" title="3 of 4 branches missed.">        if ( _content.size() == 1 &amp;&amp; !_content.get(0).get().isBlankLine )</span>
-<span class="nc" id="L426">            return _content.get(0).get().styledStrings.equals(strings);</span>
-<span class="fc" id="L427">        return false;</span>
+<span class="pc bpc" id="L431" title="3 of 4 branches missed.">        if ( _content.size() == 1 &amp;&amp; !_content.get(0).get().isBlankLine )</span>
+<span class="nc" id="L432">            return _content.get(0).get().styledStrings.equals(strings);</span>
+<span class="fc" id="L433">        return false;</span>
     }
 
     private TextConf _fontConf(FontConf fontConf) {
-<span class="fc" id="L431">        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L437">        return of(_content, fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -442,10 +448,10 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      */
     public TextConf font( Configurator&lt;FontConf&gt; fontConfFunction ) {
         try {
-<span class="fc" id="L445">            return _fontConf(fontConfFunction.configure(_fontConf));</span>
-<span class="nc" id="L446">        } catch ( Exception e ) {</span>
-<span class="nc" id="L447">            log.error(SwingTree.get().logMarker(), &quot;Error configuring font style.&quot;, e);</span>
-<span class="nc" id="L448">            return this;</span>
+<span class="fc" id="L451">            return _fontConf(fontConfFunction.configure(_fontConf));</span>
+<span class="nc" id="L452">        } catch ( Exception e ) {</span>
+<span class="nc" id="L453">            log.error(SwingTree.get().logMarker(), &quot;Error configuring font style.&quot;, e);</span>
+<span class="nc" id="L454">            return this;</span>
         }
     }
 
@@ -455,7 +461,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new {@link TextConf} object with the given font.
      */
     public TextConf font( Font font ) {
-<span class="nc" id="L458">        return _fontConf(_fontConf.withPropertiesFromFont(font));</span>
+<span class="nc" id="L464">        return _fontConf(_fontConf.withPropertiesFromFont(font));</span>
     }
 
     /**
@@ -466,7 +472,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new {@link TextConf} object with the given clip area.
      */
     public TextConf clipTo( UI.ComponentArea clipArea ) {
-<span class="fc" id="L469">        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L475">        return of(_content, _fontConf, clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -500,7 +506,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new {@link TextConf} object with the given placement boundary.
      */
     public TextConf placementBoundary(UI.ComponentBoundary placementBoundary) {
-<span class="fc" id="L503">        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L509">        return of(_content, _fontConf, _clipArea, placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -528,7 +534,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} object with the desired placement.
      */
     public TextConf placement(UI.Placement placement) {
-<span class="fc" id="L531">        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L537">        return of(_content, _fontConf, _clipArea, _placementBoundary, placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -543,7 +549,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} object with the given offset.
      */
     TextConf offset(Offset offset) {
-<span class="nc" id="L546">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="nc" id="L552">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -558,7 +564,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} object with the given offset.
      */
     public TextConf offset(int x, int y) {
-<span class="nc" id="L561">        return offset(Offset.of(x, y));</span>
+<span class="nc" id="L567">        return offset(Offset.of(x, y));</span>
     }
 
     /**
@@ -570,7 +576,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} object with the given wrap lines property.
      */
     public TextConf wrapLines(boolean wrapLines) {
-<span class="fc" id="L573">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L579">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -603,7 +609,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return A new text configuration with the desired auto height behavior.
      */
     public TextConf autoPreferredHeight(boolean autoPreferredHeight) {
-<span class="fc" id="L606">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L612">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -623,11 +629,11 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} with the given obstacles.
      */
     public TextConf obstacles( Shape... obstacles ) {
-<span class="fc" id="L626">        Objects.requireNonNull(obstacles, &quot;obstacles&quot;);</span>
-<span class="fc bfc" id="L627" title="All 2 branches covered.">        for ( int i = 0; i &lt; obstacles.length; i++ )</span>
-<span class="fc" id="L628">            Objects.requireNonNull(obstacles[i], &quot;obstacles[&quot; + i + &quot;]&quot;);</span>
-<span class="fc" id="L629">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight,</span>
-<span class="fc" id="L630">                  Tuple.of(Shape.class, obstacles), _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L632">        Objects.requireNonNull(obstacles, &quot;obstacles&quot;);</span>
+<span class="fc bfc" id="L633" title="All 2 branches covered.">        for ( int i = 0; i &lt; obstacles.length; i++ )</span>
+<span class="fc" id="L634">            Objects.requireNonNull(obstacles[i], &quot;obstacles[&quot; + i + &quot;]&quot;);</span>
+<span class="fc" id="L635">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight,</span>
+<span class="fc" id="L636">                  Tuple.of(Shape.class, obstacles), _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -648,8 +654,8 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} with the given obstacles.
      */
     public TextConf obstacles( Tuple&lt;Shape&gt; obstacles ) {
-<span class="fc" id="L651">        Objects.requireNonNull(obstacles);</span>
-<span class="fc" id="L652">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L657">        Objects.requireNonNull(obstacles);</span>
+<span class="fc" id="L658">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -679,8 +685,8 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} with the given child-obstacle boundary setting.
      */
     public TextConf obstaclesFromChildren( UI.ComponentBoundary boundary ) {
-<span class="fc" id="L682">        Objects.requireNonNull(boundary);</span>
-<span class="fc" id="L683">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, boundary, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L688">        Objects.requireNonNull(boundary);</span>
+<span class="fc" id="L689">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, boundary, _obstaclesFromChildrenEnabled, _selection);</span>
     }
 
     /**
@@ -698,7 +704,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return {@code true} if child-derived obstacles are enabled; {@code false} if they are suppressed.
      */
     boolean obstaclesFromChildrenEnabled() {
-<span class="fc" id="L701">        return _obstaclesFromChildrenEnabled;</span>
+<span class="fc" id="L707">        return _obstaclesFromChildrenEnabled;</span>
     }
 
     /**
@@ -721,7 +727,50 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * @return An updated {@link TextConf} with the given child-obstacle-enabled setting.
      */
     public TextConf obstaclesFromChildrenEnabled( boolean enabled ) {
-<span class="fc" id="L724">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, enabled);</span>
+<span class="fc" id="L730">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, enabled, _selection);</span>
+    }
+
+    TextSelectionConf selection() {
+<span class="fc" id="L734">        return _selection;</span>
+    }
+
+    TextConf selection( TextSelectionConf selection ) {
+<span class="fc" id="L738">        return of(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, selection);</span>
+    }
+
+    /**
+     *  Configures how the selected characters of this text look, for example
+     *  {@code selection( s -&gt; s.color(new Color(80, 140, 255, 90)).borderRadius(6) )}.
+     *  This only changes the look. Your users can only select characters of a text
+     *  whose name you pass to {@link swingtree.UIForAnySwing#withTextSelection(UI.Layer, String, sprouts.Var)}.
+     *
+     * @param configurator A function which receives the current {@link TextSelectionConf} and returns an updated one.
+     * @return A new text configuration with the selection look returned by the configurator.
+     */
+    public TextConf selection( Configurator&lt;TextSelectionConf&gt; configurator ) {
+        try {
+<span class="fc" id="L752">            return selection(configurator.configure(_selection));</span>
+<span class="nc" id="L753">        } catch ( Exception e ) {</span>
+<span class="nc" id="L754">            log.error(SwingTree.get().logMarker(), &quot;Error configuring the look of the text selection.&quot;, e);</span>
+<span class="nc" id="L755">            return this;</span>
+        }
+    }
+
+    String paintedText() {
+<span class="fc" id="L760">        final StringBuilder text = new StringBuilder();</span>
+<span class="fc bfc" id="L761" title="All 2 branches covered.">        for ( int i = 0; i &lt; _content.size(); i++ ) {</span>
+<span class="fc bfc" id="L762" title="All 2 branches covered.">            if ( i &gt; 0 )</span>
+<span class="fc" id="L763">                text.append('\n');</span>
+<span class="fc bfc" id="L764" title="All 2 branches covered.">            for ( StyledString string : _content.get(i).get().styledStrings )</span>
+<span class="fc" id="L765">                text.append(string.string());</span>
+        }
+<span class="fc" id="L767">        return text.toString();</span>
+    }
+
+    UI.Placement resolvedPlacement() {
+<span class="fc bfc" id="L771" title="All 2 branches covered.">        if ( _placement != UI.Placement.UNDEFINED )</span>
+<span class="fc" id="L772">            return _placement;</span>
+<span class="fc" id="L773">        return UI.Placement.of(_fontConf.verticalAlignment(), _fontConf.horizontalAlignment());</span>
     }
 
     @Override
@@ -729,60 +778,60 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
         // Note: When &quot;autoPreferredHeight&quot; is enabled we must not simplify entirely to _NONE,
         //       because this configuration still participates in preferred height computation
         //       for the component, even when the content is empty (the resulting height may be 0).
-<span class="fc bfc" id="L732" title="All 4 branches covered.">        if ( _content.isEmpty() &amp;&amp; !_autoPreferredHeight )</span>
-<span class="fc" id="L733">            return _NONE;</span>
+<span class="fc bfc" id="L781" title="All 4 branches covered.">        if ( _content.isEmpty() &amp;&amp; !_autoPreferredHeight )</span>
+<span class="fc" id="L782">            return _NONE;</span>
 
         // Collect all StyledStrings from the (pre-simplified) content.
         // Before simplified() is called, _content holds at most one wrapper paragraph.
         // After simplification, it holds the already-split interned paragraphs.
         final Tuple&lt;Pooled&lt;Paragraph&gt;&gt; newContent;
-<span class="pc bpc" id="L739" title="1 of 4 branches missed.">        if ( _content.size() == 1 &amp;&amp; !_content.get(0).get().isBlankLine ) {</span>
+<span class="pc bpc" id="L788" title="1 of 4 branches missed.">        if ( _content.size() == 1 &amp;&amp; !_content.get(0).get().isBlankLine ) {</span>
             // Normal case: un-split content — flatten, simplify, then split into paragraphs.
-<span class="fc" id="L741">            final Tuple&lt;StyledString&gt; rawStrings = _content.get(0).get().styledStrings;</span>
+<span class="fc" id="L790">            final Tuple&lt;StyledString&gt; rawStrings = _content.get(0).get().styledStrings;</span>
 
-<span class="fc" id="L743">            final Tuple&lt;StyledString&gt; simplified = rawStrings</span>
-<span class="fc" id="L744">                    .removeIf( it -&gt; it.string().isEmpty() )</span>
-<span class="fc" id="L745">                    .map( it -&gt; it.resolveUsing(_fontConf) )</span>
-<span class="fc" id="L746">                    .removeIf( it -&gt; it.fontConf()</span>
-<span class="fc bfc" id="L747" title="All 2 branches covered.">                                       .map( fc -&gt; fc.size() == 0 )</span>
-<span class="fc" id="L748">                                       .orElse(false) );</span>
+<span class="fc" id="L792">            final Tuple&lt;StyledString&gt; simplified = rawStrings</span>
+<span class="fc" id="L793">                    .removeIf( it -&gt; it.string().isEmpty() )</span>
+<span class="fc" id="L794">                    .map( it -&gt; it.resolveUsing(_fontConf) )</span>
+<span class="fc" id="L795">                    .removeIf( it -&gt; it.fontConf()</span>
+<span class="fc bfc" id="L796" title="All 2 branches covered.">                                       .map( fc -&gt; fc.size() == 0 )</span>
+<span class="fc" id="L797">                                       .orElse(false) );</span>
 
-<span class="pc bpc" id="L750" title="3 of 4 branches missed.">            if ( simplified.isEmpty() &amp;&amp; !_autoPreferredHeight )</span>
-<span class="nc" id="L751">                return _NONE;</span>
+<span class="pc bpc" id="L799" title="3 of 4 branches missed.">            if ( simplified.isEmpty() &amp;&amp; !_autoPreferredHeight )</span>
+<span class="nc" id="L800">                return _NONE;</span>
 
             // Split by '\n' into interned paragraphs, then store as the new _content.
-<span class="fc" id="L754">            final Tuple&lt;Pooled&lt;Paragraph&gt;&gt; splitContent = _splitAndIntern(simplified);</span>
-<span class="pc bpc" id="L755" title="1 of 2 branches missed.">            newContent = splitContent.isEmpty() ? _EMPTY_CONTENT : splitContent;</span>
-<span class="fc" id="L756">        } else {</span>
+<span class="fc" id="L803">            final Tuple&lt;Pooled&lt;Paragraph&gt;&gt; splitContent = _splitAndIntern(simplified);</span>
+<span class="pc bpc" id="L804" title="1 of 2 branches missed.">            newContent = splitContent.isEmpty() ? _EMPTY_CONTENT : splitContent;</span>
+<span class="fc" id="L805">        } else {</span>
             // Already-split content (e.g. after _scale on previously simplified content).
             // Process each paragraph individually so blank lines and paragraph boundaries
             // are preserved, making simplified() idempotent.
-<span class="fc" id="L760">            final List&lt;Pooled&lt;Paragraph&gt;&gt; result = new ArrayList&lt;&gt;(_content.size());</span>
-<span class="pc bpc" id="L761" title="1 of 2 branches missed.">            for ( Pooled&lt;Paragraph&gt; p : _content ) {</span>
-<span class="nc bnc" id="L762" title="All 2 branches missed.">                if ( p.get().isBlankLine ) {</span>
-<span class="nc" id="L763">                    result.add(new Pooled&lt;&gt;(Paragraph.blankLine()).intern());</span>
+<span class="fc" id="L809">            final List&lt;Pooled&lt;Paragraph&gt;&gt; result = new ArrayList&lt;&gt;(_content.size());</span>
+<span class="pc bpc" id="L810" title="1 of 2 branches missed.">            for ( Pooled&lt;Paragraph&gt; p : _content ) {</span>
+<span class="nc bnc" id="L811" title="All 2 branches missed.">                if ( p.get().isBlankLine ) {</span>
+<span class="nc" id="L812">                    result.add(new Pooled&lt;&gt;(Paragraph.blankLine()).intern());</span>
                 } else {
-<span class="nc" id="L765">                    final Tuple&lt;StyledString&gt; simplified = p.get().styledStrings</span>
-<span class="nc" id="L766">                            .removeIf( it -&gt; it.string().isEmpty() )</span>
-<span class="nc" id="L767">                            .map( it -&gt; it.resolveUsing(_fontConf) )</span>
-<span class="nc" id="L768">                            .removeIf( it -&gt; it.fontConf()</span>
-<span class="nc bnc" id="L769" title="All 2 branches missed.">                                               .map( fc -&gt; fc.size() == 0 )</span>
-<span class="nc" id="L770">                                               .orElse(false) );</span>
-<span class="nc bnc" id="L771" title="All 2 branches missed.">                    if ( !simplified.isEmpty() )</span>
-<span class="nc" id="L772">                        result.add(new Pooled&lt;&gt;(Paragraph.of(simplified)).intern());</span>
+<span class="nc" id="L814">                    final Tuple&lt;StyledString&gt; simplified = p.get().styledStrings</span>
+<span class="nc" id="L815">                            .removeIf( it -&gt; it.string().isEmpty() )</span>
+<span class="nc" id="L816">                            .map( it -&gt; it.resolveUsing(_fontConf) )</span>
+<span class="nc" id="L817">                            .removeIf( it -&gt; it.fontConf()</span>
+<span class="nc bnc" id="L818" title="All 2 branches missed.">                                               .map( fc -&gt; fc.size() == 0 )</span>
+<span class="nc" id="L819">                                               .orElse(false) );</span>
+<span class="nc bnc" id="L820" title="All 2 branches missed.">                    if ( !simplified.isEmpty() )</span>
+<span class="nc" id="L821">                        result.add(new Pooled&lt;&gt;(Paragraph.of(simplified)).intern());</span>
                 }
-<span class="nc" id="L774">            }</span>
-<span class="pc bpc" id="L775" title="1 of 2 branches missed.">            newContent = result.isEmpty()</span>
-<span class="fc" id="L776">                ? _EMPTY_CONTENT</span>
-<span class="pc" id="L777">                : Tuple.of(Pooled.classTyped(Paragraph.class), result);</span>
+<span class="nc" id="L823">            }</span>
+<span class="pc bpc" id="L824" title="1 of 2 branches missed.">            newContent = result.isEmpty()</span>
+<span class="fc" id="L825">                ? _EMPTY_CONTENT</span>
+<span class="pc" id="L826">                : Tuple.of(Pooled.classTyped(Paragraph.class), result);</span>
         }
 
-<span class="pc bpc" id="L780" title="1 of 4 branches missed.">        if ( newContent.isEmpty() &amp;&amp; !_autoPreferredHeight )</span>
-<span class="nc" id="L781">            return _NONE;</span>
+<span class="pc bpc" id="L829" title="1 of 4 branches missed.">        if ( newContent.isEmpty() &amp;&amp; !_autoPreferredHeight )</span>
+<span class="nc" id="L830">            return _NONE;</span>
 
-<span class="fc" id="L783">        return of(newContent, _fontConf, _clipArea, _placementBoundary, _placement,</span>
+<span class="fc" id="L832">        return of(newContent, _fontConf, _clipArea, _placementBoundary, _placement,</span>
                   _offset, _wrapLines, _autoPreferredHeight, _obstacles,
-                  _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);
+                  _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled, _selection);
     }
 
     /**
@@ -796,106 +845,109 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
      * can be used as identity-stable cache keys in the layout engine.
      */
     private static Tuple&lt;Pooled&lt;Paragraph&gt;&gt; _splitAndIntern( Tuple&lt;StyledString&gt; content ) {
-<span class="fc" id="L799">        final List&lt;Pooled&lt;Paragraph&gt;&gt; result = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L800">        List&lt;StyledString&gt; current = null;</span>
-<span class="fc bfc" id="L801" title="All 2 branches covered.">        for ( StyledString s : content ) {</span>
-<span class="fc" id="L802">            final String[] parts = s.string().split(&quot;\n&quot;, -1);</span>
-<span class="fc bfc" id="L803" title="All 2 branches covered.">            if ( parts.length &lt;= 1 ) {</span>
-<span class="fc bfc" id="L804" title="All 2 branches covered.">                if ( current == null ) current = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L805">                current.add(s);</span>
+<span class="fc" id="L848">        final List&lt;Pooled&lt;Paragraph&gt;&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L849">        List&lt;StyledString&gt; current = null;</span>
+<span class="fc bfc" id="L850" title="All 2 branches covered.">        for ( StyledString s : content ) {</span>
+<span class="fc" id="L851">            final String[] parts = s.string().split(&quot;\n&quot;, -1);</span>
+<span class="fc bfc" id="L852" title="All 2 branches covered.">            if ( parts.length &lt;= 1 ) {</span>
+<span class="fc bfc" id="L853" title="All 2 branches covered.">                if ( current == null ) current = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L854">                current.add(s);</span>
             } else {
-<span class="fc bfc" id="L807" title="All 2 branches covered.">                for ( int i = 0; i &lt; parts.length; i++ ) {</span>
-<span class="fc bfc" id="L808" title="All 2 branches covered.">                    if ( current == null ) current = new ArrayList&lt;&gt;();</span>
-<span class="fc bfc" id="L809" title="All 2 branches covered.">                    if ( !parts[i].isEmpty() ) current.add(s.withString(parts[i]));</span>
-<span class="fc bfc" id="L810" title="All 2 branches covered.">                    if ( i &lt; parts.length - 1 ) {</span>
-<span class="fc" id="L811">                        result.add(_internedParagraphFrom(current));</span>
-<span class="fc" id="L812">                        current = null;</span>
+<span class="fc bfc" id="L856" title="All 2 branches covered.">                for ( int i = 0; i &lt; parts.length; i++ ) {</span>
+<span class="fc bfc" id="L857" title="All 2 branches covered.">                    if ( current == null ) current = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L858" title="All 2 branches covered.">                    if ( !parts[i].isEmpty() ) current.add(s.withString(parts[i]));</span>
+<span class="fc bfc" id="L859" title="All 2 branches covered.">                    if ( i &lt; parts.length - 1 ) {</span>
+<span class="fc" id="L860">                        result.add(_internedParagraphFrom(current));</span>
+<span class="fc" id="L861">                        current = null;</span>
                     }
                 }
             }
-<span class="fc" id="L816">        }</span>
-<span class="pc bpc" id="L817" title="1 of 2 branches missed.">        if ( current != null )</span>
-<span class="fc" id="L818">            result.add(_internedParagraphFrom(current));</span>
+<span class="fc" id="L865">        }</span>
+<span class="pc bpc" id="L866" title="1 of 2 branches missed.">        if ( current != null )</span>
+<span class="fc" id="L867">            result.add(_internedParagraphFrom(current));</span>
 
-<span class="fc" id="L820">        return Tuple.of(Pooled.classTyped(Paragraph.class), result);</span>
+<span class="fc" id="L869">        return Tuple.of(Pooled.classTyped(Paragraph.class), result);</span>
     }
 
     private static Pooled&lt;Paragraph&gt; _internedParagraphFrom( List&lt;StyledString&gt; strings ) {
-<span class="fc" id="L824">        final int len = strings.stream().mapToInt(s -&gt; s.string().length()).sum();</span>
-<span class="fc bfc" id="L825" title="All 2 branches covered.">        final Paragraph p = len &lt;= 0</span>
-<span class="fc" id="L826">            ? Paragraph.blankLine()</span>
-<span class="fc" id="L827">            : Paragraph.of(Tuple.of(StyledString.class, strings));</span>
-<span class="fc" id="L828">        return new Pooled&lt;&gt;(p).intern();</span>
+<span class="fc" id="L873">        final int len = strings.stream().mapToInt(s -&gt; s.string().length()).sum();</span>
+<span class="fc bfc" id="L874" title="All 2 branches covered.">        final Paragraph p = len &lt;= 0</span>
+<span class="fc" id="L875">            ? Paragraph.blankLine()</span>
+<span class="fc" id="L876">            : Paragraph.of(Tuple.of(StyledString.class, strings));</span>
+<span class="fc" id="L877">        return new Pooled&lt;&gt;(p).intern();</span>
     }
 
     @Override
     public boolean isNone() {
-<span class="fc" id="L833">        return this.equals(_NONE);</span>
+<span class="fc" id="L882">        return this.equals(_NONE);</span>
     }
 
     TextConf _scale( double scale ) {
         // Scale each StyledString inside every paragraph, wrapping them back into un-interned
         // Pooled&lt;Paragraph&gt; objects.  Interning happens later in simplified().
-<span class="fc" id="L839">        final List&lt;Pooled&lt;Paragraph&gt;&gt; scaledParagraphs = new ArrayList&lt;&gt;(_content.size());</span>
-<span class="pc bpc" id="L840" title="1 of 2 branches missed.">        for ( Pooled&lt;Paragraph&gt; pooled : _content ) {</span>
-<span class="nc" id="L841">            final Paragraph original = pooled.get();</span>
-<span class="nc bnc" id="L842" title="All 2 branches missed.">            if ( original.isBlankLine ) {</span>
-<span class="nc" id="L843">                scaledParagraphs.add(new Pooled&lt;&gt;(Paragraph.blankLine()));</span>
+<span class="fc" id="L888">        final List&lt;Pooled&lt;Paragraph&gt;&gt; scaledParagraphs = new ArrayList&lt;&gt;(_content.size());</span>
+<span class="fc bfc" id="L889" title="All 2 branches covered.">        for ( Pooled&lt;Paragraph&gt; pooled : _content ) {</span>
+<span class="fc" id="L890">            final Paragraph original = pooled.get();</span>
+<span class="pc bpc" id="L891" title="1 of 2 branches missed.">            if ( original.isBlankLine ) {</span>
+<span class="nc" id="L892">                scaledParagraphs.add(new Pooled&lt;&gt;(Paragraph.blankLine()));</span>
             } else {
-<span class="nc" id="L845">                final Tuple&lt;StyledString&gt; scaledStrings = original.styledStrings.map( s -&gt; s.mapStyle( st -&gt; st._scale(scale) ) );</span>
-<span class="nc" id="L846">                scaledParagraphs.add(new Pooled&lt;&gt;(Paragraph.of(scaledStrings)));</span>
+<span class="fc" id="L894">                final Tuple&lt;StyledString&gt; scaledStrings = original.styledStrings.map( s -&gt; s.mapStyle( st -&gt; st._scale(scale) ) );</span>
+<span class="fc" id="L895">                scaledParagraphs.add(new Pooled&lt;&gt;(Paragraph.of(scaledStrings)));</span>
             }
-<span class="nc" id="L848">        }</span>
+<span class="fc" id="L897">        }</span>
 
-<span class="fc" id="L850">        return of(</span>
-<span class="fc" id="L851">            Tuple.of(Pooled.classTyped(Paragraph.class), scaledParagraphs),</span>
-<span class="fc" id="L852">            _fontConf._scale(scale),</span>
+<span class="fc" id="L899">        return of(</span>
+<span class="fc" id="L900">            Tuple.of(Pooled.classTyped(Paragraph.class), scaledParagraphs),</span>
+<span class="fc" id="L901">            _fontConf._scale(scale),</span>
             _clipArea,
             _placementBoundary,
             _placement,
-<span class="fc" id="L856">            _offset.scale(scale),</span>
+<span class="fc" id="L905">            _offset.scale(scale),</span>
             _wrapLines,
             _autoPreferredHeight,
             _obstacles, // obstacle shapes are in component coordinates; scaling is the caller's responsibility
             _obstaclesFromChildrenAs,
-            _obstaclesFromChildrenEnabled
+            _obstaclesFromChildrenEnabled,
+<span class="fc" id="L911">            _selection._scale(scale)</span>
         );
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="fc bfc" id="L867" title="All 2 branches covered.">        if ( this == obj )</span>
-<span class="fc" id="L868">            return true;</span>
+<span class="fc bfc" id="L917" title="All 2 branches covered.">        if ( this == obj )</span>
+<span class="fc" id="L918">            return true;</span>
 
-<span class="pc bpc" id="L870" title="1 of 2 branches missed.">        if ( !(obj instanceof TextConf) )</span>
-<span class="nc" id="L871">            return false;</span>
+<span class="pc bpc" id="L920" title="1 of 2 branches missed.">        if ( !(obj instanceof TextConf) )</span>
+<span class="nc" id="L921">            return false;</span>
 
-<span class="fc" id="L873">        TextConf other = (TextConf) obj;</span>
-<span class="fc" id="L874">        return</span>
-<span class="fc bfc" id="L875" title="All 2 branches covered.">            _content.equals(other._content) &amp;&amp;</span>
-<span class="fc bfc" id="L876" title="All 2 branches covered.">            _fontConf.equals(other._fontConf) &amp;&amp;</span>
-<span class="pc bpc" id="L877" title="1 of 2 branches missed.">            _clipArea.equals(other._clipArea) &amp;&amp;</span>
-<span class="pc bpc" id="L878" title="1 of 2 branches missed.">            _placementBoundary.equals(other._placementBoundary) &amp;&amp;</span>
-<span class="pc bpc" id="L879" title="1 of 2 branches missed.">            _placement.equals(other._placement) &amp;&amp;</span>
-<span class="pc bpc" id="L880" title="2 of 6 branches missed.">            _offset.equals(other._offset) &amp;&amp;</span>
+<span class="fc" id="L923">        TextConf other = (TextConf) obj;</span>
+<span class="fc" id="L924">        return</span>
+<span class="fc bfc" id="L925" title="All 2 branches covered.">            _content.equals(other._content) &amp;&amp;</span>
+<span class="fc bfc" id="L926" title="All 2 branches covered.">            _fontConf.equals(other._fontConf) &amp;&amp;</span>
+<span class="pc bpc" id="L927" title="1 of 2 branches missed.">            _clipArea.equals(other._clipArea) &amp;&amp;</span>
+<span class="pc bpc" id="L928" title="1 of 2 branches missed.">            _placementBoundary.equals(other._placementBoundary) &amp;&amp;</span>
+<span class="pc bpc" id="L929" title="1 of 2 branches missed.">            _placement.equals(other._placement) &amp;&amp;</span>
+<span class="pc bpc" id="L930" title="2 of 6 branches missed.">            _offset.equals(other._offset) &amp;&amp;</span>
             _wrapLines == other._wrapLines &amp;&amp;
             _autoPreferredHeight == other._autoPreferredHeight &amp;&amp;
-<span class="pc bpc" id="L883" title="1 of 6 branches missed.">            _obstacles.equals(other._obstacles) &amp;&amp;</span>
+<span class="pc bpc" id="L933" title="1 of 6 branches missed.">            _obstacles.equals(other._obstacles) &amp;&amp;</span>
             _obstaclesFromChildrenAs == other._obstaclesFromChildrenAs &amp;&amp;
-            _obstaclesFromChildrenEnabled == other._obstaclesFromChildrenEnabled;
+            _obstaclesFromChildrenEnabled == other._obstaclesFromChildrenEnabled &amp;&amp;
+<span class="fc bfc" id="L936" title="All 2 branches covered.">            _selection.equals(other._selection);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L890">        return Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc" id="L941">        final int hash = Objects.hash(_content, _fontConf, _clipArea, _placementBoundary, _placement, _offset, _wrapLines, _autoPreferredHeight, _obstacles, _obstaclesFromChildrenAs, _obstaclesFromChildrenEnabled);</span>
+<span class="fc bfc" id="L942" title="All 2 branches covered.">        return _selection.equals(TextSelectionConf.none()) ? hash : 31 * hash + _selection.hashCode();</span>
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L895" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L896">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="fc" id="L897">        Tuple&lt;StyledString&gt; flatContent = _content.stream().flatMap(p-&gt;p.get().styledStrings.stream()).collect(Tuple.collectorOf(StyledString.class));</span>
-<span class="fc" id="L898">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="fc bfc" id="L947" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L948">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L949">        Tuple&lt;StyledString&gt; flatContent = _content.stream().flatMap(p-&gt;p.get().styledStrings.stream()).collect(Tuple.collectorOf(StyledString.class));</span>
+<span class="fc" id="L950">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
             &quot;content=&quot; + flatContent + &quot;, &quot; +
             &quot;fontConf=&quot; + _fontConf + &quot;, &quot; +
             &quot;clipArea=&quot; + _clipArea + &quot;, &quot; +
@@ -907,6 +959,7 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
             &quot;obstacles=&quot; + _obstacles + &quot;, &quot; +
             &quot;obstaclesFromChildrenAs=&quot; + _obstaclesFromChildrenAs + &quot;, &quot; +
             &quot;obstaclesFromChildrenEnabled=&quot; + _obstaclesFromChildrenEnabled +
+<span class="fc bfc" id="L962" title="All 2 branches covered.">            ( _selection.equals(TextSelectionConf.none()) ? &quot;&quot; : &quot;, selection=&quot; + _selection ) +</span>
         &quot;]&quot;;
     }
 
