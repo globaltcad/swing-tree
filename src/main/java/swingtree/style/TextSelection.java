@@ -235,10 +235,11 @@ public final class TextSelection
      *  the first character of the next line. A caret made by {@link #caretAt(int)} at that place lies at
      *  the start of the next line.
      *  <p>
-     *  It is empty for a selection which SwingTree has not written into the property yet, for a
-     *  caret on a line which is not painted because the component is too small to show it, and for a
-     *  caret in an empty paragraph between two line breaks in a row, which SwingTree paints as an empty
-     *  line without a rectangle for the caret.
+     *  Two line breaks in a row make an empty paragraph, which SwingTree paints as an empty line.
+     *  The rectangle of a caret in it lies at the start of that empty line and is as tall as the font size.
+     *  <p>
+     *  It is empty for a selection which SwingTree has not written into the property yet, and for a
+     *  caret on a line which is not painted because the component is too small to show it.
      *
      * @return The rectangle of the caret, or an empty {@link Optional}.
      */
@@ -273,15 +274,18 @@ public final class TextSelection
     /**
      *  Returns a selection with the same anchor and the caret at the position nearest to the given
      *  pixel coordinate, see {@link #positionAt(Position)}. This is what dragging the mouse to the
-     *  coordinate does to the position of the caret. {@link #isCaretAtLineEnd()} follows the rule of
-     *  {@link #withCaret(int)}, so call {@link #withCaretAtLineEnd(boolean)} afterwards to choose the
-     *  other place of a position where a line wraps.
+     *  coordinate does. Where a line wraps, the caret lies on the line of the coordinate:
+     *  {@link #isCaretAtLineEnd()} is {@code true} for a coordinate at the end of the upper line and
+     *  {@code false} for a coordinate at the start of the next line. So a handle which your code paints at
+     *  {@link #caretBounds()} stays under the finger of your users while they drag it across that place.
      *
      * @param point A pixel coordinate on the component.
      * @return A selection with the moved caret, or this selection if SwingTree has not written it into the property yet.
      */
     public TextSelection withCaretAt( Position point ) {
-        return positionAt(point).map(this::withCaret).orElse(this);
+        return positionAt(point)
+                .map( caret -> withCaret(caret).withCaretAtLineEnd(_carets.endsLineAt(point.x(), point.y())) )
+                .orElse(this);
     }
 
     /**

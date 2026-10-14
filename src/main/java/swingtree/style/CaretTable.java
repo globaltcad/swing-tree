@@ -5,7 +5,6 @@ import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.layout.Bounds;
 
-import java.awt.font.TextHitInfo;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +40,7 @@ final class CaretTable
         for ( TextLayoutEngine.PlacedFragment fragment : fragments ) {
             final float[] xs = new float[fragment.charEnd() - fragment.charStart + 1];
             for ( int i = 0; i < xs.length; i++ )
-                xs[i] = _xOf(fragment, fragment.charStart + i);
+                xs[i] = fragment.xAt(fragment.charStart + i);
             lines.add(new Line(fragment.charStart, fragment.top(), fragment.bottom(), xs));
         }
         return new CaretTable(component, text, Collections.unmodifiableList(lines), look.caretShape(), look.caretWidth());
@@ -53,8 +52,8 @@ final class CaretTable
             final int from = Math.max(start, fragment.charStart);
             final int to   = Math.min(end, fragment.charEnd());
             if ( from < to ) {
-                final float fromX = _xOf(fragment, from);
-                final float toX   = _xOf(fragment, to);
+                final float fromX = fragment.xAt(from);
+                final float toX   = fragment.xAt(to);
                 areas.add(new Rectangle2D.Float(Math.min(fromX, toX), fragment.top(), Math.abs(toX - fromX), fragment.bottom() - fragment.top()));
             }
         }
@@ -65,8 +64,8 @@ final class CaretTable
         final TextLayoutEngine.@Nullable PlacedFragment holder = _holderOf(fragments, position, atLineEnd);
         if ( holder == null )
             return Optional.empty();
-        final float nextX = position < holder.charEnd() ? _xOf(holder, position + 1) : Float.NaN;
-        return Optional.of(_caretBounds(look.caretShape(), look.caretWidth(), _xOf(holder, position), nextX, holder.top(), holder.bottom()));
+        final float nextX = position < holder.charEnd() ? holder.xAt(position + 1) : Float.NaN;
+        return Optional.of(_caretBounds(look.caretShape(), look.caretWidth(), holder.xAt(position), nextX, holder.top(), holder.bottom()));
     }
 
     private static TextLayoutEngine.@Nullable PlacedFragment _holderOf( List<TextLayoutEngine.PlacedFragment> fragments, int position, boolean atLineEnd ) {
@@ -82,10 +81,6 @@ final class CaretTable
                 holder = fragment;
         }
         return holder;
-    }
-
-    private static float _xOf( TextLayoutEngine.PlacedFragment fragment, int position ) {
-        return fragment.x + fragment.layout.getCaretInfo(TextHitInfo.leading(position - fragment.charStart))[0];
     }
 
     static float thicknessOf( float caretWidth ) {

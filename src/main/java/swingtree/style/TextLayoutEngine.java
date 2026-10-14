@@ -12,6 +12,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.LineBreakMeasurer;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
+import java.awt.font.TextHitInfo;
 import java.awt.geom.*;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
@@ -280,6 +281,13 @@ final class TextLayoutEngine {
                 continue;
             final TextLayout primary = line.primary().layout;
             if ( primary == null ) {
+                if ( !line.isCoveredByObstacle )
+                    fragments.add(PlacedFragment.emptyParagraph(
+                        paragraphStart,
+                        _alignedX(placement, line.primary().regionX, line.primary().regionWidth, 0),
+                        y,
+                        y + font.getSize2D()
+                    ));
                 y += font.getSize2D();
                 continue;
             }
@@ -757,24 +765,37 @@ final class TextLayoutEngine {
     }
 
     static final class PlacedFragment {
-        final TextLayout layout;
-        final int        charStart;
-        final float      x;
-        final float      baselineY;
+        final @Nullable TextLayout layout;
+        final int                  charStart;
+        final float                x;
+        final float                baselineY;
+        private final float        _top;
+        private final float        _bottom;
         PlacedFragment( TextLayout layout, int charStart, float x, float baselineY ) {
+            this(layout, charStart, x, baselineY, baselineY - layout.getAscent(), baselineY + layout.getDescent() + layout.getLeading());
+        }
+        private PlacedFragment( @Nullable TextLayout layout, int charStart, float x, float baselineY, float top, float bottom ) {
             this.layout    = layout;
             this.charStart = charStart;
             this.x         = x;
             this.baselineY = baselineY;
+            _top           = top;
+            _bottom        = bottom;
+        }
+        static PlacedFragment emptyParagraph( int charStart, float x, float top, float bottom ) {
+            return new PlacedFragment(null, charStart, x, bottom, top, bottom);
         }
         int charEnd() {
-            return charStart + layout.getCharacterCount();
+            return layout == null ? charStart : charStart + layout.getCharacterCount();
+        }
+        float xAt( int position ) {
+            return layout == null ? x : x + layout.getCaretInfo(TextHitInfo.leading(position - charStart))[0];
         }
         float top() {
-            return baselineY - layout.getAscent();
+            return _top;
         }
         float bottom() {
-            return baselineY + layout.getDescent() + layout.getLeading();
+            return _bottom;
         }
     }
 
