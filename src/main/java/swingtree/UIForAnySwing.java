@@ -1606,9 +1606,17 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  .withTextSelection(UI.Layer.FOREGROUND, "caption", selection);
      *  }</pre>
      *  Your users select characters by dragging the mouse across them, a word by double-clicking it,
-     *  and everything with Ctrl+A (Command+A on macOS). A click with the shift key held down moves
-     *  the caret of the selection and keeps its anchor. Ctrl+C (Command+C on macOS) copies the selected
-     *  characters to the clipboard. The mouse cursor is the text cursor while it is over the text.
+     *  a paragraph by triple-clicking it, and everything with Ctrl+A (Command+A on macOS). A click with
+     *  the shift key held down moves the caret of the selection and keeps its anchor. The arrow keys, Home
+     *  and End move the caret like in a text editor, and select with the shift key held down.
+     *  Ctrl+C (Command+C on macOS) copies the selected characters to the clipboard. The mouse cursor is
+     *  the text cursor while it is over the text. The {@code selection(s -> ..)} part of the text style
+     *  switches each of these off or on, and also offers a long press which selects a word, see
+     *  {@link swingtree.style.TextSelectionConf#navigateWithKeyboard(boolean)},
+     *  {@link swingtree.style.TextSelectionConf#selectWordOnDoubleClick(boolean)},
+     *  {@link swingtree.style.TextSelectionConf#selectParagraphOnTripleClick(boolean)},
+     *  {@link swingtree.style.TextSelectionConf#selectWordOnLongPress(boolean)} and
+     *  {@link swingtree.style.TextSelectionConf#copyToClipboard(boolean)}.
      *  Pressing the mouse on the component calls {@link JComponent#requestFocusInWindow()}, because
      *  the keyboard shortcuts only reach the component which has the keyboard focus.
      *  This method replaces the {@link TransferHandler} of the component with one which copies

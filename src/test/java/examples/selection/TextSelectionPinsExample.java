@@ -18,7 +18,6 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Window;
-import java.awt.event.KeyEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.text.BreakIterator;
@@ -30,15 +29,6 @@ import java.util.Optional;
  *  In desktop mode, which is the default, the text behaves as {@code withTextSelection} makes it behave:
  *  your users drag the mouse to select, double click a word, shift-click to extend a selection, and press
  *  Ctrl+A and Ctrl+C.
- *  <p>
- *  In both modes, the keyboard moves the caret like in a text editor: the left and right arrow keys move it by one
- *  character, with Ctrl held down by one word, the up and down arrow keys move it to the line above or below,
- *  Home and End move it to the start or the end of its line, and Ctrl+Home and Ctrl+End to the start or the end
- *  of the text. With shift held down, each of these keys keeps the anchor where it is, so the keys select the
- *  characters they pass over. The example implements these keys with the public methods of {@link TextSelection}:
- *  it finds the line above or below the caret by asking {@link TextSelection#positionAt(Position)} for the position
- *  one line height above or below the middle of {@link TextSelection#caretBounds()}, and while your users press up
- *  or down several times in a row, it keeps the caret near the horizontal place where the first of these presses started.
  *  <p>
  *  In touch mode, a transparent overlay lies exactly on top of the text and receives every press of the mouse
  *  or the finger, so the desktop behaviour underneath never sees them. The overlay uses only the coordinate methods
@@ -98,8 +88,6 @@ public class TextSelectionPinsExample extends UI.Panel
     private Grab                     grab      = Grab.NOTHING;
     private Position                 pressedAt = Position.origin();
     private Position                 pinOffset = Position.origin();
-    private int                      lineMoveCaret = -1;
-    private Position                 lineMovePoint = Position.origin();
 
     public TextSelectionPinsExample() {
         longPress.setRepeats(false);
@@ -164,7 +152,6 @@ public class TextSelectionPinsExample extends UI.Panel
                 )
             )
             .withTextSelection(selection)
-            .onKeyPress( e -> _moveCaret(e.getEvent()) )
             .add("cell 1 0, w 170!",
                 UI.box("fill, insets 12", "[center]")
                 .withStyle( it -> it
@@ -184,75 +171,6 @@ public class TextSelectionPinsExample extends UI.Panel
                 )
             )
             .get(JBox.class);
-    }
-
-    private void _moveCaret( KeyEvent key ) {
-        TextSelection current = selection.get();
-        if ( !current.isEnabled() )
-            return;
-        boolean extend = key.isShiftDown();
-        boolean far    = key.isControlDown();
-        int     target;
-        switch ( key.getKeyCode() ) {
-            case KeyEvent.VK_LEFT:
-                target = !extend && !current.isEmpty() ? current.start() : far ? _wordStartBefore(current.caret()) : Math.max(0, current.caret() - 1);
-                break;
-            case KeyEvent.VK_RIGHT:
-                target = !extend && !current.isEmpty() ? current.end() : far ? _wordEndAfter(current.caret()) : Math.min(PAINTED_TEXT.length(), current.caret() + 1);
-                break;
-            case KeyEvent.VK_UP:   target = _positionOnNextLine(current, -1); break;
-            case KeyEvent.VK_DOWN: target = _positionOnNextLine(current, +1); break;
-            case KeyEvent.VK_HOME: target = far ? 0 : _positionOnCaretLine(current, 0); break;
-            case KeyEvent.VK_END:  target = far ? PAINTED_TEXT.length() : _positionOnCaretLine(current, text.getWidth()); break;
-            default: return;
-        }
-        key.consume();
-        boolean lineMove = key.getKeyCode() == KeyEvent.VK_UP || key.getKeyCode() == KeyEvent.VK_DOWN;
-        lineMoveCaret = lineMove ? target : -1;
-        selection.update( s -> extend ? s.withCaret(target) : TextSelection.caretAt(target).withEnabled(s.isEnabled()) );
-    }
-
-    private int _positionOnNextLine( TextSelection current, int direction ) {
-        Optional<Bounds> caret = current.caretBounds();
-        if ( !caret.isPresent() )
-            return current.caret();
-        float height = caret.get().size().height().orElse(0f);
-        Position from = current.caret() == lineMoveCaret ? lineMovePoint : _middleOf(caret);
-        Position to   = Position.of(from.x(), from.y() + direction * height);
-        boolean noLineThere = current.positionAt(to).equals(current.positionAt(from));
-        lineMovePoint = noLineThere ? from : to;
-        if ( noLineThere )
-            return direction < 0 ? 0 : PAINTED_TEXT.length();
-        return _positionInLineAt(current, to);
-    }
-
-    private static int _positionOnCaretLine( TextSelection current, float x ) {
-        return current.caretBounds()
-                .map( b -> _positionInLineAt(current, Position.of(x, b.location().y() + b.size().height().orElse(0f) / 2)) )
-                .orElse(current.caret());
-    }
-
-    private static int _positionInLineAt( TextSelection current, Position point ) {
-        Optional<Integer> position = current.positionAt(point);
-        if ( !position.isPresent() )
-            return current.caret();
-        TextSelection caretThere = current.withAnchorAt(point).withCaretAt(point);
-        boolean shownOnNextLine = caretThere.caretBounds().map( b -> b.location().y() > point.y() ).orElse(false);
-        return shownOnNextLine ? position.get() - 1 : position.get();
-    }
-
-    private static int _wordStartBefore( int position ) {
-        int at = position;
-        while ( at > 0 && !Character.isLetterOrDigit(PAINTED_TEXT.charAt(at - 1)) ) at--;
-        while ( at > 0 &&  Character.isLetterOrDigit(PAINTED_TEXT.charAt(at - 1)) ) at--;
-        return at;
-    }
-
-    private static int _wordEndAfter( int position ) {
-        int at = position;
-        while ( at < PAINTED_TEXT.length() && !Character.isLetterOrDigit(PAINTED_TEXT.charAt(at)) ) at++;
-        while ( at < PAINTED_TEXT.length() &&  Character.isLetterOrDigit(PAINTED_TEXT.charAt(at)) ) at++;
-        return at;
     }
 
     private void _growWindowToFitText() {

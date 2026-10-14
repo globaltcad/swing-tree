@@ -1040,6 +1040,66 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
+     *  Names the shape of the caret which SwingTree paints into a styled text that your users can select.
+     *  You pass one to {@link swingtree.style.TextSelectionConf#caretShape(CaretShape)} inside the
+     *  {@link swingtree.style.TextConf#selection(swingtree.api.Configurator) selection} part of a text style,
+     *  and you make the text selectable with {@link UIForAnySwing#withTextSelection(String, Var)}:
+     *  <pre>{@code
+     *  Var<TextSelection> selection = Var.of(TextSelection.caretAt(0));
+     *  UI.box()
+     *  .withStyle( it -> it
+     *      .text("body", t -> t
+     *          .content("Press the arrow keys to move me")
+     *          .selection( s -> s
+     *              .showCaret(true)
+     *              .caretShape(UI.CaretShape.BLOCK)
+     *              .caretColor(new Color(64, 98, 255, 120))
+     *          )
+     *      )
+     *  )
+     *  .withTextSelection("body", selection);
+     *  }</pre>
+     *  A thicker bar, like the caret of many code editors, takes the default shape and a larger
+     *  {@link swingtree.style.TextSelectionConf#caretWidth(double) caretWidth}:
+     *  <pre>{@code
+     *  .selection( s -> s.showCaret(true).caretWidth(2) )
+     *  }</pre>
+     *  SwingTree paints the caret only while no character is selected, only when
+     *  {@link swingtree.style.TextSelectionConf#showCaret(boolean)} is {@code true}, and not from the moment
+     *  the component loses the keyboard focus until it gets it back, see
+     *  {@link swingtree.style.TextSelectionConf#useUnfocusedLook(boolean)}.
+     *  Every shape starts at the gap between the two characters where the caret is.
+     *  SwingTree paints the caret behind the characters, so the character on top of a {@link #BLOCK}
+     *  stays readable when the block has a partly transparent colour or one which differs from the text.
+     *  {@link swingtree.style.TextSelection#caretBounds()} tells your code where the caret is painted.
+     *
+     * @see swingtree.style.TextSelectionConf#caretShape(CaretShape)
+     * @see swingtree.style.TextSelectionConf#caretWidth(double)
+     * @see swingtree.style.TextSelectionConf#showCaret(boolean)
+     * @see UIForAnySwing#withTextSelection(String, Var)
+     */
+    @Immutable
+    public enum CaretShape implements UIEnum<CaretShape>
+    {
+        /**
+         *  A vertical bar from the top to the bottom of the line, which starts at the gap and is
+         *  as wide as {@link swingtree.style.TextSelectionConf#caretWidth(double)}. This is the default,
+         *  and the caret of most text fields.
+         */
+        BAR,
+        /**
+         *  A rectangle from the top to the bottom of the line, which covers the character behind the gap,
+         *  like the caret of a terminal. The caret width does not change it.
+         */
+        BLOCK,
+        /**
+         *  A horizontal line along the bottom of the line, which reaches under the character behind the gap,
+         *  and which is as thick as {@link swingtree.style.TextSelectionConf#caretWidth(double)}.
+         */
+        UNDERLINE
+    }
+
+    /**
      *  Names a point of a rectangular component: one of its four corners, the middle of one
      *  of its four sides, or its center. Use it to place an image or a text as part of the
      *  {@link ImageConf} and {@link TextConf} styles, and to align the contents of a label
