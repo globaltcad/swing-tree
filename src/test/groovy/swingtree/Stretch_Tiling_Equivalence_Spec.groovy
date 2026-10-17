@@ -604,6 +604,96 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             "vertical flip" | { Graphics2D g -> g.translate(0, 200); g.scale(1d, -1d) }
     }
 
+    def 'Sharing an exemplar across stretching modes preserves corners and edge bands. (#description, sibling: #sibling)'(
+        String description, int initialWidth, int initialHeight, int targetWidth, int targetHeight, boolean sibling
+    ) {
+        reportInfo """
+            For optimal performance SwingTree blits some component styles from a cached "exemplar component".
+            It is a small rendering of a style, not a rendering tied to one component's full and final size.
+            Furthermore, this exemplar is deconstructed into 9 components which are either directly blitted
+            or "stretched" onto the final component on screen!
+            There are three ways to do that:
+
+              * Compact and stretch both axes: nine tiles preserve four corners, stretch
+                four edge bands along their edges, and stretch the center both ways.
+              * Compact and stretch width only: three vertical strips preserve the complete
+                left and right ends, and stretch the middle strip horizontally.
+              * Compact amd stretch height only: three horizontal strips preserve the complete
+                top and bottom ends, and stretch the middle strip vertically.
+
+            Stretching both axes uses nine tiles: corners, edge bands and center.
+            Stretching only width or height on the other hand uses only three strips instead of all 9 tiles. 
+            So axes which are not compacted are preserved.
+            
+            These modes can share one exemplar,
+            but need different cuts: a three-strip end includes rounded corners
+            that a nine-tile edge band leaves to separate corner tiles.
+
+            A component wider than the exemplar but exactly as tall stretches only its width;
+            increasing its height above the exemplar's makes it stretch both axes.
+            Both sizes map to the same exemplar-sized cache key, but their reconstruction
+            modes require different tile cuts.
+            In the past, there was a bug where cached tiles extracted for one rendering
+            mode were reused for another. Reusing width-only tiles for both-axis rendering
+            left the top and bottom bands missing, and stretched corner pixels along the
+            side bands. In the reverse transition, reusing both-axis tiles for width-only
+            rendering lost the rounded corners: its end strips needed the full height of
+            the exemplar, but received only the straight side bands. Differently sized
+            components sharing the cache could trigger the same bug, even without resizing.
+
+            Each row warms the cache of one mode, then switches to another by resizing or
+            painting a sibling. Cache-miss checks ensure the warm cache is used;
+            pixel comparisons against classic rendering, including alpha, detect
+            stale tile blits. Further paints check that baking preserves the
+            correct result too.
+        """
+        given : 'The rounded message-bubble background from NineTileBug, and a classic reference at the target size.'
+            var styler = { it.backgroundColor("#3b2d18").borderRadius(16).padding(9, 14, 9, 14) }
+            var classic = renderedClassically(targetWidth, targetHeight, styler)
+        and : '''
+            A warm exemplar whose tiles were first cut for a different stretching mode.
+            Radius 16 plus the two-pixel safety margin gives cuts at 18 and an exemplar
+            of 38 x 38. At exactly 38 an axis is not stretched; above 38 it is.
+        '''
+            var initial = tiledAndWarmed(initialWidth, initialHeight, styler)
+            var atlas = ComponentBackend.powering(initial).cachedRendering(UI.Layer.BACKGROUND).first()
+            assert atlas.width == 38 && atlas.height == 38
+            var target = sibling ? boxWith(targetWidth, targetHeight, styler) : initial
+            target.setSize(targetWidth, targetHeight)
+            var backend = ComponentBackend.powering(target)
+            int missesBefore = backend.cacheMissCount(UI.Layer.BACKGROUND)
+
+        when : 'The component is resized, or a differently sized sibling uses that same exemplar.'
+            var tiled = Utility.renderSingleComponent(target)
+        then : 'The warm cache serves the new mode without rendering the style again or changing the exemplar pixels.'
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
+            Utility.worstChannelDelta(atlas, backend.cachedRendering(UI.Layer.BACKGROUND).first()) == 0
+        and : 'The new mode blits the appropriate tiles: corners and edge bands match the classic rendering, including transparency.'
+            Utility.worstChannelDelta(classic, tiled) <= 2
+
+        when : 'Further paints allow the target to settle and bake its reconstruction.'
+            6.times { Utility.renderSingleComponent(target) }
+            var baked = Utility.renderSingleComponent(target)
+        then : 'The baked rendering preserves the same pixels.'
+            backend.bakedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            Utility.worstChannelDelta(classic, baked) <= 2
+        and : 'The original component still holds the shared exemplar alive.'
+            Utility.worstChannelDelta(atlas, ComponentBackend.powering(initial).cachedRendering(UI.Layer.BACKGROUND).first()) == 0
+
+        where : """
+            First choose the mode transition, then exercise both paths to sharing
+            the exemplar: resizing the original (false) and painting a sibling (true).
+        """
+            [description, initialWidth, initialHeight, targetWidth, targetHeight, sibling] << [
+                ["both to width only (rectangular bubbles)", 200, 100, 200, 38],
+                ["width only to both (missing top/bottom, rounded side pixels)", 200, 38, 200, 100],
+                ["both to height only", 200, 100, 38, 100],
+                ["height only to both", 38, 100, 200, 100],
+                ["width only to height only", 200, 38, 38, 100],
+                ["height only to width only", 38, 100, 200, 38]
+            ].collectMany { row -> [row + [false], row + [true]] }
+    }
+
     def 'A component which shrinks back below the reconstructable size returns to exact size rendering.'()
     {
         reportInfo """

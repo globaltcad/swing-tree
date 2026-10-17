@@ -15,6 +15,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
 import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
@@ -567,7 +568,7 @@ final class LayerPartitionCache
         private final int                      _width;
         private final int                      _height;
         private @Nullable BufferedImage        _image;
-        private StretchTile @Nullable []       _stretchTiles;
+        private @Nullable Map<LayerRenderConf.Compaction, StretchTile[]> _stretchTiles;
         private boolean                        _isRendered;
         private int                            _numberOfHitsUntilAllocation;
 
@@ -585,9 +586,10 @@ final class LayerPartitionCache
         long reservedBytes() {
             long total = (long) _width * _height * BYTES_PER_PIXEL;
             if ( _stretchTiles != null )
-                for ( StretchTile tile : _stretchTiles )
-                    if ( tile instanceof StretchTile.Image )
-                        total += _bytesOf(((StretchTile.Image) tile)._image);
+                for ( StretchTile[] tiles : _stretchTiles.values() )
+                    for ( StretchTile tile : tiles )
+                        if ( tile instanceof StretchTile.Image )
+                            total += _bytesOf(((StretchTile.Image) tile)._image);
             return total;
         }
 
@@ -659,17 +661,18 @@ final class LayerPartitionCache
                 return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.
 
             final OptionalInsets insets = canonicalConf.nineTileSliceInsets();
-            final LayerRenderConf.Compaction compaction =
-                        LayerRenderConf.Compaction.between(canonicalConf.boxModel().size(), actualSize);
+            final LayerRenderConf.Compaction compaction = LayerRenderConf.Compaction.between(canonicalConf.boxModel().size(), actualSize);
             final int insetTop    = compaction.includesHeight() ? insets.top().orElse(0f).intValue()    : 0;
             final int insetRight  = compaction.includesWidth()  ? insets.right().orElse(0f).intValue()  : 0;
             final int insetBottom = compaction.includesHeight() ? insets.bottom().orElse(0f).intValue() : 0;
             final int insetLeft   = compaction.includesWidth()  ? insets.left().orElse(0f).intValue()   : 0;
 
-            StretchTile[] tiles = _stretchTiles;
+            if ( _stretchTiles == null )
+                _stretchTiles = new EnumMap<>(LayerRenderConf.Compaction.class);
+            StretchTile[] tiles = _stretchTiles.get(compaction);
             if ( tiles == null ) {
                 tiles = _extractStretchTiles(g.getDeviceConfiguration(), image, insetTop, insetRight, insetBottom, insetLeft);
-                _stretchTiles = tiles;
+                _stretchTiles.put(compaction, tiles);
             }
 
             final float actualWidth  = actualSize.widthOrElse(0f);
