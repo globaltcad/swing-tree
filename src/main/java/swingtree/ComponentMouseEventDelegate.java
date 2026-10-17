@@ -192,8 +192,16 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
      * this coordinate is relative to the virtual coordinate system.
      * Otherwise, this coordinate is relative to the coordinate system
      * associated with the Component's GraphicsConfiguration.
+     * <p>
+     * <b>Important:</b> Unlike {@link #mouseX()}, this method returns the screen coordinate
+     * from {@link MouseEvent#getXOnScreen()} unchanged: it does <b>not</b> remove
+     * SwingTree's UI scaling, so the value is not in "developer pixel" units.
+     * When using it with unscaled dimensions or coordinates, apply
+     * {@link UI#unscale(int)} to the coordinate or coordinate difference you need,
+     * or use {@link UI#scale()} to convert those dimensions to the same units.
+     * Unscaling changes the units, not the origin: the coordinate remains screen-relative.
      *
-     * @return x  an integer indicating absolute horizontal position.
+     * @return The absolute horizontal screen coordinate, without unscaling by SwingTree.
      */
     public final int mouseXOnScreen() {
         return getEvent().getXOnScreen();
@@ -206,8 +214,16 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
      * this coordinate is relative to the virtual coordinate system.
      * Otherwise, this coordinate is relative to the coordinate system
      * associated with the Component's GraphicsConfiguration.
+     * <p>
+     * <b>Important:</b>Unlike {@link #mouseY()}, this method returns the screen coordinate
+     * from {@link MouseEvent#getYOnScreen()} unchanged: it does <b>not</b> remove
+     * SwingTree's UI scaling, so the value is not in "developer pixel" units.
+     * When using it with unscaled dimensions or coordinates, apply
+     * {@link UI#unscale(int)} to the coordinate or coordinate difference you need,
+     * or use {@link UI#scale()} to convert those dimensions to the same units.
+     * Unscaling changes the units, not the origin: the coordinate remains screen-relative.
      *
-     * @return y  an integer indicating absolute vertical position.
+     * @return The absolute vertical screen coordinate, without unscaling by SwingTree.
      */
     public final int mouseYOnScreen() {
         return getEvent().getYOnScreen();
@@ -218,8 +234,16 @@ public class ComponentMouseEventDelegate<C extends JComponent> extends Component
      * in the form of an immutable {@link Position} value object.
      * So you may safely share this object without
      * having to worry about side effects.
+     * <p>
+     * <b>Important:</b>Unlike {@link #mousePosition()}, this method returns the screen coordinates
+     * from {@link MouseEvent#getLocationOnScreen()} unchanged: it does <b>not</b> remove
+     * SwingTree's UI scaling, so the x and y values are not in "developer pixel" units.
+     * When using them with unscaled dimensions or coordinates, apply
+     * {@link UI#unscale(int)} to each coordinate or coordinate difference you need,
+     * or use {@link UI#scale()} to convert those dimensions to the same units.
+     * Unscaling changes the units, not the origin: the position remains screen-relative.
      *
-     * @return the absolute position of the mouse event
+     * @return The absolute screen position of the mouse event, without unscaling by SwingTree.
      */
     public final Position mousePositionOnScreen() {
         return Position.of(getEvent().getLocationOnScreen());
