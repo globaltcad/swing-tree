@@ -126,8 +126,8 @@ final class AnimationRunner
 <span class="fc" id="L126">        WeakReference&lt;Component&gt; compRef = runningAnimation.compRef();</span>
 <span class="fc bfc" id="L127" title="All 2 branches covered.">        Component component = compRef == null ? null : compRef.get();</span>
 
-<span class="fc bfc" id="L129" title="All 4 branches covered.">        if ( compRef != null &amp;&amp; component == null )</span>
-<span class="fc" id="L130">            return false; // There was a component, but it has been garbage collected.</span>
+<span class="pc bpc" id="L129" title="1 of 4 branches missed.">        if ( compRef != null &amp;&amp; component == null )</span>
+<span class="nc" id="L130">            return false; // There was a component, but it has been garbage collected.</span>
 
 <span class="fc" id="L132">        Runnable requestComponentRepaint = () -&gt; {</span>
 <span class="fc bfc" id="L133" title="All 2 branches covered.">                                                if ( component != null ) {</span>

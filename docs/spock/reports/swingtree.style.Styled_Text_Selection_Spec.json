@@ -2568,7 +2568,7 @@
 
         {"kind":"and","text":"No pixel is green:","code":[]},
 
-        {"kind":"where","text":"----","code":{"look":["borderWidth(3)"],"styler":["swingtree.style.Styled_Text_Selection_Spec$__spock_feature_0_54prov1_closure112@729330e"]}}
+        {"kind":"where","text":"----","code":{"look":["borderWidth(3)"],"styler":["swingtree.style.Styled_Text_Selection_Spec$__spock_feature_0_54prov1_closure112@6d6145d5"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -2591,7 +2591,7 @@
 
         {"kind":"and","text":"No pixel is green:","code":[]},
 
-        {"kind":"where","text":"----","code":{"look":["borderColor(GREEN)"],"styler":["swingtree.style.Styled_Text_Selection_Spec$__spock_feature_0_54prov1_closure113@3bb7bdc1"]}}
+        {"kind":"where","text":"----","code":{"look":["borderColor(GREEN)"],"styler":["swingtree.style.Styled_Text_Selection_Spec$__spock_feature_0_54prov1_closure113@77af864d"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -2614,7 +2614,7 @@
 
         {"kind":"and","text":"No pixel is green:","code":[]},
 
-        {"kind":"where","text":"----","code":{"look":["border(0, GREEN)"],"styler":["swingtree.style.Styled_Text_Selection_Spec$__spock_feature_0_54prov1_closure114@74b8d51c"]}}
+        {"kind":"where","text":"----","code":{"look":["border(0, GREEN)"],"styler":["swingtree.style.Styled_Text_Selection_Spec$__spock_feature_0_54prov1_closure114@c52d984"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

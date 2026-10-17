@@ -145,7 +145,7 @@ final class SelectableText extends MouseAdapter implements FocusListener
 <span class="fc bfc" id="L145" title="All 6 branches covered.">        if ( _warnedAboutSharedProperty || otherComponent.isEmpty() || otherComponent.equals(thisComponent) )</span>
 <span class="fc" id="L146">            return;</span>
 <span class="fc" id="L147">        final boolean replacesOwnSelection = _shown.carets().component().equals(thisComponent);</span>
-<span class="pc bpc" id="L148" title="1 of 4 branches missed.">        if ( !replacesOwnSelection || !otherComponent.equals(_lastForeignComponent) ) {</span>
+<span class="fc bfc" id="L148" title="All 4 branches covered.">        if ( !replacesOwnSelection || !otherComponent.equals(_lastForeignComponent) ) {</span>
 <span class="fc" id="L149">            _lastForeignComponent = otherComponent;</span>
 <span class="fc" id="L150">            return;</span>
         }
