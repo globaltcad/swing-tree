@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SelectableText.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">SelectableText.java</span></div><h1>SelectableText.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.api.Configurator;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JComponent;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import javax.swing.TransferHandler;
+import javax.swing.text.DefaultEditorKit;
+import java.awt.Cursor;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.text.BreakIterator;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+
+final class SelectableText extends MouseAdapter implements FocusListener
+{
+<span class="fc" id="L40">    private static final Logger log = LoggerFactory.getLogger(SelectableText.class);</span>
+<span class="fc" id="L41">    private static final Cursor TEXT_CURSOR = Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR);</span>
+    private static final int    LONG_PRESS_MILLIS    = 500;
+    private static final int    LONG_PRESS_TOLERANCE = 5;
+
+    private final JComponent                             _owner;
+    private final UI.Layer                               _layer;
+    private final String                                 _textName;
+    private final Consumer&lt;Configurator&lt;TextSelection&gt;&gt;  _propertyUpdateDispatcher; // The passed configurator is executed on the app thread!
+    private final int                                    _farJumpModifier;
+    private TextSelection                                _shown;
+    private boolean                                      _showsTextCursor;
+    private boolean                                      _focusLost;
+<span class="fc" id="L53">    private float                                        _verticalMoveX = Float.NaN;</span>
+    private @Nullable Timer                              _longPress;
+    private int                                          _pressX;
+    private int                                          _pressY;
+    private @Nullable Cursor                             _cursorOutsideText;
+    private boolean                                      _resolutionQueued;
+    private boolean                                      _warnedAboutSharedProperty;
+<span class="fc" id="L60">    private String                                       _lastForeignComponent = &quot;&quot;;</span>
+    private @Nullable StyleConf                          _styleOfCarets;
+    private @Nullable BoxModelConf                       _boxModelOfCarets;
+    private @Nullable Font                               _fontOfCarets;
+<span class="fc" id="L64">    private List&lt;?&gt;                                      _layoutOfCarets = Collections.emptyList();</span>
+<span class="fc" id="L65">    private CaretTable                                   _carets = CaretTable.EMPTY;</span>
+
+    SelectableText(
+        final JComponent                             owner,
+        final UI.Layer                               layer,
+        final String                                 textName,
+        final TextSelection                          shown,
+        final Consumer&lt;Configurator&lt;TextSelection&gt;&gt;  updateProperty
+<span class="fc" id="L73">    ) {</span>
+<span class="fc" id="L74">        _owner                    = owner;</span>
+<span class="fc" id="L75">        _layer                    = layer;</span>
+<span class="fc" id="L76">        _textName                 = textName;</span>
+<span class="fc" id="L77">        _shown                    = shown;</span>
+<span class="fc" id="L78">        _propertyUpdateDispatcher = updateProperty;</span>
+<span class="fc" id="L79">        owner.addMouseListener(this);</span>
+<span class="fc" id="L80">        owner.addMouseMotionListener(this);</span>
+<span class="fc" id="L81">        owner.addFocusListener(this);</span>
+<span class="fc" id="L82">        owner.addKeyListener(new KeyboardNavigation());</span>
+<span class="fc" id="L83">        owner.setTransferHandler(new Copying());</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        final int shortcutKey = GraphicsEnvironment.isHeadless() ? InputEvent.CTRL_DOWN_MASK : _menuShortcutKey();</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        _farJumpModifier = ( shortcutKey &amp; ( InputEvent.META_MASK | InputEvent.META_DOWN_MASK ) ) != 0 ? InputEvent.ALT_DOWN_MASK : InputEvent.CTRL_DOWN_MASK;</span>
+<span class="fc" id="L86">        final Action copy = TransferHandler.getCopyAction();</span>
+<span class="fc" id="L87">        owner.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_C, shortcutKey), copy.getValue(Action.NAME));</span>
+<span class="fc" id="L88">        owner.getActionMap().put(copy.getValue(Action.NAME), copy);</span>
+<span class="fc" id="L89">        owner.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_A, shortcutKey), DefaultEditorKit.selectAllAction);</span>
+<span class="fc" id="L90">        owner.getActionMap().put(DefaultEditorKit.selectAllAction, new AbstractAction() {</span>
+            @Override public void actionPerformed( ActionEvent e ) {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">                if ( _shown.isEnabled() )</span>
+<span class="fc" id="L93">                    _select(TextSelection.between(0, _carets().text().length()));</span>
+<span class="fc" id="L94">            }</span>
+        });
+<span class="fc" id="L96">    }</span>
+
+    @SuppressWarnings(&quot;deprecation&quot;)
+    private static int _menuShortcutKey() {
+<span class="fc" id="L100">        return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();</span>
+    }
+
+    private boolean _jumpsFar( KeyEvent e ) {
+<span class="fc bfc" id="L104" title="All 2 branches covered.">        return ( e.getModifiersEx() &amp; _farJumpModifier ) != 0;</span>
+    }
+
+    TextSelectionConf styled( TextSelectionConf look ) {
+<span class="fc bfc" id="L108" title="All 4 branches covered.">        if ( !_resolutionQueued &amp;&amp; UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L109">            _resolutionQueued = true;</span>
+<span class="fc" id="L110">            UI.runLater(this::_resolve);</span>
+        }
+<span class="fc" id="L112">        final TextSelectionConf withRange = look.range(_shown);</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        return _focusLost ? withRange.unfocused() : withRange;</span>
+    }
+
+    @Override
+    public void focusGained( FocusEvent e ) {
+<span class="fc" id="L118">        _setFocusLost(false);</span>
+<span class="fc" id="L119">    }</span>
+
+    @Override
+    public void focusLost( FocusEvent e ) {
+<span class="fc" id="L123">        _cancelLongPress();</span>
+<span class="fc" id="L124">        _setFocusLost(true);</span>
+<span class="fc" id="L125">    }</span>
+
+    private void _setFocusLost( boolean focusLost ) {
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        if ( focusLost == _focusLost )</span>
+<span class="fc" id="L129">            return;</span>
+<span class="fc" id="L130">        _focusLost = focusLost;</span>
+<span class="fc" id="L131">        _owner.repaint();</span>
+<span class="fc" id="L132">    }</span>
+
+    void show( TextSelection selection ) {
+<span class="fc" id="L135">        _warnIfPaintedByAnotherComponent(selection.carets().component());</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if ( selection.equals(_shown) )</span>
+<span class="fc" id="L137">            return;</span>
+<span class="fc" id="L138">        _shown = selection;</span>
+<span class="fc" id="L139">        _verticalMoveX = Float.NaN;</span>
+<span class="fc" id="L140">        _owner.repaint();</span>
+<span class="fc" id="L141">    }</span>
+
+    private void _warnIfPaintedByAnotherComponent( String otherComponent ) {
+<span class="fc" id="L144">        final String thisComponent = _description();</span>
+<span class="fc bfc" id="L145" title="All 6 branches covered.">        if ( _warnedAboutSharedProperty || otherComponent.isEmpty() || otherComponent.equals(thisComponent) )</span>
+<span class="fc" id="L146">            return;</span>
+<span class="fc" id="L147">        final boolean replacesOwnSelection = _shown.carets().component().equals(thisComponent);</span>
+<span class="fc bfc" id="L148" title="All 4 branches covered.">        if ( !replacesOwnSelection || !otherComponent.equals(_lastForeignComponent) ) {</span>
+<span class="fc" id="L149">            _lastForeignComponent = otherComponent;</span>
+<span class="fc" id="L150">            return;</span>
+        }
+<span class="fc" id="L152">        _warnedAboutSharedProperty = true;</span>
+<span class="fc" id="L153">        log.warn(SwingTree.get().logMarker(),</span>
+            &quot;The same 'Var&lt;TextSelection&gt;' is bound with 'withTextSelection' to two components: {} and {}. &quot; +
+            &quot;After every paint, each of the two components writes the pixel coordinates and the selected text &quot; +
+            &quot;of its own text into this property. So the property switches back and forth between the values &quot; +
+            &quot;of the two components, and it fires a change event every time. &quot; +
+            &quot;Give every component its own 'Var&lt;TextSelection&gt;'.&quot;,
+            thisComponent, otherComponent
+        );
+<span class="fc" id="L161">    }</span>
+
+    private String _description() {
+<span class="fc" id="L164">        final @Nullable String name = _owner.getName();</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        return _owner.getClass().getName() + &quot;@&quot; + Integer.toHexString(System.identityHashCode(_owner)) + ( name == null ? &quot;&quot; : &quot; named '&quot; + name + &quot;'&quot; );</span>
+    }
+
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    private void _resolve() {
+<span class="fc" id="L170">        _resolutionQueued = false;</span>
+<span class="fc" id="L171">        final CaretTable    carets   = _carets();</span>
+<span class="fc" id="L172">        final TextSelection resolved = _shown.resolvedWith(carets);</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if ( resolved == _shown )</span>
+<span class="fc" id="L174">            return;</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        if ( !resolved.equals(_shown) )</span>
+<span class="fc" id="L176">            _propertyUpdateDispatcher.accept(current -&gt; current.resolvedWith(carets) );</span>
+<span class="fc" id="L177">        _shown = resolved;</span>
+<span class="fc" id="L178">    }</span>
+
+    @Override
+    public void mousePressed( MouseEvent e ) {
+<span class="pc bpc" id="L182" title="1 of 4 branches missed.">        if ( !SwingUtilities.isLeftMouseButton(e) || !_shown.isEnabled() )</span>
+<span class="fc" id="L183">            return;</span>
+<span class="fc" id="L184">        final CaretTable carets   = _carets();</span>
+<span class="fc" id="L185">        final int        position = carets.positionAt(e.getX(), e.getY());</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if ( position &lt; 0 )</span>
+<span class="fc" id="L187">            return;</span>
+<span class="fc" id="L188">        _owner.requestFocusInWindow();</span>
+<span class="fc" id="L189">        _verticalMoveX = Float.NaN;</span>
+<span class="fc" id="L190">        _cancelLongPress();</span>
+<span class="fc" id="L191">        final TextSelectionConf look   = _look();</span>
+<span class="fc" id="L192">        final int               clicks = e.getClickCount();</span>
+<span class="fc bfc" id="L193" title="All 4 branches covered.">        if ( clicks &gt;= 3 &amp;&amp; look.selectParagraphOnTripleClick() )</span>
+<span class="fc" id="L194">            _select(_paragraphAround(carets.text(), carets.characterAt(e.getX(), e.getY())));</span>
+<span class="fc bfc" id="L195" title="All 4 branches covered.">        else if ( clicks == 2 &amp;&amp; look.selectWordOnDoubleClick() )</span>
+<span class="fc" id="L196">            _select(_wordAround(carets.text(), carets.characterAt(e.getX(), e.getY())));</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        else if ( e.isShiftDown() )</span>
+<span class="fc" id="L198">            _select(_shown.withCaret(position).withCaretAtLineEnd(carets.endsLineAt(e.getX(), e.getY())));</span>
+        else {
+<span class="fc" id="L200">            _select(TextSelection.caretAt(position).withCaretAtLineEnd(carets.endsLineAt(e.getX(), e.getY())));</span>
+<span class="fc bfc" id="L201" title="All 4 branches covered.">            if ( clicks == 1 &amp;&amp; look.selectWordOnLongPress() )</span>
+<span class="fc" id="L202">                _startLongPress(e.getX(), e.getY());</span>
+        }
+<span class="fc" id="L204">    }</span>
+
+    @Override
+    public void mouseReleased( MouseEvent e ) {
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">        if ( SwingUtilities.isLeftMouseButton(e) )</span>
+<span class="fc" id="L209">            _cancelLongPress();</span>
+<span class="fc" id="L210">    }</span>
+
+    private void _startLongPress( int x, int y ) {
+<span class="fc" id="L213">        _pressX = x;</span>
+<span class="fc" id="L214">        _pressY = y;</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        if ( _longPress == null ) {</span>
+<span class="fc" id="L216">            _longPress = new Timer(LONG_PRESS_MILLIS, event -&gt; _selectWordAtPress());</span>
+<span class="fc" id="L217">            _longPress.setRepeats(false);</span>
+        }
+<span class="fc" id="L219">        _longPress.restart();</span>
+<span class="fc" id="L220">    }</span>
+
+    private void _cancelLongPress() {
+<span class="fc bfc" id="L223" title="All 2 branches covered.">        if ( _longPress != null )</span>
+<span class="fc" id="L224">            _longPress.stop();</span>
+<span class="fc" id="L225">    }</span>
+
+    private void _selectWordAtPress() {
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        if ( !_shown.isEnabled() )</span>
+<span class="nc" id="L229">            return;</span>
+<span class="fc" id="L230">        final CaretTable carets = _carets();</span>
+<span class="fc" id="L231">        _select(_wordAround(carets.text(), carets.characterAt(_pressX, _pressY)));</span>
+<span class="fc" id="L232">    }</span>
+
+    @Override
+    public void mouseDragged( MouseEvent e ) {
+<span class="pc bpc" id="L236" title="1 of 4 branches missed.">        if ( !SwingUtilities.isLeftMouseButton(e) || !_shown.isEnabled() )</span>
+<span class="fc" id="L237">            return;</span>
+<span class="fc bfc" id="L238" title="All 4 branches covered.">        if ( Math.abs(e.getX() - _pressX) &gt; UI.scale(LONG_PRESS_TOLERANCE) || Math.abs(e.getY() - _pressY) &gt; UI.scale(LONG_PRESS_TOLERANCE) )</span>
+<span class="fc" id="L239">            _cancelLongPress();</span>
+<span class="fc" id="L240">        final CaretTable carets   = _carets();</span>
+<span class="fc" id="L241">        final int        position = carets.positionAt(e.getX(), e.getY());</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">        if ( position &gt;= 0 )</span>
+<span class="fc" id="L243">            _select(_shown.withCaret(position).withCaretAtLineEnd(carets.endsLineAt(e.getX(), e.getY())));</span>
+<span class="fc" id="L244">    }</span>
+
+    @Override
+    public void mouseMoved( MouseEvent e ) {
+<span class="fc bfc" id="L248" title="All 4 branches covered.">        final boolean overText = _shown.isEnabled() &amp;&amp; _carets().isOverText(e.getX(), e.getY());</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        if ( overText == _showsTextCursor )</span>
+<span class="fc" id="L250">            return;</span>
+<span class="fc" id="L251">        _showsTextCursor = overText;</span>
+<span class="fc bfc" id="L252" title="All 2 branches covered.">        if ( overText ) {</span>
+<span class="fc bfc" id="L253" title="All 2 branches covered.">            _cursorOutsideText = _owner.isCursorSet() ? _owner.getCursor() : null;</span>
+<span class="fc" id="L254">            _owner.setCursor(TEXT_CURSOR);</span>
+        } else {
+<span class="fc" id="L256">            _owner.setCursor(_cursorOutsideText);</span>
+<span class="fc" id="L257">            _cursorOutsideText = null;</span>
+        }
+<span class="fc" id="L259">    }</span>
+
+    private void _select( TextSelection selection ) {
+<span class="fc" id="L262">        final TextSelection resolved = selection.resolvedWith(_carets());</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">        if ( resolved.equals(_shown) )</span>
+<span class="fc" id="L264">            return;</span>
+<span class="fc" id="L265">        _shown = resolved;</span>
+<span class="fc" id="L266">        _owner.repaint();</span>
+        // We send the modification to the application thread:
+<span class="fc" id="L268">        _propertyUpdateDispatcher.accept(current -&gt; resolved.withEnabled(current.isEnabled()) );</span>
+<span class="fc" id="L269">    }</span>
+
+    private void _navigate( KeyEvent e ) {
+<span class="fc bfc" id="L272" title="All 4 branches covered.">        if ( !_shown.isEnabled() || !_look().navigateWithKeyboard() )</span>
+<span class="fc" id="L273">            return;</span>
+<span class="fc" id="L274">        final CaretTable    carets  = _carets();</span>
+<span class="fc" id="L275">        final TextSelection current = _shown.resolvedWith(carets);</span>
+<span class="fc" id="L276">        final String        text    = carets.text();</span>
+<span class="fc" id="L277">        final int           caret   = current.caret();</span>
+<span class="fc" id="L278">        final boolean       extend  = e.isShiftDown();</span>
+<span class="fc" id="L279">        final boolean       far     = _jumpsFar(e);</span>
+<span class="fc" id="L280">        final int           line    = carets.lineOf(caret, current.isCaretAtLineEnd());</span>
+<span class="fc" id="L281">        final int           key     = e.getKeyCode();</span>
+<span class="fc bfc" id="L282" title="All 4 branches covered.">        if ( key != KeyEvent.VK_UP &amp;&amp; key != KeyEvent.VK_DOWN )</span>
+<span class="fc" id="L283">            _verticalMoveX = Float.NaN;</span>
+        final TextSelection target;
+<span class="fc bfc" id="L285" title="All 6 branches covered.">        switch ( key ) {</span>
+            case KeyEvent.VK_LEFT:
+<span class="fc bfc" id="L287" title="All 6 branches covered.">                if ( !extend &amp;&amp; !far &amp;&amp; !current.isEmpty() )</span>
+<span class="fc" id="L288">                    target = TextSelection.caretAt(current.start());</span>
+                else
+<span class="fc bfc" id="L290" title="All 2 branches covered.">                    target = _moved(current, far ? _wordStartBefore(text, caret) : Math.max(0, caret - 1), false, extend);</span>
+<span class="fc" id="L291">                break;</span>
+            case KeyEvent.VK_RIGHT:
+<span class="fc bfc" id="L293" title="All 6 branches covered.">                if ( !extend &amp;&amp; !far &amp;&amp; !current.isEmpty() )</span>
+<span class="fc" id="L294">                    target = TextSelection.caretAt(current.end()).withCaretAtLineEnd(true);</span>
+                else
+<span class="fc bfc" id="L296" title="All 2 branches covered.">                    target = _moved(current, far ? _wordEndAfter(text, caret) : Math.min(text.length(), caret + 1), true, extend);</span>
+<span class="fc" id="L297">                break;</span>
+            case KeyEvent.VK_HOME:
+<span class="pc bpc" id="L299" title="1 of 4 branches missed.">                target = _moved(current, far ? 0 : line &lt; 0 ? caret : carets.startOfLine(line), false, extend);</span>
+<span class="fc" id="L300">                break;</span>
+            case KeyEvent.VK_END:
+<span class="pc bpc" id="L302" title="1 of 4 branches missed.">                target = _moved(current, far ? text.length() : line &lt; 0 ? caret : carets.endOfLine(line), true, extend);</span>
+<span class="fc" id="L303">                break;</span>
+            case KeyEvent.VK_UP:
+            case KeyEvent.VK_DOWN:
+<span class="pc bpc" id="L306" title="1 of 2 branches missed.">                if ( line &lt; 0 )</span>
+<span class="nc" id="L307">                    return;</span>
+<span class="fc bfc" id="L308" title="All 2 branches covered.">                target = _movedToNeighbourLine(current, carets, line, key == KeyEvent.VK_UP ? -1 : 1, extend);</span>
+<span class="fc" id="L309">                break;</span>
+            default:
+<span class="fc" id="L311">                return;</span>
+        }
+<span class="fc" id="L313">        e.consume();</span>
+<span class="fc" id="L314">        _select(target);</span>
+<span class="fc" id="L315">    }</span>
+
+    private TextSelection _movedToNeighbourLine( TextSelection current, CaretTable carets, int line, int direction, boolean extend ) {
+<span class="fc bfc" id="L318" title="All 2 branches covered.">        if ( Float.isNaN(_verticalMoveX) )</span>
+<span class="fc" id="L319">            _verticalMoveX = carets.xOf(line, current.caret());</span>
+<span class="fc" id="L320">        final int neighbour = carets.lineNextTo(line, direction, _verticalMoveX);</span>
+<span class="fc bfc" id="L321" title="All 2 branches covered.">        if ( neighbour &lt; 0 )</span>
+<span class="fc bfc" id="L322" title="All 4 branches covered.">            return _moved(current, direction &lt; 0 ? 0 : carets.text().length(), direction &gt; 0, extend);</span>
+<span class="fc" id="L323">        final int position = carets.positionOnLine(neighbour, _verticalMoveX);</span>
+<span class="fc" id="L324">        return _moved(current, position, carets.endsLine(neighbour, position), extend);</span>
+    }
+
+    private static TextSelection _moved( TextSelection current, int caret, boolean atLineEnd, boolean extend ) {
+<span class="fc bfc" id="L328" title="All 2 branches covered.">        return ( extend ? current.withCaret(caret) : TextSelection.caretAt(caret) ).withCaretAtLineEnd(atLineEnd);</span>
+    }
+
+    private static int _wordStartBefore( String text, int position ) {
+<span class="fc" id="L332">        final BreakIterator words = BreakIterator.getWordInstance();</span>
+<span class="fc" id="L333">        words.setText(text);</span>
+<span class="pc bpc" id="L334" title="1 of 2 branches missed.">        for ( int end = position, start = words.preceding(position); start != BreakIterator.DONE; end = start, start = words.previous() )</span>
+<span class="fc bfc" id="L335" title="All 2 branches covered.">            if ( _holdsLetterOrDigit(text, start, end) )</span>
+<span class="fc" id="L336">                return start;</span>
+<span class="nc" id="L337">        return 0;</span>
+    }
+
+    private static int _wordEndAfter( String text, int position ) {
+<span class="fc" id="L341">        final BreakIterator words = BreakIterator.getWordInstance();</span>
+<span class="fc" id="L342">        words.setText(text);</span>
+<span class="pc bpc" id="L343" title="1 of 2 branches missed.">        for ( int start = position, end = words.following(position); end != BreakIterator.DONE; start = end, end = words.next() )</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">            if ( _holdsLetterOrDigit(text, start, end) )</span>
+<span class="fc" id="L345">                return end;</span>
+<span class="nc" id="L346">        return text.length();</span>
+    }
+
+    private static boolean _holdsLetterOrDigit( String text, int start, int end ) {
+<span class="fc bfc" id="L350" title="All 2 branches covered.">        for ( int i = start; i &lt; end; i++ )</span>
+<span class="fc bfc" id="L351" title="All 2 branches covered.">            if ( Character.isLetterOrDigit(text.charAt(i)) )</span>
+<span class="fc" id="L352">                return true;</span>
+<span class="fc" id="L353">        return false;</span>
+    }
+
+    private TextSelectionConf _look() {
+<span class="fc" id="L357">        final @Nullable TextConf text = ComponentBackend.powering(_owner).getStyle().layer(_layer).texts().get(_textName);</span>
+<span class="fc bfc" id="L358" title="All 2 branches covered.">        return text == null ? TextSelectionConf.none() : text.selection();</span>
+    }
+
+    private static TextSelection _paragraphAround( String text, int character ) {
+<span class="pc bpc" id="L362" title="1 of 2 branches missed.">        if ( character &lt; 0 )</span>
+<span class="nc" id="L363">            return TextSelection.caretAt(0);</span>
+<span class="fc" id="L364">        final int start = text.lastIndexOf('\n', character - 1) + 1;</span>
+<span class="fc" id="L365">        final int end   = text.indexOf('\n', character);</span>
+<span class="fc bfc" id="L366" title="All 2 branches covered.">        return TextSelection.between(start, end &lt; 0 ? text.length() : end);</span>
+    }
+
+    private static TextSelection _wordAround( String text, int character ) {
+<span class="pc bpc" id="L370" title="1 of 2 branches missed.">        if ( text.isEmpty() )</span>
+<span class="nc" id="L371">            return TextSelection.caretAt(0);</span>
+<span class="fc" id="L372">        final int clamped = Math.max(0, Math.min(character, text.length() - 1));</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">        if ( text.charAt(clamped) == '\n' )</span>
+<span class="fc" id="L374">            return TextSelection.caretAt(clamped);</span>
+<span class="fc" id="L375">        final BreakIterator words = BreakIterator.getWordInstance();</span>
+<span class="fc" id="L376">        words.setText(text);</span>
+<span class="fc" id="L377">        final int end   = words.following(clamped);</span>
+<span class="fc" id="L378">        final int start = words.previous();</span>
+<span class="fc" id="L379">        return TextSelection.between(start, end);</span>
+    }
+
+    @SuppressWarnings(&quot;ReferenceEquality&quot;)
+    private CaretTable _carets() {
+<span class="fc" id="L384">        final ComponentBackend&lt;?&gt; backend  = ComponentBackend.powering(_owner);</span>
+<span class="fc" id="L385">        final StyleConf           style    = backend.getStyle();</span>
+<span class="fc" id="L386">        final BoxModelConf        boxModel = backend.getBoxModelConf();</span>
+<span class="fc" id="L387">        final Font                font     = _owner.getFont();</span>
+<span class="pc bpc" id="L388" title="2 of 6 branches missed.">        if ( style == _styleOfCarets &amp;&amp; boxModel == _boxModelOfCarets &amp;&amp; font == _fontOfCarets )</span>
+<span class="fc" id="L389">            return _carets;</span>
+<span class="fc" id="L390">        _styleOfCarets    = style;</span>
+<span class="fc" id="L391">        _boxModelOfCarets = boxModel;</span>
+<span class="fc" id="L392">        _fontOfCarets     = font;</span>
+<span class="fc" id="L393">        final @Nullable TextConf text = style.layer(_layer).texts().get(_textName);</span>
+<span class="fc bfc" id="L394" title="All 2 branches covered.">        final List&lt;?&gt; layout = Arrays.asList(text == null ? null : text.selection(text.selection().caretGeometry()), boxModel, font, UI.scale());</span>
+<span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( !layout.equals(_layoutOfCarets) ) {</span>
+<span class="fc" id="L396">            _layoutOfCarets = layout;</span>
+<span class="pc bpc" id="L397" title="1 of 4 branches missed.">            _carets = text == null || text.content().isEmpty() ? CaretTable.EMPTY : _caretsOf(text, boxModel, font);</span>
+        }
+<span class="fc" id="L399">        return _carets;</span>
+    }
+
+    private CaretTable _caretsOf( TextConf text, BoxModelConf boxModel, @Nullable Font componentFont ) {
+<span class="fc" id="L403">        final Font font = TextLayoutEngine.fontOf(text, boxModel, componentFont);</span>
+<span class="fc" id="L404">        return CaretTable.of(_description(), text.paintedText(), TextLayoutEngine.placeText(text, TextLayoutEngine.computeTextBounds(text, boxModel), boxModel, font, _owner.getFontMetrics(font).getFontRenderContext()), text.selection());</span>
+    }
+
+<span class="fc" id="L407">    private final class KeyboardNavigation extends KeyAdapter</span>
+    {
+        @Override
+        public void keyPressed( KeyEvent e ) {
+<span class="fc" id="L411">            _navigate(e);</span>
+<span class="fc" id="L412">        }</span>
+    }
+
+<span class="fc" id="L415">    private final class Copying extends TransferHandler</span>
+    {
+        @Override
+        public int getSourceActions( JComponent component ) {
+<span class="fc" id="L419">            return COPY;</span>
+        }
+
+        @Override
+        protected @Nullable Transferable createTransferable( JComponent component ) {
+<span class="fc bfc" id="L424" title="All 4 branches covered.">            if ( !_shown.isEnabled() || !_look().copyToClipboard() )</span>
+<span class="fc" id="L425">                return null;</span>
+<span class="fc" id="L426">            final String selected = _shown.resolvedWith(_carets()).selectedText();</span>
+<span class="fc bfc" id="L427" title="All 2 branches covered.">            return selected.isEmpty() ? null : new StringSelection(selected);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

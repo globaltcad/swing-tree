@@ -1,0 +1,232 @@
+{
+  "className":"swingtree.Shape_Rendering_Spec",
+  "title":"Filling a Shape Without Antialiasing All of It",
+  "narrative":"A rasterizer asked to antialias a shape computes a coverage value for every pixel it\n    touches, including the great majority which lie well inside the outline and come out\n    fully covered. Over a rounded rectangle the size of a scroll bar's thumb that is a few\n    hundred pixels of genuine curve and tens of thousands of pixels of arithmetic arriving\n    at \"opaque\".\n\n    `ShapeRendering.fill(..)` is what the SwingTree style engine fills its own surfaces\n    with, and what a look and feel delegate painting its own chrome can use for the same\n    reason - Swing offers no cache for a scroll bar thumb or a progress bar fill, so both\n    are drawn from scratch on every repaint. It splits a rounded rectangle into three plain\n    bands and four antialiased corner boxes, and fills a plain rectangle with no coverage\n    arithmetic at all.\n\n    The whole value of that rests on one promise, which is what the scenarios below are\n    about: **it writes the pixels `Graphics2D.fill` writes**. Not similar ones. A seam\n    between a band and a corner box that fell between two device pixels would be blended\n    twice or left uncovered, and the difference would be a hairline down the middle of every\n    control in a theme. So the shortcut is taken only when every cut lands on a whole device\n    pixel, and is given up otherwise - under a shear, under a scale which puts a corner half\n    way into a pixel, or for a shape which is neither of the two kinds it knows.",
+  "subjects":["swingtree.api.laf.OptimizedShapeRendering"],
+  "statistics":{
+    "runs":"14",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A shape filled through `ShapeRendering` looks exactly like one filled by Java2D. [11]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cases below are the ones which decide whether the split is sound rather than\n            merely plausible: a thumb-shaped rounded rectangle far taller than it is wide, a\n            radius large enough that the four corner boxes meet in the middle and the bands\n            between them are empty, a plain integer rectangle, and a shape which is neither.\n\n            Each of them is filled at six graphics scales and four sub-pixel offsets, because\n            the scale and the offset are what decide whether a cut lands on a whole device\n            pixel: at 1.25 a whole-numbered coordinate lands on a quarter pixel three times\n            out of four, and an offset of half a pixel moves every cut of every case.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"Not one pixel of the whole 700 by 700 canvas differs.","code":["differingPixels(shape, scale, offset, true, false) == 0"]},
+
+        {"kind":"where","text":"","code":{"description":["'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a scroll bar thumb'","'a wide bar'","'a wide bar'","'a radius past the box'","'a tiny glyph'","'a plain rectangle'","'a plain rectangle'","'a fractional rectangle'","'neither of the two'"],"shape":["new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(0, 0, 200, 40, 16, 16)","new RoundRectangle2D.Float(2, 7, 120, 120, 400, 400)","new RoundRectangle2D.Float(1, 1, 7, 9, 5, 5)","new Rectangle(5, 5, 400, 300)","new Rectangle(5, 5, 400, 300)","new Rectangle2D.Double(5.5d, 5.25d, 400, 300)","new Ellipse2D.Float(10, 10, 300, 200)"],"scale":["1.0d","1.25d","1.5d","2.0d","1.75d","2.3333d","1.5d","1.0d","1.0d","1.25d","1.0d","1.5d"],"offset":["0d","0.25d","0.5d","0.75d","0d","0.5d","0.25d","0d","0d","0.5d","0d","0.25d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A sheared graphics gives up the split, because its bands would not be axis aligned.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The bands and the corner boxes are stated in user space, and the split only makes\n            sense if a horizontal line in user space is still horizontal on the destination.\n            A shear breaks that, so the shape is filled in one antialiased go instead - and\n            the pixels still have to match, which is what this scenario checks.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["differingPixels(new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8), 1.0d, 0d, true, true) == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"With antialiasing already off, filling through `ShapeRendering` changes nothing.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            There is nothing to gain by splitting a shape whose edges are not being softened\n            in the first place, so the shape goes straight to Java2D. The one thing worth\n            pinning is that the hint is left as it was found: a caller which had switched\n            antialiasing off does not get it back on.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB)","var g = image.createGraphics()","g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF)"]},
+
+        {"kind":"when","text":"","code":["OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(3, 4, 53, 90, 8, 8))"]},
+
+        {"kind":"then","text":"","code":["g.getRenderingHint(RenderingHints.KEY_ANTIALIASING) == RenderingHints.VALUE_ANTIALIAS_OFF"]},
+
+        {"kind":"and","text":"The pixels are the ones Java2D writes for the same shape without antialiasing.","code":["differingPixels(new RoundRectangle2D.Float(3, 4, 53, 290, 8, 8), 1.0d, 0d, false, false) == 0"]},
+
+        {"kind":"cleanup","text":"","code":["g.dispose()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
