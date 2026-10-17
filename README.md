@@ -1,3 +1,7 @@
+> [!NOTE]
+> **SwingTree has moved to [Codeberg](https://codeberg.org/globaltcad/swing-tree).**
+> This GitHub repository is being archived because development has moved to Codeberg.
+> The project remains active—please visit the new repository for updates, issues, and contributions.
 
 # 🌳 SwingTree [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Java Version](https://img.shields.io/static/v1.svg?label=Java&message=8%2B&color=blue) #
 ## Modern Declarative UI Design for Swing ##
